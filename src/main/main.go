@@ -4,6 +4,8 @@ import (
     "fmt"
     "io/ioutil"
     "net/http"
+    
+    tgpb "telegram/telegram_pb_go"
 )
 
 const (
@@ -41,6 +43,7 @@ func (b *Bot) GetMe() (string, error) {
 
 
 func main() {
+    user := tgpb.User_builder{}.Build()
     bot := &Bot{}
     
     me, err := bot.GetMe()
