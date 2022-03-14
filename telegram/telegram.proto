@@ -1,0 +1,24 @@
+syntax = "proto3";
+package telegram;
+
+option go_package="chronist/telegram";
+
+
+message GetMeResponse {
+  bool ok = 1;
+  int64 error_code = 2;
+  string description = 3;
+  User result = 4;
+}
+
+message User {
+  int64 id = 1;                         // Unique identifier for this user or bot.
+  bool is_bot = 2;                      // True, if this user is a bot
+  string first_name = 3;                // User's or bot's first name
+  string last_name = 4;                 // Optional. User's or bot's last name
+  string username = 5;                  // Optional. User's or bot's username
+  string language_code = 6;             // Optional. IETF language tag of the user's language
+  bool can_join_groups = 7;             // Optional. True, if the bot can be invited to groups. Returned only in getMe.
+  bool can_read_all_group_messages = 8; // Optional. True, if privacy mode is disabled for the bot. Returned only in getMe.
+  bool supports_inline_queries = 9;     // Optional. True, if the bot supports inline queries. Returned only in getMe.
+}

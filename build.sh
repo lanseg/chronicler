@@ -1,12 +1,17 @@
 set -Eeuo pipefail
 
-# Configure go package and util directory if needed
-export GOPATH="${PWD}"
-export PATH="$PATH:$GOPATH/bin/"
+export ROOT="$PWD"
+export PATH="$PATH:$HOME/go/bin"
+
+cleanup() {
+  find -iname '*.sum' -delete
+  find -iname '*.pb.go' -delete
+  
+}
+
 go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
 
-protoc --proto_path=src --go_out=src/ telegram/telegram.proto
+cleanup
+protoc --proto_path=telegram/ --go_out=telegram/ --go_opt=paths=source_relative telegram/telegram.proto
+go mod tidy
 
-cd $GOPATH/src/main/
-go install
-cd ..
