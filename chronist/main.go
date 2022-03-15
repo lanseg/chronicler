@@ -8,10 +8,12 @@ import (
 
 func main() {
     b := telegram.NewBot(os.Args[1])
-    me, err := b.GetMe()
+    updates, err := b.GetUpdates(0, 10, 1, []string{"message"})
     if err != nil {
-        fmt.Println(err)
+      fmt.Println(err)
     } else {
-      fmt.Println(me)
+        for _, upd := range updates {
+          fmt.Println(upd)
+        }
     }
 }

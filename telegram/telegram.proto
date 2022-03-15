@@ -11,6 +11,13 @@ message GetMeResponse {
   User result = 4;
 }
 
+message GetUpdateResponse {
+  bool ok = 1;
+  int64 error_code = 2;
+  string description = 3;
+  repeated Update result = 4;
+}
+
 message User {
   int64 id = 1;                         // Unique identifier for this user or bot.
   bool is_bot = 2;                      // True, if this user is a bot
@@ -21,4 +28,86 @@ message User {
   bool can_join_groups = 7;             // Optional. True, if the bot can be invited to groups. Returned only in getMe.
   bool can_read_all_group_messages = 8; // Optional. True, if privacy mode is disabled for the bot. Returned only in getMe.
   bool supports_inline_queries = 9;     // Optional. True, if the bot supports inline queries. Returned only in getMe.
+}
+
+message Message {
+  int64 message_id = 1;  // Unique message identifier inside this chat
+  User from = 2;  // Optional. Sender of the message; empty for messages sent to channels. For backward compatibility, the field contains a fake sender user in non-channel chats, if the message was sent on behalf of a chat.
+  // Chat sender_chat = 3;  // Sender of the message, sent on behalf of a chat. For example, the channel itself for channel posts, the supergroup itself for messages from anonymous group administrators, the linked channel for messages automatically forwarded to the discussion group. For backward compatibility, the field from contains a fake sender user in non-channel chats, if the message was sent on behalf of a chat.
+  int64 date = 4;  // Date the message was sent in Unix time.
+  // Chat chat = 5; // Conversation the message belongs to
+  
+  User forward_from = 6; // For forwarded messages, sender of the original message
+  // Chat forward_from_chat = 7; // For messages forwarded from channels or from anonymous administrators, information about the original sender chat
+  int64 forward_from_message_id = 8; // For messages forwarded from channels, identifier of the original message in the channel
+  string forward_signature = 9; // For forwarded messages that were originally sent in channels or by an anonymous chat administrator, signature of the message sender if present
+  string forward_sender_name = 10; // Sender's name for messages forwarded from users who disallow adding a link to their account in forwarded messages
+  int64 forward_date = 11; // For forwarded messages, date the original message was sent in Unix time
+  bool is_automatic_forward = 12; // True, if the message is a channel post that was automatically forwarded to the connected discussion group
+  
+  // Message reply_to_message = 13; // For replies, the original message. Note that the Message object in this field will not contain further reply_to_message fields even if it itself is a reply.
+  User via_bot = 14; // Bot through which the message was sent
+  int64 edit_date = 15 ; // Date the message was last edited in Unix time
+  bool has_protected_content = 16; // True, if the message can't be forwarded
+  string media_group_id = 17; // The unique identifier of a media message group this message belongs to
+  string author_signature = 18; // Signature of the post author for messages in channels, or the custom title of an anonymous group administrator
+  string text = 19; // For text messages, the actual UTF-8 text of the message, 0-4096 characters
+  
+  // repeated MessageEntity entities = 20; // For text messages, special entities like usernames, URLs, bot commands, etc. that appear in the text
+  // Animation animation = 21; // Message is an animation, information about the animation. For backward compatibility, when this field is set, the document field will also be set
+  // Audio audio = 22; // Message is an audio file, information about the file
+  // Document document = 23; // Message is a general file, information about the file
+  // repeated PhotoSize photo = 24; // Message is a photo, available sizes of the photo
+  // Sticker sticker = 25; // Message is a sticker, information about the sticker
+  // Video video = 26; // Message is a video, information about the video
+  // VideoNote video_note = 27; // Message is a video note, information about the video message
+  // Voice voice = 28; // Message is a voice message, information about the file
+  string caption = 29; // Caption for the animation, audio, document, photo, video or voice, 0-1024 characters
+  // repeated MessageEntity caption_entities = 30; // For messages with a caption, special entities like usernames, URLs, bot commands, etc. that appear in the caption
+  // Contact contact = 31; // Message is a shared contact, information about the contact
+  // Dice dice = 32; // Message is a dice with random value
+  // Game game = 33; // Message is a game, information about the game. More about games »
+  // Poll poll = 34; // Message is a native poll, information about the poll
+  // Venue venue = 35; // Message is a venue, information about the venue. For backward compatibility, when this field is set, the location field will also be set
+  // Location location = 36; // Message is a shared location, information about the location
+  repeated User new_chat_members = 37; // New members that were added to the group or supergroup and information about them (the bot itself may be one of these members)
+  User left_chat_member = 38; // A member was removed from the group, information about them (this member may be the bot itself)
+  string new_chat_title = 39; // A chat title was changed to this value
+  // repeated PhotoSize new_chat_photo = 40; // A chat photo was change to this value
+  bool delete_chat_photo = 41; // Service message: the chat photo was deleted
+  bool group_chat_created = 42; // Service message: the group has been created
+  bool supergroup_chat_created = 43; // Service message: the supergroup has been created. This field can't be received in a message coming through updates, because bot can't be a member of a supergroup when it is created. It can only be found in reply_to_message if someone replies to a very first message in a directly created supergroup.
+  bool channel_chat_created = 44; // Service message: the channel has been created. This field can't be received in a message coming through updates, because bot can't be a member of a channel when it is created. It can only be found in reply_to_message if someone replies to a very first message in a channel.
+  // MessageAutoDeleteTimerChanged message_auto_delete_timer_changed = 45; // Service message: auto-delete timer settings changed in the chat
+  int64 migrate_to_chat_id = 46; // The group has been migrated to a supergroup with the specified identifier. This number may have more than 32 significant bits and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a signed 64-bit integer or double-precision float type are safe for storing this identifier.
+  int64 migrate_from_chat_id = 47; // The supergroup has been migrated from a group with the specified identifier. This number may have more than 32 significant bits and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a signed 64-bit integer or double-precision float type are safe for storing this identifier.
+  Message pinned_message = 48; // Specified message was pinned. Note that the Message object in this field will not contain further reply_to_message fields even if it is itself a reply.
+  // Invoice invoice = 49; // Message is an invoice for a payment, information about the invoice. More about payments »
+  // SuccessfulPayment successful_payment = 50; // Message is a service message about a successful payment, information about the payment. More about payments »
+  string connected_website = 51; // The domain name of the website on which the user has logged in. More about Telegram Login »
+  // PassportData passport_data = 52; // Telegram Passport data
+  // ProximityAlertTriggered proximity_alert_triggered = 53; // Service message. A user in the chat triggered another user's proximity alert while sharing Live Location.
+  // VoiceChatScheduled voice_chat_scheduled = 54; // Service message: voice chat scheduled
+  // VoiceChatStarted voice_chat_started = 55; // Service message: voice chat started
+  // VoiceChatEnded voice_chat_ended = 56; // Service message: voice chat ended
+  // VoiceChatParticipantsInvited voice_chat_participants_invited = 57; // Service message: new participants invited to a voice chat
+  // InlineKeyboardMarkup reply_markup = 58; // Inline keyboard attached to the message. login_url buttons are represented as ordinary url buttons.
+}
+
+message Update {
+  int64 update_id = 1; // Update identifiers start from a certain positive number and increase sequentially. This ID becomes especially handy if you're using Webhooks, since it allows you to ignore repeated updates or to restore the correct update sequence, should they get out of order. If there are no new updates for at least a week, then identifier of the next update will be chosen randomly instead of sequentially.
+  Message message = 2; // New incoming message of any kind — text, photo, sticker, etc.
+  Message edited_message = 3; // New version of a message that is known to the bot and was edited
+  Message channel_post = 4; // New incoming channel post of any kind — text, photo, sticker, etc.
+  Message edited_channel_post = 5; // New version of a channel post that is known to the bot and was edited
+  // InlineQuery inline_query = 6; // New incoming inline query
+  // ChosenInlineResult chosen_inline_result = 7; // The result of an inline query that was chosen by a user and sent to their chat partner. Please see our documentation on the feedback collecting for details on how to enable these updates for your bot.
+  // CallbackQuery callback_query = 8 ; // New incoming callback query
+  // ShippingQuery shipping_query = 9; // New incoming shipping query. Only for invoices with flexible price
+  // PreCheckoutQuery pre_checkout_query = 10; // New incoming pre-checkout query. Contains full information about checkout
+  // Poll poll = 11 ; // New poll state. Bots receive only updates about stopped polls and polls, which are sent by the bot
+  // PollAnswer poll_answer = 12; // A user changed their answer in a non-anonymous poll. Bots receive new votes only in polls that were sent by the bot itself.
+  // ChatMemberUpdated my_chat_member= 13; // The bot's chat member status was updated in a chat. For private chats, this update is received only when the bot is blocked or unblocked by the user.
+  // ChatMemberUpdated chat_member = 14; // A chat member's status was updated in a chat. The bot must be an administrator in the chat and must explicitly specify "chat_member" in the list of allowed_updates to receive these updates.
+  // ChatJoinRequest chat_join_request = 15; // A request to join the chat has been sent. The bot must have the can_invite_users administrator right in the chat to receive these updates.
 }
