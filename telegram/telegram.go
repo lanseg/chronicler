@@ -78,7 +78,7 @@ func (b *telegramBot) GetUpdates(offset int, limit int, timeout int, allowedUpda
         return nil, err
     }
     responseProto := &GetUpdateResponse{}
-    err = protojson.UnmarshalOptions{DiscardUnknown: true}.Unmarshal(response, responseProto)    
+    err = protojson.UnmarshalOptions{DiscardUnknown: false}.Unmarshal(response, responseProto)    
     if err != nil {
         return nil, err
     }
