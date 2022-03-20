@@ -119,9 +119,7 @@ def formatGoParamType(typename):
     return result
 
     
-def formatGolangType(typedef):
-    typeComment = typedef.description
-    
+def formatGolangType(typedef):   
     result = ''
     for param in typedef.params:
         paramComment = formatComment(param.description, 2)
@@ -130,18 +128,14 @@ def formatGolangType(typedef):
             paramType = "interface{}"
         result += "\n%s\n  %s %s `json:\"%s\"`\n" % (paramComment, toCamelCase(param.name), paramType, param.name)
 
-    return "%s\ntype %s struct {%s}" % (formatComment(typeComment, 0), typedef.name, result)
+    return "%s\ntype %s struct {%s}" % (formatComment(typedef.description, 0), typedef.name, result)
 
 def formatGolangFunc(typedef):
-    returnType = ""
-    params = []
-    for param in typedef.params:
-        actualType = formatGoParamType(param.type)
-        params.append(toCamelCase(param.name, False) + " " + actualType)
-    if typedef.returns:
-        returnType = "(%s, error)" % formatGoParamType(typedef.returns)
-    else: 
-        returnType = "error"
+    params = [
+      toCamelCase(param.name, False) + " " + formatGoParamType(param.type)
+      for param in typedef.params
+    ]    
+    returnType = "(%s, error)" % formatGoParamType(typedef.returns) if typedef.returns else "error"
     return (" // func %s (%s) %s {}") % (toCamelCase(typedef.name), ", ".join(params), returnType)
 
 def formatAsGoModule(types):
