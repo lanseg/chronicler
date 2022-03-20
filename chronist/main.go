@@ -4,16 +4,22 @@ import (
     "fmt"
     "os"
     "chronist/telegram"
+    "encoding/json"
 )
 
 func main() {
     b := telegram.NewBot(os.Args[1])
-    updates, err := b.GetUpdates(0, 10, 1, []string{"message"})
-    if err != nil {
-      fmt.Println(err)
-    } else {
-        for _, upd := range updates {
-          fmt.Println(upd)
-        }
+    
+    updates, _ := b.GetUpdates(0, 10, 1, []string{"message"})
+    ss, _ := json.MarshalIndent(updates, "", "\t")
+    fmt.Printf("%s\n", ss)
+    for _, upd := range updates {
+      if upd.Message != nil {
+        fmt.Printf("Message: %10s %10s %10s\n", upd.Message.Chat.Title, upd.Message.Chat.Type, upd.Message.Text)
+      } else if (upd.ChannelPost != nil) {
+        fmt.Printf("ChannelPost: %10s %10s\n", upd.ChannelPost.Chat.Title, upd.ChannelPost.Chat.Type)
+      } else {
+        fmt.Printf("Other update: %10s\n", "...")
+      }
     }
 }

@@ -24,7 +24,7 @@ message VoiceChatStarted{}
 message InputMessageContent{}
 message ChatMember{}
 message CallbackGame{}
-message InputMedia{}
+message InputMedia{}t
 message InlineQueryResult{}
 message PassportElementError{}
 

@@ -7,8 +7,26 @@ import (
     "io/ioutil"
     "net/http"
     "net/url"
-    "google.golang.org/protobuf/encoding/protojson"
+    "encoding/json"
 )
+
+type ResponseMetadata struct {
+  Ok bool             `json:"ok"`
+  ErrorCode int64     `json:"error_code"`
+  Description string  `json:"description"`
+}
+
+type GetMeResponse struct {
+  ResponseMetadata
+
+  Result User         `json:"result"` 
+}
+
+type GetUpdateResponse struct {
+  ResponseMetadata
+
+  Result []*Update     `json:"result"` 
+}
 
 type IBot interface {
     
@@ -54,14 +72,14 @@ func (b *telegramBot) GetMe() (*User, error) {
     }
 
     responseProto := &GetMeResponse{}
-    err = protojson.Unmarshal(response, responseProto)
+    err = json.Unmarshal(response, responseProto)
     if err != nil {
         return nil, err
     }
     if !responseProto.Ok {
         return nil, fmt.Errorf("Cannot read the result (%d): %s", responseProto.ErrorCode, responseProto.Description)
     }
-    return responseProto.Result, nil
+    return &responseProto.Result, nil
 }
 
 func (b *telegramBot) GetUpdates(offset int, limit int, timeout int, allowedUpdates []string) ([]*Update, error) {
@@ -78,12 +96,11 @@ func (b *telegramBot) GetUpdates(offset int, limit int, timeout int, allowedUpda
         return nil, err
     }
     responseProto := &GetUpdateResponse{}
-    err = protojson.UnmarshalOptions{DiscardUnknown: false}.Unmarshal(response, responseProto)    
-    if err != nil {
+    if err = json.Unmarshal(response, responseProto); err != nil {
         return nil, err
     }
     if !responseProto.Ok {
         return nil, fmt.Errorf("Cannot read the result (%d): %s", responseProto.ErrorCode, responseProto.Description)
     }
-    return responseProto.Result, nil
+    return  responseProto.Result, nil
 }
