@@ -11,6 +11,85 @@ TypeParamDef = collections.namedtuple('TypeParamDef', ['name', 'type', 'descript
 FuncDef = collections.namedtuple('FuncDef', ['name', 'description', 'params', 'returns'])
 FuncParamDef = collections.namedtuple('FuncParamDef', ['name', 'type', 'required', 'description'])
 
+
+GO_PREFIX="""
+package telegram;
+
+import (
+    "fmt"    
+    "io/ioutil"
+    "net/http"
+    "net/url"
+    "encoding/json"
+)
+
+type IResponseMetadata interface {
+    IsOk() bool
+    GetErrorCode() int64
+    GetDescription() string
+}
+
+type ResponseMetadata struct {
+  IResponseMetadata
+    
+  Ok bool             `json:"ok"`
+  ErrorCode int64     `json:"error_code"`
+  Description string  `json:"description"`
+}
+
+func (dt *ResponseMetadata) IsOk() bool {
+    return dt.Ok
+}
+
+func (dt *ResponseMetadata) GetErrorCode() int64 {
+    return dt.ErrorCode
+}
+
+func (dt *ResponseMetadata) GetDescription() string {
+    return dt.Description
+}
+
+type telegramBot struct {
+    httpClient *http.Client
+    token string    
+}
+
+func NewBot(token string) *telegramBot {
+    return &telegramBot {
+        token: token,
+        httpClient: &http.Client{},
+    }
+}
+
+func (b *telegramBot) queryApi(apiMethod string, params url.Values) ([]byte, error) {
+    resp, err := http.PostForm(fmt.Sprintf("https://api.telegram.org/bot%s/%s", b.token, apiMethod), params)
+    defer resp.Body.Close()
+    body, err := ioutil.ReadAll(resp.Body)
+    if err != nil {
+        return nil, err
+    }
+    return body, nil
+}
+
+func (b *telegramBot) queryAndUnmarshal(apiMethod string, params url.Values, result interface{}) (interface{}, error) {
+    resultBytes, err :=  b.queryApi(apiMethod, params)
+    if err != nil {
+        return nil, err
+    }
+    if err = json.Unmarshal(resultBytes, result); err != nil {
+        return nil, fmt.Errorf("Cannot unmarshal the response: %s", err)
+    }
+    resultMeta := result.(IResponseMetadata)
+    if !resultMeta.IsOk() {
+        return nil, fmt.Errorf("Request \\"%s\\" completed with error %d: %s", apiMethod, resultMeta.GetErrorCode(), resultMeta.GetDescription())
+    }
+    
+    return result, nil
+}
+
+"""
+
+
 UNKNOWN_TYPES = [
     'ChatMember',
     'InputFile',
@@ -70,41 +149,6 @@ def formatComment(comment, offset, maxWidth = 95):
         currentLines.append(line[splitAt:].strip())
     return prefix + ('\n' + prefix).join(commentLines)
 
-
-# Protobuf formatting
-def formatProtoParamType(typename):
-    if typename.count(' or') > 0:
-        return 'bytes'
-    
-    dimensions = typename.count('Array of')
-    if dimensions > 1:
-        return 'bytes'
-
-    result = typename.replace('Array of', '').strip()
-    result = TG_PROTO_TYPES.get(result, result)
-    if dimensions == 1: 
-        result = 'repeated ' + result
-    return result
-
-def formatProtobufType(typedef):
-    typeComment = formatComment(typedef.description, 0)
-    
-    result = ''
-    for i in range(len(typedef.params)):
-        param = typedef.params[i]
-        paramComment = formatComment(param.description, 2)
-        paramType = formatProtoParamType(param.type)
-        result += "\n%s\n  %s %s = %d;\n" % (paramComment, paramType, param.name, i + 1)
-
-    return "message %s {\n%s}" % (typedef.name, resuvlt)
-
-def formatAsProto(types):
-   result = []
-   for parsedType in sorted(parser.types, key=getSortingKey):
-       result.append(formatProtobufType(parsedType))
-   return '\n'.join(result)
-
-
 # Golang formatting params
 def formatGoParamType(typename):
     dimensions = typename.count('Array of')
@@ -146,7 +190,7 @@ def formatAsGoModule(types):
          funcs.append(formatGolangFunc(parsedType))
        else: 
         types.append(formatGolangType(parsedType))
-   return "package telegram\n\n%s\n\n%s" % ('\n\n'.join(types), '\n'.join(funcs))
+   return "%s\n\n%s\n\n%s" % (GO_PREFIX, '\n\n'.join(types), '\n'.join(funcs))
        
 class TypedefCollector(parser.HTMLParser):
     

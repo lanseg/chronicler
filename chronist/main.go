@@ -10,9 +10,10 @@ import (
 func main() {
     b := telegram.NewBot(os.Args[1])
     
-    updates, _ := b.GetUpdates(0, 10, 1, []string{"message"})
-    ss, _ := json.MarshalIndent(updates, "", "\t")
-    fmt.Printf("%s\n", ss)
+    updates, _ := b.GetUpdates(0, 0, 0, []string{"message", "channel_post", "edited_message", "edited_channel_post"})
+    js, _ := json.MarshalIndent(updates, "", "  ")
+    fmt.Printf("%s\n", js)
+
     for _, upd := range updates {
       if upd.Message != nil {
         fmt.Printf("Message: %10s %10s %10s\n", upd.Message.Chat.Title, upd.Message.Chat.Type, upd.Message.Text)
