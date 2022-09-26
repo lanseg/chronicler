@@ -10,7 +10,7 @@ import (
 func main() {
     b := telegram.NewBot(os.Args[1])
     
-    updates, _ := b.GetUpdates(0, 0, 0, []string{"message", "channel_post", "edited_message", "edited_channel_post"})
+    updates, _ := b.GetUpdates(986286228, 0, 10, []string{"message", "channel_post", "edited_message", "edited_channel_post"})
     js, _ := json.MarshalIndent(updates, "", "  ")
     fmt.Printf("%s\n", js)
 

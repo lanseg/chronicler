@@ -1,94 +1,14 @@
 #!/usr/bin/env python3
 
 import re
+from enum import Enum
 import collections
 import urllib.request
 from html import parser
 
-TypeDef = collections.namedtuple('TypeDef', ['name', 'description', 'params'])
-TypeParamDef = collections.namedtuple('TypeParamDef', ['name', 'type', 'description'])
-
-FuncDef = collections.namedtuple('FuncDef', ['name', 'description', 'params', 'returns'])
-FuncParamDef = collections.namedtuple('FuncParamDef', ['name', 'type', 'required', 'description'])
-
-
-GO_PREFIX="""
-package telegram;
-
-import (
-    "fmt"    
-    "io/ioutil"
-    "net/http"
-    "net/url"
-    "encoding/json"
-)
-
-type IResponseMetadata interface {
-    IsOk() bool
-    GetErrorCode() int64
-    GetDescription() string
-}
-
-type ResponseMetadata struct {
-  IResponseMetadata
-    
-  Ok bool             `json:"ok"`
-  ErrorCode int64     `json:"error_code"`
-  Description string  `json:"description"`
-}
-
-func (dt *ResponseMetadata) IsOk() bool {
-    return dt.Ok
-}
-
-func (dt *ResponseMetadata) GetErrorCode() int64 {
-    return dt.ErrorCode
-}
-
-func (dt *ResponseMetadata) GetDescription() string {
-    return dt.Description
-}
-
-type telegramBot struct {
-    httpClient *http.Client
-    token string    
-}
-
-func NewBot(token string) *telegramBot {
-    return &telegramBot {
-        token: token,
-        httpClient: &http.Client{},
-    }
-}
-
-func (b *telegramBot) queryApi(apiMethod string, params url.Values) ([]byte, error) {
-    resp, err := http.PostForm(fmt.Sprintf("https://api.telegram.org/bot%s/%s", b.token, apiMethod), params)
-    defer resp.Body.Close()
-    body, err := ioutil.ReadAll(resp.Body)
-    if err != nil {
-        return nil, err
-    }
-    return body, nil
-}
-
-func (b *telegramBot) queryAndUnmarshal(apiMethod string, params url.Values, result interface{}) (interface{}, error) {
-    resultBytes, err :=  b.queryApi(apiMethod, params)
-    if err != nil {
-        return nil, err
-    }
-    if err = json.Unmarshal(resultBytes, result); err != nil {
-        return nil, fmt.Errorf("Cannot unmarshal the response: %s", err)
-    }
-    resultMeta := result.(IResponseMetadata)
-    if !resultMeta.IsOk() {
-        return nil, fmt.Errorf("Request \\"%s\\" completed with error %d: %s", apiMethod, resultMeta.GetErrorCode(), resultMeta.GetDescription())
-    }
-    
-    return result, nil
-}
-
-"""
-
+SELF_CLOSING = set("area, base, br, col, embed, hr, img, input, keygen, link, menuitem, meta, param, source, track, wbr".split(", "))
+ParamDef = collections.namedtuple('ParamDef', ['name', 'param_type', 'optional', 'comment'])
+TypeDef = collections.namedtuple('TypeDef', ['name', 'comment', 'params', 'is_function'])
 
 UNKNOWN_TYPES = [
     'ChatMember',
@@ -102,16 +22,6 @@ UNKNOWN_TYPES = [
     'PassportElementError',
 ]
 
-TG_PROTO_TYPES = {
-    'Integer': 'int64',
-    'Float': 'float',
-    'Float number': 'float',
-    'String': 'string',
-    'Boolean': 'bool',
-    'True': 'bool',
-    'False': 'bool'
-}
-
 TG_GO_TYPES = {
     'Integer': 'int64',
     'Float': 'float32',
@@ -122,9 +32,7 @@ TG_GO_TYPES = {
     'False': 'bool'
 }
 
-RETURN_TYPE_PARSER = re.compile('[Aa]rray of (\w+)|(\w+) is returned|(\w+) object is returned')
-
-# Common functions
+# Utility code
 def toCamelCase(usstr, capFirst=True):
     result = "".join(map(lambda x: x[0].upper() + x[1:], usstr.split('_')))
     if not capFirst:
@@ -149,6 +57,54 @@ def formatComment(comment, offset, maxWidth = 95):
         currentLines.append(line[splitAt:].strip())
     return prefix + ('\n' + prefix).join(commentLines)
 
+# Main code
+class Node:
+    
+    def __init__(self, name, params):
+        self.name = name
+        self.params = params
+        self.children = []
+        self.data = []
+        
+    def find(self, name = "", params = {}): 
+        result = []
+        toVisit = [self]
+        while toVisit:
+            node = toVisit.pop()
+            if (name == '' or node.name == name) and (params == {} or node.params == params):
+                result.append(node)
+            toVisit.extend(node.children)
+        return result
+        
+    def expand_data(self):
+        result = []
+        for d in self.data:
+            if isinstance(d, str):
+                result.append(d)
+            else:
+                result.append(d.expand_data())
+        return ''.join(result)
+        
+    def __str__(self):
+        return self.name
+
+def nodesToTypedef(title, prefix, table, suffix):
+    params = []
+    funcdef = title.data[1][0].islower()
+
+    for typedef in table.find('tr')[:-1] if table else []:
+        paramNodes = list(map(lambda x: x.expand_data(), typedef.children))
+        params.append(ParamDef(
+            paramNodes[0],
+            paramNodes[1], 
+            paramNodes[2] if funcdef else '',
+            paramNodes[3] if funcdef else paramNodes[2]))
+    return TypeDef(title.data[1], 
+                      " ".join(map(lambda x: str(x.expand_data()).strip(), prefix)) + 
+                      " ".join(map(lambda x: str(x.expand_data()).strip(), suffix)),
+                      params,
+                      funcdef)
+
 # Golang formatting params
 def formatGoParamType(typename):
     dimensions = typename.count('Array of')
@@ -162,112 +118,86 @@ def formatGoParamType(typename):
         result = "[]" + result
     return result
 
-    
-def formatGolangType(typedef):   
+def formatGolangType(typedef):  
     result = ''
     for param in typedef.params:
-        paramComment = formatComment(param.description, 2)
-        paramType = formatGoParamType(param.type)
+        paramComment = formatComment(param.comment, 2)
+        paramType = formatGoParamType(param.param_type)        
         if (" or "  in paramType) or (" and " in paramType):
             paramType = "interface{}"
         result += "\n%s\n  %s %s `json:\"%s\"`\n" % (paramComment, toCamelCase(param.name), paramType, param.name)
+    return "%s\ntype %s struct {%s}" % (formatComment(typedef.comment, 0), typedef.name, result)
 
-    return "%s\ntype %s struct {%s}" % (formatComment(typedef.description, 0), typedef.name, result)
 
-def formatGolangFunc(typedef):
-    params = [
-      toCamelCase(param.name, False) + " " + formatGoParamType(param.type)
-      for param in typedef.params
-    ]    
-    returnType = "(%s, error)" % formatGoParamType(typedef.returns) if typedef.returns else "error"
-    return (" // func %s (%s) %s {}") % (toCamelCase(typedef.name), ", ".join(params), returnType)
-
-def formatAsGoModule(types):
-   types = []
-   funcs = []
-   for parsedType in sorted(parser.types, key=getSortingKey):
-       if parsedType.name[0].islower():
-         funcs.append(formatGolangFunc(parsedType))
-       else: 
-        types.append(formatGolangType(parsedType))
-   return "%s\n\n%s\n\n%s" % (GO_PREFIX, '\n\n'.join(types), '\n'.join(funcs))
-       
 class TypedefCollector(parser.HTMLParser):
-    
-    buf = ""
-    typedef = []
-    types = []
-    should_collect = False
-    
+    nodes = [Node("root", {})]
+
     def handle_starttag(self, tag, attrs):
-        if tag in ["h4", "p", "td", "th", "table"]:
-            if tag == "h4":
-                self.submit_type()
-            self.should_collect = True
-            self.buf = ""
+        node = Node(tag, dict(attrs))
+        parent = self.nodes[-1]
+        parent.children.append(node)
+        parent.data.append(node)
+        if tag not in SELF_CLOSING:
+          self.nodes.append(node)
 
     def handle_endtag(self, tag):
-        if tag in ["h4", "p", "td", "th", "table"]:
-            self.typedef.append(self.buf)
-            if tag == "table":
-                self.submit_type()            
-            self.should_collect = False
+        if tag not in SELF_CLOSING:
+          self.nodes.pop()
         
     def handle_data(self, data):
-        if self.should_collect:
-            self.buf += data
-            
-    def submit_type(self):
-        if len(self.typedef) > 0:
-            isTypeDef = False
-            isFuncDef = False
-            i = 0
-            for i in range(len(self.typedef) - 3):
-                if self.typedef[i] == 'Field' and self.typedef[i+1] == 'Type' and self.typedef[i+2] == 'Description':
-                    isTypeDef = True
-                    break
-                if self.typedef[i] == 'Parameter' and self.typedef[i+1] == 'Type' and self.typedef[i+2] == 'Required' and self.typedef[i+3] == 'Description':
-                    isFuncDef = True
-                    break
-
-            endOfDef = i
-            params = []
-            if isTypeDef:
-                i += 3
-                while i < len(self.typedef) - 2:
-                    params.append(TypeParamDef(*self.typedef[i:i+3]))
-                    i += 3                    
-            elif isFuncDef:
-                i += 4
-                while i < len(self.typedef) - 3:
-                    params.append(FuncParamDef(*self.typedef[i:i+4]))
-                    i += 4
-            
-            if not params:
-                self.typedef = []
-                return
+        self.nodes[-1].data.append(data)
     
-            description = "\n".join(self.typedef[1:endOfDef])
-            if isTypeDef: 
-              self.types.append(TypeDef(self.typedef[0], description, params))
-            if isFuncDef:
-              returnType = ''
-              m = RETURN_TYPE_PARSER.search(description)
-              if m:
-                  returnType=list(filter(None, m.groups()))[0]
-              self.types.append(FuncDef(self.typedef[0], description, params, returnType))
-              
-            self.typedef = []
+def parseNodes(data):
+   i = 0
+   
+   while i < len(data):
+     while i < len(data) and data[i].name != 'h4':
+       i += 1
+     if i == len(data): 
+         break
+     
+     title = data[i]
+     prefix = []
+     table = None
+     suffix = []
+     i += 1
+     
+     prefix = []
+     while i < len(data) and data[i].name != 'table' and data[i].name != 'h4':
+         prefix.append(data[i])
+         i += 1
+     if i == len(data): 
+         break
+     
+     if data[i].name == 'table':
+         table = data[i]
+         i += 1
+         
+     while i < len(data) and data[i].name != 'h4':
+         suffix.append(data[i])
+         i += 1
+     yield nodesToTypedef (title, prefix, table, suffix)
+     
+     
 
-def getSortingKey(typedef):
-    firstCapital = 0
-    for firstCapital in range(len(typedef.name)):
-        if typedef.name[firstCapital].isupper():
-            break
-    return typedef.name[firstCapital:]
-    
-with urllib.request.urlopen('https://core.telegram.org/bots/api') as response:
-   parser = TypedefCollector()
-   parser.feed(response.read().decode('utf-8'))
-   print (formatAsGoModule(parser.types))
+#with urllib.request.urlopen('https://core.telegram.org/bots/api') as response:
+   #parser = TypedefCollector()
+   #parser.feed(response.read().decode('utf-8'))
+   #print (formatAsGoModule(parser.types))
 
+with open('apidoc') as response:
+    parser = TypedefCollector()
+    parser.feed(response.read())
+    nodes = parser.nodes[0].find('div', {'id': 'dev_page_content'})[0].children        
+    while nodes[0].expand_data() != 'Update':
+        nodes = nodes[1:]
+    print('package telegram')
+    for node in parseNodes(nodes):
+        if node.is_function:
+            continue
+        print(formatGolangType(node))
+        print()
+     
+
+   
+   
