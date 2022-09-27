@@ -5,7 +5,6 @@ import (
     "io/ioutil"
     "net/http"
     "net/url"
-    "strconv"
     "encoding/json"
 )
 
@@ -93,12 +92,12 @@ type GetUpdatesResponse struct {
   Result []*Update         `json:"result"` 
 }
 
-func (b *telegramBot) GetUpdates(offset int, limit int, timeout int, allowedUpdates []string) ([]*Update, error) {
+func (b *telegramBot) GetUpdates(offset int64, limit int64, timeout int64, allowedUpdates []string) ([]*Update, error) {
     params := url.Values{}
     params.Set("chat_id", "-1480532340")
-    params.Set("offset", strconv.Itoa(offset))
-    params.Set("limit", strconv.Itoa(limit))
-    params.Set("timeout", strconv.Itoa(timeout))
+    params.Set("offset", fmt.Sprintf("%d", offset))
+    params.Set("limit", fmt.Sprintf("%d", limit))
+    params.Set("timeout", fmt.Sprintf("%d", timeout))
     for _, upd := range allowedUpdates {
         params.Add("allowed_updates", upd)
     }
@@ -108,4 +107,39 @@ func (b *telegramBot) GetUpdates(offset int, limit int, timeout int, allowedUpda
         return nil, err
     }
     return response.(*GetUpdatesResponse).Result, nil
+}
+
+type GetFileResponse struct {
+  ResponseMetadata
+  
+  Result *File         `json:"result"`
+}
+
+func (b *telegramBot) GetFile(fileId string) (*File, error) {
+    params := url.Values{}
+    params.Set("file_id", fileId)
+    
+    response, err := b.queryAndUnmarshal("getFile", params, &GetFileResponse{})
+    if err != nil {
+        return nil, err
+    }
+    return response.(*GetFileResponse).Result, nil
+}
+
+// Utilities
+
+func GetLargestImage(sizes []*PhotoSize) *PhotoSize {
+    if len(sizes) == 0 {
+        return nil
+    }
+    var result *PhotoSize = sizes[0]
+    resultSize := int64(0)
+    for _, photo := range sizes {
+        size := photo.Width * photo.Height
+        if size > resultSize {
+            result = photo
+            resultSize = size
+        }
+    }
+    return result
 }

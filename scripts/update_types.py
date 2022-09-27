@@ -180,14 +180,9 @@ def parseNodes(data):
      
      
 
-#with urllib.request.urlopen('https://core.telegram.org/bots/api') as response:
-   #parser = TypedefCollector()
-   #parser.feed(response.read().decode('utf-8'))
-   #print (formatAsGoModule(parser.types))
-
-with open('apidoc') as response:
+with urllib.request.urlopen('https://core.telegram.org/bots/api') as response:
     parser = TypedefCollector()
-    parser.feed(response.read())
+    parser.feed(response.read().decode('utf-8'))
     nodes = parser.nodes[0].find('div', {'id': 'dev_page_content'})[0].children        
     while nodes[0].expand_data() != 'Update':
         nodes = nodes[1:]

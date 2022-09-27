@@ -3,24 +3,77 @@ package main
 import (
     "fmt"
     "os"
+    "strings"
     "chronist/telegram"
-    "encoding/json"
 )
+
+type RecordType int
+
+const (
+  UNKNOWN RecordType = 0
+  TEXT    RecordType = 1
+  VIDEO   RecordType = 2
+  IMAGE   RecordType = 3
+  TWITTER RecordType = 4
+)
+
+type Record struct {
+  recordType RecordType
+  
+  fileId      string
+  links       []string
+  textContent string
+}
+
+func (r *Record) toString() string {
+  text := r.textContent
+  if len(text) > 10 {
+    text = text[:10] + "..."
+  }
+  return fmt.Sprintf("Record {type: %d, links: %s, file:%s, text: \"%s\"}",
+                     r.recordType, r.links, r.fileId, r.textContent)
+}
+
+
+func readUpdate(upd *telegram.Update) *Record {
+    if upd.Message == nil {
+      return nil
+    }  
+    result := &Record{
+      links: []string{},
+    }
+    msg := upd.Message
+    for _, e := range msg.Entities {
+      if e.Type == "text_link" {
+        result.links = append(result.links, e.Url)
+      }
+    }
+    result.textContent = strings.Replace(msg.Text, "\n\n", "\n", -1)
+    if msg.Video != nil {
+      result.recordType = VIDEO
+      result.fileId = msg.Video.FileId
+    }
+    if msg.Photo != nil {
+      result.recordType = IMAGE
+      result.fileId = telegram.GetLargestImage(msg.Photo).FileId
+    }
+    return result
+}
 
 func main() {
     b := telegram.NewBot(os.Args[1])
+    updId := int64(0)
+    var updates []*telegram.Update = nil
     
-    updates, _ := b.GetUpdates(986286228, 0, 10, []string{"message", "channel_post", "edited_message", "edited_channel_post"})
-    js, _ := json.MarshalIndent(updates, "", "  ")
-    fmt.Printf("%s\n", js)
-
-    for _, upd := range updates {
-      if upd.Message != nil {
-        fmt.Printf("Message: %10s %10s %10s\n", upd.Message.Chat.Title, upd.Message.Chat.Type, upd.Message.Text)
-      } else if (upd.ChannelPost != nil) {
-        fmt.Printf("ChannelPost: %10s %10s\n", upd.ChannelPost.Chat.Title, upd.ChannelPost.Chat.Type)
-      } else {
-        fmt.Printf("Other update: %10s\n", "...")
+    for updates == nil || len(updates) == 0 {
+      updates, _ = b.GetUpdates(updId, 100, 100, []string{})
+      for _, upd := range updates {
+        if updId < upd.UpdateId {
+          updId = upd.UpdateId
+        }
+        fmt.Println(readUpdate(upd).toString())
       }
     }
+
+    fmt.Printf("Total updates: %d\n", len(updates))
 }
