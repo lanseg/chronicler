@@ -17,4 +17,6 @@
 *.go.sum
 pkg/
 bin/
+telegram/telegram_types.go
+
 

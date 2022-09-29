@@ -11,4 +11,5 @@ cleanup() {
 
 cleanup
 go mod tidy
+go build -o bin/chronist chronist/main.go
 

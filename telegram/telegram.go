@@ -2,7 +2,10 @@ package telegram;
 
 import (
     "fmt"    
-    "io/ioutil"
+    "os"
+    "io"
+    "bytes"
+    "log"
     "net/http"
     "net/url"
     "encoding/json"
@@ -34,29 +37,37 @@ func (dt *ResponseMetadata) GetDescription() string {
     return dt.Description
 }
 
-type telegramBot struct {
+type TelegramBot struct {
     httpClient *http.Client
-    token string    
+    token string
+
+    logger *log.Logger
 }
 
-func NewBot(token string) *telegramBot {
-    return &telegramBot {
+func NewBot(token string) *TelegramBot {
+    return &TelegramBot {
         token: token,
         httpClient: &http.Client{},
+        logger: log.Default(),
     }
 }
 
-func (b *telegramBot) queryApi(apiMethod string, params url.Values) ([]byte, error) {
+func (b *TelegramBot) queryApi(apiMethod string, params url.Values) ([]byte, error) {
     resp, err := http.PostForm(fmt.Sprintf("https://api.telegram.org/bot%s/%s", b.token, apiMethod), params)
+    if err != nil {
+      return nil, err
+    }
     defer resp.Body.Close()
-    body, err := ioutil.ReadAll(resp.Body)
+    
+    var buf bytes.Buffer
+    _, err = io.Copy(&buf, resp.Body)
     if err != nil {
         return nil, err
     }
-    return body, nil
+    return buf.Bytes(), nil
 }
 
-func (b *telegramBot) queryAndUnmarshal(apiMethod string, params url.Values, result interface{}) (interface{}, error) {
+func (b *TelegramBot) queryAndUnmarshal(apiMethod string, params url.Values, result interface{}) (interface{}, error) {
     resultBytes, err :=  b.queryApi(apiMethod, params)
     if err != nil {
         return nil, err
@@ -78,7 +89,7 @@ type GetMeResponse struct {
   Result *User         `json:"result"` 
 }
 
-func (b *telegramBot) GetMe() (*User, error) {
+func (b *TelegramBot) GetMe() (*User, error) {
     response, err := b.queryAndUnmarshal("getMe", url.Values{}, &GetMeResponse{})
     if err != nil {
         return nil, err
@@ -92,7 +103,7 @@ type GetUpdatesResponse struct {
   Result []*Update         `json:"result"` 
 }
 
-func (b *telegramBot) GetUpdates(offset int64, limit int64, timeout int64, allowedUpdates []string) ([]*Update, error) {
+func (b *TelegramBot) GetUpdates(offset int64, limit int64, timeout int64, allowedUpdates []string) ([]*Update, error) {
     params := url.Values{}
     params.Set("chat_id", "-1480532340")
     params.Set("offset", fmt.Sprintf("%d", offset))
@@ -115,7 +126,7 @@ type GetFileResponse struct {
   Result *File         `json:"result"`
 }
 
-func (b *telegramBot) GetFile(fileId string) (*File, error) {
+func (b *TelegramBot) GetFile(fileId string) (*File, error) {
     params := url.Values{}
     params.Set("file_id", fileId)
     
@@ -126,6 +137,26 @@ func (b *telegramBot) GetFile(fileId string) (*File, error) {
     return response.(*GetFileResponse).Result, nil
 }
 
+func (b *TelegramBot) Download(file *File, target string) error {
+    resp, err := b.httpClient.Get(
+        fmt.Sprintf("https://api.telegram.org/file/bot%s/%s", b.token, file.FilePath))
+    if err != nil {
+        return err 
+    }
+    defer resp.Body.Close();    
+   
+    targetFile, err := os.Create(target)
+    if err != nil {
+        return err
+    }
+    defer targetFile.Close();
+    
+    _, err = io.Copy(targetFile, resp.Body)
+    if err != nil {
+        return err
+    }
+    return nil
+}
 // Utilities
 
 func GetLargestImage(sizes []*PhotoSize) *PhotoSize {
