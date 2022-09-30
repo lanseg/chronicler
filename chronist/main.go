@@ -6,69 +6,25 @@ import (
     "log"
     "strings"
     "chronist/telegram"
-    "path/filepath"
+    "chronist/storage"
 )
-
-type RecordType int
-
-const (
-  UNKNOWN RecordType = 0
-  TEXT    RecordType = 1
-  VIDEO   RecordType = 2
-  IMAGE   RecordType = 3
-  TWITTER RecordType = 4
-)
-
-type Record struct {
-  recordId    string
-  recordType  RecordType
-  fileId      string
-  links       []string
-  textContent string
-}
-
-func readUpdate(upd *telegram.Update) *Record {
-    if upd.Message == nil {
-      return nil
-    }  
-    result := &Record{
-      recordId: fmt.Sprintf("%d", upd.UpdateId),
-      links:    []string{},
-    }
-    msg := upd.Message
-    for _, e := range msg.Entities {
-      if e.Type == "url" {
-        result.links = append(result.links, e.Url)
-      }
-    }
-    result.textContent = strings.Replace(msg.Text, "\n\n", "\n", -1)
-    if msg.Video != nil {
-      result.recordType = VIDEO
-      result.fileId = msg.Video.FileId
-    }
-    if msg.Photo != nil {
-      result.recordType = IMAGE
-      result.fileId = telegram.GetLargestImage(msg.Photo).FileId
-    }
-    return result
-}
 
 type IChronist interface {
   
-  FetchRequests() ([]*Record, error);
+  FetchRequests() ([]*storage.Record, error)
+  StoreRequest(record *storage.Record) error
 }
 
 type Chronist struct {
   IChronist
   
-  storageRoot string
   logger *log.Logger
   tg *telegram.TelegramBot
 }
 
-func (ch *Chronist) FetchRequests() ([]*Record, error) {
+func (ch *Chronist) FetchRequests() ([]*storage.Record, error) {
   updId := int64(0)
-  records := []*Record{}    
+  records := []*storage.Record{}    
   var updates []*telegram.Update = nil
   
   for len(updates) == 0 {
@@ -78,68 +34,62 @@ func (ch *Chronist) FetchRequests() ([]*Record, error) {
       if updId < upd.UpdateId {
         updId = upd.UpdateId
       }
-      records = append(records, readUpdate(upd))
+      records = append(records, FromTelegramUpdate(upd))
     }
     ch.logger.Printf("Loaded %d updates into %d records", len(updates), len(records))
+  }
+  for _, record := range records {
+    if len(record.FileId) == 0 {
+      continue
+    }
+    actualFile, err := ch.tg.GetFile(record.FileId)
+    if err != nil {
+      ch.logger.Printf("Cannot get actual file url for %s: %s\n", record.FileId, err)
+      continue
+    }
+    record.FileUrl = ch.tg.GetUrl(actualFile)
   }
   return records, nil
 }
 
-func (ch *Chronist) StoreRequest(record *Record) error {
-  recordRoot := filepath.Join(ch.storageRoot, record.recordId)
-  if err := os.MkdirAll(recordRoot, os.ModePerm); err != nil {
-    return err
+func NewChronist(telegramKey string) *Chronist {
+  return &Chronist {
+    logger: log.Default(),
+    tg: telegram.NewBot(telegramKey),
   }
-  if record.recordType == VIDEO || record.recordType == IMAGE {
-    file, err := ch.tg.GetFile(record.fileId)
-    if err != nil {
-      return err
-    }
-    targetName := "video"
-    if record.recordType == IMAGE {
-      targetName = "image"
-    }
-    return ch.tg.Download(file, filepath.Join(recordRoot, targetName))
-  }
-
-  f, err := os.Create(filepath.Join(recordRoot, "textdata.txt"))
-  if err != nil {
-    return err
-  }
-  defer f.Close()
-  _, err = f.WriteString(record.textContent)
-  if err != nil {
-    return err
-  }
-  
-  if len(record.links) == 0 {
-    return nil
-  }
-  f, err = os.Create(filepath.Join(recordRoot, "links.txt"))
-  if err != nil {
-    return err
-  }
-  defer f.Close()  
-  _, err = f.WriteString(strings.Join(record.links, "\n"))
-  if err != nil {
-    return err
-  }
-  return nil
 }
 
-func NewChronist(tg *telegram.TelegramBot) *Chronist {
-  return &Chronist {
-    storageRoot: "chronist_storage",
-    logger: log.Default(),
-    tg: tg,
-  }
+func FromTelegramUpdate(upd *telegram.Update) *storage.Record {
+    if upd.Message == nil {
+      return nil
+    }  
+    result := &storage.Record{
+      RecordId: fmt.Sprintf("%d", upd.UpdateId),
+      Links:    []string{},
+    }
+    msg := upd.Message
+    for _, e := range msg.Entities {
+      if e.Type == "url" {
+        result.Links = append(result.Links, e.Url)
+      }
+    }
+    result.TextContent = strings.Replace(msg.Text, "\n\n", "\n", -1)
+    if msg.Video != nil {
+      result.FileId = msg.Video.FileId
+    }
+    if msg.Photo != nil {
+      result.FileId = telegram.GetLargestImage(msg.Photo).FileId
+    }
+    return result
 }
 
 func main() {
-    chr := NewChronist(telegram.NewBot(os.Args[1]))
+    chr := NewChronist(os.Args[1])
+    storage := storage.NewStorage("chronist_storage")
+
     reqs, _ := chr.FetchRequests()
     for _, req := range reqs {
-      if err := chr.StoreRequest(req); err != nil {
+      if err := storage.SaveRecord(req); err != nil {
         fmt.Printf("ERROR: %s", err)
       }
     }
