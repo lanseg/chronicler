@@ -1,6 +1,7 @@
 package storage
 
 import (
+    "fmt"
     "io"
     "log"
     "os"
@@ -10,12 +11,23 @@ import (
     "path/filepath"
 )
 
+type File struct {
+    FileId string
+    FileUrl string
+}
+
 type Record struct {
   RecordId    string
-  FileId      string
-  FileUrl     string
+  Files       []*File
   Links       []string
   TextContent string
+}
+
+func (r *Record) AddFile(fileId string ) {
+  if r.Files == nil {
+    r.Files = []*File{}
+  }
+  r.Files = append(r.Files, &File {FileId: fileId})
 }
 
 type IStorage interface {
@@ -73,9 +85,12 @@ func (s *Storage) SaveRecord(r *Record) error {
       return err
     }
   }
-  if len(r.FileUrl) > 0 {
-      if err := s.downloadUrl(r.FileUrl, filepath.Join(r.RecordId, "file")); err != nil {
-          return err
+  if len(r.Files) > 0 {
+      for i, file := range r.Files {
+        fname := fmt.Sprintf("file_%d", i)
+        if err := s.downloadUrl(file.FileUrl, filepath.Join(r.RecordId, fname)); err != nil {
+            return err
+        }
       }
   }
   return nil

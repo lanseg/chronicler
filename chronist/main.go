@@ -39,15 +39,17 @@ func (ch *Chronist) FetchRequests() ([]*storage.Record, error) {
     ch.logger.Printf("Loaded %d updates into %d records", len(updates), len(records))
   }
   for _, record := range records {
-    if len(record.FileId) == 0 {
+    if len(record.Files) == 0 {
       continue
     }
-    actualFile, err := ch.tg.GetFile(record.FileId)
-    if err != nil {
-      ch.logger.Printf("Cannot get actual file url for %s: %s\n", record.FileId, err)
-      continue
+    for _, file := range record.Files {
+      fileUrl, err := ch.tg.GetFile(file.FileId)
+      if err != nil {
+        ch.logger.Printf("Cannot get actual file url for %s: %s\n", file.FileId, err)
+        continue
+      }
+      file.FileUrl = ch.tg.GetUrl(fileUrl)
     }
-    record.FileUrl = ch.tg.GetUrl(actualFile)
   }
   return records, nil
 }
@@ -75,10 +77,10 @@ func FromTelegramUpdate(upd *telegram.Update) *storage.Record {
     }
     result.TextContent = strings.Replace(msg.Text, "\n\n", "\n", -1)
     if msg.Video != nil {
-      result.FileId = msg.Video.FileId
+      result.AddFile(msg.Video.FileId)
     }
     if msg.Photo != nil {
-      result.FileId = telegram.GetLargestImage(msg.Photo).FileId
+      result.AddFile(telegram.GetLargestImage(msg.Photo).FileId)
     }
     return result
 }
