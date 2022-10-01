@@ -7,6 +7,7 @@ import (
     "os"
     "strings"
     
+    "chronist/util"
     "net/http"    
     "path/filepath"
 )
@@ -28,6 +29,35 @@ func (r *Record) AddFile(fileId string ) {
     r.Files = []*File{}
   }
   r.Files = append(r.Files, &File {FileId: fileId})
+}
+
+func (r *Record) Merge(other *Record) {
+  newFiles := map[string]*File{}
+  for _, f := range r.Files {
+    newFiles[f.FileId] = f
+  }
+  for _, f := range other.Files {
+    newFiles[f.FileId] = f
+  }
+  
+  newLinks := map[string]bool{}
+  for _, l := range r.Links {
+    newLinks[l] = true
+  }
+  for _, l := range other.Links {
+    newLinks[l] = true
+  }
+  
+  newText := r.TextContent
+  if strings.Contains(other.TextContent, newText) {
+    newText = other.TextContent
+  } else if !strings.Contains(newText, other.TextContent) {
+    newText += "\n" + other.TextContent
+  }
+  
+  r.Files = util.Values(newFiles)
+  r.Links = util.Keys(newLinks)
+  r.TextContent = newText
 }
 
 type IStorage interface {

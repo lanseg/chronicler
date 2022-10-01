@@ -5,6 +5,8 @@ import (
     "os"
     "log"
     "strings"
+
+    "chronist/util"
     "chronist/telegram"
     "chronist/storage"
 )
@@ -24,7 +26,7 @@ type Chronist struct {
 
 func (ch *Chronist) FetchRequests() ([]*storage.Record, error) {
   updId := int64(0)
-  records := []*storage.Record{}    
+  records := map[string]*storage.Record{}    
   var updates []*telegram.Update = nil
   
   for len(updates) == 0 {
@@ -34,7 +36,18 @@ func (ch *Chronist) FetchRequests() ([]*storage.Record, error) {
       if updId < upd.UpdateId {
         updId = upd.UpdateId
       }
-      records = append(records, FromTelegramUpdate(upd))
+      if upd.Message == nil {
+        continue
+      }  
+      msg := upd.Message
+      key := fmt.Sprintf("%d_%d_%d", msg.Chat.Id, msg.From.Id, msg.Date)
+      newRecord := FromTelegramUpdate(upd)
+      
+      if oldRecord, ok := records[key]; ok {
+        oldRecord.Merge(newRecord)
+      } else {
+        records[key] = newRecord
+      }
     }
     ch.logger.Printf("Loaded %d updates into %d records", len(updates), len(records))
   }
@@ -51,7 +64,7 @@ func (ch *Chronist) FetchRequests() ([]*storage.Record, error) {
       file.FileUrl = ch.tg.GetUrl(fileUrl)
     }
   }
-  return records, nil
+  return util.Values(records), nil
 }
 
 func NewChronist(telegramKey string) *Chronist {
@@ -62,9 +75,6 @@ func NewChronist(telegramKey string) *Chronist {
 }
 
 func FromTelegramUpdate(upd *telegram.Update) *storage.Record {
-    if upd.Message == nil {
-      return nil
-    }  
     result := &storage.Record{
       RecordId: fmt.Sprintf("%d", upd.UpdateId),
       Links:    []string{},
