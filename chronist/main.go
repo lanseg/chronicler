@@ -11,6 +11,10 @@ import (
     "chronist/storage"
 )
 
+const (
+  privateChatId = int64(-1480532340)
+)
+
 type IChronist interface {
   
   FetchRequests() ([]*storage.Record, error)
@@ -31,7 +35,7 @@ func (ch *Chronist) FetchRequests() ([]*storage.Record, error) {
   
   for len(updates) == 0 {
     ch.logger.Printf("Loading all updates starting from %d", updId)
-    updates, _ = ch.tg.GetUpdates(updId, 100, 100, []string{})
+    updates, _ = ch.tg.GetUpdates(privateChatId, updId, 100, 100, []string{})
     for _, upd := range updates {
       if updId < upd.UpdateId {
         updId = upd.UpdateId
@@ -102,6 +106,7 @@ func main() {
     reqs, _ := chr.FetchRequests()
     for _, req := range reqs {
       if err := storage.SaveRecord(req); err != nil {
+        chr.tg.SendMessage(privateChatId, fmt.Sprintf("ERROR: %s", err))
         fmt.Printf("ERROR: %s", err)
       }
     }

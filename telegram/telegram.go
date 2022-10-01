@@ -101,9 +101,9 @@ type GetUpdatesResponse struct {
   Result []*Update         `json:"result"` 
 }
 
-func (b *TelegramBot) GetUpdates(offset int64, limit int64, timeout int64, allowedUpdates []string) ([]*Update, error) {
+func (b *TelegramBot) GetUpdates(chatId int64, offset int64, limit int64, timeout int64, allowedUpdates []string) ([]*Update, error) {
   params := url.Values{}
-  params.Set("chat_id", "-1480532340")
+  params.Set("chat_id", fmt.Sprintf("%d", chatId))
   params.Set("offset", fmt.Sprintf("%d", offset))
   params.Set("limit", fmt.Sprintf("%d", limit))
   params.Set("timeout", fmt.Sprintf("%d", timeout))
@@ -116,6 +116,23 @@ func (b *TelegramBot) GetUpdates(offset int64, limit int64, timeout int64, allow
     return nil, err
   }
   return response.(*GetUpdatesResponse).Result, nil
+}
+
+type GetSendMessageResponse struct {
+  ResponseMetadata
+
+  Result *Message         `json:"result"` 
+}
+func (b *TelegramBot) SendMessage(chatId int64, text string) (*Message, error) {
+  params := url.Values{}
+  params.Set("chat_id", fmt.Sprintf("%d", chatId))
+  params.Set("text", text)
+ 
+  response, err := b.queryAndUnmarshal("sendMessage", params, &GetSendMessageResponse{})
+  if err != nil {
+    return nil, err
+  }
+  return response.(*GetSendMessageResponse).Result, nil 
 }
 
 type GetFileResponse struct {
