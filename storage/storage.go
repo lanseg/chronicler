@@ -17,11 +17,24 @@ type File struct {
     FileUrl string
 }
 
+type Source struct {
+  SenderId   string
+  ChannelId  string
+  MessageId  string
+}
+
 type Record struct {
   RecordId    string
+  Source      *Source
   Files       []*File
   Links       []string
   TextContent string
+}
+
+func (r *Record) String() string {
+  return fmt.Sprintf(
+    "{recordId: %s, source: %v, files: %v, links: %v, TextContent: %s}",
+    r.RecordId, r.Source, r.Files, r.Links, r.TextContent)
 }
 
 func (r *Record) AddFile(fileId string ) {
