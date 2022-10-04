@@ -33,9 +33,14 @@ TG_GO_TYPES = {
 }
 
 # Utility code
+def formatWord(word):
+    if word.lower() in ['id', 'url', 'ip']:
+        return word.upper()
+    return word[0].upper() + word[1:]
+    
 def toCamelCase(usstr, capFirst=True):
-    result = "".join(map(lambda x: x[0].upper() + x[1:], usstr.split('_')))
-    if not capFirst:
+    result = "".join(map(formatWord, usstr.split('_')))
+    if not capFirst and result.upper() != result: 
         return result[0].lower() + result[1:]
     return result
 

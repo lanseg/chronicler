@@ -30,7 +30,7 @@ type Chronist struct {
 
 	cursor int64
 	logger *log.Logger
-	tg     *telegram.TelegramBot
+	tg     *telegram.Bot
 }
 
 func (ch *Chronist) FetchRequests() ([]*storage.Record, error) {
@@ -41,14 +41,14 @@ func (ch *Chronist) FetchRequests() ([]*storage.Record, error) {
 		ch.logger.Printf("Loading all updates starting from %d", ch.cursor)
 		updates, _ = ch.tg.GetUpdates(privateChatId, ch.cursor, 100, 100, []string{})
 		for _, upd := range updates {
-			if ch.cursor < upd.UpdateId {
-				ch.cursor = upd.UpdateId
+			if ch.cursor < upd.UpdateID {
+				ch.cursor = upd.UpdateID
 			}
 			if upd.Message == nil {
 				continue
 			}
 			msg := upd.Message
-			key := fmt.Sprintf("%d_%d_%d", msg.Chat.Id, msg.From.Id, msg.Date)
+			key := fmt.Sprintf("%d_%d_%d", msg.Chat.ID, msg.From.ID, msg.Date)
 			newRecord := FromTelegramUpdate(upd)
 
 			if oldRecord, ok := records[key]; ok {
@@ -64,12 +64,12 @@ func (ch *Chronist) FetchRequests() ([]*storage.Record, error) {
 			continue
 		}
 		for _, file := range record.Files {
-			fileUrl, err := ch.tg.GetFile(file.FileId)
+			fileURL, err := ch.tg.GetFile(file.FileID)
 			if err != nil {
-				ch.logger.Printf("Cannot get actual file url for %s: %s\n", file.FileId, err)
+				ch.logger.Printf("Cannot get actual file url for %s: %s\n", file.FileID, err)
 				continue
 			}
-			file.FileUrl = ch.tg.GetUrl(fileUrl)
+			file.FileURL = ch.tg.GetUrl(fileURL)
 		}
 	}
 	return util.Values(records), nil
@@ -79,24 +79,24 @@ func FromTelegramUpdate(upd *telegram.Update) *storage.Record {
 	msg := upd.Message
 	result := &storage.Record{
 		Source: &storage.Source{
-			SenderId:  fmt.Sprintf("%d", msg.From.Id),
-			ChannelId: fmt.Sprintf("%d", msg.Chat.Id),
-			MessageId: fmt.Sprintf("%d", msg.MessageId),
+			SenderID:  fmt.Sprintf("%d", msg.From.ID),
+			ChannelID: fmt.Sprintf("%d", msg.Chat.ID),
+			MessageID: fmt.Sprintf("%d", msg.MessageID),
 		},
-		RecordId: fmt.Sprintf("%d", upd.UpdateId),
+		RecordID: fmt.Sprintf("%d", upd.UpdateID),
 		Links:    []string{},
 	}
 	for _, e := range msg.Entities {
 		if e.Type == "url" {
-			result.Links = append(result.Links, e.Url)
+			result.Links = append(result.Links, e.URL)
 		}
 	}
 	result.TextContent = strings.Replace(msg.Text, "\n\n", "\n", -1)
 	if msg.Video != nil {
-		result.AddFile(msg.Video.FileId)
+		result.AddFile(msg.Video.FileID)
 	}
 	if msg.Photo != nil {
-		result.AddFile(telegram.GetLargestImage(msg.Photo).FileId)
+		result.AddFile(telegram.GetLargestImage(msg.Photo).FileID)
 	}
 	return result
 }
@@ -141,7 +141,7 @@ func main() {
 				logger.Printf("Saved record %v\n", req)
 			}
 		}
-		id, _ := strconv.Atoi(src.ChannelId)
+		id, _ := strconv.Atoi(src.ChannelID)
 		chr.tg.SendMessage(int64(id),
 			fmt.Sprintf("Saved %d new records, failed to save: %d",
 				len(success), len(failure)))

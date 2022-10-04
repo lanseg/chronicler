@@ -13,18 +13,18 @@ import (
 )
 
 type File struct {
-	FileId  string
-	FileUrl string
+	FileID  string
+	FileURL string
 }
 
 type Source struct {
-	SenderId  string
-	ChannelId string
-	MessageId string
+	SenderID  string
+	ChannelID string
+	MessageID string
 }
 
 type Record struct {
-	RecordId    string
+	RecordID    string
 	Source      *Source
 	Files       []*File
 	Links       []string
@@ -33,30 +33,33 @@ type Record struct {
 
 func (r *Record) String() string {
 	return fmt.Sprintf(
-		"{recordId: %s, source: %v, files: %v, links: %v, TextContent: %s}",
-		r.RecordId, r.Source, r.Files, r.Links, r.TextContent)
+		"{RecordID: %s, source: %v, files: %v, links: %v, TextContent: %s}",
+		r.RecordID, r.Source, r.Files, r.Links, r.TextContent)
 }
 
-func (r *Record) AddFile(fileId string) {
+func (r *Record) AddFile(FileID string) {
 	if r.Files == nil {
 		r.Files = []*File{}
 	}
-	r.Files = append(r.Files, &File{FileId: fileId})
+
+	r.Files = append(r.Files, &File{FileID: FileID, FileURL: ""})
 }
 
 func (r *Record) Merge(other *Record) {
 	newFiles := map[string]*File{}
 	for _, f := range r.Files {
-		newFiles[f.FileId] = f
+		newFiles[f.FileID] = f
 	}
+	
 	for _, f := range other.Files {
-		newFiles[f.FileId] = f
+		newFiles[f.FileID] = f
 	}
 
 	newLinks := map[string]bool{}
 	for _, l := range r.Links {
 		newLinks[l] = true
 	}
+
 	for _, l := range other.Links {
 		newLinks[l] = true
 	}
@@ -92,7 +95,7 @@ func (s *Storage) saveLines(name string, lines []string) error {
 		os.ModePerm)
 }
 
-func (s *Storage) downloadUrl(url string, target string) error {
+func (s *Storage) downloadURL(url string, target string) error {
 	resp, err := s.httpClient.Get(url)
 	if err != nil {
 		return err
@@ -109,38 +112,45 @@ func (s *Storage) downloadUrl(url string, target string) error {
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
 func (s *Storage) SaveRecord(r *Record) error {
-	if err := os.MkdirAll(filepath.Join(s.root, r.RecordId), os.ModePerm); err != nil {
+	if err := os.MkdirAll(filepath.Join(s.root, r.RecordID), os.ModePerm); err != nil {
 		return err
 	}
+
 	if len(r.Links) > 0 {
-		if err := s.saveLines(filepath.Join(r.RecordId, "links.txt"), r.Links); err != nil {
+		if err := s.saveLines(filepath.Join(r.RecordID, "links.txt"), r.Links); err != nil {
 			return err
 		}
 	}
+
 	if len(r.TextContent) > 0 {
-		if err := s.saveLines(filepath.Join(r.RecordId, "text.txt"), []string{
+		if err := s.saveLines(filepath.Join(r.RecordID, "text.txt"), []string{
 			r.TextContent,
 		}); err != nil {
 			return err
 		}
 	}
+	
 	if len(r.Files) > 0 {
 		for i, file := range r.Files {
 			fname := fmt.Sprintf("file_%d", i)
-			if err := s.downloadUrl(file.FileUrl, filepath.Join(r.RecordId, fname)); err != nil {
+			if err := s.downloadURL(file.FileURL, filepath.Join(r.RecordID, fname)); err != nil {
 				return err
 			}
 		}
 	}
+
 	return nil
 }
 
 func NewStorage(root string) *Storage {
 	return &Storage{
+        IStorage
+
 		root:       root,
 		httpClient: &http.Client{},
 		logger:     log.Default(),
