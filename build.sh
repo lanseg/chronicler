@@ -10,6 +10,7 @@ cleanup() {
 }
 
 cleanup
+find -iname '*go' -exec gofmt -s -w {} \;
 go mod tidy
 go build -o bin/chronist chronist/main.go
 
