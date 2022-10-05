@@ -3,13 +3,12 @@ package storage
 import (
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"strings"
-
-	"chronist/util"
 	"net/http"
 	"path/filepath"
+    
+    "chronist/util"
 )
 
 type File struct {
@@ -37,12 +36,12 @@ func (r *Record) String() string {
 		r.RecordID, r.Source, r.Files, r.Links, r.TextContent)
 }
 
-func (r *Record) AddFile(FileID string) {
+func (r *Record) AddFile(fileId string) {
 	if r.Files == nil {
 		r.Files = []*File{}
 	}
 
-	r.Files = append(r.Files, &File{FileID: FileID, FileURL: ""})
+	r.Files = append(r.Files, &File{FileID: fileId, FileURL: ""})
 }
 
 func (r *Record) Merge(other *Record) {
@@ -84,7 +83,7 @@ type Storage struct {
 	IStorage
 
 	httpClient *http.Client
-	logger     *log.Logger
+	logger     *util.Logger
 	root       string
 }
 
@@ -144,15 +143,15 @@ func (s *Storage) SaveRecord(r *Record) error {
 		}
 	}
 
+	s.logger.Infof("Saved new record to %s", filepath.Join(s.root, r.RecordID)) 
 	return nil
 }
 
 func NewStorage(root string) *Storage {
 	return &Storage{
-        IStorage
 
 		root:       root,
 		httpClient: &http.Client{},
-		logger:     log.Default(),
+		logger:     util.NewLogger("storage"),
 	}
 }

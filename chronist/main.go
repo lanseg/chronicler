@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -17,7 +16,7 @@ const (
 )
 
 var (
-	logger = log.Default()
+	logger = util.NewLogger("main")
 )
 
 type IChronist interface {
@@ -29,7 +28,7 @@ type Chronist struct {
 	IChronist
 
 	cursor int64
-	logger *log.Logger
+	logger *util.Logger
 	tg     *telegram.Bot
 }
 
@@ -38,7 +37,7 @@ func (ch *Chronist) FetchRequests() ([]*storage.Record, error) {
 	var updates []*telegram.Update = nil
 
 	for len(updates) == 0 {
-		ch.logger.Printf("Loading all updates starting from %d", ch.cursor)
+		ch.logger.Infof("Loading all updates starting from %d", ch.cursor)
 		updates, _ = ch.tg.GetUpdates(privateChatId, ch.cursor, 100, 100, []string{})
 		for _, upd := range updates {
 			if ch.cursor < upd.UpdateID {
@@ -57,7 +56,7 @@ func (ch *Chronist) FetchRequests() ([]*storage.Record, error) {
 				records[key] = newRecord
 			}
 		}
-		ch.logger.Printf("Loaded %d updates into %d records", len(updates), len(records))
+		ch.logger.Infof("Loaded %d updates into %d records", len(updates), len(records))
 	}
 	for _, record := range records {
 		if len(record.Files) == 0 {
@@ -66,7 +65,7 @@ func (ch *Chronist) FetchRequests() ([]*storage.Record, error) {
 		for _, file := range record.Files {
 			fileURL, err := ch.tg.GetFile(file.FileID)
 			if err != nil {
-				ch.logger.Printf("Cannot get actual file url for %s: %s\n", file.FileID, err)
+				ch.logger.Errorf("Cannot get actual file url for %s: %s", file.FileID, err)
 				continue
 			}
 			file.FileURL = ch.tg.GetUrl(fileURL)
@@ -117,7 +116,7 @@ func main() {
 	stg := storage.NewStorage(storageRoot)
 	chr := &Chronist{
 		cursor: getCursor(),
-		logger: log.Default(),
+		logger: util.NewLogger("chronist"),
 		tg:     telegram.NewBot(tgApiKey),
 	}
 
@@ -135,10 +134,10 @@ func main() {
 		for _, req := range reqs {
 			if err := stg.SaveRecord(req); err != nil {
 				failure = append(failure, req)
-				logger.Printf("ERROR: failed to save record %v: %s\n", req, err)
+				logger.Errorf("failed to save record %v: %s\n", req, err)
 			} else {
 				success = append(success, req)
-				logger.Printf("Saved record %v\n", req)
+				logger.Infof("Saved record %v\n", req)
 			}
 		}
 		id, _ := strconv.Atoi(src.ChannelID)
