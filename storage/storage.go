@@ -124,6 +124,14 @@ func (s *Storage) SaveRecord(r *Record) error {
 		if err := s.saveLines(filepath.Join(r.RecordID, "links.txt"), r.Links); err != nil {
 			return err
 		}
+		for _, link := range r.Links {
+          if !util.IsYoutubeLink(link) {
+            continue
+          }
+          if err := util.DownloadYoutube(link, filepath.Join(s.root, r.RecordID)); err != nil {
+            s.logger.Warningf("Failed to download youtube video: %s", err)
+          }
+        }
 	}
 
 	if len(r.TextContent) > 0 {

@@ -15,10 +15,6 @@ const (
 	privateChatId = int64(0)
 )
 
-var (
-	logger = util.NewLogger("main")
-)
-
 type IChronist interface {
 	FetchRequests() ([]*storage.Record, error)
 	StoreRequest(record *storage.Record) error
@@ -111,7 +107,9 @@ func saveCursor(cursor int64) {
 }
 
 func main() {
-	tgApiKey := os.Args[1]
+    logger := util.NewLogger("main")
+
+    tgApiKey := os.Args[1]
 	storageRoot := "chronist_storage"
 	stg := storage.NewStorage(storageRoot)
 	chr := &Chronist{
