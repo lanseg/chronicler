@@ -156,10 +156,12 @@ func (s *Storage) SaveRecord(r *Record) error {
 }
 
 func NewStorage(root string) *Storage {
+    log := util.NewLogger("storage")
+    log.Infof("Storage root set to %s", root)
 	return &Storage{
 
 		root:       root,
 		httpClient: &http.Client{},
-		logger:     util.NewLogger("storage"),
+		logger:     log,
 	}
 }

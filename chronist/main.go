@@ -1,6 +1,7 @@
 package main
 
 import (
+    "flag"
 	"fmt"
 	"os"
 	"strconv"
@@ -13,6 +14,13 @@ import (
 
 const (
 	privateChatId = int64(0)
+    tgBotKeyFlag = "telegram_bot_key"
+    storageRootFlag = "storage_root"
+)
+
+var (
+  telegramBotKey = flag.String(tgBotKeyFlag, "", "A key for the telegram bot api.")
+  storageRoot = flag.String(storageRootFlag, "chronist_storage", "A local folder to save downloads.")
 )
 
 type IChronist interface {
@@ -107,15 +115,19 @@ func saveCursor(cursor int64) {
 }
 
 func main() {
-    logger := util.NewLogger("main")
+    flag.Parse()  
+    logger := util.NewLogger("main")  
 
-    tgApiKey := os.Args[1]
-	storageRoot := "chronist_storage"
-	stg := storage.NewStorage(storageRoot)
+    if len(*telegramBotKey) == 0{
+      logger.Errorf("No telegram bot key defined, please set it with --%s=\"...\"", tgBotKeyFlag)
+      return
+    }
+
+	stg := storage.NewStorage(*storageRoot)
 	chr := &Chronist{
 		cursor: getCursor(),
 		logger: util.NewLogger("chronist"),
-		tg:     telegram.NewBot(tgApiKey),
+		tg:     telegram.NewBot(*telegramBotKey),
 	}
 
 	newRequests, err := chr.FetchRequests()
