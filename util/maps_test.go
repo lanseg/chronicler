@@ -64,3 +64,23 @@ func TestGroupBy(t *testing.T) {
 		})
 	}
 }
+
+func TestKeysValues(t *testing.T) {
+	for _, tc := range []struct {
+		desc       string
+		data       map[string]string
+		wantKeys   []string
+		wantValues []string
+	}{} {
+		t.Run(tc.desc, func(t *testing.T) {
+			keys := Keys(tc.data)
+			values := Values(tc.data)
+			if !reflect.DeepEqual(tc.wantKeys, keys) {
+				t.Errorf("Keys(%v) expected to be %v, but got %v", tc.data, tc.wantKeys, keys)
+			}
+			if !reflect.DeepEqual(tc.wantValues, values) {
+				t.Errorf("Values(%v) expected to be %v, but got %v", tc.data, tc.wantValues, values)
+			}
+		})
+	}
+}
