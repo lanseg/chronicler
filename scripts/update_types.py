@@ -10,7 +10,7 @@ SELF_CLOSING = set("area, base, br, col, embed, hr, img, input, keygen, link, me
 ParamDef = collections.namedtuple('ParamDef', ['name', 'param_type', 'optional', 'comment'])
 TypeDef = collections.namedtuple('TypeDef', ['name', 'comment', 'params', 'is_function'])
 
-UNKNOWN_TYPES = [
+GENERIC_TYPES = [
     'ChatMember',
     'InputFile',
     'CallbackGame',
@@ -20,6 +20,14 @@ UNKNOWN_TYPES = [
     'InputMedia',
     'BotCommandScope',
     'PassportElementError',
+]
+
+EXCLUDE_HEADERS = [
+    'Determining list of commands',
+    'Sending files',
+    'Inline mode objects',
+    'Formatting options', 
+    'Inline mode methods',
 ]
 
 TG_GO_TYPES = {
@@ -114,8 +122,8 @@ def nodesToTypedef(title, prefix, table, suffix):
 def formatGoParamType(typename):
     dimensions = typename.count('Array of')
     result = typename.replace('Array of', '').strip()
-    result = TG_GO_TYPES.get(result, result)
-    if result in UNKNOWN_TYPES or ' or ' in result:
+    result = TG_GO_TYPES.get(result, result)    
+    if result in GENERIC_TYPES or ' or ' in result:
         result = 'interface{}'
     if result[0].isupper():
         result = "*" + result
@@ -131,7 +139,10 @@ def formatGolangType(typedef):
         if (" or "  in paramType) or (" and " in paramType):
             paramType = "interface{}"
         result += "\n%s\n  %s %s `json:\"%s\"`\n" % (paramComment, toCamelCase(param.name), paramType, param.name)
-    return "%s\ntype %s struct {%s}" % (formatComment(typedef.comment, 0), typedef.name, result)
+    thedef = "type %s struct {%s}" % (typedef.name, result)
+    if typedef.name in EXCLUDE_HEADERS:
+        thedef = "// " + thedef
+    return "%s\n%s" % (formatComment(typedef.comment, 0), thedef)
 
 
 class TypedefCollector(parser.HTMLParser):
@@ -161,10 +172,10 @@ def parseNodes(data):
      if i == len(data): 
          break
      
-     title = data[i]
      prefix = []
-     table = None
      suffix = []
+     title = data[i]
+     table = None
      i += 1
      
      prefix = []
