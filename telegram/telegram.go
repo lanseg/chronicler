@@ -127,10 +127,13 @@ type GetSendMessageResponse struct {
 	Result *Message `json:"result"`
 }
 
-func (b *Bot) SendMessage(chatID int64, text string) (*Message, error) {
+func (b *Bot) SendMessage(chatID int64, replyId int64, text string) (*Message, error) {
 	params := url.Values{}
 	params.Set("chat_id", fmt.Sprintf("%d", chatID))
 	params.Set("text", text)
+	if replyId > 0 {
+		params.Set("reply_to_message_id", fmt.Sprintf("%d", replyId))
+	}
 
 	response, err := b.queryAndUnmarshal("sendMessage", params, &GetSendMessageResponse{})
 	if err != nil {

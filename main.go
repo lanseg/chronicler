@@ -42,34 +42,17 @@ func main() {
       return
     }
 
-    tg := telegram.NewBot(*telegramBotKey)
-	stg := storage.NewStorage(*storageRoot)
-	chr := chronist.NewChronist(getCursor(), tg)
+	chr := chronist.NewChronist(
+		getCursor(), 
+		telegram.NewBot(*telegramBotKey),
+		storage.NewStorage(*storageRoot),
+	)
 
 	newRequests, err := chr.FetchRequests()
 	if err != nil {
-		fmt.Println(err.Error())
+		logger.Errorf("Cannot fetch the requests: %s", err.Error())
 		return
 	}
-	requestBySource := util.GroupBy(newRequests, func(r *storage.Record) *storage.Source {
-		return r.Source
-	})
-	for src, reqs := range requestBySource {
-		success := []*storage.Record{}
-		failure := []*storage.Record{}
-		for _, req := range reqs {
-			if err := stg.SaveRecord(req); err != nil {
-				failure = append(failure, req)
-				logger.Errorf("failed to save record %v: %s\n", req, err)
-			} else {
-				success = append(success, req)
-				logger.Infof("Saved record %v\n", req)
-			}
-		}
-		id, _ := strconv.Atoi(src.ChannelID)
-		tg.SendMessage(int64(id),
-			fmt.Sprintf("Saved %d new records, failed to save: %d",
-				len(success), len(failure)))
-	}
+    chr.SaveRequests(newRequests)
 	saveCursor(chr.GetCursor() + 1)
 }

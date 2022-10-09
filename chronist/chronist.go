@@ -2,6 +2,7 @@ package chronist
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"chronist/storage"
@@ -9,25 +10,37 @@ import (
 	"chronist/util"
 )
 
+type Status int64
+
+const (
+	UNKNOWN     Status = 0
+	FAIL        Status = 1
+	IN_PROGRESS Status = 2
+	SUCCESS     Status = 3
+)
+
 type IChronist interface {
 	FetchRequests() ([]*storage.Record, error)
-	StoreRequest(record *storage.Record) error
+	SaveRequests(record []*storage.Record) error
+	SendStatusUpdate(source *storage.Source, status Status, msg string) error
 	GetCursor() int64
 }
 
 type Chronist struct {
 	IChronist
 
-	cursor int64
-	logger *util.Logger
-	tg     *telegram.Bot
+	cursor  int64
+	logger  *util.Logger
+	tg      *telegram.Bot
+	storage *storage.Storage
 }
 
-func NewChronist(cursor int64, tg *telegram.Bot) IChronist {
-	return &Chronist {
-		cursor: cursor,
-		logger: util.NewLogger("chronist"),
-		tg: tg,
+func NewChronist(cursor int64, tg *telegram.Bot, st *storage.Storage) IChronist {
+	return &Chronist{
+		cursor:  cursor,
+		logger:  util.NewLogger("chronist"),
+		storage: st,
+		tg:      tg,
 	}
 }
 
@@ -59,6 +72,38 @@ func FromTelegramUpdate(upd *telegram.Update) *storage.Record {
 		result.AddFile(telegram.GetLargestImage(msg.Photo).FileID)
 	}
 	return result
+}
+
+func (ch *Chronist) SaveRequests(requests []*storage.Record) error {
+	for _, req := range requests {
+		ch.SendStatusUpdate(req.Source, IN_PROGRESS, "")
+		if err := ch.storage.SaveRecord(req); err != nil {
+			ch.SendStatusUpdate(req.Source, FAIL, err.Error())
+		} else {
+			ch.SendStatusUpdate(req.Source, SUCCESS, "")
+		}
+	}
+	return nil
+}
+
+func (ch *Chronist) SendStatusUpdate(source *storage.Source, status Status, msg string) error {
+	sender, _ := strconv.Atoi(source.SenderID)
+	message, _ := strconv.Atoi(source.MessageID)
+	switch status {
+		case UNKNOWN:
+			ch.logger.Infof("Unknown status")
+		case FAIL:
+			ch.tg.SendMessage(int64(sender), int64(message), "Failed")
+			ch.logger.Infof("Status update: %v, FAIL (%s)", source, msg)
+		case IN_PROGRESS:
+			ch.logger.Infof("Status update: %v, IN_PROGRESS (%s)", source, status, msg)
+		case SUCCESS:
+			ch.tg.SendMessage(int64(sender), int64(message), "Saved")
+			ch.logger.Infof("Status update: %v, SUCCESS (%s)", source, status, msg)
+		default:
+			ch.logger.Infof("Unknown status")
+	}
+	return nil
 }
 
 func (ch *Chronist) FetchRequests() ([]*storage.Record, error) {

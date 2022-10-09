@@ -19,4 +19,10 @@ pkg/
 bin/
 telegram/telegram_types.go
 
-
+bazel-bin
+bazel-out
+bazel-testlogs
+bazel-chronist
+chronist_storage/
+cursor.txt
+go.sum

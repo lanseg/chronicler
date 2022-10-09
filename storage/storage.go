@@ -22,6 +22,11 @@ type Source struct {
 	MessageID string
 }
 
+func (s *Source) String() string {
+	return fmt.Sprintf("{SenderID: %s, ChannelID: %s, MessageID: %s}",
+					   s.SenderID, s.ChannelID, s.MessageID)
+}
+
 type Record struct {
 	RecordID    string
 	Source      *Source
