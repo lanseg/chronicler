@@ -90,18 +90,18 @@ func (ch *Chronist) SendStatusUpdate(source *storage.Source, status Status, msg 
 	sender, _ := strconv.Atoi(source.SenderID)
 	message, _ := strconv.Atoi(source.MessageID)
 	switch status {
-		case UNKNOWN:
-			ch.logger.Infof("Unknown status")
-		case FAIL:
-			ch.tg.SendMessage(int64(sender), int64(message), "Failed")
-			ch.logger.Infof("Status update: %v, FAIL (%s)", source, msg)
-		case IN_PROGRESS:
-			ch.logger.Infof("Status update: %v, IN_PROGRESS (%s)", source, status, msg)
-		case SUCCESS:
-			ch.tg.SendMessage(int64(sender), int64(message), "Saved")
-			ch.logger.Infof("Status update: %v, SUCCESS (%s)", source, status, msg)
-		default:
-			ch.logger.Infof("Unknown status")
+	case UNKNOWN:
+		ch.logger.Infof("Unknown status")
+	case FAIL:
+		ch.tg.SendMessage(int64(sender), int64(message), "Failed")
+		ch.logger.Infof("Status update: %v, FAIL (%s)", source, msg)
+	case IN_PROGRESS:
+		ch.logger.Infof("Status update: %v, IN_PROGRESS (%s)", source, status, msg)
+	case SUCCESS:
+		ch.tg.SendMessage(int64(sender), int64(message), "Saved")
+		ch.logger.Infof("Status update: %v, SUCCESS (%s)", source, status, msg)
+	default:
+		ch.logger.Infof("Unknown status")
 	}
 	return nil
 }

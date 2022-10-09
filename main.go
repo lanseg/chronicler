@@ -13,14 +13,14 @@ import (
 )
 
 var (
-  telegramBotKey = flag.String(tgBotKeyFlag, "", "A key for the telegram bot api.")
-  storageRoot = flag.String(storageRootFlag, "chronist_storage", "A local folder to save downloads.")
+	telegramBotKey = flag.String(tgBotKeyFlag, "", "A key for the telegram bot api.")
+	storageRoot    = flag.String(storageRootFlag, "chronist_storage", "A local folder to save downloads.")
 )
 
 const (
-	privateChatId = int64(0)
-    tgBotKeyFlag = "telegram_bot_key"
-    storageRootFlag = "storage_root"
+	privateChatId   = int64(0)
+	tgBotKeyFlag    = "telegram_bot_key"
+	storageRootFlag = "storage_root"
 )
 
 func getCursor() int64 {
@@ -34,16 +34,16 @@ func saveCursor(cursor int64) {
 }
 
 func main() {
-    flag.Parse()  
-    logger := util.NewLogger("main")  
+	flag.Parse()
+	logger := util.NewLogger("main")
 
-    if len(*telegramBotKey) == 0{
-      logger.Errorf("No telegram bot key defined, please set it with --%s=\"...\"", tgBotKeyFlag)
-      return
-    }
+	if len(*telegramBotKey) == 0 {
+		logger.Errorf("No telegram bot key defined, please set it with --%s=\"...\"", tgBotKeyFlag)
+		return
+	}
 
 	chr := chronist.NewChronist(
-		getCursor(), 
+		getCursor(),
 		telegram.NewBot(*telegramBotKey),
 		storage.NewStorage(*storageRoot),
 	)
@@ -53,6 +53,6 @@ func main() {
 		logger.Errorf("Cannot fetch the requests: %s", err.Error())
 		return
 	}
-    chr.SaveRequests(newRequests)
+	chr.SaveRequests(newRequests)
 	saveCursor(chr.GetCursor() + 1)
 }

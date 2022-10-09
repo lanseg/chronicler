@@ -3,12 +3,12 @@ package storage
 import (
 	"fmt"
 	"io"
-	"os"
-	"strings"
 	"net/http"
+	"os"
 	"path/filepath"
-    
-    "chronist/util"
+	"strings"
+
+	"chronist/util"
 )
 
 type File struct {
@@ -24,7 +24,7 @@ type Source struct {
 
 func (s *Source) String() string {
 	return fmt.Sprintf("{SenderID: %s, ChannelID: %s, MessageID: %s}",
-					   s.SenderID, s.ChannelID, s.MessageID)
+		s.SenderID, s.ChannelID, s.MessageID)
 }
 
 type Record struct {
@@ -54,7 +54,7 @@ func (r *Record) Merge(other *Record) {
 	for _, f := range r.Files {
 		newFiles[f.FileID] = f
 	}
-	
+
 	for _, f := range other.Files {
 		newFiles[f.FileID] = f
 	}
@@ -130,13 +130,13 @@ func (s *Storage) SaveRecord(r *Record) error {
 			return err
 		}
 		for _, link := range r.Links {
-          if !util.IsYoutubeLink(link) {
-            continue
-          }
-          if err := util.DownloadYoutube(link, filepath.Join(s.root, r.RecordID)); err != nil {
-            s.logger.Warningf("Failed to download youtube video: %s", err)
-          }
-        }
+			if !util.IsYoutubeLink(link) {
+				continue
+			}
+			if err := util.DownloadYoutube(link, filepath.Join(s.root, r.RecordID)); err != nil {
+				s.logger.Warningf("Failed to download youtube video: %s", err)
+			}
+		}
 	}
 
 	if len(r.TextContent) > 0 {
@@ -146,7 +146,7 @@ func (s *Storage) SaveRecord(r *Record) error {
 			return err
 		}
 	}
-	
+
 	if len(r.Files) > 0 {
 		for i, file := range r.Files {
 			fname := fmt.Sprintf("file_%d", i)
@@ -156,13 +156,13 @@ func (s *Storage) SaveRecord(r *Record) error {
 		}
 	}
 
-	s.logger.Infof("Saved new record to %s", filepath.Join(s.root, r.RecordID)) 
+	s.logger.Infof("Saved new record to %s", filepath.Join(s.root, r.RecordID))
 	return nil
 }
 
 func NewStorage(root string) *Storage {
-    log := util.NewLogger("storage")
-    log.Infof("Storage root set to %s", root)
+	log := util.NewLogger("storage")
+	log.Infof("Storage root set to %s", root)
 	return &Storage{
 
 		root:       root,
