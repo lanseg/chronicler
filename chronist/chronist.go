@@ -12,19 +12,10 @@ import (
 	rpb "chronist/proto/records"
 )
 
-type Status int64
-
-const (
-	UNKNOWN     Status = 0
-	FAIL        Status = 1
-	IN_PROGRESS Status = 2
-	SUCCESS     Status = 3
-)
-
 type IChronist interface {
 	FetchRequests() ([]*rpb.Record, error)
 	SaveRequests(record []*rpb.Record) error
-	SendStatusUpdate(source *rpb.Source, status Status, msg string) error
+	SendStatusUpdate(source *rpb.Source, status rpb.FetchStatus, msg string) error
 	GetCursor() int64
 }
 
@@ -61,13 +52,9 @@ func FromTelegramUpdate(upd *telegram.Update, baseRecord *rpb.Record) *rpb.Recor
 		},
 		RecordId: fmt.Sprintf("%d", upd.UpdateID),
 	}
-	if baseRecord != nil {
-		result.Links = append(result.Links, baseRecord.Links...)
-		result.Files = append(result.Files, baseRecord.Files...)
-	}
 	for _, e := range msg.Entities {
 		if e.Type == "url" {
-			result.Links = append(result.Links, e.URL)
+			result.Links = append(result.Links, e. URL)
 		}
 	}
 	result.TextContent = strings.Replace(msg.Text, "\n\n", "\n", -1)
@@ -79,37 +66,38 @@ func FromTelegramUpdate(upd *telegram.Update, baseRecord *rpb.Record) *rpb.Recor
 			FileId: telegram.GetLargestImage(msg.Photo).FileID,
 		})
 	}
+	if baseRecord != nil {
+		result.Links = append(result.Links, baseRecord.Links...)
+		result.Files = append(result.Files, baseRecord.Files...)
+		newText := result.TextContent
+		if strings.Contains(baseRecord.TextContent, newText) {
+			newText = baseRecord.TextContent
+		} else if !strings.Contains(newText, baseRecord.TextContent) {
+			newText += "\n" + baseRecord.TextContent
+		}
+		result.TextContent = newText
+	}	
 	return result
 }
 
 func (ch *Chronist) SaveRequests(requests []*rpb.Record) error {
 	for _, req := range requests {
-		ch.SendStatusUpdate(req.Source, IN_PROGRESS, "")
+		ch.SendStatusUpdate(req.Source, rpb.FetchStatus_IN_PROGRESS, "")
 		if err := ch.storage.SaveRecord(req); err != nil {
-			ch.SendStatusUpdate(req.Source, FAIL, err.Error())
+			ch.SendStatusUpdate(req.Source, rpb.FetchStatus_FAIL, err.Error())
 		} else {
-			ch.SendStatusUpdate(req.Source, SUCCESS, "")
+			ch.SendStatusUpdate(req.Source, rpb.FetchStatus_SUCCESS, "")
 		}
 	}
 	return nil
 }
 
-func (ch *Chronist) SendStatusUpdate(source *rpb.Source, status Status, msg string) error {
+func (ch *Chronist) SendStatusUpdate(source *rpb.Source, status rpb.FetchStatus, msg string) error {
 	sender, _ := strconv.Atoi(source.SenderId)
 	message, _ := strconv.Atoi(source.MessageId)
-	switch status {
-		case UNKNOWN:
-			ch.logger.Infof("Unknown status")
-		case FAIL:
-			ch.tg.SendMessage(int64(sender), int64(message), "Failed")
-			ch.logger.Infof("Status update: %v, FAIL (%s)", source, msg)
-		case IN_PROGRESS:
-			ch.logger.Infof("Status update: %v, IN_PROGRESS (%s)", source, msg)
-		case SUCCESS:
-			ch.tg.SendMessage(int64(sender), int64(message), "Saved")
-			ch.logger.Infof("Status update: %v, SUCCESS (%s)", source, msg)
-		default:
-			ch.logger.Infof("Unknown status")
+	ch.logger.Infof("Fetch status is %v", status)
+	if status == rpb.FetchStatus_FAIL || status == rpb.FetchStatus_SUCCESS {
+		ch.tg.SendMessage(int64(sender), int64(message), status.String())
 	}
 	return nil
 }
