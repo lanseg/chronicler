@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package chronist.records;
+
+message File {
+  string file_id = 1;
+  string file_url = 2;
+}
+
+message Source {
+  string sender_id = 1;
+  string channel_id = 2;
+  string message_id = 3;
+}
+
+message Record {
+  string record_id = 1;
+  Source source = 2;
+  string text_content = 3;
+  repeated File files = 4;
+  repeated string links = 5;
+}

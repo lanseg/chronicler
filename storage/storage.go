@@ -9,79 +9,42 @@ import (
 	"strings"
 
 	"chronist/util"
+	rpb "chronist/proto/records"
 )
 
-type File struct {
-	FileID  string
-	FileURL string
-}
-
-type Source struct {
-	SenderID  string
-	ChannelID string
-	MessageID string
-}
-
-func (s *Source) String() string {
-	return fmt.Sprintf("{SenderID: %s, ChannelID: %s, MessageID: %s}",
-		s.SenderID, s.ChannelID, s.MessageID)
-}
-
-type Record struct {
-	RecordID    string
-	Source      *Source
-	Files       []*File
-	Links       []string
-	TextContent string
-}
-
-func (r *Record) String() string {
-	return fmt.Sprintf(
-		"{RecordID: %s, source: %v, files: %v, links: %v, TextContent: %s}",
-		r.RecordID, r.Source, r.Files, r.Links, r.TextContent)
-}
-
-func (r *Record) AddFile(fileId string) {
-	if r.Files == nil {
-		r.Files = []*File{}
-	}
-
-	r.Files = append(r.Files, &File{FileID: fileId, FileURL: ""})
-}
-
-func (r *Record) Merge(other *Record) {
-	newFiles := map[string]*File{}
-	for _, f := range r.Files {
-		newFiles[f.FileID] = f
-	}
-
-	for _, f := range other.Files {
-		newFiles[f.FileID] = f
-	}
-
-	newLinks := map[string]bool{}
-	for _, l := range r.Links {
-		newLinks[l] = true
-	}
-
-	for _, l := range other.Links {
-		newLinks[l] = true
-	}
-
-	newText := r.TextContent
-	if strings.Contains(other.TextContent, newText) {
-		newText = other.TextContent
-	} else if !strings.Contains(newText, other.TextContent) {
-		newText += "\n" + other.TextContent
-	}
-
-	r.Files = util.Values(newFiles)
-	r.Links = util.Keys(newLinks)
-	r.TextContent = newText
-}
+// func (r *Record) Merge(other *Record) {
+// 	newFiles := map[string]*File{}
+// 	for _, f := range r.Files {
+// 		newFiles[f.FileID] = f
+// 	}
+// 
+// 	for _, f := range other.Files {
+// 		newFiles[f.FileID] = f
+// 	}
+// 
+// 	newLinks := map[string]bool{}
+// 	for _, l := range r.Links {
+// 		newLinks[l] = true
+// 	}
+// 
+// 	for _, l := range other.Links {
+// 		newLinks[l] = true
+// 	}
+// 
+// 	newText := r.TextContent
+// 	if strings.Contains(other.TextContent, newText) {
+// 		newText = other.TextContent
+// 	} else if !strings.Contains(newText, other.TextContent) {
+// 		newText += "\n" + other.TextContent
+// 	}
+// 
+// 	r.Files = util.Values(newFiles)
+// 	r.Links = util.Keys(newLinks)
+// 	r.TextContent = newText
+// }
 
 type IStorage interface {
-	SaveRecord(r *Record) error
+	SaveRecord(r *rpb.Record) error
 }
 
 type Storage struct {
@@ -120,27 +83,27 @@ func (s *Storage) downloadURL(url string, target string) error {
 	return nil
 }
 
-func (s *Storage) SaveRecord(r *Record) error {
-	if err := os.MkdirAll(filepath.Join(s.root, r.RecordID), os.ModePerm); err != nil {
+func (s *Storage) SaveRecord(r *rpb.Record) error {
+	if err := os.MkdirAll(filepath.Join(s.root, r.GetRecordId()), os.ModePerm); err != nil {
 		return err
 	}
 
 	if len(r.Links) > 0 {
-		if err := s.saveLines(filepath.Join(r.RecordID, "links.txt"), r.Links); err != nil {
+		if err := s.saveLines(filepath.Join(r.GetRecordId(), "links.txt"), r.Links); err != nil {
 			return err
 		}
 		for _, link := range r.Links {
+			
 			if !util.IsYoutubeLink(link) {
-				continue
-			}
-			if err := util.DownloadYoutube(link, filepath.Join(s.root, r.RecordID)); err != nil {
-				s.logger.Warningf("Failed to download youtube video: %s", err)
+				if err := util.DownloadYoutube(link, filepath.Join(s.root, r.GetRecordId())); err != nil {
+					s.logger.Warningf("Failed to download youtube video: %s", err)
+				}
 			}
 		}
 	}
 
 	if len(r.TextContent) > 0 {
-		if err := s.saveLines(filepath.Join(r.RecordID, "text.txt"), []string{
+		if err := s.saveLines(filepath.Join(r.GetRecordId(), "text.txt"), []string{
 			r.TextContent,
 		}); err != nil {
 			return err
@@ -148,15 +111,15 @@ func (s *Storage) SaveRecord(r *Record) error {
 	}
 
 	if len(r.Files) > 0 {
-		for i, file := range r.Files {
+		for i, file := range r.GetFiles() {
 			fname := fmt.Sprintf("file_%d", i)
-			if err := s.downloadURL(file.FileURL, filepath.Join(r.RecordID, fname)); err != nil {
+			if err := s.downloadURL(file.GetFileUrl(), filepath.Join(r.GetRecordId(), fname)); err != nil {
 				return err
 			}
 		}
 	}
 
-	s.logger.Infof("Saved new record to %s", filepath.Join(s.root, r.RecordID))
+	s.logger.Infof("Saved new record to %s", filepath.Join(s.root, r.GetRecordId()))
 	return nil
 }
 

@@ -7,6 +7,7 @@ go_library(
     importpath = "chronist/storage",
     deps = [
       "//util:util",
+      "//proto:records_go_proto",
     ],
     srcs = [
       "storage.go",
