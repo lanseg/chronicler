@@ -16,6 +16,7 @@ go_test(
     name = "util_test",
     srcs = [
       "maps_test.go",
+      "runners_test.go",
     ],
     embed = [
       ":util",
