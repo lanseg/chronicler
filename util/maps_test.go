@@ -3,6 +3,7 @@ package util
 import (
 	"reflect"
 	"testing"
+	"sort"
 )
 
 func identity[T any](a T) T {
@@ -71,10 +72,33 @@ func TestKeysValues(t *testing.T) {
 		data       map[string]string
 		wantKeys   []string
 		wantValues []string
-	}{} {
+	}{
+		{
+			desc: "successful operation",
+			data: map[string]string{"a": "1", "b": "2", "c": "!@#", "hello": "world"},
+			wantKeys: []string{"a", "b", "c", "hello"},
+			wantValues: []string{"1", "2", "!@#", "world"},
+		},
+		{
+			desc: "empty map returns empty key value",
+			data: map[string]string{},
+			wantKeys: []string{},
+			wantValues: []string{},
+		},
+		{
+			desc: "duplicate values preserved",
+			data: map[string]string{"a": "1", "b": "1", "c": "1"},
+			wantKeys: []string{"a", "b", "c"},
+			wantValues: []string{"1", "1", "1"},
+		},
+	} {
 		t.Run(tc.desc, func(t *testing.T) {
 			keys := Keys(tc.data)
 			values := Values(tc.data)
+			sort.Strings(keys)
+			sort.Strings(values)
+			sort.Strings(tc.wantKeys)
+			sort.Strings(tc.wantValues)
 			if !reflect.DeepEqual(tc.wantKeys, keys) {
 				t.Errorf("Keys(%v) expected to be %v, but got %v", tc.data, tc.wantKeys, keys)
 			}

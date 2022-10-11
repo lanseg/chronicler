@@ -13,7 +13,7 @@ go_library(
 )
 
 go_test(
-    name = "test",
+    name = "util_test",
     srcs = [
       "maps_test.go",
     ],

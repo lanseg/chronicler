@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-	
+
 	"chronist/storage"
 	"chronist/telegram"
 	"chronist/util"
-	
+
 	rpb "chronist/proto/records"
 )
 
@@ -54,7 +54,7 @@ func FromTelegramUpdate(upd *telegram.Update, baseRecord *rpb.Record) *rpb.Recor
 	}
 	for _, e := range msg.Entities {
 		if e.Type == "url" {
-			result.Links = append(result.Links, e. URL)
+			result.Links = append(result.Links, e.URL)
 		}
 	}
 	result.TextContent = strings.Replace(msg.Text, "\n\n", "\n", -1)
@@ -76,7 +76,7 @@ func FromTelegramUpdate(upd *telegram.Update, baseRecord *rpb.Record) *rpb.Recor
 			newText += "\n" + baseRecord.TextContent
 		}
 		result.TextContent = newText
-	}	
+	}
 	return result
 }
 

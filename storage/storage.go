@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"chronist/util"
 	rpb "chronist/proto/records"
+	"chronist/util"
 )
 
 type IStorage interface {
@@ -62,8 +62,7 @@ func (s *Storage) SaveRecord(r *rpb.Record) error {
 			return err
 		}
 		for _, link := range r.Links {
-			
-			if !util.IsYoutubeLink(link) {
+			if util.IsYoutubeLink(link) {
 				if err := util.DownloadYoutube(link, filepath.Join(s.root, r.GetRecordId())); err != nil {
 					s.logger.Warningf("Failed to download youtube video: %s", err)
 				}
@@ -96,7 +95,6 @@ func NewStorage(root string) *Storage {
 	log := util.NewLogger("storage")
 	log.Infof("Storage root set to %s", root)
 	return &Storage{
-
 		root:       root,
 		httpClient: &http.Client{},
 		logger:     log,
