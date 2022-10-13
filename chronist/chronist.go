@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-
+	
 	"chronist/storage"
 	"chronist/telegram"
 	"chronist/util"
-
+	
 	rpb "chronist/proto/records"
 )
 
@@ -17,6 +17,7 @@ type IChronist interface {
 	SaveRequests(record []*rpb.Record) error
 	SendStatusUpdate(source *rpb.Source, status rpb.FetchStatus, msg string) error
 	GetCursor() int64
+	SetCursor(cursor int64)
 }
 
 type Chronist struct {
@@ -41,6 +42,10 @@ func (c *Chronist) GetCursor() int64 {
 	return c.cursor
 }
 
+func (c *Chronist) SetCursor(cursor int64) {
+	c.cursor = cursor
+}
+
 func FromTelegramUpdate(upd *telegram.Update, baseRecord *rpb.Record) *rpb.Record {
 	msg := upd.Message
 
@@ -54,7 +59,7 @@ func FromTelegramUpdate(upd *telegram.Update, baseRecord *rpb.Record) *rpb.Recor
 	}
 	for _, e := range msg.Entities {
 		if e.Type == "url" {
-			result.Links = append(result.Links, e.URL)
+			result.Links = append(result.Links, e. URL)
 		}
 	}
 	result.TextContent = strings.Replace(msg.Text, "\n\n", "\n", -1)
@@ -76,7 +81,7 @@ func FromTelegramUpdate(upd *telegram.Update, baseRecord *rpb.Record) *rpb.Recor
 			newText += "\n" + baseRecord.TextContent
 		}
 		result.TextContent = newText
-	}
+	}	
 	return result
 }
 

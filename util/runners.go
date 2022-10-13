@@ -2,13 +2,8 @@ package util
 
 import (
 	"fmt"
-	"regexp"
 
 	"os/exec"
-)
-
-const (
-	ytLinkRegex = "^((?:https?:)?\\/\\/)?((?:www|m)\\.)?((?:youtube\\.com|youtu.be))(\\/(?:[\\w\\-]+\\?v=|embed\\/|v\\/)?)([\\w\\-]+)(\\S+)?$"
 )
 
 var (
@@ -23,15 +18,6 @@ func execute(command string, args []string) error {
 	output := string(out[:])
 	fmt.Println(output)
 	return nil
-}
-
-func IsYoutubeLink(link string) bool {
-	ok, err := regexp.Match(ytLinkRegex, []byte(link))
-	if err != nil {
-		logger.Warningf("Cannot check if '%s' is youtube link: %s", link, err)
-		return false
-	}
-	return ok
 }
 
 func DownloadYoutube(video string, targetDir string) error {

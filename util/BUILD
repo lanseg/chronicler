@@ -8,6 +8,7 @@ go_library(
     srcs = [
       "logging.go",
       "maps.go",
+      "textdata.go",
       "runners.go",
     ],
 )
