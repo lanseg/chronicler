@@ -18,6 +18,7 @@ go_test(
     srcs = [
       "maps_test.go",
       "runners_test.go",
+      "textdata_test.go",
     ],
     embed = [
       ":util",
