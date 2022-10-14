@@ -18,11 +18,10 @@ const (
 
 func TestLinkCheckers(t *testing.T) {
 	for _, tc := range []struct {
-		desc          string
-		checker       func(string) bool
-		skipProtocols bool
-		link          string
-		want          bool
+		desc    string
+		checker func(string) bool
+		link    string
+		want    bool
 	}{
 		{
 			desc:    "youtube regular checker success",
@@ -50,17 +49,12 @@ func TestLinkCheckers(t *testing.T) {
 		},
 	} {
 		t.Run(tc.desc, func(t *testing.T) {
-			result := false
-			if tc.skipProtocols {
-				result = tc.checker(tc.link)
-			} else {
-				for _, prefix := range []string{"http://", "https://", ""} {
-					result = tc.checker(prefix + tc.link)
+			for _, prefix := range []string{"http://", "https://", ""} {
+				result := tc.checker(prefix + tc.link)
+				if result != tc.want {
+					t.Errorf("%v(\"%v\") expected to be %v, but got %v",
+						tc.checker, tc.link, tc.want, result)
 				}
-			}
-			if result != tc.want {
-				t.Errorf("%v(\"%v\") expected to be %v, but got %v",
-					tc.checker, tc.link, tc.want, result)
 			}
 		})
 	}
@@ -118,6 +112,13 @@ func TestLinkFinders(t *testing.T) {
 				ytLinkFull, tgLinkShort, ytLinkMobile, twitterLinkPost),
 			want: []string{ytLinkFull, tgLinkShort, ytLinkMobile, twitterLinkPost},
 		},
+		{
+			desc:   "multiple links with prefixes",
+			finder: FindWebLinks,
+			text: fmt.Sprintf("Lorem http://%s ipsum dolor https://%s %s sit amet, consectetur adipiscing elit, sed do eiusmod tempor %s incididunt ut labore et dolore magna aliqua.",
+				ytLinkFull, tgLinkShort, ytLinkMobile, twitterLinkPost),
+			want: []string{ytLinkFull, tgLinkShort, ytLinkMobile, twitterLinkPost},
+		},		
 	} {
 		t.Run(tc.desc, func(t *testing.T) {
 			result := tc.finder(tc.text)
