@@ -118,7 +118,7 @@ func TestLinkFinders(t *testing.T) {
 			text: fmt.Sprintf("Lorem http://%s ipsum dolor https://%s %s sit amet, consectetur adipiscing elit, sed do eiusmod tempor %s incididunt ut labore et dolore magna aliqua.",
 				ytLinkFull, tgLinkShort, ytLinkMobile, twitterLinkPost),
 			want: []string{ytLinkFull, tgLinkShort, ytLinkMobile, twitterLinkPost},
-		},		
+		},
 	} {
 		t.Run(tc.desc, func(t *testing.T) {
 			result := tc.finder(tc.text)

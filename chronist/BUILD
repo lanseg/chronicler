@@ -13,3 +13,13 @@ go_library(
       "//proto:records_go_proto",
     ],
 )
+
+go_test(
+    name = "chronist_test",
+    srcs = [
+      "chronist_test.go",
+    ],
+    embed = [
+      ":chronist",
+    ],
+)
