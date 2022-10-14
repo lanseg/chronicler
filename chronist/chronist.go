@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"sort"
 
 	"chronist/storage"
 	"chronist/telegram"
@@ -82,6 +83,8 @@ func FromTelegramUpdate(upd *telegram.Update, baseRecord *rpb.Record) *rpb.Recor
 		}
 		result.TextContent = newText
 	}
+	result.Links = util.Unique(append(result.Links, util.FindWebLinks(result.TextContent)...))
+	sort.Strings(result.Links)
 	return result
 }
 

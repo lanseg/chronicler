@@ -1,5 +1,13 @@
 package util
 
+func Identity[T any](value T) T {
+	return value
+}
+
+func Unique[T comparable](values []T) []T {
+	return Keys(GroupBy(values, Identity[T]))
+}
+
 func GroupBy[T, V comparable](items []T, key func(a T) V) map[V]([]T) {
 	result := map[V]([]T){}
 
