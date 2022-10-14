@@ -2,9 +2,9 @@ package chronist
 
 import (
 	"fmt"
+	"sort"
 	"strconv"
 	"strings"
-	"sort"
 
 	"chronist/storage"
 	"chronist/telegram"
@@ -115,7 +115,6 @@ func (ch *Chronist) FetchRequests() ([]*rpb.Record, error) {
 	var updates []*telegram.Update = nil
 
 	for len(updates) == 0 {
-		ch.logger.Infof("Loading all updates starting from %d", ch.cursor)
 		updates, _ = ch.tg.GetUpdates(int64(0), ch.cursor, 100, 100, []string{})
 		for _, upd := range updates {
 			if ch.cursor < upd.UpdateID {
@@ -128,7 +127,9 @@ func (ch *Chronist) FetchRequests() ([]*rpb.Record, error) {
 			key := fmt.Sprintf("%d_%d_%d", msg.Chat.ID, msg.From.ID, msg.Date)
 			records[key] = FromTelegramUpdate(upd, records[key])
 		}
-		ch.logger.Infof("Loaded %d updates into %d records", len(updates), len(records))
+		if len(updates) > 0 {
+			ch.logger.Infof("Loaded %d updates into %d records", len(updates), len(records))
+		}
 	}
 	for _, record := range records {
 		if len(record.Files) == 0 {
