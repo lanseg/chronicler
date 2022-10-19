@@ -106,7 +106,7 @@ func TestLinkFinders(t *testing.T) {
 			want: []string{ytLinkFull, ytLinkFake, ytLinkMobile, ytLinkShort},
 		},
 		{
-			desc:   "multiple links without prefixes eb finder",
+			desc:   "multiple links web finder",
 			finder: FindWebLinks,
 			text: fmt.Sprintf("Lorem %s ipsum dolor %s %s sit amet, consectetur adipiscing elit, sed do eiusmod tempor %s incididunt ut labore et dolore magna aliqua.",
 				ytLinkFull, tgLinkShort, ytLinkMobile, twitterLinkPost),
@@ -117,12 +117,7 @@ func TestLinkFinders(t *testing.T) {
 			finder: FindWebLinks,
 			text: fmt.Sprintf("Lorem http://%s ipsum dolor https://%s %s sit amet, consectetur adipiscing elit, sed do eiusmod tempor %s incididunt ut labore et dolore magna aliqua.",
 				ytLinkFull, tgLinkShort, ytLinkMobile, twitterLinkPost),
-			want: []string{
-				"http://" + ytLinkFull,
-				"https://" + tgLinkShort,
-				ytLinkMobile,
-				twitterLinkPost,
-			},
+			want: []string{ytLinkFull, tgLinkShort, ytLinkMobile, twitterLinkPost},
 		},
 	} {
 		t.Run(tc.desc, func(t *testing.T) {
