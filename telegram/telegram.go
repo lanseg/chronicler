@@ -54,7 +54,6 @@ func NewBot(token string) *Bot {
 }
 
 func (b *Bot) queryApi(apiMethod string, params url.Values) ([]byte, error) {
-	b.logger.Infof("%s", apiMethod)
 	resp, err := http.PostForm(fmt.Sprintf("https://api.telegram.org/bot%s/%s", b.token, apiMethod), params)
 	if err != nil {
 		return nil, err

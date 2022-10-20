@@ -57,6 +57,7 @@ func FromTelegramUpdate(upd *telegram.Update, baseRecord *rpb.Record) *rpb.Recor
 			MessageId: fmt.Sprintf("%d", msg.MessageID),
 		},
 		RecordId: fmt.Sprintf("%d", upd.UpdateID),
+		Time:     msg.Date,
 	}
 	for _, e := range msg.Entities {
 		if e.Type == "url" {

@@ -14,12 +14,6 @@ git_repository(
     remote = "https://github.com/bazelbuild/rules_proto.git"
 )
 
-git_repository(
-    name = "google_protobuf",
-    branch = "master",
-    remote = "https://github.com/golang/protobuf.git"
-)
-
 load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
 load("@rules_proto//proto:repositories.bzl", "rules_proto_dependencies", "rules_proto_toolchains")
 

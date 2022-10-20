@@ -10,6 +10,8 @@ import (
 
 	rpb "chronist/proto/records"
 	"chronist/util"
+
+	"github.com/golang/protobuf/proto"
 )
 
 type IStorage interface {
@@ -22,6 +24,10 @@ type Storage struct {
 	httpClient *http.Client
 	logger     *util.Logger
 	root       string
+}
+
+func (s *Storage) saveText(name string, text string) error {
+	return os.WriteFile(filepath.Join(s.root, name), []byte(text), os.ModePerm)
 }
 
 func (s *Storage) saveLines(name string, lines []string) error {
@@ -71,9 +77,7 @@ func (s *Storage) SaveRecord(r *rpb.Record) error {
 	}
 
 	if len(r.TextContent) > 0 {
-		if err := s.saveLines(filepath.Join(r.GetRecordId(), "text.txt"), []string{
-			r.TextContent,
-		}); err != nil {
+		if err := s.saveText(filepath.Join(r.GetRecordId(), "text.txt"), r.TextContent); err != nil {
 			return err
 		}
 	}
@@ -87,6 +91,9 @@ func (s *Storage) SaveRecord(r *rpb.Record) error {
 		}
 	}
 
+	if err := s.saveText(filepath.Join(r.GetRecordId(), ".metadata"), proto.MarshalTextString(r)); err != nil {
+		return err
+	}
 	s.logger.Infof("Saved new record to %s", filepath.Join(s.root, r.GetRecordId()))
 	return nil
 }
