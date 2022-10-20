@@ -4,11 +4,13 @@ import (
 	"fmt"
 
 	"os/exec"
+	"path/filepath"
 )
 
 var (
-	logger = NewLogger("util")
+	logger = NewLogger("runners")
 )
+
 
 func execute(command string, args []string) error {
 	out, err := exec.Command(command, args...).Output()
@@ -24,7 +26,7 @@ func DownloadYoutube(video string, targetDir string) error {
 	return execute("yt-dlp", []string{
 		"-ciw",
 		"-o",
-		fmt.Sprintf("\"%s/%%(playlist)s.%%(title)s.%%(ext)s\"", targetDir),
+		fmt.Sprintf("\"%s\"", filepath.Join(targetDir, "%(playlist)s.%(title)s.%(ext)s")),
 		"-v", video,
 	})
 }
