@@ -22,9 +22,11 @@ message Source {
 
 message Record {
   string record_id = 1;
-  Source source = 2;
-  string text_content = 3;
-  int64 time = 4;
-  repeated File files = 5;
-  repeated string links = 6;
+  string parent_record_id = 2;
+  Source source = 3;
+  Source parent = 4;
+  string text_content = 5;
+  int64 time = 6;
+  repeated File files = 7;
+  repeated string links = 8;
 }

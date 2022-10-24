@@ -59,17 +59,23 @@ func (s *Storage) downloadURL(url string, target string) error {
 }
 
 func (s *Storage) SaveRecord(r *rpb.Record) error {
-	if err := os.MkdirAll(filepath.Join(s.root, r.GetRecordId()), os.ModePerm); err != nil {
+	var recordRoot string
+	if r.GetParentRecordId() != "" {
+		recordRoot = filepath.Join(r.GetParentRecordId(), r.GetRecordId())
+	} else {
+		recordRoot = filepath.Join(r.GetRecordId())
+	}
+	if err := os.MkdirAll(filepath.Join(s.root, recordRoot), os.ModePerm); err != nil {
 		return err
 	}
 
 	if len(r.Links) > 0 {
-		if err := s.saveLines(filepath.Join(r.GetRecordId(), "links.txt"), r.Links); err != nil {
+		if err := s.saveLines(filepath.Join(recordRoot, "links.txt"), r.Links); err != nil {
 			return err
 		}
 		for _, link := range r.Links {
 			if util.IsYoutubeLink(link) {
-				if err := util.DownloadYoutube(link, filepath.Join(s.root, r.GetRecordId())); err != nil {
+				if err := util.DownloadYoutube(link, filepath.Join(s.root, recordRoot)); err != nil {
 					s.logger.Warningf("Failed to download youtube video: %s", err)
 				}
 			}
@@ -77,7 +83,7 @@ func (s *Storage) SaveRecord(r *rpb.Record) error {
 	}
 
 	if len(r.TextContent) > 0 {
-		if err := s.saveText(filepath.Join(r.GetRecordId(), "text.txt"), r.TextContent); err != nil {
+		if err := s.saveText(filepath.Join(recordRoot, "text.txt"), r.TextContent); err != nil {
 			return err
 		}
 	}
@@ -85,16 +91,16 @@ func (s *Storage) SaveRecord(r *rpb.Record) error {
 	if len(r.Files) > 0 {
 		for i, file := range r.GetFiles() {
 			fname := fmt.Sprintf("file_%d", i)
-			if err := s.downloadURL(file.GetFileUrl(), filepath.Join(r.GetRecordId(), fname)); err != nil {
+			if err := s.downloadURL(file.GetFileUrl(), filepath.Join(recordRoot, fname)); err != nil {
 				return err
 			}
 		}
 	}
 
-	if err := s.saveText(filepath.Join(r.GetRecordId(), ".metadata"), proto.MarshalTextString(r)); err != nil {
+	if err := s.saveText(filepath.Join(recordRoot, ".metadata"), proto.MarshalTextString(r)); err != nil {
 		return err
 	}
-	s.logger.Infof("Saved new record to %s", filepath.Join(s.root, r.GetRecordId()))
+	s.logger.Infof("Saved new record to %s", recordRoot)
 	return nil
 }
 

@@ -9,18 +9,21 @@ import (
 	"chronist"
 	"chronist/storage"
 	"chronist/telegram"
+	"chronist/twitter"
 	"chronist/util"
-)
-
-var (
-	telegramBotKey = flag.String(tgBotKeyFlag, "", "A key for the telegram bot api.")
-	storageRoot    = flag.String(storageRootFlag, "chronist_storage", "A local folder to save downloads.")
 )
 
 const (
 	privateChatId   = int64(0)
 	tgBotKeyFlag    = "telegram_bot_key"
+	twitterApiFlag  = "twitter_api_key"
 	storageRootFlag = "storage_root"
+)
+
+var (
+	telegramBotKey = flag.String(tgBotKeyFlag, "", "A key for the telegram bot api.")
+	twitterApiKey  = flag.String(twitterApiFlag, "", "A key for the twitter api.")
+	storageRoot    = flag.String(storageRootFlag, "chronist_storage", "A local folder to save downloads.")
 )
 
 func getCursor() int64 {
@@ -45,6 +48,7 @@ func main() {
 	chr := chronist.NewChronist(
 		getCursor(),
 		telegram.NewBot(*telegramBotKey),
+		twitter.NewClient(*twitterApiKey),
 		storage.NewStorage(*storageRoot),
 	)
 

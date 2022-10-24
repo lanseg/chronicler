@@ -47,6 +47,12 @@ func TestLinkCheckers(t *testing.T) {
 			link:    ytLinkFake,
 			want:    false,
 		},
+		{
+			desc:    "twitter regular checker success",
+			checker: IsTwitterLink,
+			link:    twitterLinkPost,
+			want:    true,
+		},
 	} {
 		t.Run(tc.desc, func(t *testing.T) {
 			for _, prefix := range []string{"http://", "https://", ""} {
@@ -118,6 +124,14 @@ func TestLinkFinders(t *testing.T) {
 			text: fmt.Sprintf("Lorem http://%s ipsum dolor https://%s %s sit amet, consectetur adipiscing elit, sed do eiusmod tempor %s incididunt ut labore et dolore magna aliqua.",
 				ytLinkFull, tgLinkShort, ytLinkMobile, twitterLinkPost),
 			want: []string{ytLinkFull, tgLinkShort, ytLinkMobile, twitterLinkPost},
+		},
+		{
+			desc:   "Find twitter id full link",
+			finder: FindTwitterIds,
+			text:   "twitter.com/Some_user/status/1234567890123456789?qwodmqwodm1=123",
+			want: []string{
+				"1234567890123456789",
+			},
 		},
 	} {
 		t.Run(tc.desc, func(t *testing.T) {

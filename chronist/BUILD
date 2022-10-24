@@ -10,6 +10,7 @@ go_library(
       "//util:util",
       "//storage:storage",
       "//telegram:telegram",
+      "//twitter:twitter",
       "//proto:records_go_proto",
     ],
 )

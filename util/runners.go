@@ -11,7 +11,6 @@ var (
 	logger = NewLogger("runners")
 )
 
-
 func execute(command string, args []string) error {
 	out, err := exec.Command(command, args...).Output()
 	if err != nil {

@@ -8,5 +8,6 @@ go_binary(
       "//chronist:chronist",
       "//storage:storage",
       "//telegram:telegram",
+      "//twitter:twitter",
     ],
 )
