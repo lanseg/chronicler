@@ -17,6 +17,7 @@ go_library(
     importpath = "chronist/telegram",
     srcs = [
       "telegram.go",
+      "utils.go",
       ":telegram_types",
     ],
     deps = [

@@ -12,30 +12,12 @@ import (
 	"chronist/util"
 )
 
-type IResponseMetadata interface {
-	IsOk() bool
-	GetErrorCode() int64
-	GetDescription() string
-}
-
-type ResponseMetadata struct {
-	IResponseMetadata
-
+type Response[T any] struct {
 	Ok          bool   `json:"ok"`
 	ErrorCode   int64  `json:"error_code"`
 	Description string `json:"description"`
-}
 
-func (dt *ResponseMetadata) IsOk() bool {
-	return dt.Ok
-}
-
-func (dt *ResponseMetadata) GetErrorCode() int64 {
-	return dt.ErrorCode
-}
-
-func (dt *ResponseMetadata) GetDescription() string {
-	return dt.Description
+	Result T `json:"result"`
 }
 
 type Bot struct {
@@ -68,39 +50,29 @@ func (b *Bot) queryApi(apiMethod string, params url.Values) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func (b *Bot) queryAndUnmarshal(apiMethod string, params url.Values, result interface{}) (interface{}, error) {
+func queryAndUnmarshal[T any](b *Bot, apiMethod string, params url.Values) (T, error) {
+	var zero T
 	resultBytes, err := b.queryApi(apiMethod, params)
 	if err != nil {
-		return nil, err
+		return zero, err
 	}
-	if err = json.Unmarshal(resultBytes, result); err != nil {
-		return nil, fmt.Errorf("Cannot unmarshal the response: %s", err)
+	response := &Response[T]{}
+	if err = json.Unmarshal(resultBytes, response); err != nil {
+		return zero, fmt.Errorf("Cannot unmarshal the response: %s", err)
 	}
-	resultMeta := result.(IResponseMetadata)
-	if !resultMeta.IsOk() {
-		return nil, fmt.Errorf("Request \"%s\" completed with error %d: %s", apiMethod, resultMeta.GetErrorCode(), resultMeta.GetDescription())
+	if !response.Ok {
+		return zero, fmt.Errorf("Request \"%s\" completed with error %d: %s",
+			apiMethod, response.ErrorCode, response.Description)
 	}
-	return result, nil
-}
-
-type GetMeResponse struct {
-	ResponseMetadata
-
-	Result *User `json:"result"`
+	return response.Result, nil
 }
 
 func (b *Bot) GetMe() (*User, error) {
-	response, err := b.queryAndUnmarshal("getMe", url.Values{}, &GetMeResponse{})
+	result, err := queryAndUnmarshal[*User](b, "getMe", url.Values{})
 	if err != nil {
 		return nil, err
 	}
-	return response.(*GetMeResponse).Result, nil
-}
-
-type GetUpdatesResponse struct {
-	ResponseMetadata
-
-	Result []*Update `json:"result"`
+	return result, nil
 }
 
 func (b *Bot) GetUpdates(chatID int64, offset int64, limit int64, timeout int64, allowedUpdates []string) ([]*Update, error) {
@@ -113,17 +85,11 @@ func (b *Bot) GetUpdates(chatID int64, offset int64, limit int64, timeout int64,
 		params.Add("allowed_updates", upd)
 	}
 
-	response, err := b.queryAndUnmarshal("getUpdates", params, &GetUpdatesResponse{})
+	result, err := queryAndUnmarshal[[]*Update](b, "getUpdates", params)
 	if err != nil {
 		return nil, err
 	}
-	return response.(*GetUpdatesResponse).Result, nil
-}
-
-type GetSendMessageResponse struct {
-	ResponseMetadata
-
-	Result *Message `json:"result"`
+	return result, nil
 }
 
 func (b *Bot) SendMessage(chatID int64, replyId int64, text string) (*Message, error) {
@@ -134,52 +100,27 @@ func (b *Bot) SendMessage(chatID int64, replyId int64, text string) (*Message, e
 		params.Set("reply_to_message_id", fmt.Sprintf("%d", replyId))
 	}
 
-	response, err := b.queryAndUnmarshal("sendMessage", params, &GetSendMessageResponse{})
+	result, err := queryAndUnmarshal[*Message](b, "sendMessage", params)
 	if err != nil {
 		return nil, err
 	}
 
-	return response.(*GetSendMessageResponse).Result, nil
-}
-
-type GetFileResponse struct {
-	ResponseMetadata
-
-	Result *File `json:"result"`
+	return result, nil
 }
 
 func (b *Bot) GetFile(fileID string) (*File, error) {
 	params := url.Values{}
 	params.Set("file_id", fileID)
 
-	response, err := b.queryAndUnmarshal("getFile", params, &GetFileResponse{})
+	result, err := queryAndUnmarshal[*File](b, "getFile", params)
 	if err != nil {
 		return nil, err
 	}
 
-	return response.(*GetFileResponse).Result, nil
+	return result, nil
 }
 
 func (b *Bot) GetUrl(file *File) string {
 	return fmt.Sprintf("https://api.telegram.org/file/bot%s/%s",
 		b.token, file.FilePath)
-}
-
-// Utilities
-func GetLargestImage(sizes []*PhotoSize) *PhotoSize {
-	if len(sizes) == 0 {
-		return nil
-	}
-
-	var result *PhotoSize = sizes[0]
-	resultSize := int64(0)
-	for _, photo := range sizes {
-		size := photo.Width * photo.Height
-		if size > resultSize {
-			result = photo
-			resultSize = size
-		}
-	}
-
-	return result
 }

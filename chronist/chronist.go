@@ -18,7 +18,7 @@ type IChronist interface {
 	FetchRequests() ([]*rpb.Record, error)
 	SaveRequests(record []*rpb.Record) error
 	SendStatusUpdate(source *rpb.Source, status rpb.FetchStatus, msg string) error
-	FromTweets(tweetIds []string) ([]*rpb.Record, error)
+	fetchTweets(tweetIds []string) ([]*rpb.Record, error)
 	GetCursor() int64
 	SetCursor(cursor int64)
 }
@@ -92,7 +92,7 @@ func FromTelegramUpdate(upd *telegram.Update, baseRecord *rpb.Record) *rpb.Recor
 	return result
 }
 
-func (ch *Chronist) FromTweets(tweetIds []string) ([]*rpb.Record, error) {
+func (ch *Chronist) fetchTweets(tweetIds []string) ([]*rpb.Record, error) {
 	ch.logger.Infof("Loading tweets %v", tweetIds)
 	visited := util.NewSet([]string{})
 	toVisit := util.NewSet(tweetIds)
@@ -199,28 +199,16 @@ func (ch *Chronist) FetchRequests() ([]*rpb.Record, error) {
 		return nil, err
 	}
 
+	tweetIds := []string{}
 	for _, r := range records {
-		allTweets := []string{}
-
 		for _, l := range r.Links {
 			if util.IsTwitterLink(l) {
 				ids := util.FindTwitterIds(l)
-				allTweets = append(allTweets, ids...)
-			}
-		}
-
-		ch.logger.Infof("Loading %d tweets: %v", len(allTweets), allTweets)
-		if len(allTweets) > 0 {
-			tweets, err := ch.FromTweets(allTweets)
-			if err == nil {
-				for _, tweet := range tweets {
-					tweet.ParentRecordId = r.RecordId
-				}
-				records = append(records, tweets...)
-			} else {
-				ch.logger.Warningf("Cannot load tweets for ids \"%v\": %s", allTweets, err.Error())
+				tweetIds = append(tweetIds, ids...)
 			}
 		}
 	}
-	return records, nil
+	ch.logger.Infof("Loading %d tweets: %v", len(tweetIds), tweetIds)
+	tweets, err := ch.fetchTweets(tweetIds)
+	return append(records, tweets...), nil
 }
