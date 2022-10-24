@@ -1,13 +1,15 @@
 package twitter
 
 import (
-	"chronist/util"
-	"encoding/json"
 	"fmt"
+	"strings"
+
+	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"strings"
+
+	"chronist/util"
 )
 
 var (
@@ -25,15 +27,21 @@ var (
 	}
 )
 
-type Client struct {
+type Client interface {
+	GetTweets(ids []string) ([]*Tweet, error)
+}
+
+type ClientImpl struct {
+	Client
+
 	httpClient *http.Client
 	token      string
 
 	logger *util.Logger
 }
 
-func NewClient(token string) *Client {
-	return &Client{
+func NewClient(token string) Client {
+	return &ClientImpl{
 		token:      token,
 		httpClient: &http.Client{},
 		logger:     util.NewLogger("twitter"),
@@ -69,7 +77,17 @@ func getBestQualityMedia(medias []Media) *TwitterMedia {
 	return result
 }
 
-func (c *Client) GetTweets(ids []string) ([]*Tweet, error) {
+func (c *ClientImpl) newRequest(url string) (*http.Request, error) {
+	request, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+	request.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.token))
+	request.Header.Set("Content-Type", "application/json")
+	return request, nil
+}
+
+func (c *ClientImpl) GetTweets(ids []string) ([]*Tweet, error) {
 	url := url.URL{
 		Scheme: "https",
 		Host:   "api.twitter.com",
@@ -80,12 +98,10 @@ func (c *Client) GetTweets(ids []string) ([]*Tweet, error) {
 			url.QueryEscape(strings.Join(tweetExpansions, ",")),
 			url.QueryEscape(strings.Join(tweetMediaFields, ","))),
 	}
-	request, err := http.NewRequest("GET", url.String(), nil)
+	request, err := c.newRequest(url.String())
 	if err != nil {
 		return nil, err
 	}
-	request.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.token))
-	request.Header.Set("Content-Type", "application/json")
 
 	response, err := c.httpClient.Do(request)
 	if err != nil {
@@ -97,18 +113,14 @@ func (c *Client) GetTweets(ids []string) ([]*Tweet, error) {
 	if err != nil {
 		return nil, err
 	}
-	result := &Response{}
+
+	result := &Response{Includes: &Includes{}}
 	if err = json.Unmarshal(bytes, result); err != nil {
 		return nil, err
 	}
-	var mediaByKey map[string][]Media
-	if result.Includes != nil {
-		mediaByKey = util.GroupBy(result.Includes.Media, func(m Media) string {
-			return m.MediaKey
-		})
-	} else {
-		mediaByKey = map[string][]Media{}
-	}
+	mediaByKey := util.GroupBy(result.Includes.Media, func(m Media) string {
+		return m.MediaKey
+	})
 	for _, tweet := range result.Data {
 		for _, mk := range tweet.Attachments.MediaKeys {
 			if medias, ok := mediaByKey[mk]; ok {

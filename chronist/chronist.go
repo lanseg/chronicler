@@ -29,11 +29,11 @@ type Chronist struct {
 	cursor  int64
 	logger  *util.Logger
 	tg      *telegram.Bot
-	tw      *twitter.Client
+	tw      twitter.Client
 	storage *storage.Storage
 }
 
-func NewChronist(cursor int64, tg *telegram.Bot, tw *twitter.Client, st *storage.Storage) IChronist {
+func NewChronist(cursor int64, tg *telegram.Bot, tw twitter.Client, st *storage.Storage) IChronist {
 	return &Chronist{
 		cursor:  cursor,
 		logger:  util.NewLogger("chronist"),
