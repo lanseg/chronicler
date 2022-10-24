@@ -100,28 +100,32 @@ func TestLinkFinders(t *testing.T) {
 		{
 			desc:   "multiple youtube links",
 			finder: FindYoutubeLinks,
-			text: fmt.Sprintf("Lorem %s ipsum dolor %s %s sit amet, consectetur adipiscing elit, sed do eiusmod tempor %s incididunt ut labore et dolore magna aliqua.",
+			text: fmt.Sprintf("Lorem %s ipsum dolor %s %s sit amet, consectetur adipiscing elit,"+
+				"sed do eiusmod tempor %s incididunt ut labore et dolore magna aliqua.",
 				ytLinkFull, ytLinkFake, ytLinkMobile, ytLinkShort),
 			want: []string{ytLinkFull, ytLinkMobile, ytLinkShort},
 		},
 		{
 			desc:   "multiple youtube links web finder",
 			finder: FindWebLinks,
-			text: fmt.Sprintf("Lorem %s ipsum dolor %s %s sit amet, consectetur adipiscing elit, sed do eiusmod tempor %s incididunt ut labore et dolore magna aliqua.",
+			text: fmt.Sprintf("Lorem %s ipsum dolor %s %s sit amet, consectetur adipiscing elit,"+
+				"sed do eiusmod tempor %s incididunt ut labore et dolore magna aliqua.",
 				ytLinkFull, ytLinkFake, ytLinkMobile, ytLinkShort),
 			want: []string{ytLinkFull, ytLinkFake, ytLinkMobile, ytLinkShort},
 		},
 		{
 			desc:   "multiple links web finder",
 			finder: FindWebLinks,
-			text: fmt.Sprintf("Lorem %s ipsum dolor %s %s sit amet, consectetur adipiscing elit, sed do eiusmod tempor %s incididunt ut labore et dolore magna aliqua.",
+			text: fmt.Sprintf("Lorem %s ipsum dolor %s %s sit amet, consectetur adipiscing elit,"+
+				"sed do eiusmod tempor %s incididunt ut labore et dolore magna aliqua.",
 				ytLinkFull, tgLinkShort, ytLinkMobile, twitterLinkPost),
 			want: []string{ytLinkFull, tgLinkShort, ytLinkMobile, twitterLinkPost},
 		},
 		{
 			desc:   "multiple links with prefixes",
 			finder: FindWebLinks,
-			text: fmt.Sprintf("Lorem http://%s ipsum dolor https://%s %s sit amet, consectetur adipiscing elit, sed do eiusmod tempor %s incididunt ut labore et dolore magna aliqua.",
+			text: fmt.Sprintf("Lorem %s ipsum dolor %s %s sit amet, consectetur adipiscing elit,"+
+				"sed do eiusmod tempor %s incididunt ut labore et dolore magna aliqua.",
 				ytLinkFull, tgLinkShort, ytLinkMobile, twitterLinkPost),
 			want: []string{ytLinkFull, tgLinkShort, ytLinkMobile, twitterLinkPost},
 		},

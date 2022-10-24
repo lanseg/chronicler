@@ -7,17 +7,12 @@ import (
 	"path/filepath"
 )
 
-var (
-	logger = NewLogger("runners")
-)
-
 func execute(command string, args []string) error {
 	out, err := exec.Command(command, args...).Output()
 	if err != nil {
 		return err
 	}
-	output := string(out[:])
-	fmt.Println(output)
+	fmt.Println(string(out))
 	return nil
 }
 
