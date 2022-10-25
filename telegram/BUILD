@@ -7,20 +7,20 @@ exports_files(["update_types.py"])
 genrule(
     name = "telegram_types",
     outs = ["telegram_types.go"],
-    tools = ["update_types.py"],
     cmd = "python $(location update_types.py) > \"$@\"",
-    visibility = ["//visibility:private"]
+    tools = ["update_types.py"],
+    visibility = ["//visibility:private"],
 )
 
 go_library(
     name = "telegram",
-    importpath = "chronist/telegram",
     srcs = [
-      "telegram.go",
-      "utils.go",
-      ":telegram_types",
+        "telegram.go",
+        "utils.go",
+        ":telegram_types",
     ],
+    importpath = "chronist/telegram",
     deps = [
-      "//util:util",
+        "//util",
     ],
 )

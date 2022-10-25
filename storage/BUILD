@@ -4,13 +4,13 @@ package(default_visibility = ["//visibility:public"])
 
 go_library(
     name = "storage",
+    srcs = [
+        "storage.go",
+    ],
     importpath = "chronist/storage",
     deps = [
-      "//util:util",
-      "//proto:records_go_proto",
-      "@com_github_golang_protobuf//proto:go_default_library",
-    ],
-    srcs = [
-      "storage.go",
+        "//proto:records_go_proto",
+        "//util",
+        "@com_github_golang_protobuf//proto:go_default_library",
     ],
 )

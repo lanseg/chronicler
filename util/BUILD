@@ -4,23 +4,23 @@ package(default_visibility = ["//visibility:public"])
 
 go_library(
     name = "util",
-    importpath = "chronist/util",
     srcs = [
-      "logging.go",
-      "maps.go",
-      "textdata.go",
-      "runners.go",
+        "logging.go",
+        "maps.go",
+        "runners.go",
+        "textdata.go",
     ],
+    importpath = "chronist/util",
 )
 
 go_test(
     name = "util_test",
     srcs = [
-      "maps_test.go",
-      "runners_test.go",
-      "textdata_test.go",
+        "maps_test.go",
+        "runners_test.go",
+        "textdata_test.go",
     ],
     embed = [
-      ":util",
+        ":util",
     ],
 )

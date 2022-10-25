@@ -7,20 +7,20 @@ go_library(
     srcs = ["chronist.go"],
     importpath = "chronist",
     deps = [
-      "//util:util",
-      "//storage:storage",
-      "//telegram:telegram",
-      "//twitter:twitter",
-      "//proto:records_go_proto",
+        "//proto:records_go_proto",
+        "//storage",
+        "//telegram",
+        "//twitter",
+        "//util",
     ],
 )
 
 go_test(
     name = "chronist_test",
     srcs = [
-      "chronist_test.go",
+        "chronist_test.go",
     ],
     embed = [
-      ":chronist",
+        ":chronist",
     ],
 )

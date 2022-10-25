@@ -4,13 +4,12 @@ package(default_visibility = ["//visibility:public"])
 
 go_library(
     name = "twitter",
-    importpath = "chronist/twitter",
     srcs = [
-      "twitter.go",
-      "twitter_types.go",
+        "twitter.go",
+        "twitter_types.go",
     ],
+    importpath = "chronist/twitter",
     deps = [
-      "//util:util",
+        "//util",
     ],
 )
- 
