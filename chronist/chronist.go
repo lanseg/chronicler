@@ -76,6 +76,9 @@ func FromTelegramUpdate(upd *telegram.Update, baseRecord *rpb.Record) *rpb.Recor
 			FileId: telegram.GetLargestImage(msg.Photo).FileID,
 		})
 	}
+	if msg.Document != nil {
+		result.Files = append(result.Files, &rpb.File{FileId: msg.Document.FileID})
+	}
 	if baseRecord != nil {
 		result.Links = append(result.Links, baseRecord.Links...)
 		result.Files = append(result.Files, baseRecord.Files...)

@@ -55,7 +55,8 @@ type Tweet struct {
 }
 
 func (t Tweet) String() string {
-	return fmt.Sprintf("Tweet {id: %s, text: %s, created: %s, author: %s, attachments:%s, references:%s, media:%s}",
+	return fmt.Sprintf(
+		"Tweet {id: %s, text: %s, created: %s, author: %s, attachments:%s, references:%s, media:%s}",
 		t.Id, t.Text, t.Created, t.Author, t.Attachments, t.Reference, t.Media)
 }
 
