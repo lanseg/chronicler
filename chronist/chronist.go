@@ -155,9 +155,16 @@ func (ch *Chronist) SaveRequests(requests []*rpb.Record) error {
 func (ch *Chronist) SendStatusUpdate(source *rpb.Source, status rpb.FetchStatus, msg string) error {
 	sender, _ := strconv.Atoi(source.SenderId)
 	message, _ := strconv.Atoi(source.MessageId)
-	ch.logger.Infof("Fetch status is %v %s", status, msg)
+	messageText := ""
+	switch status {
+	case rpb.FetchStatus_FAIL:
+		messageText = "Status \u274C"
+	case rpb.FetchStatus_SUCCESS:
+		messageText = "Status \u2713"
+	}
+	ch.logger.Infof("Fetch status is %v %s (%s)", status, msg, messageText)
 	if status == rpb.FetchStatus_FAIL || status == rpb.FetchStatus_SUCCESS {
-		ch.tg.SendMessage(int64(sender), int64(message), status.String())
+		ch.tg.SendMessage(int64(sender), int64(message), messageText)
 	}
 	return nil
 }
