@@ -124,10 +124,10 @@ func TestLinkFinders(t *testing.T) {
 		{
 			desc:   "multiple links with prefixes",
 			finder: FindWebLinks,
-			text: fmt.Sprintf("Lorem %s ipsum dolor %s %s sit amet, consectetur adipiscing elit,"+
-				"sed do eiusmod tempor %s incididunt ut labore et dolore magna aliqua.",
+			text: fmt.Sprintf("Lorem http://%s ipsum dolor https://%s %s sit amet, consectetur adipiscing elit,"+
+				"sed do eiusmod tempor https://%s incididunt ut labore et dolore magna aliqua.",
 				ytLinkFull, tgLinkShort, ytLinkMobile, twitterLinkPost),
-			want: []string{ytLinkFull, tgLinkShort, ytLinkMobile, twitterLinkPost},
+			want: []string{"http://" + ytLinkFull, "https://" + tgLinkShort, ytLinkMobile, "https://" + twitterLinkPost},
 		},
 		{
 			desc:   "Find twitter id full link",

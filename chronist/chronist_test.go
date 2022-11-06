@@ -43,6 +43,7 @@ func TestFromTelegramUpdate(t *testing.T) {
 					SenderId:  "1234",
 					ChannelId: "1234",
 					MessageId: "1234",
+					Type:      rpb.SourceType_TELEGRAM,
 				},
 				TextContent: "Hello there https://some.link.text",
 				Links: []string{

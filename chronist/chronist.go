@@ -58,6 +58,7 @@ func FromTelegramUpdate(upd *telegram.Update, baseRecord *rpb.Record) *rpb.Recor
 			SenderId:  fmt.Sprintf("%d", msg.From.ID),
 			ChannelId: fmt.Sprintf("%d", msg.Chat.ID),
 			MessageId: fmt.Sprintf("%d", msg.MessageID),
+			Type:      rpb.SourceType_TELEGRAM,
 		},
 		RecordId: fmt.Sprintf("%d", upd.UpdateID),
 		Time:     msg.Date,
@@ -115,6 +116,7 @@ func (ch *Chronist) fetchTweets(tweetIds []string) ([]*rpb.Record, error) {
 				Source: &rpb.Source{
 					SenderId:  tweet.Author,
 					MessageId: tweet.Id,
+					Type:      rpb.SourceType_TWITTER,
 				},
 				Parent:      parents[tweet.Id],
 				TextContent: tweet.Text,
