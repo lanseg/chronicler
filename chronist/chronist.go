@@ -104,13 +104,13 @@ func (ch *Chronist) fetchTweets(tweetIds []string) ([]*rpb.Record, error) {
 	parents := map[string]*rpb.Source{}
 
 	for toVisit.Size() > 0 {
-		tweets, err := ch.tw.GetTweets(toVisit.Values())
+		response, err := ch.tw.GetTweets(toVisit.Values())
 		visited.AddSet(toVisit)
 		toVisit.Clear()
 		if err != nil {
 			return nil, err
 		}
-		for _, tweet := range tweets {
+		for _, tweet := range response.Data {
 			twRecord := &rpb.Record{
 				RecordId: tweet.Id,
 				Source: &rpb.Source{
