@@ -1,8 +1,9 @@
 package main
 
 import (
-	"flag"
 	"fmt"
+	"strings"
+	"flag"
 
 	"chronist/twitter"
 	"chronist/util"
@@ -21,19 +22,23 @@ func main() {
 	logger := util.NewLogger("main")
 
 	client := twitter.NewClient(*twitterApiKey)
+
 	token := ""
+	tweets := []*twitter.Tweet{}
 	for {
 		result, err := client.GetConversation("1605769469833494529", token)
 		if err != nil {
 			logger.Errorf("Cannot load tweet: %s", err)
-			return
-		}
-		for _, tweet := range result.Data {
-			fmt.Printf("%s %s %s\n", tweet.Id, tweet.ConversationId, tweet.Text)
+			break
 		}
 		token = result.Meta.NextToken
+		tweets = append(tweets, result.Data...)
 		if len(result.Data) == 0 || token == "" {
 			break
 		}
+	}
+	
+	for _, tweet := range tweets {
+	  fmt.Printf("[%s] %s %s %s\n", tweet.Created, tweet.Id, tweet.ConversationId, strings.ReplaceAll(tweet.Text, "\n", "\\n"))
 	}
 }

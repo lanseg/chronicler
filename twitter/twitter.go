@@ -53,7 +53,8 @@ type Media struct {
 }
 
 func (m Media) String() string {
-	return fmt.Sprintf("Media {key: %s, url: %s, size: %dx%d, variants: %s}", m.MediaKey, m.Url, m.Width, m.Height, m.Variants)
+	return fmt.Sprintf("Media {key: %s, url: %s, size: %dx%d, variants: %s}",
+		m.MediaKey, m.Url, m.Width, m.Height, m.Variants)
 }
 
 type Includes struct {
