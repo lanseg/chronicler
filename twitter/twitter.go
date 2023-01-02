@@ -58,7 +58,8 @@ func (m Media) String() string {
 }
 
 type Includes struct {
-	Media []Media `json:"media"`
+	Media  []Media  `json:"media"`
+	Tweets []*Tweet `json:"tweets"`
 }
 
 type Attachment struct {

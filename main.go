@@ -3,63 +3,90 @@ package main
 import (
 	"flag"
 	"fmt"
-	"os"
-	"strconv"
+	"strings"
+	"time"
 
-	"chronist"
-	"chronist/storage"
-	"chronist/telegram"
 	"chronist/twitter"
 	"chronist/util"
+
+	rpb "chronist/proto/records"
 )
 
 const (
-	privateChatId   = int64(0)
-	tgBotKeyFlag    = "telegram_bot_key"
 	twitterApiFlag  = "twitter_api_key"
 	storageRootFlag = "storage_root"
 )
 
 var (
-	telegramBotKey = flag.String(tgBotKeyFlag, "", "A key for the telegram bot api.")
-	twitterApiKey  = flag.String(twitterApiFlag, "", "A key for the twitter api.")
-	storageRoot    = flag.String(storageRootFlag, "chronist_storage", "A local folder to save downloads.")
+	twitterApiKey = flag.String(twitterApiFlag, "", "A key for the twitter api.")
+	storageRoot   = flag.String(storageRootFlag, "chronist_storage", "A local folder to save downloads.")
+	logger        = util.NewLogger("main")
 )
 
-func getCursor() int64 {
-	bytes, _ := os.ReadFile("cursor.txt")
-	num, _ := strconv.Atoi(string(bytes))
-	return int64(num)
-}
+func getWholeConversation(client twitter.Client, conversation string) []*rpb.Record {
+	token := ""
+	tweets := []*twitter.Tweet{}
+	seen := util.NewSet[string]([]string{})
+	for {
+		result, err := client.GetConversation(conversation, token)
+		if err != nil {
+			logger.Errorf("Cannot load tweet: %s", err)
+			break
+		}
+		token = result.Meta.NextToken
+		for _, t := range append(result.Data, result.Includes.Tweets...) {
+			if seen.Contains(t.Id) {
+				continue
+			}
+			tweets = append(tweets, t)
+			seen.Add(t.Id)
+		}
+		if len(result.Data) == 0 || token == "" {
+			break
+		}
+	}
 
-func saveCursor(cursor int64) {
-	os.WriteFile("cursor.txt", []byte(fmt.Sprintf("%d", cursor)), 0644)
+	records := map[string]*rpb.Record{}
+	for _, tweet := range tweets {
+		twRecord := &rpb.Record{
+			RecordId: tweet.Id,
+			Source: &rpb.Source{
+				SenderId:  tweet.Author,
+				ChannelId: conversation,
+				MessageId: tweet.Id,
+				Type:      rpb.SourceType_TWITTER,
+			},
+			TextContent: tweet.Text,
+		}
+		if timestamp, err := time.Parse(time.RFC3339, tweet.Created); err == nil {
+			twRecord.Time = timestamp.Unix()
+		}
+		for _, m := range tweet.Media {
+			twRecord.Files = append(twRecord.Files, &rpb.File{
+				FileId:  m.Id,
+				FileUrl: m.Url,
+			})
+		}
+		records[tweet.Id] = twRecord
+	}
+
+	result := []*rpb.Record{}
+	for _, tweet := range tweets {
+		for _, ref := range tweet.Reference {
+			if refTweet, ok := records[ref.Id]; ok {
+				records[refTweet.RecordId].Parent = records[tweet.Id].Source
+			}
+		}
+		result = append(result, records[tweet.Id])
+	}
+	return result
 }
 
 func main() {
 	flag.Parse()
-	logger := util.NewLogger("main")
 
-	if len(*telegramBotKey) == 0 {
-		logger.Errorf("No telegram bot key defined, please set it with --%s=\"...\"", tgBotKeyFlag)
-		return
-	}
-
-	chr := chronist.NewChronist(
-		getCursor(),
-		telegram.NewBot(*telegramBotKey),
-		twitter.NewClient(*twitterApiKey),
-		storage.NewStorage(*storageRoot),
-	)
-
-	for {
-		newRequests, err := chr.FetchRequests()
-		if err != nil {
-			logger.Errorf("Cannot fetch the requests: %s", err.Error())
-			return
-		}
-		chr.SaveRequests(newRequests)
-		chr.SetCursor(chr.GetCursor() + 1)
-		saveCursor(chr.GetCursor())
+	twt := twitter.NewClient(*twitterApiKey)
+	for _, tweet := range getWholeConversation(twt, "1605769469833494529") {
+		fmt.Printf("%d %s %s\n", tweet.Time, tweet.RecordId, strings.ReplaceAll(tweet.TextContent, "\n", "\\n"))
 	}
 }

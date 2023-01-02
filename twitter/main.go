@@ -1,9 +1,9 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"strings"
-	"flag"
 
 	"chronist/twitter"
 	"chronist/util"
@@ -37,8 +37,8 @@ func main() {
 			break
 		}
 	}
-	
+
 	for _, tweet := range tweets {
-	  fmt.Printf("[%s] %s %s %s\n", tweet.Created, tweet.Id, tweet.ConversationId, strings.ReplaceAll(tweet.Text, "\n", "\\n"))
+		fmt.Printf("[%s] %s %s %s\n", tweet.Created, tweet.Id, tweet.ConversationId, strings.ReplaceAll(tweet.Text, "\n", "\\n"))
 	}
 }
