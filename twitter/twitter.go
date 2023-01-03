@@ -89,6 +89,17 @@ func (t Tweet) String() string {
 		t.Id, t.Text, t.Created, t.Author, t.Attachments, t.Reference, t.Media)
 }
 
+type Error struct {
+	ResourceId   string `json:"resource_id"`
+	Parameter    string `json:"parameter"`
+	ResourceType string `json:"resource_type"`
+	Section      string `json:"section"`
+	Title        string `json:"title"`
+	Value        string `json:"value"`
+	Detail       string `json:"detail"`
+	Type         string `json:"type"`
+}
+
 type Metadata struct {
 	NextToken   string `json:"next_token"`
 	ResultCount uint64 `json:"result_count"`
@@ -97,6 +108,7 @@ type Metadata struct {
 type Response struct {
 	Data     []*Tweet  `json:"data"`
 	Includes *Includes `json:"includes"`
+	Errors   []*Error  `json:"errors"`
 	Meta     *Metadata `json:"meta"`
 }
 
