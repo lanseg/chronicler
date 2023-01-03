@@ -4,8 +4,7 @@ go_binary(
     name = "main",
     srcs = ["main.go"],
     deps = [
-	    "//proto:records_go_proto",
-	"//chronist",
+        "//proto:records_go_proto",
         "//storage",
         "//telegram",
         "//twitter",

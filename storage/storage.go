@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -10,12 +11,10 @@ import (
 
 	rpb "chronist/proto/records"
 	"chronist/util"
-
-	"github.com/golang/protobuf/proto"
 )
 
 type IStorage interface {
-	SaveRecord(r *rpb.Record) error
+	SaveRecords(name string, r *rpb.RecordSet) error
 }
 
 type Storage struct {
@@ -58,47 +57,43 @@ func (s *Storage) downloadURL(url string, target string) error {
 	return nil
 }
 
-func (s *Storage) SaveRecord(r *rpb.Record) error {
-	var recordRoot string
-	if r.GetParentRecordId() != "" {
-		recordRoot = filepath.Join(r.GetParentRecordId(), r.GetRecordId())
-	} else {
-		recordRoot = filepath.Join(r.GetRecordId())
-	}
+func (s *Storage) SaveRecords(recordRoot string, r *rpb.RecordSet) error {
 	if err := os.MkdirAll(filepath.Join(s.root, recordRoot), os.ModePerm); err != nil {
 		return err
 	}
-
-	if len(r.Links) > 0 {
-		if err := s.saveLines(filepath.Join(recordRoot, "links.txt"), r.Links); err != nil {
-			return err
-		}
-		for _, link := range r.Links {
-			if util.IsYoutubeLink(link) {
-				if err := util.DownloadYoutube(link, filepath.Join(s.root, recordRoot)); err != nil {
-					s.logger.Warningf("Failed to download youtube video: %s", err)
+	bytes, err := json.Marshal(r)
+	if err != nil {
+		return fmt.Errorf("Json marshalling error: %s", err)
+	}
+	if err := s.saveText(filepath.Join(recordRoot, "record.json"), string(bytes)); err != nil {
+		return err
+	}
+	for _, r := range r.Records {
+		if len(r.Links) > 0 {
+			for _, link := range r.Links {
+				if util.IsYoutubeLink(link) {
+					if err := util.DownloadYoutube(link, filepath.Join(s.root, recordRoot)); err != nil {
+						s.logger.Warningf("Failed to download youtube video: %s", err)
+					}
 				}
 			}
 		}
-	}
 
-	if len(r.TextContent) > 0 {
-		if err := s.saveText(filepath.Join(recordRoot, "text.txt"), r.TextContent); err != nil {
-			return err
-		}
-	}
-
-	if len(r.Files) > 0 {
-		for i, file := range r.GetFiles() {
-			fname := fmt.Sprintf("file_%d", i)
-			if err := s.downloadURL(file.GetFileUrl(), filepath.Join(recordRoot, fname)); err != nil {
-				return err
+		if len(r.Files) > 0 {
+			for i, file := range r.GetFiles() {
+				if file.GetFileUrl() == "" {
+					s.logger.Warningf("File without an url: %s", file)
+					continue
+				}
+				fileUrl := file.GetFileUrl()
+				fnamePos := strings.LastIndex(fileUrl, "/")
+				fname := fmt.Sprintf("%d_%s", i, fileUrl[fnamePos+1:])
+				if err := s.downloadURL(file.GetFileUrl(), filepath.Join(recordRoot, fname)); err != nil {
+					s.logger.Warningf("Failed to download file: %s: %s", file, err)
+				}
 			}
 		}
-	}
 
-	if err := s.saveText(filepath.Join(recordRoot, ".metadata"), proto.MarshalTextString(r)); err != nil {
-		return err
 	}
 	s.logger.Infof("Saved new record to %s", recordRoot)
 	return nil

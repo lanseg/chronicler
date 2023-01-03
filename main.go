@@ -2,10 +2,10 @@ package main
 
 import (
 	"flag"
-	"fmt"
-	"strings"
+	"sort"
 	"time"
 
+	"chronist/storage"
 	"chronist/twitter"
 	"chronist/util"
 
@@ -20,17 +20,17 @@ const (
 var (
 	twitterApiKey = flag.String(twitterApiFlag, "", "A key for the twitter api.")
 	storageRoot   = flag.String(storageRootFlag, "chronist_storage", "A local folder to save downloads.")
-	logger        = util.NewLogger("main")
+	log           = util.NewLogger("main")
 )
 
-func getWholeConversation(client twitter.Client, conversation string) []*rpb.Record {
+func getWholeConversation(client twitter.Client, conversation string) *rpb.RecordSet {
 	token := ""
 	tweets := []*twitter.Tweet{}
 	seen := util.NewSet[string]([]string{})
 	for {
 		result, err := client.GetConversation(conversation, token)
 		if err != nil {
-			logger.Errorf("Cannot load tweet: %s", err)
+			log.Errorf("Cannot load tweet: %s", err)
 			break
 		}
 		token = result.Meta.NextToken
@@ -49,7 +49,6 @@ func getWholeConversation(client twitter.Client, conversation string) []*rpb.Rec
 	records := map[string]*rpb.Record{}
 	for _, tweet := range tweets {
 		twRecord := &rpb.Record{
-			RecordId: tweet.Id,
 			Source: &rpb.Source{
 				SenderId:  tweet.Author,
 				ChannelId: conversation,
@@ -70,15 +69,19 @@ func getWholeConversation(client twitter.Client, conversation string) []*rpb.Rec
 		records[tweet.Id] = twRecord
 	}
 
-	result := []*rpb.Record{}
+	result := &rpb.RecordSet{}
 	for _, tweet := range tweets {
 		for _, ref := range tweet.Reference {
 			if refTweet, ok := records[ref.Id]; ok {
-				records[refTweet.RecordId].Parent = records[tweet.Id].Source
+				records[refTweet.Source.MessageId].Parent = records[tweet.Id].Source
 			}
 		}
-		result = append(result, records[tweet.Id])
+		result.Records = append(result.Records, records[tweet.Id])
 	}
+
+	sort.Slice(result.Records, func(i int, j int) bool {
+		return result.Records[i].Time < result.Records[j].Time
+	})
 	return result
 }
 
@@ -86,7 +89,12 @@ func main() {
 	flag.Parse()
 
 	twt := twitter.NewClient(*twitterApiKey)
-	for _, tweet := range getWholeConversation(twt, "1605769469833494529") {
-		fmt.Printf("%d %s %s\n", tweet.Time, tweet.RecordId, strings.ReplaceAll(tweet.TextContent, "\n", "\\n"))
+	stg := storage.NewStorage(*storageRoot)
+
+	for _, arg := range flag.Args() {
+		threadId := arg
+		if err := stg.SaveRecords(threadId, getWholeConversation(twt, threadId)); err != nil {
+			log.Warningf("Error while saving a record: %s", err)
+		}
 	}
 }

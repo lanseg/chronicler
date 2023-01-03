@@ -26,3 +26,4 @@ bazel-chronist
 chronist_storage/
 cursor.txt
 go.sum
+keys
