@@ -23,27 +23,15 @@ var (
 	log           = util.NewLogger("main")
 )
 
-func getWholeConversation(client twitter.Client, conversation string) *rpb.RecordSet {
-	token := ""
-	tweets := []*twitter.Tweet{}
+func twitterToRecord(response *twitter.Response) *rpb.RecordSet {
 	seen := util.NewSet[string]([]string{})
-	for {
-		result, err := client.GetConversation(conversation, token)
-		if err != nil {
-			log.Errorf("Cannot load tweet: %s", err)
-			break
+	tweets := []*twitter.Tweet{}
+	for _, twt := range append(response.Data, response.Includes.Tweets...) {
+		if seen.Contains(twt.Id) {
+			continue
 		}
-		token = result.Meta.NextToken
-		for _, t := range append(result.Data, result.Includes.Tweets...) {
-			if seen.Contains(t.Id) {
-				continue
-			}
-			tweets = append(tweets, t)
-			seen.Add(t.Id)
-		}
-		if len(result.Data) == 0 || token == "" {
-			break
-		}
+		seen.Add(twt.Id)
+		tweets = append(tweets, twt)
 	}
 
 	records := map[string]*rpb.Record{}
@@ -51,7 +39,7 @@ func getWholeConversation(client twitter.Client, conversation string) *rpb.Recor
 		twRecord := &rpb.Record{
 			Source: &rpb.Source{
 				SenderId:  tweet.Author,
-				ChannelId: conversation,
+				ChannelId: tweet.ConversationId,
 				MessageId: tweet.Id,
 				Type:      rpb.SourceType_TWITTER,
 			},
@@ -93,7 +81,11 @@ func main() {
 
 	for _, arg := range flag.Args() {
 		threadId := arg
-		if err := stg.SaveRecords(threadId, getWholeConversation(twt, threadId)); err != nil {
+		conv, err := twt.GetConversation(arg)
+		if err != nil {
+			log.Errorf("Failed to get conversation for id %s: %s", threadId, err)
+		}
+		if err := stg.SaveRecords(threadId, twitterToRecord(conv)); err != nil {
 			log.Warningf("Error while saving a record: %s", err)
 		}
 	}

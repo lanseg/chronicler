@@ -123,7 +123,7 @@ func (r Response) String() string {
 // The client
 type Client interface {
 	GetTweets(ids []string) (*Response, error)
-	GetConversation(conversationId string, paginationToken string) (*Response, error)
+	GetConversation(conversationId string) (*Response, error)
 }
 
 type ClientImpl struct {
@@ -199,7 +199,10 @@ func (c *ClientImpl) performRequest(url url.URL) (*Response, error) {
 		return nil, err
 	}
 
-	result := &Response{Includes: &Includes{}}
+	result := &Response{
+		Includes: &Includes{},
+		Meta:     &Metadata{},
+	}
 	if err = json.Unmarshal(bytes, result); err != nil {
 		return nil, err
 	}
@@ -216,7 +219,7 @@ func (c *ClientImpl) performRequest(url url.URL) (*Response, error) {
 	return result, nil
 }
 
-func (c *ClientImpl) GetConversation(conversationId string, paginationToken string) (*Response, error) {
+func (c *ClientImpl) getConversationPage(conversationId string, paginationToken string) (*Response, error) {
 	url := url.URL{
 		Scheme: "https",
 		Host:   "api.twitter.com",
@@ -231,6 +234,43 @@ func (c *ClientImpl) GetConversation(conversationId string, paginationToken stri
 		url.RawQuery = fmt.Sprintf("%s&pagination_token=%s", url.RawQuery, paginationToken)
 	}
 	return c.performRequest(url)
+}
+
+func (c *ClientImpl) GetConversation(conversationId string) (*Response, error) {
+	token := ""
+	responses := []*Response{}
+	for {
+		result, err := c.getConversationPage(conversationId, token)
+		if err != nil {
+			c.logger.Errorf("Cannot load tweets from converation %s with token %s: %s",
+				conversationId, token, err)
+			if len(responses) == 0 {
+				return nil, err
+			} else {
+				break
+			}
+		}
+		responses = append(responses, result)
+		token = result.Meta.NextToken
+		c.logger.Infof("Loaded pages: %d, next page: %s", len(responses), token)
+		if len(result.Data) == 0 || token == "" {
+			break
+		}
+	}
+	c.logger.Infof("Loaded %d pages from conversation %s", len(responses), conversationId)
+
+	result := &Response{
+		Includes: &Includes{},
+		Meta:     &Metadata{},
+	}
+	for _, r := range responses {
+		result.Data = append(result.Data, r.Data...)
+		result.Errors = append(result.Errors, r.Errors...)
+		result.Includes.Media = append(result.Includes.Media, r.Includes.Media...)
+		result.Includes.Tweets = append(result.Includes.Tweets, r.Includes.Tweets...)
+	}
+	result.Meta.ResultCount = uint64(len(result.Data))
+	return result, nil
 }
 
 func (c *ClientImpl) GetTweets(ids []string) (*Response, error) {

@@ -23,21 +23,14 @@ func main() {
 
 	client := twitter.NewClient(*twitterApiKey)
 
-	token := ""
 	tweets := []*twitter.Tweet{}
-	for {
-		result, err := client.GetConversation("1605769469833494529", token)
-		if err != nil {
-			logger.Errorf("Cannot load tweet: %s", err)
-			break
-		}
-		token = result.Meta.NextToken
-		tweets = append(tweets, result.Data...)
-		if len(result.Data) == 0 || token == "" {
-			break
-		}
+	result, err := client.GetConversation("1605769469833494529")
+	if err != nil {
+	    logger.Errorf("Cannot load tweet: %s", err)
 	}
-
+    tweets = append(tweets, result.Data...)
+    tweets = append(tweets, result.Includes.Tweets...)
+    
 	for _, tweet := range tweets {
 		fmt.Printf("[%s] %s %s %s\n", tweet.Created, tweet.Id, tweet.ConversationId, strings.ReplaceAll(tweet.Text, "\n", "\\n"))
 	}

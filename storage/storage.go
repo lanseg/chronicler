@@ -82,7 +82,8 @@ func (s *Storage) SaveRecords(recordRoot string, r *rpb.RecordSet) error {
 		if len(r.Files) > 0 {
 			for i, file := range r.GetFiles() {
 				if file.GetFileUrl() == "" {
-					s.logger.Warningf("File without an url: %s", file)
+					s.logger.Warningf("Record with source %s has a without an url: %s",
+						r.Source, file)
 					continue
 				}
 				fileUrl := file.GetFileUrl()
