@@ -26,11 +26,11 @@ func main() {
 	tweets := []*twitter.Tweet{}
 	result, err := client.GetConversation("1605769469833494529")
 	if err != nil {
-	    logger.Errorf("Cannot load tweet: %s", err)
+		logger.Errorf("Cannot load tweet: %s", err)
 	}
-    tweets = append(tweets, result.Data...)
-    tweets = append(tweets, result.Includes.Tweets...)
-    
+	tweets = append(tweets, result.Data...)
+	tweets = append(tweets, result.Includes.Tweets...)
+
 	for _, tweet := range tweets {
 		fmt.Printf("[%s] %s %s %s\n", tweet.Created, tweet.Id, tweet.ConversationId, strings.ReplaceAll(tweet.Text, "\n", "\\n"))
 	}

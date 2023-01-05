@@ -1,4 +1,4 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test", "go_binary")
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library", "go_test")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -10,6 +10,18 @@ go_library(
     importpath = "chronist/twitter",
     deps = [
         "//util",
+    ],
+)
+
+go_test(
+    name = "twitter_test",
+    size = "small",
+    srcs = [
+        "twitter_test.go",
+    ],
+    data = glob(["testdata/*"]),
+    embed = [
+        ":twitter",
     ],
 )
 

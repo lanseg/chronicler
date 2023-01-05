@@ -15,6 +15,7 @@ go_library(
 
 go_test(
     name = "util_test",
+    size = "small",
     srcs = [
         "maps_test.go",
         "runners_test.go",
