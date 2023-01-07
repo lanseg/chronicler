@@ -58,6 +58,13 @@ func twitterToRecord(response *twitter.Response) *rpb.RecordSet {
 	}
 
 	result := &rpb.RecordSet{}
+	for _, user := range response.Includes.Users {
+		result.UserMetadata = append(result.UserMetadata, &rpb.UserMetadata{
+			Id:       user.Id,
+			Username: user.Username,
+			Quotes:   []string{user.Name},
+		})
+	}
 	for _, tweet := range tweets {
 		for _, ref := range tweet.Reference {
 			if refTweet, ok := records[ref.Id]; ok {

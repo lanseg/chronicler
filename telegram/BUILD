@@ -1,4 +1,4 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -15,7 +15,7 @@ genrule(
 go_library(
     name = "telegram",
     srcs = [
-        "telegram.go",
+        "bot.go",
         "utils.go",
         ":telegram_types",
     ],

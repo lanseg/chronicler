@@ -11,10 +11,10 @@ enum SourceType {
 }
 
 enum FetchStatus {
-	UNKNOWN_STATUS = 0;
+  UNKNOWN_STATUS = 0;
   FAIL           = 1;
-	IN_PROGRESS    = 2;
-	SUCCESS        = 3;
+  IN_PROGRESS    = 2;
+  SUCCESS        = 3;
 }
 
 message File {
@@ -38,6 +38,13 @@ message Record {
   repeated string links = 8;
 }
 
+message UserMetadata {
+  string id = 1;
+  string username = 2;
+  repeated string quotes = 3;
+}
+
 message RecordSet {
   repeated Record records = 1;
+  repeated UserMetadata userMetadata = 2;
 }

@@ -1,5 +1,5 @@
 #!/usr/bin/bash
-set -euo pipefail
+set -eio pipefail
 
 find -name BUILD -print -exec buildifier {} \;
 find -iname '*go' -print \

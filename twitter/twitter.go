@@ -21,8 +21,10 @@ var (
 		"conversation_id",
 	}
 	tweetExpansions = []string{
+		"author_id",
 		"attachments.media_keys",
 		"referenced_tweets.id",
+		"entities.mentions.username",
 	}
 	tweetMediaFields = []string{
 		"url", "height", "width", "media_key", "variants",
@@ -57,9 +59,16 @@ func (m Media) String() string {
 		m.MediaKey, m.Url, m.Width, m.Height, m.Variants)
 }
 
+type User struct {
+	Id       string `json:"id"`
+	Name     string `json:"name"`
+	Username string `json:"username"`
+}
+
 type Includes struct {
 	Media  []Media  `json:"media"`
 	Tweets []*Tweet `json:"tweets"`
+	Users  []User   `json:"users"`
 }
 
 type Attachment struct {
@@ -198,7 +207,6 @@ func (c *ClientImpl) performRequest(url url.URL) (*Response, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	result := &Response{
 		Includes: &Includes{},
 		Meta:     &Metadata{},
@@ -266,6 +274,7 @@ func (c *ClientImpl) GetConversation(conversationId string) (*Response, error) {
 	for _, r := range responses {
 		result.Data = append(result.Data, r.Data...)
 		result.Errors = append(result.Errors, r.Errors...)
+		result.Includes.Users = append(result.Includes.Users, r.Includes.Users...)
 		result.Includes.Media = append(result.Includes.Media, r.Includes.Media...)
 		result.Includes.Tweets = append(result.Includes.Tweets, r.Includes.Tweets...)
 	}
