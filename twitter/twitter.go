@@ -162,12 +162,11 @@ func getBestQualityMedia(medias []Media) *TwitterMedia {
 		bitrate := int64(0)
 		url := m.Url
 		for _, v := range m.Variants {
-			if bitrate < v.Bitrate {
+			if bitrate <= v.Bitrate && v.Url != "" {
 				url = v.Url
 				bitrate = v.Bitrate
 			}
 		}
-
 		size := m.Width * m.Height
 		if size > result.Width*result.Height {
 			result.Width = m.Width
@@ -217,6 +216,7 @@ func (c *ClientImpl) performRequest(url url.URL) (*Response, error) {
 	mediaByKey := util.GroupBy(result.Includes.Media, func(m Media) string {
 		return m.MediaKey
 	})
+
 	for _, tweet := range result.Data {
 		for _, mk := range tweet.Attachments.MediaKeys {
 			if medias, ok := mediaByKey[mk]; ok {
