@@ -34,6 +34,13 @@ func twitterToRecord(response *twitter.Response) *rpb.RecordSet {
 		tweets = append(tweets, twt)
 	}
 
+	media := map[string]*twitter.TwitterMedia{}
+	for _, m := range response.Includes.Media {
+		bestMedia := twitter.GetBestQualityMedia(m)
+		media[bestMedia.Id] = bestMedia
+	}
+	log.Debugf("Response: %s", media)
+
 	records := map[string]*rpb.Record{}
 	for _, tweet := range tweets {
 		twRecord := &rpb.Record{
@@ -48,7 +55,11 @@ func twitterToRecord(response *twitter.Response) *rpb.RecordSet {
 		if timestamp, err := time.Parse(time.RFC3339, tweet.Created); err == nil {
 			twRecord.Time = timestamp.Unix()
 		}
-		for _, m := range tweet.Media {
+		for _, mediaKey := range tweet.Attachments.MediaKeys {
+			m, ok := media[mediaKey]
+			if !ok {
+				log.Warningf("Missing media for key: %s", mediaKey)
+			}
 			twRecord.Files = append(twRecord.Files, &rpb.File{
 				FileId:  m.Id,
 				FileUrl: m.Url,

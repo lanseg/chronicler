@@ -74,7 +74,6 @@ func TestTwitterClient(t *testing.T) {
 							Type: "replied_to",
 						},
 					},
-					Media: []*TwitterMedia{},
 				},
 			},
 		}

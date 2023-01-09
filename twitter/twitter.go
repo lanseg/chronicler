@@ -24,7 +24,6 @@ var (
 		"author_id",
 		"attachments.media_keys",
 		"referenced_tweets.id",
-		"entities.mentions.username",
 	}
 	tweetMediaFields = []string{
 		"url", "height", "width", "media_key", "variants",
@@ -89,13 +88,12 @@ type Tweet struct {
 	Author         string            `json:"author_id"`
 	Attachments    Attachment        `json:"attachments"`
 	Reference      []ReferencedTweet `json:"referenced_tweets"`
-	Media          []*TwitterMedia
 }
 
 func (t Tweet) String() string {
 	return fmt.Sprintf(
-		"Tweet {id: %s, text: %s, created: %s, author: %s, attachments:%s, references:%s, media:%s}",
-		t.Id, t.Text, t.Created, t.Author, t.Attachments, t.Reference, t.Media)
+		"Tweet {id: %s, text: %s, created: %s, author: %s, attachments:%s, references:%s}",
+		t.Id, t.Text, t.Created, t.Author, t.Attachments, t.Reference)
 }
 
 type Error struct {
@@ -152,29 +150,24 @@ func NewClient(token string) Client {
 	}
 }
 
-func getBestQualityMedia(medias []Media) *TwitterMedia {
-	if len(medias) == 0 {
-		return nil
-	}
+func GetBestQualityMedia(media Media) *TwitterMedia {
 	result := &TwitterMedia{}
 
-	for _, m := range medias {
-		bitrate := int64(0)
-		url := m.Url
-		for _, v := range m.Variants {
-			if bitrate <= v.Bitrate && v.Url != "" {
-				url = v.Url
-				bitrate = v.Bitrate
-			}
+	bitrate := int64(0)
+	url := media.Url
+	for _, v := range media.Variants {
+		if bitrate <= v.Bitrate && v.Url != "" {
+			url = v.Url
+			bitrate = v.Bitrate
 		}
-		size := m.Width * m.Height
-		if size > result.Width*result.Height {
-			result.Width = m.Width
-			result.Height = m.Height
-			result.Url = url
-			result.Bitrate = bitrate
-			result.Id = m.MediaKey
-		}
+	}
+	size := media.Width * media.Height
+	if size > result.Width*result.Height {
+		result.Width = media.Width
+		result.Height = media.Height
+		result.Url = url
+		result.Bitrate = bitrate
+		result.Id = media.MediaKey
 	}
 
 	return result
@@ -191,6 +184,7 @@ func (c *ClientImpl) newRequest(url string) (*http.Request, error) {
 }
 
 func (c *ClientImpl) performRequest(url url.URL) (*Response, error) {
+	c.logger.Debugf("Api request: %s", url.String())
 	request, err := c.newRequest(url.String())
 	if err != nil {
 		return nil, err
@@ -213,18 +207,24 @@ func (c *ClientImpl) performRequest(url url.URL) (*Response, error) {
 	if err = json.Unmarshal(bytes, result); err != nil {
 		return nil, err
 	}
-	mediaByKey := util.GroupBy(result.Includes.Media, func(m Media) string {
-		return m.MediaKey
-	})
-
-	for _, tweet := range result.Data {
-		for _, mk := range tweet.Attachments.MediaKeys {
-			if medias, ok := mediaByKey[mk]; ok {
-				tweet.Media = append(tweet.Media, getBestQualityMedia(medias))
-			}
-		}
-	}
 	return result, nil
+}
+
+func (c *ClientImpl) getMediaForTweets(ids []string) ([]Media, error) {
+	url := url.URL{
+		Scheme: "https",
+		Host:   "api.twitter.com",
+		Path:   "2/tweets",
+		RawQuery: fmt.Sprintf("ids=%s&expansions=%s&media.fields=%s",
+			url.QueryEscape(strings.Join(ids, ",")),
+			url.QueryEscape("attachments.media_keys"),
+			url.QueryEscape(strings.Join(tweetMediaFields, ","))),
+	}
+	response, err := c.performRequest(url)
+	if err != nil {
+		return nil, err
+	}
+	return response.Includes.Media, nil
 }
 
 func (c *ClientImpl) getConversationPage(conversationId string, paginationToken string) (*Response, error) {
@@ -279,6 +279,26 @@ func (c *ClientImpl) GetConversation(conversationId string) (*Response, error) {
 		result.Includes.Tweets = append(result.Includes.Tweets, r.Includes.Tweets...)
 	}
 	result.Meta.ResultCount = uint64(len(result.Data))
+
+	mediaById := map[string]*Media{}
+	for _, r := range result.Includes.Media {
+		mediaById[r.MediaKey] = &r
+	}
+
+	missingMedia := map[string]([]string){}
+	for _, tweet := range append(result.Data, result.Includes.Tweets...) {
+		for _, attachedMediaKey := range tweet.Attachments.MediaKeys {
+			if mediaById[attachedMediaKey] == nil || mediaById[attachedMediaKey].Url == "" {
+				missingMedia[tweet.Id] = append(missingMedia[tweet.Id], attachedMediaKey)
+			}
+		}
+	}
+	c.logger.Infof("Missing media from tweets %s, for keys: %s", strings.Join(util.Keys(missingMedia), ", "), util.Values(missingMedia))
+	if moreMedia, err := c.getMediaForTweets(util.Keys(missingMedia)); err == nil {
+		result.Includes.Media = append(result.Includes.Media, moreMedia...)
+	} else {
+		c.logger.Warningf("Failed loading media for %s: %s", util.Keys(missingMedia))
+	}
 	return result, nil
 }
 

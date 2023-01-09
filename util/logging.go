@@ -11,16 +11,18 @@ const (
 )
 
 type Logger struct {
-	info *log.Logger
-	warn *log.Logger
-	err  *log.Logger
+	debug *log.Logger
+	info  *log.Logger
+	warn  *log.Logger
+	err   *log.Logger
 }
 
 func NewLogger(name string) *Logger {
 	return &Logger{
-		info: log.New(os.Stdout, "INFO: ", logFormat),
-		warn: log.New(os.Stdout, "WARNING: ", logFormat),
-		err:  log.New(os.Stdout, "ERROR: ", logFormat),
+		debug: log.New(os.Stdout, "DEBUG: ", logFormat),
+		info:  log.New(os.Stdout, "INFO: ", logFormat),
+		warn:  log.New(os.Stdout, "WARNING: ", logFormat),
+		err:   log.New(os.Stdout, "ERROR: ", logFormat),
 	}
 }
 
@@ -30,6 +32,11 @@ func doFormat(format string, v ...any) string {
 	}
 	return fmt.Sprintf(format, v...)
 }
+
+func (l *Logger) Debugf(format string, v ...any) {
+	l.debug.Output(2, doFormat(format, v...))
+}
+
 func (l *Logger) Infof(format string, v ...any) {
 	l.info.Output(2, doFormat(format, v...))
 }
