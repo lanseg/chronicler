@@ -150,6 +150,22 @@ func NewClient(token string) Client {
 	}
 }
 
+func getMissingMedia(response *Response) map[string]([]string) {
+	mediaById := map[string]*Media{}
+	for _, r := range response.Includes.Media {
+		mediaById[r.MediaKey] = &r
+	}
+	result := map[string]([]string){}
+	for _, tweet := range append(response.Data, response.Includes.Tweets...) {
+		for _, attachedMediaKey := range tweet.Attachments.MediaKeys {
+			if mediaById[attachedMediaKey] == nil || mediaById[attachedMediaKey].Url == "" {
+				result[tweet.Id] = append(result[tweet.Id], attachedMediaKey)
+			}
+		}
+	}
+	return result
+}
+
 func GetBestQualityMedia(media Media) *TwitterMedia {
 	result := &TwitterMedia{}
 
@@ -280,25 +296,18 @@ func (c *ClientImpl) GetConversation(conversationId string) (*Response, error) {
 	}
 	result.Meta.ResultCount = uint64(len(result.Data))
 
-	mediaById := map[string]*Media{}
-	for _, r := range result.Includes.Media {
-		mediaById[r.MediaKey] = &r
-	}
-
-	missingMedia := map[string]([]string){}
-	for _, tweet := range append(result.Data, result.Includes.Tweets...) {
-		for _, attachedMediaKey := range tweet.Attachments.MediaKeys {
-			if mediaById[attachedMediaKey] == nil || mediaById[attachedMediaKey].Url == "" {
-				missingMedia[tweet.Id] = append(missingMedia[tweet.Id], attachedMediaKey)
-			}
-		}
-	}
-	c.logger.Infof("Missing media from tweets %s, for keys: %s", strings.Join(util.Keys(missingMedia), ", "), util.Values(missingMedia))
+	missingMedia := getMissingMedia(result)
+	c.logger.Infof("Downloading missing media from tweets %s, for keys: %s",
+		strings.Join(util.Keys(missingMedia), ", "), util.Values(missingMedia))
 	if moreMedia, err := c.getMediaForTweets(util.Keys(missingMedia)); err == nil {
 		result.Includes.Media = append(result.Includes.Media, moreMedia...)
 	} else {
 		c.logger.Warningf("Failed loading media for %s: %s", util.Keys(missingMedia))
 	}
+	missingMedia = getMissingMedia(result)
+	c.logger.Infof("Missing media after the download: from tweets %s, for keys: %s",
+		util.Keys(missingMedia), util.Values(missingMedia))
+
 	return result, nil
 }
 

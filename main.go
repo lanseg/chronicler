@@ -39,7 +39,6 @@ func twitterToRecord(response *twitter.Response) *rpb.RecordSet {
 		bestMedia := twitter.GetBestQualityMedia(m)
 		media[bestMedia.Id] = bestMedia
 	}
-	log.Debugf("Response: %s", media)
 
 	records := map[string]*rpb.Record{}
 	for _, tweet := range tweets {
