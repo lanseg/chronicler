@@ -48,3 +48,8 @@ message RecordSet {
   repeated Record records = 1;
   repeated UserMetadata userMetadata = 2;
 }
+
+message Request {
+  string raw_request = 1;
+  Source source = 2;
+}

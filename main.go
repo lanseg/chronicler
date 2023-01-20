@@ -90,6 +90,17 @@ func twitterToRecord(response *twitter.Response) *rpb.RecordSet {
 	return result
 }
 
+func parseRequest(s string) rpb.Request {
+
+	return rpb.Request{
+		RawRequest: s,
+		Source: &rpb.Source{
+			ChannelId: s,
+			Type:      rpb.SourceType_TWITTER,
+		},
+	}
+}
+
 func main() {
 	flag.Parse()
 
@@ -97,13 +108,19 @@ func main() {
 	stg := storage.NewStorage(*storageRoot)
 
 	for _, arg := range flag.Args() {
-		threadId := arg
-		conv, err := twt.GetConversation(arg)
-		if err != nil {
-			log.Errorf("Failed to get conversation for id %s: %s", threadId, err)
-		}
-		if err := stg.SaveRecords(threadId, twitterToRecord(conv)); err != nil {
-			log.Warningf("Error while saving a record: %s", err)
+		request := parseRequest(arg)
+		switch srcType := request.Source.Type; srcType {
+		case rpb.SourceType_TWITTER:
+			threadId := request.Source.ChannelId
+			conv, err := twt.GetConversation(threadId)
+			if err != nil {
+				log.Errorf("Failed to get conversation for id %s: %s", threadId, err)
+			}
+			if err := stg.SaveRecords(threadId, twitterToRecord(conv)); err != nil {
+				log.Warningf("Error while saving a record: %s", err)
+			}
+		default:
+			log.Warningf("No loader found for request %s", request)
 		}
 	}
 }

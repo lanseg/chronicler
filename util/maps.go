@@ -104,3 +104,15 @@ func (s *Set[T]) Contains(item T) bool {
 func (s *Set[T]) Clear() {
 	s.values = map[T]bool{}
 }
+
+func NewMap[K comparable, V any](keys []K, values []V) map[K]V {
+	result := make(map[K]V, len(keys))
+	for i, k := range keys {
+		var value V
+		if i < len(values) {
+			value = values[i]
+		}
+		result[k] = value
+	}
+	return result
+}

@@ -108,3 +108,45 @@ func TestKeysValues(t *testing.T) {
 		})
 	}
 }
+
+func TestNewMap(t *testing.T) {
+	for _, tc := range []struct {
+		desc   string
+		keys   []string
+		values []string
+		want   map[string]string
+	}{
+		{
+			desc:   "successful operation",
+			keys:   []string{"a", "b", "c"},
+			values: []string{"0", "1", "2"},
+			want:   map[string]string{"a": "0", "b": "1", "c": "2"},
+		},
+		{
+			desc:   "more keys than values",
+			keys:   []string{"a", "b", "c", "d"},
+			values: []string{"0", "1"},
+			want:   map[string]string{"a": "0", "b": "1", "c": "", "d": ""},
+		},
+		{
+			desc:   "more values than keys",
+			keys:   []string{"a", "b"},
+			values: []string{"0", "1", "2", "3"},
+			want:   map[string]string{"a": "0", "b": "1"},
+		},
+		{
+			desc:   "empty keys and values",
+			keys:   []string{},
+			values: []string{},
+			want:   map[string]string{},
+		},
+	} {
+		t.Run(tc.desc, func(t *testing.T) {
+			result := NewMap(tc.keys, tc.values)
+			if !reflect.DeepEqual(tc.want, result) {
+				t.Errorf("NewMap(%v, %v) expected to be %v, but got %v", tc.keys, tc.values,
+					tc.want, result)
+			}
+		})
+	}
+}
