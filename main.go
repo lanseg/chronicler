@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"regexp"
 	"sort"
 	"time"
 
@@ -91,11 +92,16 @@ func twitterToRecord(response *twitter.Response) *rpb.RecordSet {
 }
 
 func parseRequest(s string) rpb.Request {
-
+	re := regexp.MustCompile("twitter.*/(?P<twitter_id>[0-9]+)[/]?")
+	matches := util.NewMap(re.SubexpNames(), re.FindStringSubmatch(s))
+    key := s
+	if match, ok := matches["twitter_id"]; ok && match != "" {
+        key = matches["twitter_id"]
+	}
 	return rpb.Request{
 		RawRequest: s,
 		Source: &rpb.Source{
-			ChannelId: s,
+			ChannelId: key,
 			Type:      rpb.SourceType_TWITTER,
 		},
 	}
