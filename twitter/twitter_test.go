@@ -1,7 +1,7 @@
 package twitter
 
 import (
-	"chronist/util"
+	"chronicler/util"
 	"fmt"
 	"io"
 	"io/ioutil"

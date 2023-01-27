@@ -7,7 +7,7 @@ go_library(
     srcs = [
         "twitter.go",
     ],
-    importpath = "chronist/twitter",
+    importpath = "chronicler/twitter",
     deps = [
         "//util",
     ],

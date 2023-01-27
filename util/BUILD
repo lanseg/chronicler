@@ -10,7 +10,7 @@ go_library(
         "runners.go",
         "textdata.go",
     ],
-    importpath = "chronist/util",
+    importpath = "chronicler/util",
 )
 
 go_test(

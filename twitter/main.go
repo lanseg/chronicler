@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strings"
 
-	"chronist/twitter"
-	"chronist/util"
+	"chronicler/twitter"
+	"chronicler/util"
 )
 
 const (

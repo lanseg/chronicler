@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"chronist/util"
+	"chronicler/util"
 )
 
 var (

@@ -8,7 +8,7 @@ proto_library(
 
 go_proto_library(
     name = "records_go_proto",
-    importpath = "chronist/proto/records",
+    importpath = "chronicler/proto/records",
     protos = [":records_proto"],
     visibility = ["//visibility:public"],
 )

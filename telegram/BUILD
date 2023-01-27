@@ -19,7 +19,7 @@ go_library(
         "utils.go",
         ":telegram_types",
     ],
-    importpath = "chronist/telegram",
+    importpath = "chronicler/telegram",
     deps = [
         "//util",
     ],

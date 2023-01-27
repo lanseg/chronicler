@@ -9,8 +9,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	rpb "chronist/proto/records"
-	"chronist/util"
+	rpb "chronicler/proto/records"
+	"chronicler/util"
 )
 
 type IStorage interface {

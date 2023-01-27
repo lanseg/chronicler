@@ -3,26 +3,29 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 package(default_visibility = ["//visibility:public"])
 
 go_library(
-    name = "chronist",
+    name = "chronicler",
     srcs = [
-        "chronist.go",
+        "chronicler.go",
+        "twitter.go",
     ],
+    importpath = "chronicler",
     deps = [
         "//proto:records_go_proto",
+        "//twitter",
+        "//util",
     ],
-    importpath = "chronist",
 )
 
 go_test(
-    name = "chronist_test",
+    name = "chronicler_test",
     size = "small",
     srcs = [
-        "chronist_test.go",
+        "chronicler_test.go",
+    ],
+    embed = [
+        ":chronicler",
     ],
     deps = [
         "//proto:records_go_proto",
-    ],
-    embed = [
-        ":chronist",
     ],
 )
