@@ -7,7 +7,7 @@ go_library(
     srcs = [
         "logging.go",
         "maps.go",
-        "nulls.go", 
+        "nulls.go",
         "runners.go",
         "textdata.go",
     ],

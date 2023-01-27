@@ -23,6 +23,18 @@ var (
 	log           = util.NewLogger("main")
 )
 
+type Config struct {
+	twitterApiKey *string
+	storageRoot   *string
+}
+
+func getConfig(configFile string) Config {
+	result := Config{}
+	result.twitterApiKey = util.Ifnull(twitterApiKey, result.twitterApiKey)
+	result.storageRoot = util.Ifnull(storageRoot, result.storageRoot)
+	return result
+}
+
 func parseRequest(s string) rpb.Request {
 	re := regexp.MustCompile("twitter.*/(?P<twitter_id>[0-9]+)[/]?")
 	matches := util.NewMap(re.SubexpNames(), re.FindStringSubmatch(s))
@@ -42,22 +54,27 @@ func parseRequest(s string) rpb.Request {
 func main() {
 	flag.Parse()
 
-	var twt chronicler.Chronicler = chronicler.NewTwitter("twitter", twitter.NewClient(*twitterApiKey))
-	stg := storage.NewStorage(*storageRoot)
+	config := getConfig("config")
+    chroniclers := map[rpb.SourceType]chronicler.Chronicler {
+        rpb.SourceType_TWITTER: chronicler.NewTwitter("twitter", twitter.NewClient(*config.twitterApiKey)),
+    }
+	stg := storage.NewStorage(*config.storageRoot)
 
 	for _, arg := range flag.Args() {
 		request := parseRequest(arg)
-		switch srcType := request.Source.Type; srcType {
-		case rpb.SourceType_TWITTER:
-			conv, err := twt.GetRecords(&request)
-			if err != nil {
-				log.Errorf("Failed to get conversation for id %s: %s", request, err)
-			}
-			if err := stg.SaveRecords(request.Source.ChannelId, conv); err != nil {
-				log.Warningf("Error while saving a record: %s", err)
-			}
-		default:
+        chr, ok := chroniclers[request.Source.Type]
+        if !ok {
 			log.Warningf("No loader found for request %s", request)
+            continue
 		}
+
+		conv, err := chr.GetRecords(&request)
+		if err != nil {
+			log.Errorf("Failed to get conversation for id %s: %s", request, err)
+		}
+		if err := stg.SaveRecords(request.Source.ChannelId, conv); err != nil {
+			log.Warningf("Error while saving a record: %s", err)
+		}
+
 	}
 }
