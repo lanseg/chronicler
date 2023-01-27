@@ -7,6 +7,7 @@ go_library(
     srcs = [
         "logging.go",
         "maps.go",
+        "nulls.go", 
         "runners.go",
         "textdata.go",
     ],
@@ -18,6 +19,7 @@ go_test(
     size = "small",
     srcs = [
         "maps_test.go",
+        "nulls_test.go",
         "runners_test.go",
         "textdata_test.go",
     ],
