@@ -55,17 +55,17 @@ func main() {
 	flag.Parse()
 
 	config := getConfig("config")
-    chroniclers := map[rpb.SourceType]chronicler.Chronicler {
-        rpb.SourceType_TWITTER: chronicler.NewTwitter("twitter", twitter.NewClient(*config.twitterApiKey)),
-    }
+	chroniclers := map[rpb.SourceType]chronicler.Chronicler{
+		rpb.SourceType_TWITTER: chronicler.NewTwitter("twitter", twitter.NewClient(*config.twitterApiKey)),
+	}
 	stg := storage.NewStorage(*config.storageRoot)
 
 	for _, arg := range flag.Args() {
 		request := parseRequest(arg)
-        chr, ok := chroniclers[request.Source.Type]
-        if !ok {
+		chr, ok := chroniclers[request.Source.Type]
+		if !ok {
 			log.Warningf("No loader found for request %s", request)
-            continue
+			continue
 		}
 
 		conv, err := chr.GetRecords(&request)

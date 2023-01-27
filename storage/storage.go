@@ -37,6 +37,7 @@ func (s *Storage) saveLines(name string, lines []string) error {
 }
 
 func (s *Storage) downloadURL(url string, target string) error {
+    s.logger.Debugf("Downloading file from %s to %s", url, target)
 	resp, err := s.httpClient.Get(url)
 	if err != nil {
 		return err
