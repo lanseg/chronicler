@@ -38,9 +38,9 @@ func getConfig(configFile string) Config {
 
 func parseRequest(s string) rpb.Request {
 	source := &rpb.Source{}
-	if _, err := url.ParseRequestURI(s); err == nil {
+	if parsedUrl, err := url.ParseRequestURI(s); err == nil {
 		source.Url = s
-		source.ChannelId = "WEB"
+        source.ChannelId = parsedUrl.Host
 		source.Type = rpb.SourceType_WEB
 	}
 

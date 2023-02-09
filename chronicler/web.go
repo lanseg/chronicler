@@ -59,7 +59,7 @@ func (w *Web) GetRecords(request *rpb.Request) (*rpb.RecordSet, error) {
 		Records: []*rpb.Record{
 			{
 				Source: &rpb.Source{
-					ChannelId: "WEB",
+					ChannelId: requestUrl.Host,
 				},
 				Files:       linkedFiles,
 				TextContent: html,
