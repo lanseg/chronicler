@@ -40,7 +40,7 @@ func parseRequest(s string) rpb.Request {
 	source := &rpb.Source{}
 	if parsedUrl, err := url.ParseRequestURI(s); err == nil {
 		source.Url = s
-        source.ChannelId = parsedUrl.Host
+		source.ChannelId = parsedUrl.Host
 		source.Type = rpb.SourceType_WEB
 	}
 
@@ -70,14 +70,13 @@ func main() {
 			log.Warningf("No loader found for request %s", request)
 			continue
 		}
-
 		conv, err := chr.GetRecords(&request)
+        conv.Request = &request
 		if err != nil {
 			log.Errorf("Failed to get conversation for id %s: %s", request, err)
 		}
-		if err := stg.SaveRecords(request.Source.ChannelId, conv); err != nil {
+		if err := stg.SaveRecords(conv); err != nil {
 			log.Warningf("Error while saving a record: %s", err)
 		}
-
 	}
 }

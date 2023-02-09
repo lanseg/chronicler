@@ -60,7 +60,8 @@ func (s *Storage) downloadURL(url string, target string) error {
 	return nil
 }
 
-func (s *Storage) SaveRecords(recordRoot string, r *rpb.RecordSet) error {
+func (s *Storage) SaveRecords(r *rpb.RecordSet) error {
+    recordRoot := filepath.Join(fmt.Sprint(r.Request.Source.Type), r.Request.Source.ChannelId)
 	if err := os.MkdirAll(filepath.Join(s.root, recordRoot), os.ModePerm); err != nil {
 		return err
 	}

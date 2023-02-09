@@ -46,10 +46,11 @@ message UserMetadata {
 }
 
 message RecordSet {
-  repeated Record records = 1;
-  repeated UserMetadata userMetadata = 2;
+  Request request = 1;
+  repeated Record records = 2;
+  repeated UserMetadata userMetadata = 3;
 }
 
 message Request {
-  Source source = 2;
+  Source source = 1;
 }
