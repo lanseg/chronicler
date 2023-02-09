@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 
@@ -70,29 +72,23 @@ func (s *Storage) SaveRecords(recordRoot string, r *rpb.RecordSet) error {
 		return err
 	}
 	for _, r := range r.Records {
-		if len(r.Links) > 0 {
-			for _, link := range r.Links {
-				if util.IsYoutubeLink(link) {
-					if err := util.DownloadYoutube(link, filepath.Join(s.root, recordRoot)); err != nil {
-						s.logger.Warningf("Failed to download youtube video: %s", err)
-					}
+		for _, link := range r.Links {
+			if util.IsYoutubeLink(link) {
+				if err := util.DownloadYoutube(link, filepath.Join(s.root, recordRoot)); err != nil {
+					s.logger.Warningf("Failed to download youtube video: %s", err)
 				}
 			}
 		}
 
-		if len(r.Files) > 0 {
-			for i, file := range r.GetFiles() {
-				if file.GetFileUrl() == "" {
-					s.logger.Warningf("Record with source %s has a without an url: %s",
-						r.Source, file)
-					continue
-				}
-				fileUrl := file.GetFileUrl()
-				fnamePos := strings.LastIndex(fileUrl, "/")
-				fname := fmt.Sprintf("%d_%s", i, fileUrl[fnamePos+1:])
-				if err := s.downloadURL(file.GetFileUrl(), filepath.Join(recordRoot, fname)); err != nil {
-					s.logger.Warningf("Failed to download file: %s: %s", file, err)
-				}
+		for _, file := range r.GetFiles() {
+			fileUrl, err := url.Parse(file.GetFileUrl())
+			if err != nil || fileUrl.String() == "" {
+				s.logger.Warningf("Malformed url for file: %s", file)
+				continue
+			}
+			fname := path.Base(fileUrl.Path)
+			if err := s.downloadURL(file.GetFileUrl(), filepath.Join(recordRoot, fname)); err != nil {
+				s.logger.Warningf("Failed to download file: %s: %s", file, err)
 			}
 		}
 

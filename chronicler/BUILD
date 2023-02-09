@@ -7,6 +7,7 @@ go_library(
     srcs = [
         "chronicler.go",
         "twitter.go",
+        "web.go",
     ],
     importpath = "chronicler",
     deps = [

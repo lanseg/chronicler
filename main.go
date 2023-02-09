@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"net/url"
 	"regexp"
 
 	"chronicler"
@@ -36,19 +37,20 @@ func getConfig(configFile string) Config {
 }
 
 func parseRequest(s string) rpb.Request {
+	source := &rpb.Source{}
+	if _, err := url.ParseRequestURI(s); err == nil {
+		source.Url = s
+		source.ChannelId = "WEB"
+		source.Type = rpb.SourceType_WEB
+	}
+
 	re := regexp.MustCompile("twitter.*/(?P<twitter_id>[0-9]+)[/]?")
 	matches := util.NewMap(re.SubexpNames(), re.FindStringSubmatch(s))
-	key := s
 	if match, ok := matches["twitter_id"]; ok && match != "" {
-		key = matches["twitter_id"]
+		source.ChannelId = matches["twitter_id"]
+		source.Type = rpb.SourceType_TWITTER
 	}
-	return rpb.Request{
-		RawRequest: s,
-		Source: &rpb.Source{
-			ChannelId: key,
-			Type:      rpb.SourceType_TWITTER,
-		},
-	}
+	return rpb.Request{Source: source}
 }
 
 func main() {
@@ -57,6 +59,7 @@ func main() {
 	config := getConfig("config")
 	chroniclers := map[rpb.SourceType]chronicler.Chronicler{
 		rpb.SourceType_TWITTER: chronicler.NewTwitter("twitter", twitter.NewClient(*config.twitterApiKey)),
+		rpb.SourceType_WEB:     chronicler.NewWeb("web", nil),
 	}
 	stg := storage.NewStorage(*config.storageRoot)
 
