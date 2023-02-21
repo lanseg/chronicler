@@ -71,7 +71,7 @@ func main() {
 			continue
 		}
 		conv, err := chr.GetRecords(&request)
-        conv.Request = &request
+		conv.Request = &request
 		if err != nil {
 			log.Errorf("Failed to get conversation for id %s: %s", request, err)
 		}
