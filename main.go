@@ -1,8 +1,10 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"net/url"
+	"os"
 	"regexp"
 
 	"chronicler"
@@ -14,26 +16,40 @@ import (
 )
 
 const (
+	configFlag      = "config"
 	twitterApiFlag  = "twitter_api_key"
 	storageRootFlag = "storage_root"
 )
 
 var (
+	configFile    = flag.String(configFlag, "", "Configuration defaults.")
 	twitterApiKey = flag.String(twitterApiFlag, "", "A key for the twitter api.")
 	storageRoot   = flag.String(storageRootFlag, "chronicler_storage", "A local folder to save downloads.")
 	log           = util.NewLogger("main")
 )
 
 type Config struct {
-	twitterApiKey *string
-	storageRoot   *string
+	TwitterApiKey *string `json:"twitterApiKey"`
+	StorageRoot   *string `json:"storageRoot"`
 }
 
-func getConfig(configFile string) Config {
-	result := Config{}
-	result.twitterApiKey = util.Ifnull(twitterApiKey, result.twitterApiKey)
-	result.storageRoot = util.Ifnull(storageRoot, result.storageRoot)
-	return result
+func getConfig(configFile *string) Config {
+	config := Config{}
+	if configFile != nil {
+		b, err := os.ReadFile(*configFile)
+		if err != nil {
+			log.Warningf("Error reading file %s: %s", config, err)
+		} else if err = json.Unmarshal(b, &config); err != nil {
+			log.Warningf("Error unmarshalling file %s: %s", config, err)
+		}
+	}
+	if *twitterApiKey != "" {
+		config.TwitterApiKey = twitterApiKey
+	}
+	if *storageRoot != "" {
+		config.StorageRoot = storageRoot
+	}
+	return config
 }
 
 func parseRequest(s string) rpb.Request {
@@ -56,12 +72,12 @@ func parseRequest(s string) rpb.Request {
 func main() {
 	flag.Parse()
 
-	config := getConfig("config")
+	config := getConfig(configFile)
 	chroniclers := map[rpb.SourceType]chronicler.Chronicler{
-		rpb.SourceType_TWITTER: chronicler.NewTwitter("twitter", twitter.NewClient(*config.twitterApiKey)),
+		rpb.SourceType_TWITTER: chronicler.NewTwitter("twitter", twitter.NewClient(*config.TwitterApiKey)),
 		rpb.SourceType_WEB:     chronicler.NewWeb("web", nil),
 	}
-	stg := storage.NewStorage(*config.storageRoot)
+	stg := storage.NewStorage(*config.StorageRoot)
 
 	for _, arg := range flag.Args() {
 		request := parseRequest(arg)
