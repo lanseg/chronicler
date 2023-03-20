@@ -1,0 +1,89 @@
+<html>
+    <head>
+        <link rel='stylesheet' href='style.css' />
+        <script>
+            window.onload = () => {
+                Map.prototype.getOrElse = function(key, value) {
+                    return this.has(key) ? this.get(key) : value;
+                }
+
+                function pad(number, len = 2) {
+                    return String(number).padStart(2, '0');
+                }
+
+                function formatDateTime(date) {
+                    return `${pad(date.getDate())}.${pad(date.getMonth() + 1)}.${date.getFullYear()} ` +
+                           `${pad(date.getHours())}:${pad(date.getMinutes())}`;
+                }
+                fetch('/chronicler?type=twitter&id=1636761535371706374')
+                .then(response => response.text())
+                .then(text => {
+                    const data = JSON.parse(text);
+                    const fragment = document.createDocumentFragment();
+                    const records = document.querySelector('.records');
+
+                    const userById = new Map();
+                    for (const user of data.userMetadata) {
+                        userById.set(user.id, user);
+                    }
+
+                    const recordById = new Map();
+                    for (const record of data.records) {
+                        if (!record.source) {
+                            continue;
+                        }
+                        recordById.set(record.source.message_id, record);
+                    }
+
+                    function getUserName(id) {
+                        return userById.has(id) ? userById.get(id).username : id;
+                    }
+
+                    function getParent(record) {
+                        if (record.parent) {
+                            return recordById.get(record.parent.message_id);
+                        }
+                        if (record.source.channel_id) {
+                            return recordById.get(record.source.channel_id);
+                        }
+                        return undefined;
+                    }
+
+                    for (const record of data.records) {
+                        console.log(record.parent);
+                        const date = new Date(record.time * 1000);
+                        const userName = getUserName(record.source.sender_id);
+                        const parent = getParent(record);
+                        const parentName = parent ? getUserName(parent.source.sender_id) : 'NONE';
+
+                        const recordEl = document.createElement('div');
+                        recordEl.setAttribute('id', record.source.message_id)
+                        recordEl.setAttribute('class', 'record');
+                        recordEl.innerHTML = `<div class='header'>
+                          <span class="datetime">${formatDateTime(date)}</span>
+                          <a href="#${record.source.message_id}">#</a>
+                          <span class="username">${userName}</span>
+                          <span class="username">→ <a href="#${parent.source.message_id}">${parentName}</a></span>
+                        </div>
+                        <div class='content'>${record.text_content}</div>`;
+
+                        const mediaEl = document.createElement('div')
+                        mediaEl.setAttribute('class', 'media');
+                        for (const file of record.files ?? []) {
+                            mediaEl.innerHTML += `${file.file_id}<br/>`;
+                        }
+
+                        recordEl.appendChild(mediaEl);
+                        fragment.appendChild(recordEl);
+                    }
+                    records.append(fragment);
+                });
+            };
+        </script>
+    </head>
+    <body>
+        <div class="records"> 
+        Loading...
+        </div>
+    </body>
+</html>

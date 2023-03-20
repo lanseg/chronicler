@@ -73,7 +73,7 @@ func (t *Twitter) tweetToRecord(response *twitter.Response) *rpb.RecordSet {
 	for _, tweet := range tweets {
 		for _, ref := range tweet.Reference {
 			if refTweet, ok := records[ref.Id]; ok {
-				records[refTweet.Source.MessageId].Parent = records[tweet.Id].Source
+				records[tweet.Id].Parent = records[refTweet.Source.MessageId].Source
 			}
 		}
 		result.Records = append(result.Records, records[tweet.Id])

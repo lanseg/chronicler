@@ -15,16 +15,10 @@ import (
 	rpb "chronicler/proto/records"
 )
 
-const (
-	configFlag      = "config"
-	twitterApiFlag  = "twitter_api_key"
-	storageRootFlag = "storage_root"
-)
-
 var (
-	configFile    = flag.String(configFlag, "", "Configuration defaults.")
-	twitterApiKey = flag.String(twitterApiFlag, "", "A key for the twitter api.")
-	storageRoot   = flag.String(storageRootFlag, "chronicler_storage", "A local folder to save downloads.")
+	configFile    = flag.String("config", "", "Configuration defaults.")
+	twitterApiKey = flag.String("twitter_api_key", "", "A key for the twitter api.")
+	storageRoot   = flag.String("storage_root", "chronicler_storage", "A local folder to save downloads.")
 	log           = util.NewLogger("main")
 )
 

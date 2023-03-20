@@ -1,4 +1,4 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -11,6 +11,5 @@ go_library(
     deps = [
         "//proto:records_go_proto",
         "//util",
-        "@com_github_golang_protobuf//proto:go_default_library",
     ],
 )

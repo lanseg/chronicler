@@ -1,0 +1,41 @@
+* {
+    font-family: sans-serif;
+}
+
+.records {
+    width: 100%;
+    max-width:600px;
+    display: grid;
+    grid-template-columns: 1;
+    row-gap: 6px;
+}
+
+.parent {
+    border: solid 1px red;
+}
+
+.record {
+    border: solid 1px lightgray;
+    border-radius: 8px;
+    padding: 4px;
+}
+
+.record .datetime {
+  color: darkgray;
+}
+.username {
+    font-weight: bold;
+}
+
+.header {
+  margin-bottom: 4px;
+}
+
+.content {
+    /* border: solid 1px red; */
+}
+
+.record .media {
+    width: 100%;
+    border: solid 1px red;
+}

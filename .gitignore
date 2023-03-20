@@ -24,6 +24,8 @@ bazel-out
 bazel-testlogs
 bazel-chronist
 chronist_storage/
+chronicler_storage/
+config.json
 cursor.txt
 go.sum
 keys
