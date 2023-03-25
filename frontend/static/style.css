@@ -3,11 +3,19 @@
 }
 
 .records {
-    width: 100%;
-    max-width:600px;
     display: grid;
     grid-template-columns: 100%;
     row-gap: 6px;
+    margin: 0px;
+}
+
+.controls {
+  margin: 0px;
+  width: 100%;
+  border-radius: 8px;
+  display: grid;
+  grid-template-columns: 80% 20%;
+  margin-bottom: 8px;
 }
 
 .record {
@@ -26,10 +34,6 @@
 
 .header {
   margin-bottom: 4px;
-}
-
-.content {
-    /* border: solid 1px red; */
 }
 
 .record .images {

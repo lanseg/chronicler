@@ -1,42 +1,45 @@
 <html>
-    <head>
-        <link rel='stylesheet' href='style.css' />
-        <script>
-            const type = 'twitter';
-            const rcid = '1636761535371706374';
-            const imgExtensions = ['png', 'jpg', 'svg', 'gif', 'webp'];
 
-            window.onload = () => {
-                Map.prototype.getOrElse = function(key, value) {
-                    return this.has(key) ? this.get(key) : value;
-                }
+<head>
+    <link rel='stylesheet' href='style.css' />
+    <script>
+        const params = new URLSearchParams(document.location.search);
+        const type = 'twitter';
+        const rcid = params.get("record_id");
+        const imgExtensions = ['png', 'jpg', 'svg', 'gif', 'webp'];
 
-                function pad(number, len = 2) {
-                    return String(number).padStart(2, '0');
-                }
+        window.onload = () => {
+            Map.prototype.getOrElse = function (key, value) {
+                return this.has(key) ? this.get(key) : value;
+            }
 
-                function formatDateTime(date) {
-                    return `${pad(date.getDate())}.${pad(date.getMonth() + 1)}.${date.getFullYear()} ` +
-                           `${pad(date.getHours())}:${pad(date.getMinutes())}`;
-                }
+            function pad(number, len = 2) {
+                return String(number).padStart(2, '0');
+            }
 
-                function isImage(path) {
-                    return imgExtensions.includes(getExtension(path.toLowerCase()));
-                }
+            function formatDateTime(date) {
+                return `${pad(date.getDate())}.${pad(date.getMonth() + 1)}.${date.getFullYear()} ` +
+                    `${pad(date.getHours())}:${pad(date.getMinutes())}`;
+            }
 
-                function getExtension(path) {
-                    const lastIndex = path.lastIndexOf('.');
-                    return (lastIndex > -1 && lastIndex < path.length) ? 
-                        path.substring(lastIndex + 1) : "";
-                }
+            function isImage(path) {
+                return imgExtensions.includes(getExtension(path.toLowerCase()));
+            }
 
-                function getFileName(path) {
-                    const lastIndex = path.lastIndexOf('/');
-                    return (lastIndex > -1 && lastIndex < path.length) ? 
-                        path.substring(lastIndex + 1) : "";
-                }
+            function getExtension(path) {
+                const lastIndex = path.lastIndexOf('.');
+                return (lastIndex > -1 && lastIndex < path.length) ?
+                    path.substring(lastIndex + 1) : "";
+            }
 
-                fetch(`/chronicler?type=${type}&id=${rcid}`)
+            function getFileName(path) {
+                const lastIndex = path.lastIndexOf('/');
+                return (lastIndex > -1 && lastIndex < path.length) ?
+                    path.substring(lastIndex + 1) : "";
+            }
+
+            document.getElementById("recordId").value = rcid;
+            fetch(`/chronicler?type=${type}&id=${rcid}`)
                 .then(response => response.text())
                 .then(text => {
                     const data = JSON.parse(text);
@@ -99,7 +102,7 @@
                         }
 
                         const imagesEl = document.createElement('div')
-                        imagesEl.setAttribute('class', 'images');                        
+                        imagesEl.setAttribute('class', 'images');
                         for (const file of images) {
                             imagesEl.innerHTML += `<div class="image">
                                     <a href="chronicler?type=${type}&id=${rcid}&file=${file}">
@@ -121,11 +124,17 @@
                     }
                     records.append(fragment);
                 });
-            };
-        </script>
-    </head>
-    <body>
-        <div class="records"> 
-        </div>
-    </body>
+        };
+    </script>
+</head>
+
+<body>
+    <div class="controls">
+        <input id="recordId" type="text" placeholder="tweet conversation id" />
+        <button>Open</buttom>
+    </div>
+    <div class="records">
+    </div>
+</body>
+
 </html>
