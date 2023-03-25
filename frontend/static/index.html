@@ -2,6 +2,10 @@
     <head>
         <link rel='stylesheet' href='style.css' />
         <script>
+            const type = 'twitter';
+            const rcid = '1636761535371706374';
+            const imgExtensions = ['png', 'jpg', 'svg', 'gif', 'webp'];
+
             window.onload = () => {
                 Map.prototype.getOrElse = function(key, value) {
                     return this.has(key) ? this.get(key) : value;
@@ -15,7 +19,24 @@
                     return `${pad(date.getDate())}.${pad(date.getMonth() + 1)}.${date.getFullYear()} ` +
                            `${pad(date.getHours())}:${pad(date.getMinutes())}`;
                 }
-                fetch('/chronicler?type=twitter&id=1636761535371706374')
+
+                function isImage(path) {
+                    return imgExtensions.includes(getExtension(path.toLowerCase()));
+                }
+
+                function getExtension(path) {
+                    const lastIndex = path.lastIndexOf('.');
+                    return (lastIndex > -1 && lastIndex < path.length) ? 
+                        path.substring(lastIndex + 1) : "";
+                }
+
+                function getFileName(path) {
+                    const lastIndex = path.lastIndexOf('/');
+                    return (lastIndex > -1 && lastIndex < path.length) ? 
+                        path.substring(lastIndex + 1) : "";
+                }
+
+                fetch(`/chronicler?type=${type}&id=${rcid}`)
                 .then(response => response.text())
                 .then(text => {
                     const data = JSON.parse(text);
@@ -50,7 +71,6 @@
                     }
 
                     for (const record of data.records) {
-                        console.log(record.parent);
                         const date = new Date(record.time * 1000);
                         const userName = getUserName(record.source.sender_id);
                         const parent = getParent(record);
@@ -67,13 +87,36 @@
                         </div>
                         <div class='content'>${record.text_content}</div>`;
 
-                        const mediaEl = document.createElement('div')
-                        mediaEl.setAttribute('class', 'media');
+                        const images = [];
+                        const others = [];
                         for (const file of record.files ?? []) {
-                            mediaEl.innerHTML += `${file.file_id}<br/>`;
+                            const fname = getFileName(file.file_url);
+                            if (isImage(fname)) {
+                                images.push(fname);
+                            } else {
+                                others.push(fname);
+                            }
                         }
 
-                        recordEl.appendChild(mediaEl);
+                        const imagesEl = document.createElement('div')
+                        imagesEl.setAttribute('class', 'images');                        
+                        for (const file of images) {
+                            imagesEl.innerHTML += `<div class="image">
+                                    <a href="chronicler?type=${type}&id=${rcid}&file=${file}">
+                                    <img src="chronicler?type=${type}&id=${rcid}&file=${file}" />
+                                    </a>
+                                </div>`;
+                        }
+
+                        const filesEl = document.createElement('div')
+                        filesEl.setAttribute('class', 'files');
+                        for (const file of others) {
+                            filesEl.innerHTML += `<div class="file">
+                                <a href="chronicler?type=${type}&id=${rcid}&file=${file}">
+                            </div>`;
+                        }
+                        recordEl.appendChild(imagesEl);
+                        recordEl.appendChild(filesEl);
                         fragment.appendChild(recordEl);
                     }
                     records.append(fragment);
@@ -83,7 +126,6 @@
     </head>
     <body>
         <div class="records"> 
-        Loading...
         </div>
     </body>
 </html>

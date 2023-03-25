@@ -31,9 +31,14 @@ func (ws *WebServer) handleRequest(w http.ResponseWriter, r *http.Request) {
 		ws.Error(w, fmt.Sprintf("Unknown source type: \"%s\"", params.Get("type")), 500)
 		return
 	}
-	b, err := os.ReadFile(filepath.Join(ws.storageRoot, fmt.Sprintf("%s", sourceType), params.Get("id"), "record.json"))
+	fname := "record.json"
+	if params.Has("file") {
+		fname = params.Get("file")
+	}
+	b, err := os.ReadFile(filepath.Join(ws.storageRoot,
+		fmt.Sprintf("%s", sourceType), params.Get("id"), fname))
 	if err != nil {
-		ws.Error(w, fmt.Sprintf("Record %s/%s not found", sourceType, params.Get("id")), 500)
+		ws.Error(w, fmt.Sprintf("File %s/%s not found", sourceType, params.Get("id")), 500)
 		return
 	}
 	_, err = w.Write(b)
