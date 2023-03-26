@@ -1,6 +1,8 @@
 <html>
 
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel='stylesheet' href='style.css' />
     <script>
         const params = new URLSearchParams(document.location.search);
@@ -38,7 +40,11 @@
                     path.substring(lastIndex + 1) : "";
             }
 
-            document.getElementById("recordId").value = rcid;
+            document.querySelector("#recordId .search-input").value = rcid;
+            document.querySelector("#recordId button").addEventListener('click', () => {
+                window.location.href = "?record_id=" + document.querySelector("#recordId .search-input").value;
+            });
+
             fetch(`/chronicler?type=${type}&id=${rcid}`)
                 .then(response => response.text())
                 .then(text => {
@@ -78,7 +84,7 @@
                         const userName = getUserName(record.source.sender_id);
                         const parent = getParent(record);
                         const parentName = parent ? getUserName(parent.source.sender_id) : 'NONE';
-
+                        const parentMessage = parent ? parent.source.message_id : 'NONE';
                         const recordEl = document.createElement('div');
                         recordEl.setAttribute('id', record.source.message_id)
                         recordEl.setAttribute('class', 'record');
@@ -86,7 +92,7 @@
                           <span class="datetime">${formatDateTime(date)}</span>
                           <a href="#${record.source.message_id}">#</a>
                           <span class="username">${userName}</span>
-                          <span class="username">→ <a href="#${parent.source.message_id}">${parentName}</a></span>
+                          <span class="username">→ <a href="#${parentMessage}">${parentName}</a></span>
                         </div>
                         <div class='content'>${record.text_content}</div>`;
 
@@ -129,8 +135,8 @@
 </head>
 
 <body>
-    <div class="controls">
-        <input id="recordId" type="text" placeholder="tweet conversation id" />
+    <div id="recordId" class="controls">
+        <input type="text" placeholder="tweet conversation id" class="search-input" />
         <button>Open</buttom>
     </div>
     <div class="records">

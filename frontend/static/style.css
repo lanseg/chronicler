@@ -10,30 +10,43 @@
 }
 
 .controls {
-  margin: 0px;
-  width: 100%;
-  border-radius: 8px;
-  display: grid;
-  grid-template-columns: 80% 20%;
-  margin-bottom: 8px;
+    margin: 0px;
+    width: 100%;
+    column-gap: 8px;
+    border-radius: 8px;
+    display: grid;
+    grid-template-columns: 80% auto;
+    margin-bottom: 8px;
+}
+
+.controls .search-input {
+    padding: 0.5rem;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
 }
 
 .record {
     width: 100%;
     border: solid 1px lightgray;
     border-radius: 8px;
+}
+
+.record .content {
     padding: 4px;
+    font-size: 1rem;
 }
 
 .record .datetime {
-  color: darkgray;
+    color: darkgray;
 }
+
 .username {
     font-weight: bold;
 }
 
 .header {
-  margin-bottom: 4px;
+    padding: 4px;
 }
 
 .record .images {

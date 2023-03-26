@@ -21,6 +21,7 @@ func main() {
 
 	cwd, _ := os.Getwd()
 	logger.Infof("Currect directory: %s", cwd)
+	logger.Infof("Storage root: %s", *storageRoot)
 	logger.Infof("Starting server on port %d", *port)
 
 	server := frontend.NewServer(*port, *storageRoot, "/home/lans/devel/chronist/frontend/static")
