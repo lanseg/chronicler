@@ -59,8 +59,8 @@ func TestTwitterClient(t *testing.T) {
 		if err != nil {
 			t.Errorf("Unexpected error: %s", err)
 		}
-		expected := &Response{
-			Data: []*Tweet{
+		expected := &Response[Tweet]{
+			Data: []Tweet{
 				{
 					Id: "1307025659294674945",
 					Text: "Here’s an article that highlights the updates in the " +

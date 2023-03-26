@@ -17,9 +17,9 @@ type Twitter struct {
 	client twitter.Client
 }
 
-func (t *Twitter) tweetToRecord(response *twitter.Response) *rpb.RecordSet {
+func (t *Twitter) tweetToRecord(response *twitter.Response[twitter.Tweet]) *rpb.RecordSet {
 	seen := util.NewSet[string]([]string{})
-	tweets := []*twitter.Tweet{}
+	tweets := []twitter.Tweet{}
 	for _, twt := range append(response.Data, response.Includes.Tweets...) {
 		if seen.Contains(twt.Id) {
 			continue

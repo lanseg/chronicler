@@ -28,6 +28,9 @@ var (
 	tweetMediaFields = []string{
 		"url", "height", "width", "media_key", "variants",
 	}
+	tweetUserFields = []string{
+		"id", "name", "username",
+	}
 )
 
 // Media types
@@ -65,9 +68,9 @@ type User struct {
 }
 
 type Includes struct {
-	Media  []Media  `json:"media"`
-	Tweets []*Tweet `json:"tweets"`
-	Users  []User   `json:"users"`
+	Media  []Media `json:"media"`
+	Tweets []Tweet `json:"tweets"`
+	Users  []User  `json:"users"`
 }
 
 type Attachment struct {
@@ -112,25 +115,25 @@ type Metadata struct {
 	ResultCount uint64 `json:"result_count"`
 }
 
-type Response struct {
-	Data     []*Tweet  `json:"data"`
+type Response[T any] struct {
+	Data     []T       `json:"data"`
 	Includes *Includes `json:"includes"`
 	Errors   []*Error  `json:"errors"`
 	Meta     *Metadata `json:"meta"`
 }
 
-func (r Response) String() string {
+func (r Response[T]) String() string {
 	result := make([]string, len(r.Data))
 	for i, tweet := range r.Data {
-		result[i] = tweet.String()
+		result[i] = fmt.Sprintf("%s", tweet)
 	}
 	return fmt.Sprintf("Response {data: [%s]}", strings.Join(result, ", "))
 }
 
 // The client
 type Client interface {
-	GetTweets(ids []string) (*Response, error)
-	GetConversation(conversationId string) (*Response, error)
+	GetTweets(ids []string) (*Response[Tweet], error)
+	GetConversation(conversationId string) (*Response[Tweet], error)
 }
 
 type ClientImpl struct {
@@ -150,7 +153,7 @@ func NewClient(token string) Client {
 	}
 }
 
-func getMissingMedia(response *Response) map[string]([]string) {
+func getMissingMedia(response *Response[Tweet]) map[string]([]string) {
 	mediaById := map[string]*Media{}
 	for _, r := range response.Includes.Media {
 		mediaById[r.MediaKey] = &r
@@ -164,6 +167,20 @@ func getMissingMedia(response *Response) map[string]([]string) {
 		}
 	}
 	return result
+}
+
+func getMissingUsers(response *Response[Tweet]) []string {
+	users := util.NewSet([]string{})
+	for _, tweet := range response.Data {
+		users.Add(tweet.Author)
+	}
+	for _, tweet := range response.Includes.Tweets {
+		users.Add(tweet.Author)
+	}
+	for _, user := range response.Includes.Users {
+		users.Remove(user.Id)
+	}
+	return users.Values()
 }
 
 func GetBestQualityMedia(media Media) *TwitterMedia {
@@ -199,7 +216,18 @@ func (c *ClientImpl) newRequest(url string) (*http.Request, error) {
 	return request, nil
 }
 
-func (c *ClientImpl) performRequest(url url.URL) (*Response, error) {
+func unmarshalResponse[T any](bytes []byte) (*Response[T], error) {
+	result := &Response[T]{
+		Includes: &Includes{},
+		Meta:     &Metadata{},
+	}
+	if err := json.Unmarshal(bytes, result); err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+func (c *ClientImpl) performRequest(url url.URL) ([]byte, error) {
 	c.logger.Debugf("Api request: %s", url.String())
 	request, err := c.newRequest(url.String())
 	if err != nil {
@@ -216,14 +244,28 @@ func (c *ClientImpl) performRequest(url url.URL) (*Response, error) {
 	if err != nil {
 		return nil, err
 	}
-	result := &Response{
-		Includes: &Includes{},
-		Meta:     &Metadata{},
+	return bytes, nil
+}
+
+func (c *ClientImpl) getUserInfo(ids []string) ([]User, error) {
+	url := url.URL{
+		Scheme: "https",
+		Host:   "api.twitter.com",
+		Path:   "2/users",
+		RawQuery: fmt.Sprintf("ids=%s&user.fields=%s",
+			url.QueryEscape(strings.Join(ids, ",")),
+			url.QueryEscape(strings.Join(tweetUserFields, ",")),
+		),
 	}
-	if err = json.Unmarshal(bytes, result); err != nil {
+	bytes, err := c.performRequest(url)
+	if err != nil {
 		return nil, err
 	}
-	return result, nil
+	response, err := unmarshalResponse[User](bytes)
+	if err != nil {
+		return nil, err
+	}
+	return response.Data, nil
 }
 
 func (c *ClientImpl) getMediaForTweets(ids []string) ([]Media, error) {
@@ -236,33 +278,46 @@ func (c *ClientImpl) getMediaForTweets(ids []string) ([]Media, error) {
 			url.QueryEscape("attachments.media_keys"),
 			url.QueryEscape(strings.Join(tweetMediaFields, ","))),
 	}
-	response, err := c.performRequest(url)
+	bytes, err := c.performRequest(url)
+	if err != nil {
+		return nil, err
+	}
+	response, err := unmarshalResponse[Tweet](bytes)
 	if err != nil {
 		return nil, err
 	}
 	return response.Includes.Media, nil
 }
 
-func (c *ClientImpl) getConversationPage(conversationId string, paginationToken string) (*Response, error) {
+func (c *ClientImpl) getConversationPage(conversationId string, paginationToken string) (*Response[Tweet], error) {
 	url := url.URL{
 		Scheme: "https",
 		Host:   "api.twitter.com",
 		Path:   "2/tweets/search/recent",
-		RawQuery: fmt.Sprintf("query=conversation_id:%s&tweet.fields=%s&expansions=%s&media.fields=%s&max_results=100",
+		RawQuery: fmt.Sprintf("query=conversation_id:%s&tweet.fields=%s&expansions=%s&user.fields=%s&media.fields=%s&max_results=100",
 			url.QueryEscape(conversationId),
 			url.QueryEscape(strings.Join(tweetFields, ",")),
 			url.QueryEscape(strings.Join(tweetExpansions, ",")),
+			url.QueryEscape(strings.Join(tweetUserFields, ",")),
 			url.QueryEscape(strings.Join(tweetMediaFields, ","))),
 	}
 	if paginationToken != "" {
 		url.RawQuery = fmt.Sprintf("%s&pagination_token=%s", url.RawQuery, paginationToken)
 	}
-	return c.performRequest(url)
+	bytes, err := c.performRequest(url)
+	if err != nil {
+		return nil, err
+	}
+	response, err := unmarshalResponse[Tweet](bytes)
+	if err != nil {
+		return nil, err
+	}
+	return response, nil
 }
 
-func (c *ClientImpl) GetConversation(conversationId string) (*Response, error) {
+func (c *ClientImpl) GetConversation(conversationId string) (*Response[Tweet], error) {
 	token := ""
-	responses := []*Response{}
+	responses := []*Response[Tweet]{}
 	for {
 		result, err := c.getConversationPage(conversationId, token)
 		if err != nil {
@@ -283,7 +338,7 @@ func (c *ClientImpl) GetConversation(conversationId string) (*Response, error) {
 	}
 	c.logger.Infof("Loaded %d pages from conversation %s", len(responses), conversationId)
 
-	result := &Response{
+	result := &Response[Tweet]{
 		Includes: &Includes{},
 		Meta:     &Metadata{},
 	}
@@ -308,10 +363,20 @@ func (c *ClientImpl) GetConversation(conversationId string) (*Response, error) {
 	c.logger.Infof("Missing media after the download: from tweets %s, for keys: %s",
 		util.Keys(missingMedia), util.Values(missingMedia))
 
+	missingUsers := getMissingUsers(result)
+	c.logger.Infof("Downloading missing information for users: %s", missingUsers)
+	if users, err := c.getUserInfo(missingUsers); err == nil {
+		result.Includes.Users = append(result.Includes.Users, users...)
+	} else {
+		c.logger.Warningf("Failed loading user information for %s", missingUsers)
+	}
+	missingUsers = getMissingUsers(result)
+	c.logger.Infof("Missing information for users after download: %s", missingUsers)
+
 	return result, nil
 }
 
-func (c *ClientImpl) GetTweets(ids []string) (*Response, error) {
+func (c *ClientImpl) GetTweets(ids []string) (*Response[Tweet], error) {
 	url := url.URL{
 		Scheme: "https",
 		Host:   "api.twitter.com",
@@ -322,5 +387,13 @@ func (c *ClientImpl) GetTweets(ids []string) (*Response, error) {
 			url.QueryEscape(strings.Join(tweetExpansions, ",")),
 			url.QueryEscape(strings.Join(tweetMediaFields, ","))),
 	}
-	return c.performRequest(url)
+	bytes, err := c.performRequest(url)
+	if err != nil {
+		return nil, err
+	}
+	response, err := unmarshalResponse[Tweet](bytes)
+	if err != nil {
+		return nil, err
+	}
+	return response, nil
 }
