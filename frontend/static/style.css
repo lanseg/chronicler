@@ -55,10 +55,15 @@
 }
 
 .record .images .image {
+    max-width: 300px;
     margin: 4px;
     width: 100%;
 }
 
 .record .images .image img {
     width: 100%;
+}
+
+.record .files {
+    margin: 4px;
 }

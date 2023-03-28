@@ -121,7 +121,7 @@
                         filesEl.setAttribute('class', 'files');
                         for (const file of others) {
                             filesEl.innerHTML += `<div class="file">
-                                <a href="chronicler?type=${type}&id=${rcid}&file=${file}">
+                                <a href="chronicler?type=${type}&id=${rcid}&file=${encodeURIComponent(file)}">${file}</a>
                             </div>`;
                         }
                         recordEl.appendChild(imagesEl);
