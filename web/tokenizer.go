@@ -44,7 +44,7 @@ func (p *Tokenizer) charAt() rune {
 }
 
 func (p *Tokenizer) isChar(r rune) bool {
-	return r == rune(p.text[p.pos])
+	return !p.isEnd() && r == rune(p.text[p.pos])
 }
 
 func (p *Tokenizer) isSpace() bool {
@@ -110,6 +110,12 @@ func (p *Tokenizer) parseParamValue() string {
 	for !p.isEnd() && !p.isChar('>') && !((quoted && p.isChar(char)) || (!quoted && p.isSpace())) {
 		paramValue += string(p.charAt())
 		p.next()
+		for p.isChar('\\') {
+			paramValue += string(p.charAt())
+			p.next()
+			paramValue += string(p.charAt())
+			p.next()
+		}
 	}
 	if quoted {
 		p.next()
@@ -193,25 +199,23 @@ func (p *Tokenizer) parseDocument() {
 	}
 }
 
-func (p *Tokenizer) Parse(data string) {
+func (p *Tokenizer) tokenize(data string) {
 	p.text = data
 	p.parser = p.parseDocument
 
 	for p.pos < len(data) {
 		p.parser()
 	}
-
-	for i, t := range p.tokens {
-		fmt.Printf("%03d %s\n", i, t)
-	}
 }
 
-func CreateTokenizer() *Tokenizer {
-	return &Tokenizer{
+func Tokenize(input string) []*Token {
+	tok := &Tokenizer{
 		tokens: []*Token{
 			{
 				Name: "root",
 			},
 		},
 	}
+	tok.tokenize(input)
+	return tok.tokens[1:]
 }

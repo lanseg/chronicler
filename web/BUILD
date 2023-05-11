@@ -16,3 +16,15 @@ go_library(
     importpath = "web/tokenizer",
     deps = [],
 )
+
+go_test(
+    name = "web_test",
+    size = "small",
+    srcs = [
+        "tokenizer_test.go",
+    ],
+    data = glob(["testdata/*"]),
+    embed = [
+        ":tokenizer",
+    ],
+)
