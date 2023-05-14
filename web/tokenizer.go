@@ -184,10 +184,16 @@ func (p *Tokenizer) parseScriptContent() {
 		tokenBuffer += string(p.charAt())
 		p.next()
 	}
+	if strings.HasSuffix(tokenBuffer, "</script>") {
+		p.pos -= len("</script>")
+		tokenBuffer = tokenBuffer[:len(tokenBuffer) - len("</script>")]
+        p.parser = p.parseContent
+	} else {
+        p.parser = p.parseDocument
+    }
 	if len(tokenBuffer) != 0 && !isSpace(tokenBuffer) {
 		p.addTextToken(tokenBuffer)
 	}
-	p.parser = p.parseDocument
 }
 
 func (p *Tokenizer) parseDocument() {

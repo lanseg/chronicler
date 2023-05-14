@@ -27,6 +27,18 @@ func TestTwitterClient(t *testing.T) {
 			},
 		},
 		{
+			desc:  "Script special case",
+			input: "<tag>Text<script>the code</script>More text",
+			want: []*Token{
+				{Name: "tag", Params: []Param{}},
+				{Text: "Text"},
+				{Name: "script", Params: []Param{}},
+				{Text: "the code"},
+				{Name: "/script", Params: []Param{}},
+				{Text: "More text"},
+			},
+		},
+		{
 			desc:  "Single tag content",
 			input: "Some input <tag key=value key key=\"quoted value\" key='also quoted'></tag>",
 			want: []*Token{
