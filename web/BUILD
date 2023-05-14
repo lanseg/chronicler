@@ -15,7 +15,9 @@ go_library(
         "tokenizer.go",
     ],
     importpath = "web/tokenizer",
-    deps = [],
+    deps = [
+        "//util",
+    ],
 )
 
 go_test(

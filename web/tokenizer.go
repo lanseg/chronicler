@@ -1,7 +1,7 @@
 package tokenizer
 
 import (
-	"fmt"
+	"chronicler/util"
 	"strings"
 	"unicode"
 )
@@ -15,19 +15,10 @@ func isSpace(s string) bool {
 	return true
 }
 
-type Param struct {
-	Key   string
-	Value string
-}
-
-func (p Param) String() string {
-	return fmt.Sprintf("{\"%s\"=\"%s\"}", p.Key, p.Value)
-}
-
 type Token struct {
 	Name   string
 	Text   string
-	Params []Param
+	Params []util.Pair[string, string]
 }
 
 type Tokenizer struct {
@@ -83,7 +74,7 @@ func (p *Tokenizer) addTextToken(content string) *Token {
 	return p.lastToken()
 }
 
-func (p *Tokenizer) addTagToken(name string, params []Param) *Token {
+func (p *Tokenizer) addTagToken(name string, params []util.Pair[string, string]) *Token {
 	p.tokens = append(p.tokens, &Token{
 		Name:   name,
 		Params: params,
@@ -124,7 +115,7 @@ func (p *Tokenizer) parseParamValue() string {
 }
 
 func (p *Tokenizer) parseParamList() {
-	params := []Param{}
+	params := []util.Pair[string, string]{}
 	for !p.isEnd() && !p.isChar('>') {
 		paramName := p.parseParamName()
 		p.skipSpace()
@@ -134,9 +125,9 @@ func (p *Tokenizer) parseParamList() {
 		if p.isChar('=') {
 			p.next()
 			paramValue := p.parseParamValue()
-			params = append(params, Param{Key: paramName, Value: paramValue})
+			params = append(params, util.AsPair(paramName, paramValue))
 		} else {
-			params = append(params, Param{Key: paramName})
+			params = append(params, util.AsPair(paramName, ""))
 		}
 		p.skipSpace()
 	}
@@ -152,7 +143,7 @@ func (p *Tokenizer) parseTag() {
 		p.next()
 	}
 	if len(tokenBuffer) != 0 {
-		p.addTagToken(tokenBuffer, []Param{})
+		p.addTagToken(tokenBuffer, []util.Pair[string, string]{})
 	}
 	p.skipSpace()
 	if p.isChar('>') {
@@ -186,11 +177,11 @@ func (p *Tokenizer) parseScriptContent() {
 	}
 	if strings.HasSuffix(tokenBuffer, "</script>") {
 		p.pos -= len("</script>")
-		tokenBuffer = tokenBuffer[:len(tokenBuffer) - len("</script>")]
-        p.parser = p.parseContent
+		tokenBuffer = tokenBuffer[:len(tokenBuffer)-len("</script>")]
+		p.parser = p.parseContent
 	} else {
-        p.parser = p.parseDocument
-    }
+		p.parser = p.parseDocument
+	}
 	if len(tokenBuffer) != 0 && !isSpace(tokenBuffer) {
 		p.addTextToken(tokenBuffer)
 	}

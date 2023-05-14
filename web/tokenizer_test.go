@@ -1,6 +1,7 @@
 package tokenizer
 
 import (
+	"chronicler/util"
 	"reflect"
 	"testing"
 )
@@ -30,11 +31,11 @@ func TestTwitterClient(t *testing.T) {
 			desc:  "Script special case",
 			input: "<tag>Text<script>the code</script>More text",
 			want: []*Token{
-				{Name: "tag", Params: []Param{}},
+				{Name: "tag", Params: []util.Pair[string, string]{}},
 				{Text: "Text"},
-				{Name: "script", Params: []Param{}},
+				{Name: "script", Params: []util.Pair[string, string]{}},
 				{Text: "the code"},
-				{Name: "/script", Params: []Param{}},
+				{Name: "/script", Params: []util.Pair[string, string]{}},
 				{Text: "More text"},
 			},
 		},
@@ -45,16 +46,16 @@ func TestTwitterClient(t *testing.T) {
 				{Text: "Some input "},
 				{
 					Name: "tag",
-					Params: []Param{
-						{Key: "key", Value: "value"},
-						{Key: "key"},
-						{Key: "key", Value: "quoted value"},
-						{Key: "key", Value: "also quoted"},
+					Params: []util.Pair[string, string]{
+						util.AsPair("key", "value"),
+						util.AsPair("key", ""),
+						util.AsPair("key", "quoted value"),
+						util.AsPair("key", "also quoted"),
 					},
 				},
 				{
 					Name:   "/tag",
-					Params: []Param{},
+					Params: []util.Pair[string, string]{},
 				},
 			},
 		},
@@ -64,14 +65,14 @@ func TestTwitterClient(t *testing.T) {
 			want: []*Token{
 				{
 					Name: "tag",
-					Params: []Param{
-						{Key: "key", Value: "val\\\"ue"},
+					Params: []util.Pair[string, string]{
+						util.AsPair("key", "val\\\"ue"),
 					},
 				},
 				{
 					Name: "tag",
-					Params: []Param{
-						{Key: "key", Value: "val\\'ue"},
+					Params: []util.Pair[string, string]{
+						util.AsPair("key", "val\\'ue"),
 					},
 				},
 			},
