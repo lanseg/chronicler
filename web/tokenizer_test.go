@@ -60,6 +60,18 @@ func TestTwitterClient(t *testing.T) {
 			},
 		},
 		{
+			desc:  "Params with dash",
+			input: "<tag data-value=\"some value\" />",
+			want: []*Token{
+				{
+					Name: "tag",
+					Params: []util.Pair[string, string]{
+						util.AsPair("data-value", "some value"),
+					},
+				},
+			},
+		},
+		{
 			desc:  "Escaped quotes supported",
 			input: "<tag key=\"val\\\"ue\" /><tag key='val\\'ue' />",
 			want: []*Token{

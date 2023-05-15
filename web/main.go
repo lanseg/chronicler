@@ -16,49 +16,51 @@ var (
 	})
 )
 
-type Tag struct {
+type Node struct {
 	Name     string
-	Token    *tokenizer.Token
-	Children []*Tag
+	Text     string
+	Params   []util.Pair[string, string]
+	Children []*Node
 }
 
-func (t *Tag) dump(prefix string) {
-	if t.Token.Name == "" {
-		fmt.Printf("%s%s\n", prefix, t.Token.Text)
+func (n *Node) dump(prefix string) {
+	if n.Name == "" {
+		fmt.Printf("%s%s\n", prefix, n.Text)
 	} else {
-		fmt.Printf("%s[%s]\n", prefix, t.Token.Name)
+		fmt.Printf("%s[%s]\n", prefix, n.Name)
 	}
-	for _, child := range t.Children {
+	for _, child := range n.Children {
 		child.dump(prefix + "  ")
 	}
 }
 
-func newTag(t *tokenizer.Token) *Tag {
-	return &Tag{
-		Token:    t,
-		Children: []*Tag{},
+func newNode(t *tokenizer.Token) *Node {
+	return &Node{
+		Name:     t.Name,
+		Text:     t.Text,
+		Params:   t.Params,
+		Children: []*Node{},
 	}
 }
 
-func ParseHtml(content string) *Tag {
+func ParseHtml(content string) *Node {
 	tokens := tokenizer.Tokenize(content)
 	fmt.Printf("Tokens: %d, %s\n", len(tokens), tokens[len(tokens)-1])
-	root := &Tag{
-		Name:     "root",
-		Token:    &tokenizer.Token{Name: "root"},
-		Children: []*Tag{},
+	root := &Node{
+		Name:     "#root",
+		Children: []*Node{},
 	}
-	tagStack := []*Tag{root}
+	nodes := []*Node{root}
 	for _, token := range tokens {
-		parent := tagStack[0]
+		parent := nodes[0]
 		if ("/" + parent.Name) == token.Name {
-			tagStack = tagStack[1:]
+			nodes = nodes[1:]
 			continue
 		}
-		newTag := newTag(token)
-		parent.Children = append(parent.Children, newTag)
-		if newTag.Name != "" && !strings.HasPrefix(newTag.Name, "/") && !selfClosingTags.Contains(newTag.Name) {
-			tagStack = append([]*Tag{newTag}, tagStack...)
+		node := newNode(token)
+		parent.Children = append(parent.Children, node)
+		if node.Name != "" && !strings.HasPrefix(node.Name, "/") && !selfClosingTags.Contains(node.Name) {
+			nodes = append([]*Node{node}, nodes...)
 		}
 	}
 	return root
@@ -68,6 +70,6 @@ func main() {
 	fmt.Println("Reading file")
 	content, _ := ioutil.ReadFile("/home/lans/devel/chronist/sample.html")
 	fmt.Println("Parsing file")
-	tag := ParseHtml(string(content))
-	tag.dump("")
+	rootNode := ParseHtml(string(content))
+	rootNode.dump("")
 }
