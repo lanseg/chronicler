@@ -22,10 +22,9 @@ type Token struct {
 }
 
 type Tokenizer struct {
-	pos          int
-	text         string
-	tokens       []*Token
-	parseHistory string
+	pos    int
+	text   string
+	tokens []*Token
 
 	parser func()
 }
@@ -50,7 +49,6 @@ func (p *Tokenizer) next() {
 	if p.isEnd() {
 		return
 	}
-	p.parseHistory += string(p.charAt())
 	p.pos++
 }
 
@@ -83,35 +81,35 @@ func (p *Tokenizer) addTagToken(name string, params []util.Pair[string, string])
 }
 
 func (p *Tokenizer) parseParamName() string {
-	paramName := ""
+	paramName := strings.Builder{}
 	for !p.isEnd() && !p.isChar('>') && !p.isChar('=') && !p.isSpace() {
-		paramName += string(p.charAt())
+		paramName.WriteRune(p.charAt())
 		p.next()
 	}
-	return paramName
+	return paramName.String()
 }
 
 func (p *Tokenizer) parseParamValue() string {
-	paramValue := ""
+	paramValue := strings.Builder{}
 	char := p.charAt()
 	quoted := char == '"' || char == '\''
 	if quoted {
 		p.next()
 	}
 	for !p.isEnd() && !p.isChar('>') && !((quoted && p.isChar(char)) || (!quoted && p.isSpace())) {
-		paramValue += string(p.charAt())
+		paramValue.WriteRune(p.charAt())
 		p.next()
 		for p.isChar('\\') {
-			paramValue += string(p.charAt())
+			paramValue.WriteRune(p.charAt())
 			p.next()
-			paramValue += string(p.charAt())
+			paramValue.WriteRune(p.charAt())
 			p.next()
 		}
 	}
 	if quoted {
 		p.next()
 	}
-	return paramValue
+	return paramValue.String()
 }
 
 func (p *Tokenizer) parseParamList() {
@@ -137,13 +135,13 @@ func (p *Tokenizer) parseParamList() {
 }
 
 func (p *Tokenizer) parseTag() {
-	tokenBuffer := ""
+	tokenBuffer := strings.Builder{}
 	for !p.isEnd() && !p.isSpace() && !p.isChar('>') {
-		tokenBuffer += string(p.charAt())
+		tokenBuffer.WriteRune(p.charAt())
 		p.next()
 	}
-	if len(tokenBuffer) != 0 {
-		p.addTagToken(tokenBuffer, []util.Pair[string, string]{})
+	if tokenBuffer.Len() != 0 {
+		p.addTagToken(tokenBuffer.String(), []util.Pair[string, string]{})
 	}
 	p.skipSpace()
 	if p.isChar('>') {
@@ -155,13 +153,14 @@ func (p *Tokenizer) parseTag() {
 }
 
 func (p *Tokenizer) parseContent() {
-	tokenBuffer := ""
+	tokenBuffer := strings.Builder{}
 	for !p.isEnd() && !p.isChar('<') {
-		tokenBuffer += string(p.charAt())
+		tokenBuffer.WriteRune(p.charAt())
 		p.next()
 	}
-	if len(tokenBuffer) != 0 && !isSpace(tokenBuffer) {
-		p.addTextToken(tokenBuffer)
+	result := tokenBuffer.String()
+	if len(result) > 0 && !isSpace(result) {
+		p.addTextToken(result)
 	}
 	if !p.isEnd() && p.isChar('<') {
 		p.parser = p.parseTag
@@ -170,20 +169,21 @@ func (p *Tokenizer) parseContent() {
 }
 
 func (p *Tokenizer) parseScriptContent() {
-	tokenBuffer := ""
-	for !p.isEnd() && !strings.HasSuffix(tokenBuffer, "</script>") {
-		tokenBuffer += string(p.charAt())
+	tokenBuffer := strings.Builder{}
+	for !p.isEnd() && !strings.HasSuffix(tokenBuffer.String(), "</script>") {
+		tokenBuffer.WriteRune(p.charAt())
 		p.next()
 	}
-	if strings.HasSuffix(tokenBuffer, "</script>") {
+	result := tokenBuffer.String()
+	if strings.HasSuffix(result, "</script>") {
 		p.pos -= len("</script>")
-		tokenBuffer = tokenBuffer[:len(tokenBuffer)-len("</script>")]
+		result = result[:len(result)-len("</script>")]
 		p.parser = p.parseContent
 	} else {
 		p.parser = p.parseDocument
 	}
-	if len(tokenBuffer) != 0 && !isSpace(tokenBuffer) {
-		p.addTextToken(tokenBuffer)
+	if len(result) != 0 && !isSpace(result) {
+		p.addTextToken(result)
 	}
 }
 

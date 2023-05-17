@@ -4,8 +4,12 @@ import (
 	"chronicler/util"
 	"fmt"
 	"io/ioutil"
+	"net/url"
+	"os"
+	"runtime/pprof"
 	"strings"
 	"web/tokenizer"
+	// rpb "chronicler/proto/records"
 )
 
 var (
@@ -23,15 +27,18 @@ type Node struct {
 	Children []*Node
 }
 
-func (n *Node) dump(prefix string) {
-	if n.Name == "" {
-		fmt.Printf("%s%s\n", prefix, n.Text)
-	} else {
-		fmt.Printf("%s[%s]\n", prefix, n.Name)
+func (n *Node) GetElementsByTagName(tagName string) []*Node {
+	result := []*Node{}
+	toVisit := []*Node{n}
+	current := n
+	for len(toVisit) > 0 {
+		current, toVisit = toVisit[0], toVisit[1:]
+		toVisit = append(toVisit, current.Children...)
+		if current.Name == tagName {
+			result = append(result, current)
+		}
 	}
-	for _, child := range n.Children {
-		child.dump(prefix + "  ")
-	}
+	return result
 }
 
 func newNode(t *tokenizer.Token) *Node {
@@ -45,7 +52,6 @@ func newNode(t *tokenizer.Token) *Node {
 
 func ParseHtml(content string) *Node {
 	tokens := tokenizer.Tokenize(content)
-	fmt.Printf("Tokens: %d, %s\n", len(tokens), tokens[len(tokens)-1])
 	root := &Node{
 		Name:     "#root",
 		Children: []*Node{},
@@ -67,9 +73,33 @@ func ParseHtml(content string) *Node {
 }
 
 func main() {
-	fmt.Println("Reading file")
+	f, err := os.Create("profile.prof")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	pprof.StartCPUProfile(f)
+	defer pprof.StopCPUProfile()
+
+	log := util.NewLogger("main")
+	log.Infof("Reading file")
 	content, _ := ioutil.ReadFile("/home/lans/devel/chronist/sample.html")
-	fmt.Println("Parsing file")
+	log.Infof("Parsing html")
 	rootNode := ParseHtml(string(content))
-	rootNode.dump("")
+	log.Infof("Enumerating nodes")
+	nodes := rootNode.GetElementsByTagName("a")
+	fmt.Println("here")
+
+	for _, link := range nodes {
+		for _, param := range link.Params {
+			if param.First == "href" {
+				u, _ := url.Parse(param.Second)
+				if u.Host == "" {
+					u.Host = "meduza.io"
+					u.Scheme = "https"
+				}
+				fmt.Printf("%s\n", u)
+			}
+		}
+	}
 }
