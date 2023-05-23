@@ -10,7 +10,7 @@ go_library(
     importpath = "chronicler/twitter",
     deps = [
         "//util",
-        "@optional",
+        "@commons//optional",
     ],
 )
 

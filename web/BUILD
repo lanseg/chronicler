@@ -5,7 +5,9 @@ go_binary(
     srcs = ["main.go"],
     deps = [
         ":tokenizer",
+        "//proto:records_go_proto",
         "//util",
+        "@commons//collections",
     ],
 )
 

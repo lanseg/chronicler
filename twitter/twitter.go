@@ -11,7 +11,7 @@ import (
 
 	"chronicler/util"
 
-	"github.com/lanseg/optional"
+	"github.com/lanseg/golang-commons/optional"
 )
 
 var (

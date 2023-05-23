@@ -15,9 +15,9 @@ git_repository(
 )
 
 git_repository(
-    name = "optional",
+    name = "commons",
     branch = "main",
-    remote = "https://github.com/lanseg/optional.git",
+    remote = "https://github.com/lanseg/golang-commons.git",
 )
 
 load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
