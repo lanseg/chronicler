@@ -1,11 +1,15 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library", "go_test")
 
-go_binary(
-    name = "main",
-    srcs = ["main.go"],
+package(default_visibility = ["//visibility:public"])
+
+go_library(
+    name = "htmlparser",
+    srcs = [
+        "htmlparser.go",
+    ],
+    importpath = "web/htmlparser",
     deps = [
         ":tokenizer",
-        "//proto:records_go_proto",
         "//util",
         "@commons//collections",
     ],

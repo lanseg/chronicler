@@ -80,12 +80,12 @@ func (s *Storage) ListRecords() ([]*rpb.RecordSet, error) {
 		}
 		return nil
 	})
-	s.logger.Infof("RESULT: %s", result)
 	return result, nil
 }
 
 func (s *Storage) SaveRecords(r *rpb.RecordSet) error {
 	recordRoot := filepath.Join(fmt.Sprint(r.Request.Source.Type), r.Request.Source.ChannelId)
+	s.logger.Debugf("Saving record to %s", recordRoot)
 	if err := os.MkdirAll(filepath.Join(s.root, recordRoot), os.ModePerm); err != nil {
 		return err
 	}
@@ -99,9 +99,10 @@ func (s *Storage) SaveRecords(r *rpb.RecordSet) error {
 	for _, r := range r.Records {
 		for _, link := range r.Links {
 			if util.IsYoutubeLink(link) {
-				if err := util.DownloadYoutube(link, filepath.Join(s.root, recordRoot)); err != nil {
-					s.logger.Warningf("Failed to download youtube video: %s", err)
-				}
+				s.logger.Debugf("Found youtube link: %s", link)
+				//				if err := util.DownloadYoutube(link, filepath.Join(s.root, recordRoot)); err != nil {
+				//					s.logger.Warningf("Failed to download youtube video: %s", err)
+				//				}
 			}
 		}
 
@@ -124,7 +125,7 @@ func (s *Storage) SaveRecords(r *rpb.RecordSet) error {
 
 func NewStorage(root string) *Storage {
 	log := util.NewLogger("storage")
-	log.Infof("Storage root set to %s", root)
+	log.Infof("Storage root set to \"%s\"", root)
 	return &Storage{
 		root:       root,
 		httpClient: &http.Client{},

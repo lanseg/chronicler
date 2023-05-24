@@ -7,8 +7,20 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
-	"unicode"
+	"web/htmlparser"
 )
+
+func fixLink(scheme string, host string, link string) string {
+	u, err := url.Parse(link)
+	if err != nil {
+		return link
+	}
+	if u.Host == "" {
+		u.Host = host
+		u.Scheme = scheme
+	}
+	return u.String()
+}
 
 type Web struct {
 	Chronicler
@@ -23,100 +35,45 @@ func (t *Web) GetName() string {
 }
 
 func (w *Web) GetRecords(request *rpb.Request) (*rpb.RecordSet, error) {
+	w.logger.Infof("Loading web page from %s", request.Source.Url)
 	response, err := http.Get(request.Source.Url)
 	if err != nil {
 		return nil, err
 	}
 	requestUrl := response.Request.URL
+	w.logger.Infof("Resolved actual URL as %s", requestUrl)
 	defer response.Body.Close()
-
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
 		return nil, err
 	}
-	html := string(body)
-	links := w.parseHtml(html)
-	linkedFiles := []*rpb.File{}
-	for _, link := range links {
-		linkUrl, err := url.Parse(link)
-		if err != nil {
-			w.logger.Warningf("Looks like a malformed url: %s", linkUrl.String())
-		}
-		if linkUrl.Scheme == "" {
-			linkUrl.Scheme = requestUrl.Scheme
-		}
-		if linkUrl.Host == "" {
-			linkUrl.Host = requestUrl.Host
-		}
-		if linkUrl.Scheme == "mailto" || linkUrl.Scheme == "tel" {
-			continue
-		}
-		linkedFiles = append(linkedFiles, &rpb.File{
-			FileUrl: linkUrl.String(),
-		})
-	}
-	return &rpb.RecordSet{
-		Records: []*rpb.Record{
-			{
-				Source: &rpb.Source{
-					ChannelId: requestUrl.Host,
-				},
-				Files:       linkedFiles,
-				TextContent: html,
-			},
+	record := &rpb.Record{
+		Source: &rpb.Source{
+			ChannelId: requestUrl.Host,
+			Url:       requestUrl.String(),
+			Type:      rpb.SourceType_WEB,
 		},
-	}, nil
-}
-
-func (w *Web) parseHtml(html string) []string {
-	links := []string{}
-	tokens := []string{}
-	buffer := ""
-	inTag := false
-	inQuote := false
-	for _, ch := range html {
-		if ch == '<' {
-			inTag = true
-			buffer = ""
-		}
-		if !inTag {
-			continue
-		}
-		if ch == '\\' {
-			buffer += string(ch)
-			continue
-		}
-		if ch == '"' {
-			inQuote = !inQuote
-		}
-		if inQuote {
-			buffer += string(ch)
-			continue
-		}
-		if (ch == '=' || ch == '>' || unicode.IsSpace(ch)) && buffer != "" {
-			tokens = append(tokens, buffer)
-			if ch == '=' {
-				tokens = append(tokens, "=")
+		TextContent: string(body),
+	}
+	w.logger.Debugf("Parsing html content")
+	root := htmlparser.ParseHtml(record.TextContent)
+	linkNodes := root.GetElementsByTagNames("a", "img", "script", "link")
+	w.logger.Debugf("Found %d external link(s)", len(linkNodes))
+	fileExt := util.NewSet([]string{"jpg", "png", "js", "css", "json", "ico"})
+	for _, node := range linkNodes {
+		for _, link := range append(node.GetParam("href"), node.GetParam("src")...) {
+			fixedLink := fixLink(requestUrl.Scheme, requestUrl.Host, link)
+			pos := strings.LastIndex(fixedLink, ".")
+			if pos != -1 && fileExt.Contains(fixedLink[pos+1:]) {
+				record.Files = append(record.Files, &rpb.File{FileUrl: fixedLink})
+			} else {
+				record.Links = append(record.Links, fixedLink)
 			}
-			buffer = ""
-		} else if ch != '<' && !unicode.IsSpace(ch) {
-			buffer += string(ch)
-		}
-		if ch == '>' {
-			for i, value := range tokens {
-				if i < len(tokens)-2 && tokens[i+1] == "=" && (value == "src" || value == "href") {
-					link := strings.Trim(tokens[i+2], "\"")
-					if link != "#" {
-						links = append(links, link)
-					}
-				}
-			}
-			buffer = ""
-			inTag = false
-			tokens = []string{}
 		}
 	}
-	return links
+	w.logger.Debugf("Done loading page: %d byte(s), %d file link(s), %d other link(s)",
+		len(body), len(record.Files), len(record.Links))
+	return &rpb.RecordSet{Records: []*rpb.Record{record}}, nil
 }
 
 func NewWeb(name string, httpClient *http.Client) Chronicler {

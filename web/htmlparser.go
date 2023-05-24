@@ -1,13 +1,7 @@
-package main
+package htmlparser
 
 import (
-	rpb "chronicler/proto/records"
 	"chronicler/util"
-	"encoding/json"
-	"fmt"
-	"io/ioutil"
-	"net/url"
-	"os"
 	"strings"
 	"web/tokenizer"
 
@@ -87,32 +81,4 @@ func ParseHtml(content string) *Node {
 		}
 	}
 	return root
-}
-
-func main() {
-
-	record := &rpb.Record{
-		Source: &rpb.Source{
-			Type: rpb.SourceType_WEB,
-			Url:  os.Args[1],
-		},
-	}
-	content, _ := ioutil.ReadFile(os.Args[1])
-	record.TextContent = string(content)
-
-	rootNode := ParseHtml(record.TextContent)
-	nodes := rootNode.GetElementsByTagNames("a", "img", "script", "link")
-
-	for _, link := range nodes {
-		for _, param := range append(link.GetParam("href"), link.GetParam("src")...) {
-			u, _ := url.Parse(param)
-			if u.Host == "" {
-				u.Host = "meduza.io"
-				u.Scheme = "https"
-			}
-			record.Links = append(record.Links, u.String())
-		}
-	}
-	bytes, _ := json.Marshal(record)
-	fmt.Println(string(bytes))
 }

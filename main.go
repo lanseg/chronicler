@@ -1,8 +1,10 @@
 package main
 
 import (
+	"crypto/md5"
 	"encoding/json"
 	"flag"
+	"fmt"
 	"net/url"
 	"os"
 	"regexp"
@@ -50,7 +52,9 @@ func parseRequest(s string) rpb.Request {
 	source := &rpb.Source{}
 	if parsedUrl, err := url.ParseRequestURI(s); err == nil {
 		source.Url = s
-		source.ChannelId = parsedUrl.Host
+		source.ChannelId = fmt.Sprintf("%s_%x",
+			parsedUrl.Host,
+			md5.Sum([]byte(parsedUrl.String())))
 		source.Type = rpb.SourceType_WEB
 	}
 

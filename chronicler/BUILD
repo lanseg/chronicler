@@ -11,6 +11,8 @@ go_library(
     ],
     importpath = "chronicler",
     deps = [
+        "//web:htmlparser",
+        "@commons//collections",
         "//proto:records_go_proto",
         "//twitter",
         "//util",
