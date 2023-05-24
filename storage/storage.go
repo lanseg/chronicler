@@ -64,20 +64,20 @@ func (s *Storage) downloadURL(url string, target string) error {
 func (s *Storage) ListRecords() ([]*rpb.RecordSet, error) {
 	result := []*rpb.RecordSet{}
 	filepath.Walk(s.root, func(path string, info os.FileInfo, err error) error {
-		if filepath.Base(path) == "record.json" {
-			s.logger.Infof("PATH: %s", path)
-			b, err := os.ReadFile(path)
-			if err != nil {
-				s.logger.Warningf("Error reading file: %s", err)
-				return err
-			}
-			rs := &rpb.RecordSet{}
-			if err = json.Unmarshal(b, &rs); err != nil {
-				s.logger.Warningf("Error unmarshalling file: %s", err)
-				return err
-			}
-			result = append(result, rs)
+		if filepath.Base(path) != "record.json" {
+			return nil
 		}
+		b, err := os.ReadFile(path)
+		if err != nil {
+			s.logger.Warningf("Error reading file: %s", err)
+			return err
+		}
+		rs := &rpb.RecordSet{}
+		if err = json.Unmarshal(b, &rs); err != nil {
+			s.logger.Warningf("Error unmarshalling file: %s", err)
+			return err
+		}
+		result = append(result, rs)
 		return nil
 	})
 	return result, nil

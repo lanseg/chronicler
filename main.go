@@ -72,8 +72,9 @@ func main() {
 
 	config := getConfig(configFile)
 	chroniclers := map[rpb.SourceType]chronicler.Chronicler{
-		rpb.SourceType_TWITTER: chronicler.NewTwitter("twitter", twitter.NewClient(*config.TwitterApiKey)),
-		rpb.SourceType_WEB:     chronicler.NewWeb("web", nil),
+		rpb.SourceType_TWITTER: chronicler.NewTwitter("twitter",
+			twitter.NewClient(*config.TwitterApiKey)),
+		rpb.SourceType_WEB: chronicler.NewWeb("web", nil),
 	}
 	stg := storage.NewStorage(*config.StorageRoot)
 

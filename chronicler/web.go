@@ -10,6 +10,10 @@ import (
 	"web/htmlparser"
 )
 
+const (
+	userAgent = "curl/7.54"
+)
+
 func fixLink(scheme string, host string, link string) string {
 	u, err := url.Parse(link)
 	if err != nil {
@@ -30,13 +34,22 @@ type Web struct {
 	client *http.Client
 }
 
-func (t *Web) GetName() string {
-	return t.name
+func (w *Web) GetName() string {
+	return w.name
+}
+
+func (w *Web) Get(link string) (*http.Response, error) {
+	req, err := http.NewRequest("GET", link, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("User-Agent", userAgent)
+	return w.client.Do(req)
 }
 
 func (w *Web) GetRecords(request *rpb.Request) (*rpb.RecordSet, error) {
 	w.logger.Infof("Loading web page from %s", request.Source.Url)
-	response, err := http.Get(request.Source.Url)
+	response, err := w.Get(request.Source.Url)
 	if err != nil {
 		return nil, err
 	}
