@@ -14,6 +14,12 @@ const (
 	userAgent = "curl/7.54"
 )
 
+var (
+    webpageFileTypes = util.NewSet([]string {
+      "jpg", "png", "js", "css", "json", "ico",
+    })
+)
+
 func fixLink(scheme string, host string, link string) string {
 	u, err := url.Parse(link)
 	if err != nil {
@@ -72,12 +78,11 @@ func (w *Web) GetRecords(request *rpb.Request) (*rpb.RecordSet, error) {
 	root := htmlparser.ParseHtml(record.TextContent)
 	linkNodes := root.GetElementsByTagNames("a", "img", "script", "link")
 	w.logger.Debugf("Found %d external link(s)", len(linkNodes))
-	fileExt := util.NewSet([]string{"jpg", "png", "js", "css", "json", "ico"})
 	for _, node := range linkNodes {
 		for _, link := range append(node.GetParam("href"), node.GetParam("src")...) {
 			fixedLink := fixLink(requestUrl.Scheme, requestUrl.Host, link)
 			pos := strings.LastIndex(fixedLink, ".")
-			if pos != -1 && fileExt.Contains(fixedLink[pos+1:]) {
+			if pos != -1 && webpageFileTypes.Contains(fixedLink[pos+1:]) {
 				record.Files = append(record.Files, &rpb.File{FileUrl: fixedLink})
 			} else {
 				record.Links = append(record.Links, fixedLink)
