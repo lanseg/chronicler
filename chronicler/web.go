@@ -15,9 +15,9 @@ const (
 )
 
 var (
-    webpageFileTypes = util.NewSet([]string {
-      "jpg", "png", "js", "css", "json", "ico",
-    })
+	webpageFileTypes = util.NewSet([]string{
+		"jpg", "png", "js", "css", "json", "ico",
+	})
 )
 
 func fixLink(scheme string, host string, link string) string {
@@ -59,13 +59,15 @@ func (w *Web) GetRecords(request *rpb.Request) (*rpb.RecordSet, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer response.Body.Close()
+
 	requestUrl := response.Request.URL
 	w.logger.Infof("Resolved actual URL as %s", requestUrl)
-	defer response.Body.Close()
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
 		return nil, err
 	}
+
 	record := &rpb.Record{
 		Source: &rpb.Source{
 			ChannelId: requestUrl.Host,
