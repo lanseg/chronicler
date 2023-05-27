@@ -15,53 +15,74 @@ import (
 	"chronicler/util"
 )
 
-type IStorage interface {
-	SaveRecords(name string, r *rpb.RecordSet) error
+const (
+	userAgent = "curl/7.54"
+)
+
+type Storage interface {
+	SaveRecords(r *rpb.RecordSet) error
 	ListRecords() ([]*rpb.RecordSet, error)
 }
 
-type Storage struct {
-	IStorage
+type LocalStorage struct {
+	Storage
 
 	httpClient *http.Client
 	logger     *util.Logger
 	root       string
 }
 
-func (s *Storage) saveText(name string, text string) error {
-	return os.WriteFile(filepath.Join(s.root, name), []byte(text), os.ModePerm)
+func (s *LocalStorage) path(relativePath string) string {
+	return filepath.Join(s.root, relativePath)
 }
 
-func (s *Storage) saveLines(name string, lines []string) error {
-	return os.WriteFile(
-		filepath.Join(s.root, name),
-		[]byte(strings.Join(lines, "\n")),
-		os.ModePerm)
-}
-
-func (s *Storage) downloadURL(url string, target string) error {
-	s.logger.Debugf("Downloading file from %s to %s", url, target)
-	resp, err := s.httpClient.Get(url)
-	if err != nil {
+func (s *LocalStorage) mkdir(path string) error {
+	recordRoot := s.path(path)
+	s.logger.Infof("Creating directory at [%s]/%s: %s", s.root, path, recordRoot)
+	if err := os.MkdirAll(recordRoot, os.ModePerm); err != nil {
 		return err
 	}
-	defer resp.Body.Close()
-
-	targetFile, err := os.Create(filepath.Join(s.root, target))
-	if err != nil {
-		return err
-	}
-	defer targetFile.Close()
-
-	_, err = io.Copy(targetFile, resp.Body)
-	if err != nil {
-		return err
-	}
-
 	return nil
 }
 
-func (s *Storage) ListRecords() ([]*rpb.RecordSet, error) {
+func (s *LocalStorage) writeFile(path string, value []byte) error {
+	return os.WriteFile(s.path(path), value, os.ModePerm)
+}
+
+func (s *LocalStorage) copyReader(src io.ReadCloser, dst string) error {
+	defer src.Close()
+
+	targetFile, err := os.Create(s.path(dst))
+	defer targetFile.Close()
+	if err != nil {
+		return err
+	}
+	_, err = io.Copy(targetFile, src)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *LocalStorage) get(link string) (*http.Response, error) {
+	req, err := http.NewRequest("GET", link, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("User-Agent", userAgent)
+	return s.httpClient.Do(req)
+}
+
+func (s *LocalStorage) downloadURL(url string, target string) error {
+	s.logger.Debugf("Downloading file from %s to %s", url, target)
+	resp, err := s.get(url)
+	if err != nil {
+		return err
+	}
+	return s.copyReader(resp.Body, target)
+}
+
+func (s *LocalStorage) ListRecords() ([]*rpb.RecordSet, error) {
 	result := []*rpb.RecordSet{}
 	filepath.Walk(s.root, func(path string, info os.FileInfo, err error) error {
 		if filepath.Base(path) != "record.json" {
@@ -83,7 +104,7 @@ func (s *Storage) ListRecords() ([]*rpb.RecordSet, error) {
 	return result, nil
 }
 
-func (s *Storage) SaveRecords(r *rpb.RecordSet) error {
+func (s *LocalStorage) SaveRecords(r *rpb.RecordSet) error {
 	recordRoot := filepath.Join(fmt.Sprint(r.Request.Source.Type), r.Request.Source.ChannelId)
 	s.logger.Debugf("Saving record to %s", recordRoot)
 	if err := os.MkdirAll(filepath.Join(s.root, recordRoot), os.ModePerm); err != nil {
@@ -93,16 +114,16 @@ func (s *Storage) SaveRecords(r *rpb.RecordSet) error {
 	if err != nil {
 		return fmt.Errorf("Json marshalling error: %s", err)
 	}
-	if err := s.saveText(filepath.Join(recordRoot, "record.json"), string(bytes)); err != nil {
+	if err := s.writeFile(filepath.Join(recordRoot, "record.json"), bytes); err != nil {
 		return err
 	}
 	for _, r := range r.Records {
 		for _, link := range r.Links {
-			if util.IsYoutubeLink(link) {
+			if util.IsYoutubeLink(link) && strings.Contains(link, "v=") {
 				s.logger.Debugf("Found youtube link: %s", link)
-				//				if err := util.DownloadYoutube(link, filepath.Join(s.root, recordRoot)); err != nil {
-				//					s.logger.Warningf("Failed to download youtube video: %s", err)
-				//				}
+				if err := util.DownloadYoutube(link, filepath.Join(s.root, recordRoot)); err != nil {
+					s.logger.Warningf("Failed to download youtube video: %s", err)
+				}
 			}
 		}
 
@@ -123,10 +144,10 @@ func (s *Storage) SaveRecords(r *rpb.RecordSet) error {
 	return nil
 }
 
-func NewStorage(root string) *Storage {
+func NewStorage(root string) Storage {
 	log := util.NewLogger("storage")
 	log.Infof("Storage root set to \"%s\"", root)
-	return &Storage{
+	return &LocalStorage{
 		root:       root,
 		httpClient: &http.Client{},
 		logger:     log,
