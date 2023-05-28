@@ -1,5 +1,60 @@
 * {
     font-family: sans-serif;
+    margin: 0px;
+}
+
+.topheader {
+    overflow: hidden;
+    background-color: #4c947e;
+    position: fixed;
+    width: 100%;
+}
+
+.topheader .title {
+    color: white;
+    padding: 14px 16px;
+    text-decoration: none;
+    font-size: 22px;
+    display: inline-block;
+    font-weight: bold;
+}
+
+.topheader .menu {
+    background-color: black;
+    color: white;
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    width: 54px;
+    height: 54px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.topheader .menu:active {
+    background-color: darkgray;
+}
+
+.topheader input[type="checkbox"][role="switch"] {
+    display: none;
+}
+
+.topheader .links {
+    display: none;
+    width: 100%;
+}
+
+.topheader .links .link {
+    width: 100%;
+    font-size: 20px;
+    padding: 4px;
+    padding-left: 16px;
+    background-color: #9edac8;
+}
+
+.topheader input[type="checkbox"][role="switch"]:checked~.links {
+    display: block;
 }
 
 .records {
@@ -11,6 +66,7 @@
 
 .controls {
     margin: 0px;
+    padding-top: 64px;
     width: 100%;
     column-gap: 8px;
     border-radius: 8px;
@@ -45,7 +101,7 @@
     font-weight: bold;
 }
 
-.header {
+.record .header {
     padding: 4px;
 }
 
