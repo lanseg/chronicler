@@ -5,56 +5,64 @@
 
 .topheader {
     overflow: hidden;
-    background-color: #4c947e;
     position: fixed;
     width: 100%;
 }
 
-.topheader .title {
-    color: white;
-    padding: 14px 16px;
-    text-decoration: none;
-    font-size: 22px;
-    display: inline-block;
-    font-weight: bold;
-}
-
-.topheader .menu {
+.topheader .menubar {
     background-color: black;
-    color: white;
-    position: absolute;
-    top: 0px;
-    right: 0px;
-    width: 54px;
-    height: 54px;
+    width: 100%;
     display: flex;
-    justify-content: center;
+    color: white;
     align-items: center;
+    justify-content: center;
 }
 
-.topheader .menu:active {
+.topheader .menubar .title {
+    flex-grow: 2;
+    font-size: 25px;
+    font-weight: bold;
+    padding: 4px;
+    padding-left: 8px;
+}
+
+.topheader .menu label {
     background-color: darkgray;
+    height: 54px;
+    width: 54px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.topheader input[type="checkbox"][role="switch"] {
+#menuitems_check {
     display: none;
 }
 
-.topheader .links {
-    display: none;
-    width: 100%;
+#menuitems_check:checked~.menuitems {
+    display: block;
 }
 
-.topheader .links .link {
+.topheader .menuitems {
     width: 100%;
-    font-size: 20px;
+    display: none;
+}
+
+.topheader .menuitem {
+    background-color: darkgray;
     padding: 4px;
     padding-left: 16px;
-    background-color: #9edac8;
+    width: 100%;
+    font-size: 20px;
+    border-bottom: solid 1px lightgray;
 }
 
-.topheader input[type="checkbox"][role="switch"]:checked~.links {
-    display: block;
+.topheader .menuitem:active {
+    background-color: lightgray;
+}
+
+.topheader .menu label:active {
+    background-color: lightgray;
 }
 
 .records {
@@ -65,13 +73,13 @@
 }
 
 .controls {
-    margin: 0px;
-    padding-top: 64px;
-    width: 100%;
+    padding: 8px;
+    padding-top: 60px;
     column-gap: 8px;
     border-radius: 8px;
-    display: grid;
-    grid-template-columns: 80% auto;
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
     margin-bottom: 8px;
 }
 
@@ -80,6 +88,11 @@
     font-size: 1rem;
     border: 1px solid #ccc;
     border-radius: 5px;
+    flex-grow: 2;
+}
+
+.records {
+    padding: 8px;
 }
 
 .record {
