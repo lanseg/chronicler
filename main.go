@@ -2,11 +2,9 @@ package main
 
 import (
 	"crypto/md5"
-	"encoding/json"
 	"flag"
 	"fmt"
 	"net/url"
-	"os"
 	"regexp"
 
 	"chronicler"
@@ -18,35 +16,8 @@ import (
 )
 
 var (
-	configFile    = flag.String("config", "", "Configuration defaults.")
-	twitterApiKey = flag.String("twitter_api_key", "", "A key for the twitter api.")
-	storageRoot   = flag.String("storage_root", "chronicler_storage", "A local folder to save downloads.")
-	log           = util.NewLogger("main")
+	log = util.NewLogger("main")
 )
-
-type Config struct {
-	TwitterApiKey *string `json:"twitterApiKey"`
-	StorageRoot   *string `json:"storageRoot"`
-}
-
-func getConfig(configFile *string) Config {
-	config := Config{}
-	if configFile != nil {
-		b, err := os.ReadFile(*configFile)
-		if err != nil {
-			log.Warningf("Error reading file %s: %s", config, err)
-		} else if err = json.Unmarshal(b, &config); err != nil {
-			log.Warningf("Error unmarshalling file %s: %s", config, err)
-		}
-	}
-	if *twitterApiKey != "" {
-		config.TwitterApiKey = twitterApiKey
-	}
-	if *storageRoot != "" {
-		config.StorageRoot = storageRoot
-	}
-	return config
-}
 
 func parseRequest(s string) rpb.Request {
 	source := &rpb.Source{}
@@ -69,14 +40,13 @@ func parseRequest(s string) rpb.Request {
 
 func main() {
 	flag.Parse()
-
-	config := getConfig(configFile)
+	cfg := chronicler.GetConfig()
 	chroniclers := map[rpb.SourceType]chronicler.Chronicler{
 		rpb.SourceType_TWITTER: chronicler.NewTwitter("twitter",
-			twitter.NewClient(*config.TwitterApiKey)),
+			twitter.NewClient(*cfg.TwitterApiKey)),
 		rpb.SourceType_WEB: chronicler.NewWeb("web", nil),
 	}
-	stg := storage.NewStorage(*config.StorageRoot)
+	stg := storage.NewStorage(*cfg.StorageRoot)
 
 	for _, arg := range flag.Args() {
 		request := parseRequest(arg)

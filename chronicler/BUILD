@@ -6,6 +6,7 @@ go_library(
     name = "chronicler",
     srcs = [
         "chronicler.go",
+        "config.go",
         "twitter.go",
         "web.go",
     ],

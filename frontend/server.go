@@ -23,16 +23,19 @@ func (ws *WebServer) Error(w http.ResponseWriter, msg string, code int) {
 	http.Error(w, msg, code)
 }
 
-func (ws *WebServer) handleRequest(w http.ResponseWriter, r *http.Request) {
-	ws.logger.Infof("Request: %s", r.URL.String())
+func (ws *WebServer) handleRecordListRequest(w http.ResponseWriter, r *http.Request) {
+	ws.logger.Infof("Requesting record list: %s", r.URL.String())
+	// params := r.URL.Query()
+	// sourceType := rpb.SourceType(rpb.SourceType_value[strings.ToUpper(params.Get("type"))])
+
+}
+
+func (ws *WebServer) handleRecordRequest(w http.ResponseWriter, r *http.Request) {
+	ws.logger.Infof("Requesting record: %s", r.URL.String())
 	params := r.URL.Query()
-	sourceType := rpb.SourceType(rpb.SourceType_value[strings.ToUpper(params.Get("type"))])
-	if sourceType == rpb.SourceType_UNKNOWN_TYPE {
-		ws.Error(w, fmt.Sprintf("Unknown source type: \"%s\"", params.Get("type")), 500)
-		return
-	}
 	recordId := params.Get("id")
 	fname := "record.json"
+	sourceType := rpb.SourceType(rpb.SourceType_value[strings.ToUpper(params.Get("type"))])
 	if params.Has("file") {
 		fname = params.Get("file")
 	}
@@ -46,6 +49,20 @@ func (ws *WebServer) handleRequest(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		ws.Error(w, err.Error(), 500)
 	}
+}
+
+func (ws *WebServer) handleRequest(w http.ResponseWriter, r *http.Request) {
+	params := r.URL.Query()
+	sourceType := rpb.SourceType(rpb.SourceType_value[strings.ToUpper(params.Get("type"))])
+	if sourceType == rpb.SourceType_UNKNOWN_TYPE {
+		ws.Error(w, fmt.Sprintf("Unknown source type: \"%s\"", params.Get("type")), 500)
+		return
+	}
+	if !params.Has("id") {
+		ws.handleRecordListRequest(w, r)
+		return
+	}
+	ws.handleRecordRequest(w, r)
 }
 
 func (ws *WebServer) Start() {
