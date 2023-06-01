@@ -20,7 +20,7 @@ type DataRequest struct {
 }
 
 func (d DataRequest) String() string {
-	return fmt.Sprintf("DataRequest {sourceType: %s, id: %s, file: %s}",
+	return fmt.Sprintf("DataRequest {sourceType: \"%s\", id: \"%s\", file: \"%s\"}",
 		d.sourceType, d.id, d.filename)
 }
 
@@ -81,12 +81,22 @@ func (ws *WebServer) responseSourceTypes(w http.ResponseWriter) {
 }
 
 func (ws *WebServer) responseIdsForSource(w http.ResponseWriter, srcType rpb.SourceType) {
-	w.Write([]byte("whatever"))
+	records, err := ws.storage.ListRecords(srcType)
+	if err != nil {
+		ws.Error(w, fmt.Sprintf("Cannot enumerate records for %s", srcType), 500)
+		return
+	}
+	for _, r := range records {
+		if len(r.Records) == 0 {
+			continue
+		}
+		w.Write([]byte(fmt.Sprintf("%s\n", r.Records[0])))
+	}
 }
 
 func (ws *WebServer) handleApiRequest(w http.ResponseWriter, r *http.Request) {
-	ws.logger.Infof("Request [api]: %s (%s)", r.URL.String())
 	params, err := parseUrlRequest(r.URL)
+	ws.logger.Infof("Request [api]: %s (%s)", r.URL.String(), params)
 	if err != nil {
 		ws.Error(w, err.Error(), 422)
 		return
@@ -99,9 +109,7 @@ func (ws *WebServer) handleApiRequest(w http.ResponseWriter, r *http.Request) {
 		ws.responseIdsForSource(w, params.sourceType)
 		return
 	}
-	records, _ := ws.storage.ListRecords()
-	bytes, _ := json.Marshal(records)
-	w.Write(bytes)
+	w.Write([]byte(fmt.Sprintf("%s", params)))
 }
 
 func (ws *WebServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {

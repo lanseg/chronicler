@@ -21,7 +21,7 @@ const (
 
 type Storage interface {
 	SaveRecords(r *rpb.RecordSet) error
-	ListRecords() ([]*rpb.RecordSet, error)
+	ListRecords(stype rpb.SourceType) ([]*rpb.RecordSet, error)
 }
 
 type LocalStorage struct {
@@ -82,25 +82,26 @@ func (s *LocalStorage) downloadURL(url string, target string) error {
 	return s.copyReader(resp.Body, target)
 }
 
-func (s *LocalStorage) ListRecords() ([]*rpb.RecordSet, error) {
+func (s *LocalStorage) ListRecords(stype rpb.SourceType) ([]*rpb.RecordSet, error) {
 	result := []*rpb.RecordSet{}
-	filepath.Walk(s.root, func(path string, info os.FileInfo, err error) error {
-		if filepath.Base(path) != "record.json" {
+	filepath.Walk(s.path(fmt.Sprintf("%s", stype)),
+		func(path string, info os.FileInfo, err error) error {
+			if filepath.Base(path) != "record.json" {
+				return nil
+			}
+			b, err := os.ReadFile(path)
+			if err != nil {
+				s.logger.Warningf("Error reading file: %s", err)
+				return err
+			}
+			rs := &rpb.RecordSet{}
+			if err = json.Unmarshal(b, &rs); err != nil {
+				s.logger.Warningf("Error unmarshalling file: %s", err)
+				return err
+			}
+			result = append(result, rs)
 			return nil
-		}
-		b, err := os.ReadFile(path)
-		if err != nil {
-			s.logger.Warningf("Error reading file: %s", err)
-			return err
-		}
-		rs := &rpb.RecordSet{}
-		if err = json.Unmarshal(b, &rs); err != nil {
-			s.logger.Warningf("Error unmarshalling file: %s", err)
-			return err
-		}
-		result = append(result, rs)
-		return nil
-	})
+		})
 	return result, nil
 }
 
