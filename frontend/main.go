@@ -27,5 +27,7 @@ func main() {
 	logger.Infof("Starting server on port %d", *port)
 
 	server := frontend.NewServer(*port, *storageRoot, *staticRoot)
-	server.Start()
+	if err := server.ListenAndServe(); err != nil {
+		log.Errorf("Failed to start server: %s", err)
+	}
 }

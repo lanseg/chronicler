@@ -27,7 +27,7 @@
 }
 
 .topheader .menu label {
-    background-color: darkgray;
+    background-color: #2F2F2F;
     height: 54px;
     width: 54px;
     display: flex;
@@ -49,20 +49,25 @@
 }
 
 .topheader .menuitem {
-    background-color: darkgray;
+    text-decoration: none;
+    background-color: #2F2F2F;
     padding: 4px;
     padding-left: 16px;
     width: 100%;
     font-size: 20px;
-    border-bottom: solid 1px lightgray;
+    border-bottom: solid 1px #4F4F4F;
+}
+
+.topheader .menuitem a {
+    color: white;
 }
 
 .topheader .menuitem:active {
-    background-color: lightgray;
+    background-color: #4F4F4F;
 }
 
 .topheader .menu label:active {
-    background-color: lightgray;
+    background-color: #4F4F4F;
 }
 
 .records {

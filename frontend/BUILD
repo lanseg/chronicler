@@ -10,6 +10,7 @@ go_library(
     importpath = "chronicler/frontend",
     deps = [
         "//proto:records_go_proto",
+        "//storage",
         "//util",
     ],
 )
