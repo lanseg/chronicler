@@ -46,9 +46,10 @@ message UserMetadata {
 }
 
 message RecordSet {
-  Request request = 1;
-  repeated Record records = 2;
-  repeated UserMetadata userMetadata = 3;
+  string id = 1;
+  Request request = 2;
+  repeated Record records = 3;
+  repeated UserMetadata userMetadata = 4;
 }
 
 message Request {

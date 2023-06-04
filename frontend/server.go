@@ -81,7 +81,7 @@ func (ws *WebServer) responseSourceTypes(w http.ResponseWriter) {
 }
 
 func (ws *WebServer) responseIdsForSource(w http.ResponseWriter, srcType rpb.SourceType) {
-	records, err := ws.storage.ListRecords(srcType)
+	records, err := ws.storage.ListRecords()
 	if err != nil {
 		ws.Error(w, fmt.Sprintf("Cannot enumerate records for %s", srcType), 500)
 		return

@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"crypto/sha512"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -9,6 +10,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	rpb "chronicler/proto/records"
@@ -19,9 +21,24 @@ const (
 	userAgent = "curl/7.54"
 )
 
+func getRecordSetId(set *rpb.RecordSet) string {
+	if set.Id != "" {
+		return set.Id
+	}
+	checksum := []byte{}
+	if set.Request != nil {
+		checksum = append(checksum, []byte(set.Request.Source.SenderId)...)
+		checksum = append(checksum, []byte(set.Request.Source.ChannelId)...)
+		checksum = append(checksum, []byte(set.Request.Source.MessageId)...)
+		checksum = append(checksum, []byte(set.Request.Source.Url)...)
+		checksum = append(checksum, byte(set.Request.Source.Type))
+	}
+	return fmt.Sprintf("%x", sha512.Sum512(checksum))
+}
+
 type Storage interface {
 	SaveRecords(r *rpb.RecordSet) error
-	ListRecords(stype rpb.SourceType) ([]*rpb.RecordSet, error)
+	ListRecords() ([]*rpb.RecordSet, error)
 }
 
 type LocalStorage struct {
@@ -82,9 +99,9 @@ func (s *LocalStorage) downloadURL(url string, target string) error {
 	return s.copyReader(resp.Body, target)
 }
 
-func (s *LocalStorage) ListRecords(stype rpb.SourceType) ([]*rpb.RecordSet, error) {
+func (s *LocalStorage) ListRecords() ([]*rpb.RecordSet, error) {
 	result := []*rpb.RecordSet{}
-	filepath.Walk(s.path(fmt.Sprintf("%s", stype)),
+	filepath.Walk(s.root,
 		func(path string, info os.FileInfo, err error) error {
 			if filepath.Base(path) != "record.json" {
 				return nil
@@ -102,27 +119,30 @@ func (s *LocalStorage) ListRecords(stype rpb.SourceType) ([]*rpb.RecordSet, erro
 			result = append(result, rs)
 			return nil
 		})
+	sort.Slice(result, func(i int, j int) bool {
+		return result[i].String() < result[j].String()
+	})
 	return result, nil
 }
 
 func (s *LocalStorage) SaveRecords(r *rpb.RecordSet) error {
-	recordRoot := filepath.Join(fmt.Sprint(r.Request.Source.Type), r.Request.Source.ChannelId)
-	s.logger.Debugf("Saving record to %s", recordRoot)
-	if err := os.MkdirAll(filepath.Join(s.root, recordRoot), os.ModePerm); err != nil {
+	root := getRecordSetId(r)
+	s.logger.Debugf("Saving record to %s", s.path(root))
+	if err := s.mkdir(root); err != nil {
 		return err
 	}
 	bytes, err := json.Marshal(r)
 	if err != nil {
 		return fmt.Errorf("Json marshalling error: %s", err)
 	}
-	if err := s.writeFile(filepath.Join(recordRoot, "record.json"), bytes); err != nil {
+	if err := s.writeFile(filepath.Join(root, "record.json"), bytes); err != nil {
 		return err
 	}
 	for _, r := range r.Records {
 		for _, link := range r.Links {
 			if util.IsYoutubeLink(link) && strings.Contains(link, "v=") {
 				s.logger.Debugf("Found youtube link: %s", link)
-				if err := util.DownloadYoutube(link, filepath.Join(s.root, recordRoot)); err != nil {
+				if err := util.DownloadYoutube(link, s.path(root)); err != nil {
 					s.logger.Warningf("Failed to download youtube video: %s", err)
 				}
 			}
@@ -135,13 +155,13 @@ func (s *LocalStorage) SaveRecords(r *rpb.RecordSet) error {
 				continue
 			}
 			fname := path.Base(fileUrl.Path)
-			if err := s.downloadURL(file.GetFileUrl(), filepath.Join(recordRoot, fname)); err != nil {
+			if err := s.downloadURL(file.GetFileUrl(), filepath.Join(root, fname)); err != nil {
 				s.logger.Warningf("Failed to download file: %s: %s", file, err)
 			}
 		}
 
 	}
-	s.logger.Infof("Saved new record to %s", recordRoot)
+	s.logger.Infof("Saved new record to %s", root)
 	return nil
 }
 
