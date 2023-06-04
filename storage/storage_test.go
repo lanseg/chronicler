@@ -8,7 +8,7 @@ import (
 )
 
 func newRecordSet(name string) *rpb.RecordSet {
-    rs := &rpb.RecordSet{
+	rs := &rpb.RecordSet{
 		Request: &rpb.Request{
 			Source: &rpb.Source{
 				SenderId:  "SenderId" + name,
@@ -18,8 +18,8 @@ func newRecordSet(name string) *rpb.RecordSet {
 			},
 		},
 	}
-    rs.Id = getRecordSetId(rs)
-    return rs
+	rs.Id = getRecordSetId(rs)
+	return rs
 }
 
 func newRecordSetFull(name string, nrecords int) *rpb.RecordSet {
@@ -44,8 +44,8 @@ func TestStorage(t *testing.T) {
 	}{
 		{
 			name:    "Empty record set",
-            records: []*rpb.RecordSet{{Id:"123"}},
-            want:    []*rpb.RecordSet{{Id:"123"}},
+			records: []*rpb.RecordSet{{Id: "123"}},
+			want:    []*rpb.RecordSet{{Id: "123"}},
 		},
 		{
 			name:    "Record set with request",

@@ -12,6 +12,7 @@ go_library(
         "//proto:records_go_proto",
         "//storage",
         "//util",
+        "//web:htmlparser",
     ],
 )
 

@@ -27,6 +27,7 @@ type Node struct {
 	Name     string
 	Text     string
 	Params   map[string][]string
+	Parent   *Node
 	Children []*Node
 }
 
@@ -75,10 +76,26 @@ func ParseHtml(content string) *Node {
 			continue
 		}
 		node := newNode(token)
+		node.Parent = parent
 		parent.Children = append(parent.Children, node)
 		if node.Name != "" && !strings.HasPrefix(node.Name, "/") && !selfClosingTags.Contains(node.Name) {
 			nodes = append([]*Node{node}, nodes...)
 		}
 	}
 	return root
+}
+
+func StripTags(content string) string {
+	doc := ParseHtml(content)
+	result := strings.Builder{}
+	collections.IterateTree(doc, getChildren).Filter(
+		func(n *Node) bool {
+			return n.Parent != nil && n.Parent.Name != "script" && n.Text != ""
+		}).ForEachRemaining(
+		func(n *Node) bool {
+			result.WriteString(n.Text)
+			result.WriteRune(' ')
+			return false
+		})
+	return result.String()
 }

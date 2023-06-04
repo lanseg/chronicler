@@ -10,18 +10,22 @@ import (
 	"net/http"
 	"net/url"
 
+	"web/htmlparser"
+
 	rpb "chronicler/proto/records"
 )
 
+const (
+	textSampleSize = 512
+)
+
 type DataRequest struct {
-	sourceType rpb.SourceType
-	id         string
-	filename   string
+	id       string
+	filename string
 }
 
 func (d DataRequest) String() string {
-	return fmt.Sprintf("DataRequest {sourceType: \"%s\", id: \"%s\", file: \"%s\"}",
-		d.sourceType, d.id, d.filename)
+	return fmt.Sprintf("DataRequest {id: \"%s\", file: \"%s\"}", d.id, d.filename)
 }
 
 func parseUrlRequest(link *url.URL) (*DataRequest, error) {
@@ -30,10 +34,8 @@ func parseUrlRequest(link *url.URL) (*DataRequest, error) {
 	for i, param := range strings.Split(strings.TrimPrefix(path, "/chronicler/"), "/") {
 		switch i {
 		case 0:
-			params.sourceType = rpb.SourceType(rpb.SourceType_value[strings.ToUpper(param)])
-		case 1:
 			params.id = param
-		case 2:
+		case 1:
 			params.filename = param
 		default:
 			return nil, fmt.Errorf("Unsupported path parameter #%d: %s", i, param)
@@ -80,18 +82,29 @@ func (ws *WebServer) responseSourceTypes(w http.ResponseWriter) {
 	ws.writeJson(w, values)
 }
 
-func (ws *WebServer) responseIdsForSource(w http.ResponseWriter, srcType rpb.SourceType) {
+func (ws *WebServer) responseRecordList(w http.ResponseWriter) {
 	records, err := ws.storage.ListRecords()
 	if err != nil {
-		ws.Error(w, fmt.Sprintf("Cannot enumerate records for %s", srcType), 500)
+		ws.Error(w, "Cannot enumerate records", 500)
 		return
 	}
+	result := &rpb.RecordListResponse{}
 	for _, r := range records {
-		if len(r.Records) == 0 {
-			continue
+		desc := ""
+		if len(r.Records) > 0 {
+			desc = r.Records[0].TextContent
 		}
-		w.Write([]byte(fmt.Sprintf("%s\n", r.Records[0])))
+		description := htmlparser.StripTags(desc)
+		if len(description) > textSampleSize {
+			description = description[:textSampleSize]
+		}
+		result.RecordSets = append(result.RecordSets, &rpb.RecordListResponse_RecordSetInfo{
+			Id:          r.Id,
+			Description: description,
+			RecordCount: int32(len(r.Records)),
+		})
 	}
+	ws.writeJson(w, result)
 }
 
 func (ws *WebServer) handleApiRequest(w http.ResponseWriter, r *http.Request) {
@@ -102,11 +115,8 @@ func (ws *WebServer) handleApiRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if params.sourceType == 0 && params.id == "" && params.filename == "" {
-		ws.responseSourceTypes(w)
-		return
-	} else if params.id == "" && params.filename == "" {
-		ws.responseIdsForSource(w, params.sourceType)
+	if params.id == "" && params.filename == "" {
+		ws.responseRecordList(w)
 		return
 	}
 	w.Write([]byte(fmt.Sprintf("%s", params)))

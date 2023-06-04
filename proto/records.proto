@@ -52,6 +52,17 @@ message RecordSet {
   repeated UserMetadata userMetadata = 4;
 }
 
+message RecordListResponse {
+
+  message RecordSetInfo {
+    string id = 1;
+    string description = 2;
+    int32 record_count = 3;
+  }  
+
+  repeated RecordSetInfo record_sets = 1;
+}
+
 message Request {
   Source source = 1;
 }

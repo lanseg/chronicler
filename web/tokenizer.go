@@ -23,18 +23,18 @@ type Token struct {
 
 type Tokenizer struct {
 	pos    int
-	text   string
+	text   []rune
 	tokens []*Token
 
 	parser func()
 }
 
 func (p *Tokenizer) charAt() rune {
-	return rune(p.text[p.pos])
+	return p.text[p.pos]
 }
 
 func (p *Tokenizer) isChar(r rune) bool {
-	return !p.isEnd() && r == rune(p.text[p.pos])
+	return !p.isEnd() && r == p.text[p.pos]
 }
 
 func (p *Tokenizer) isSpace() bool {
@@ -197,10 +197,10 @@ func (p *Tokenizer) parseDocument() {
 }
 
 func (p *Tokenizer) tokenize(data string) {
-	p.text = data
+	p.text = []rune(data)
 	p.parser = p.parseDocument
 
-	for p.pos < len(data) {
+	for !p.isEnd() {
 		p.parser()
 	}
 }

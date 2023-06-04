@@ -21,10 +21,10 @@ func TestTwitterClient(t *testing.T) {
 			},
 		},
 		{
-			desc:  "Text-only content",
-			input: "Some text input \nnewline\n whatever",
+			desc:  "Text-only content without newlines unicode",
+			input: "Текст в юникоде 中國 भारत 한국",
 			want: []*Token{
-				{Text: "Some text input \nnewline\n whatever"},
+				{Text: "Текст в юникоде 中國 भारत 한국"},
 			},
 		},
 		{
