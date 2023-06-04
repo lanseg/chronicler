@@ -116,11 +116,14 @@ func (s *LocalStorage) ListRecords() ([]*rpb.RecordSet, error) {
 				s.logger.Warningf("Error unmarshalling file: %s", err)
 				return err
 			}
+			if rs.Id == "" {
+				rs.Id = getRecordSetId(rs)
+			}
 			result = append(result, rs)
 			return nil
 		})
 	sort.Slice(result, func(i int, j int) bool {
-		return result[i].String() < result[j].String()
+		return result[i].Request.String() < result[j].Request.String()
 	})
 	return result, nil
 }
