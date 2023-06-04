@@ -71,17 +71,6 @@ func (ws *WebServer) writeJson(w http.ResponseWriter, data any) {
 	w.Write(bytes)
 }
 
-func (ws *WebServer) responseSourceTypes(w http.ResponseWriter) {
-	values := []string{}
-	for name, i := range rpb.SourceType_value {
-		if i == 0 {
-			continue
-		}
-		values = append(values, name)
-	}
-	ws.writeJson(w, values)
-}
-
 func (ws *WebServer) responseRecordList(w http.ResponseWriter) {
 	records, err := ws.storage.ListRecords()
 	if err != nil {
@@ -107,6 +96,21 @@ func (ws *WebServer) responseRecordList(w http.ResponseWriter) {
 	ws.writeJson(w, result)
 }
 
+func (ws *WebServer) responseRecord(w http.ResponseWriter, id string) {
+	allRecords, err := ws.storage.ListRecords()
+	if err != nil {
+		ws.Error(w, "Cannot enumerate records", 500)
+		return
+	}
+	for _, r := range allRecords {
+		if r.Id == id {
+			ws.writeJson(w, r)
+			return
+		}
+	}
+	ws.Error(w, "Cannot find record with id "+id, 404)
+}
+
 func (ws *WebServer) handleApiRequest(w http.ResponseWriter, r *http.Request) {
 	params, err := parseUrlRequest(r.URL)
 	ws.logger.Infof("Request [api]: %s (%s)", r.URL.String(), params)
@@ -114,9 +118,11 @@ func (ws *WebServer) handleApiRequest(w http.ResponseWriter, r *http.Request) {
 		ws.Error(w, err.Error(), 422)
 		return
 	}
-
 	if params.id == "" && params.filename == "" {
 		ws.responseRecordList(w)
+		return
+	} else if params.filename == "" {
+		ws.responseRecord(w, params.id)
 		return
 	}
 	w.Write([]byte(fmt.Sprintf("%s", params)))
