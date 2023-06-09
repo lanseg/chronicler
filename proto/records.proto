@@ -58,9 +58,11 @@ message RecordListResponse {
     string id = 1;
     string description = 2;
     int32 record_count = 3;
-  }  
 
+    Record root_record = 4;
+  }
   repeated RecordSetInfo record_sets = 1;
+  repeated UserMetadata userMetadata = 2;
 }
 
 message Request {

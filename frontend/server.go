@@ -87,11 +87,15 @@ func (ws *WebServer) responseRecordList(w http.ResponseWriter) {
 		if len(description) > textSampleSize {
 			description = description[:textSampleSize]
 		}
-		result.RecordSets = append(result.RecordSets, &rpb.RecordListResponse_RecordSetInfo{
+		set := &rpb.RecordListResponse_RecordSetInfo{
 			Id:          r.Id,
 			Description: description,
 			RecordCount: int32(len(r.Records)),
-		})
+		}
+		if len(r.Records) > 0 {
+			set.RootRecord = r.Records[0]
+		}
+		result.RecordSets = append(result.RecordSets, set)
 	}
 	ws.writeJson(w, result)
 }

@@ -51,113 +51,122 @@
                 .then(text => JSON.parse(text));
         }
 
-        window.onload = () => {
-            document.querySelector("#recordId .search-input").value = rcid;
-            document.querySelector("#recordId button").addEventListener('click', () => {
-                window.location.href = "?record_id=" + document.querySelector("#recordId .search-input").value;
-            });
-
-            getRecordSets().then(data => {
-                const fragment = document.createDocumentFragment();
-                const records = document.querySelector('.records');
-                for (const rs of data["record_sets"]) {
-                    const recordEl = document.createElement('div');
-                    recordEl.setAttribute('id', rs["id"])
-                    recordEl.setAttribute('class', 'record');
-                    recordEl.innerHTML = `<div class='header'>
-                           <span class="datetime">${new Date()}</span>
+        function renderRecordSets(data) {
+            const fragment = document.createDocumentFragment();
+            const records = document.querySelector('.records');
+            for (const rs of data["record_sets"]) {
+                const recordEl = document.createElement('div');
+                recordEl.setAttribute('id', rs["id"])
+                recordEl.setAttribute('class', 'record');
+                recordEl.innerHTML = `<div class='header'>
+                           <span class="datetime">${formatDateTime(new Date())}</span>,
+                           <span>${rs["record_count"]}</span>
+                           <a href="?record_id=${rs["id"]}">#</a>
                          </div>
                          <div class='content'>${rs["description"]}</div>`;
-                    fragment.appendChild(recordEl);
-                }
-                records.append(fragment);
-            });
+                fragment.appendChild(recordEl);
+            }
+            records.append(fragment);
+        }
 
-            /* fetch(`/chronicler?type=${type}&id=${rcid}`)
-                 .then(response => response.text())
-                 .then(text => {
-                     const data = JSON.parse(text);
-                     const fragment = document.createDocumentFragment();
-                     const records = document.querySelector('.records');
- 
-                     const userById = new Map();
-                     for (const user of data.userMetadata) {
-                         userById.set(user.id, user);
-                     }
- 
-                     const recordById = new Map();
-                     for (const record of data.records) {
-                         if (!record.source) {
-                             continue;
-                         }
-                         recordById.set(record.source.message_id, record);
-                     }
- 
-                     function getUserName(id) {
-                         return userById.has(id) ? userById.get(id).username : id;
-                     }
- 
-                     function getParent(record) {
-                         if (record.parent) {
-                             return recordById.get(record.parent.message_id);
-                         }
-                         if (record.source.channel_id) {
-                             return recordById.get(record.source.channel_id);
-                         }
-                         return undefined;
-                     }
- 
-                     for (const record of data.records) {
-                         const date = new Date(record.time * 1000);
-                         const userName = getUserName(record.source.sender_id);
-                         const parent = getParent(record);
-                         const parentName = parent ? getUserName(parent.source.sender_id) : 'NONE';
-                         const parentMessage = parent ? parent.source.message_id : 'NONE';
-                         const recordEl = document.createElement('div');
-                         recordEl.setAttribute('id', record.source.message_id)
-                         recordEl.setAttribute('class', 'record');
-                         recordEl.innerHTML = `<div class='header'>
+        function renderRecord(data) {
+            const fragment = document.createDocumentFragment();
+            const records = document.querySelector('.records');
+
+            const userById = new Map();
+            for (const user of data.userMetadata) {
+                userById.set(user.id, user);
+            }
+
+            const recordById = new Map();
+            for (const record of data.records) {
+                if (!record.source) {
+                    continue;
+                }
+                recordById.set(record.source.message_id, record);
+            }
+
+            function getUserName(id) {
+                return userById.has(id) ? userById.get(id).username : id;
+            }
+
+            function getParent(record) {
+                if (record.parent) {
+                    return recordById.get(record.parent.message_id);
+                }
+                if (record.source.channel_id) {
+                    return recordById.get(record.source.channel_id);
+                }
+                return undefined;
+            }
+
+            for (const record of data.records) {
+                const date = new Date(record.time * 1000);
+                const userName = getUserName(record.source.sender_id);
+                const parent = getParent(record);
+                const parentName = parent ? getUserName(parent.source.sender_id) : 'NONE';
+                const parentMessage = parent ? parent.source.message_id : 'NONE';
+                const recordEl = document.createElement('div');
+                recordEl.setAttribute('id', record.source.message_id)
+                recordEl.setAttribute('class', 'record');
+                recordEl.innerHTML = `<div class='header'>
                            <span class="datetime">${formatDateTime(date)}</span>
                            <a href="#${record.source.message_id}">#</a>
                            <span class="username">${userName}</span>
                            <span class="username">→ <a href="#${parentMessage}">${parentName}</a></span>
                          </div>
                          <div class='content'>${record.text_content}</div>`;
- 
-                         const images = [];
-                         const others = [];
-                         for (const file of record.files ?? []) {
-                             const fname = getFileName(file.file_url);
-                             if (isImage(fname)) {
-                                 images.push(fname);
-                             } else {
-                                 others.push(fname);
-                             }
-                         }
- 
-                         const imagesEl = document.createElement('div')
-                         imagesEl.setAttribute('class', 'images');
-                         for (const file of images) {
-                             imagesEl.innerHTML += `<div class="image">
+
+                const images = [];
+                const others = [];
+                for (const file of record.files ?? []) {
+                    const fname = getFileName(file.file_url);
+                    if (isImage(fname)) {
+                        images.push(fname);
+                    } else {
+                        others.push(fname);
+                    }
+                }
+
+                const imagesEl = document.createElement('div')
+                imagesEl.setAttribute('class', 'images');
+                for (const file of images) {
+                    imagesEl.innerHTML += `<div class="image">
                                      <a href="chronicler?type=${type}&id=${rcid}&file=${file}">
                                      <img src="chronicler?type=${type}&id=${rcid}&file=${file}" />
                                      </a>
                                  </div>`;
-                         }
- 
-                         const filesEl = document.createElement('div')
-                         filesEl.setAttribute('class', 'files');
-                         for (const file of others) {
-                             filesEl.innerHTML += `<div class="file">
+                }
+
+                const filesEl = document.createElement('div')
+                filesEl.setAttribute('class', 'files');
+                for (const file of others) {
+                    filesEl.innerHTML += `<div class="file">
                                  <a href="chronicler?type=${type}&id=${rcid}&file=${encodeURIComponent(file)}">${file}</a>
                              </div>`;
-                         }
-                         recordEl.appendChild(imagesEl);
-                         recordEl.appendChild(filesEl);
-                         fragment.appendChild(recordEl);
-                     }
-                     records.append(fragment);
-                 });*/
+                }
+                recordEl.appendChild(imagesEl);
+                recordEl.appendChild(filesEl);
+                fragment.appendChild(recordEl);
+            }
+            records.append(fragment);
+        }
+
+        window.onload = () => {
+            document.querySelector("#recordId .search-input").value = rcid;
+            document.querySelector("#recordId button").addEventListener('click', () => {
+                window.location.href = "?record_id=" + document.querySelector("#recordId .search-input").value;
+            });
+
+            if (params.get("record_id")) {
+                getRecord(params.get("record_id")).then(data => {
+                    renderRecord(data);
+                })
+            } else {
+                getRecordSets().then(data => {
+                    renderRecordSets(data);
+                });
+            }
         };
     </script>
 </head>
