@@ -9,6 +9,7 @@
         const type = 'twitter';
         const rcid = params.get("record_id");
         const imgExtensions = ['png', 'jpg', 'svg', 'gif', 'webp'];
+        const sourceType = ["UNKNOWN", "TELEGRAM", "TWITTER", "WEB", "YOUTUBE"];
 
         Map.prototype.getOrElse = function (key, value) {
             return this.has(key) ? this.get(key) : value;
@@ -60,6 +61,7 @@
                 recordEl.setAttribute('class', 'record');
                 recordEl.innerHTML = `<div class='header'>
                            <span class="datetime">${formatDateTime(new Date())}</span>,
+                           <span>${sourceType[rs["root_record"] ? rs["root_record"]["source"]["type"] : 0]}</span>,
                            <span>${rs["record_count"]}</span>
                            <a href="?record_id=${rs["id"]}">#</a>
                          </div>
