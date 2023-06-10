@@ -115,6 +115,15 @@ func (ws *WebServer) responseRecord(w http.ResponseWriter, id string) {
 	ws.Error(w, "Cannot find record with id "+id, 404)
 }
 
+func (ws *WebServer) responseFile(w http.ResponseWriter, params *DataRequest) {
+	f, err := ws.storage.GetFile(params.id, params.filename)
+	if err != nil {
+		ws.Error(w, err.Error(), 500)
+		return
+	}
+	w.Write(f)
+}
+
 func (ws *WebServer) handleApiRequest(w http.ResponseWriter, r *http.Request) {
 	params, err := parseUrlRequest(r.URL)
 	ws.logger.Infof("Request [api]: %s (%s)", r.URL.String(), params)
@@ -128,8 +137,10 @@ func (ws *WebServer) handleApiRequest(w http.ResponseWriter, r *http.Request) {
 	} else if params.filename == "" {
 		ws.responseRecord(w, params.id)
 		return
+	} else {
+		ws.responseFile(w, params)
 	}
-	w.Write([]byte(fmt.Sprintf("%s", params)))
+	w.Write([]byte(":)"))
 }
 
 func (ws *WebServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {

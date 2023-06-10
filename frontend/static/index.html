@@ -132,8 +132,8 @@
                 imagesEl.setAttribute('class', 'images');
                 for (const file of images) {
                     imagesEl.innerHTML += `<div class="image">
-                                     <a href="chronicler?type=${type}&id=${rcid}&file=${file}">
-                                     <img src="chronicler?type=${type}&id=${rcid}&file=${file}" />
+                                     <a href="chronicler/${rcid}/${encodeURIComponent(file)}">
+                                     <img src="chronicler/${rcid}/${encodeURIComponent(file)}" />
                                      </a>
                                  </div>`;
                 }
@@ -142,7 +142,7 @@
                 filesEl.setAttribute('class', 'files');
                 for (const file of others) {
                     filesEl.innerHTML += `<div class="file">
-                                 <a href="chronicler?type=${type}&id=${rcid}&file=${encodeURIComponent(file)}">${file}</a>
+                                 <a href="chronicler/${rcid}/${encodeURIComponent(file)}">${file}</a>
                              </div>`;
                 }
                 recordEl.appendChild(imagesEl);

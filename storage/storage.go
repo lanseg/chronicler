@@ -39,6 +39,7 @@ func getRecordSetId(set *rpb.RecordSet) string {
 type Storage interface {
 	SaveRecords(r *rpb.RecordSet) error
 	ListRecords() ([]*rpb.RecordSet, error)
+	GetFile(id string, filename string) ([]byte, error)
 }
 
 type LocalStorage struct {
@@ -97,6 +98,40 @@ func (s *LocalStorage) downloadURL(url string, target string) error {
 		return err
 	}
 	return s.copyReader(resp.Body, target)
+}
+
+func (s *LocalStorage) GetFile(id string, filename string) ([]byte, error) {
+	localPath := ""
+
+	filepath.Walk(s.root,
+		func(path string, info os.FileInfo, err error) error {
+			if filepath.Base(path) != "record.json" {
+				return nil
+			}
+			b, err := os.ReadFile(path)
+			if err != nil {
+				s.logger.Warningf("Error reading file: %s", err)
+				return err
+			}
+			rs := &rpb.RecordSet{}
+			if err = json.Unmarshal(b, &rs); err != nil {
+				s.logger.Warningf("Error unmarshalling file: %s", err)
+				return err
+			}
+			if rs.Id == id || (rs.Id == "" && getRecordSetId(rs) == id) {
+				localPath = filepath.Dir(path)
+			}
+			return nil
+		})
+
+	if localPath == "" {
+		return nil, fmt.Errorf("File not found: %s/%s", id, filename)
+	}
+	bytes, err := os.ReadFile(filepath.Join(localPath, filename))
+	if err != nil {
+		return nil, err
+	}
+	return bytes, nil
 }
 
 func (s *LocalStorage) ListRecords() ([]*rpb.RecordSet, error) {
