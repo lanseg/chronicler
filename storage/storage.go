@@ -45,9 +45,10 @@ type Storage interface {
 type LocalStorage struct {
 	Storage
 
-	httpClient *http.Client
-	logger     *util.Logger
-	root       string
+	recordCache map[string]string
+	httpClient  *http.Client
+	logger      *util.Logger
+	root        string
 }
 
 func (s *LocalStorage) path(relativePath string) string {
@@ -100,10 +101,10 @@ func (s *LocalStorage) downloadURL(url string, target string) error {
 	return s.copyReader(resp.Body, target)
 }
 
-func (s *LocalStorage) GetFile(id string, filename string) ([]byte, error) {
-	localPath := ""
-
-	filepath.Walk(s.root,
+func (s *LocalStorage) refreshCache() error {
+	s.logger.Debugf("Refreshing record cache")
+	s.recordCache = map[string]string{}
+	return filepath.Walk(s.root,
 		func(path string, info os.FileInfo, err error) error {
 			if filepath.Base(path) != "record.json" {
 				return nil
@@ -118,16 +119,30 @@ func (s *LocalStorage) GetFile(id string, filename string) ([]byte, error) {
 				s.logger.Warningf("Error unmarshalling file: %s", err)
 				return err
 			}
-			if rs.Id == id || (rs.Id == "" && getRecordSetId(rs) == id) {
-				localPath = filepath.Dir(path)
+			id := rs.Id
+			if rs.Id == "" {
+				id = getRecordSetId(rs)
 			}
+			s.recordCache[id] = filepath.Dir(path)
 			return nil
 		})
+}
 
-	if localPath == "" {
+func (s *LocalStorage) getRecordDir(id string) (string, bool) {
+	if result, ok := s.recordCache[id]; ok {
+		return result, true
+	}
+	s.refreshCache()
+	result, ok := s.recordCache[id]
+	return result, ok
+}
+
+func (s *LocalStorage) GetFile(id string, filename string) ([]byte, error) {
+	recordDir, ok := s.getRecordDir(id)
+	if !ok {
 		return nil, fmt.Errorf("File not found: %s/%s", id, filename)
 	}
-	bytes, err := os.ReadFile(filepath.Join(localPath, filename))
+	bytes, err := os.ReadFile(filepath.Join(recordDir, filename))
 	if err != nil {
 		return nil, err
 	}
@@ -135,28 +150,24 @@ func (s *LocalStorage) GetFile(id string, filename string) ([]byte, error) {
 }
 
 func (s *LocalStorage) ListRecords() ([]*rpb.RecordSet, error) {
+	s.refreshCache()
 	result := []*rpb.RecordSet{}
-	filepath.Walk(s.root,
-		func(path string, info os.FileInfo, err error) error {
-			if filepath.Base(path) != "record.json" {
-				return nil
-			}
-			b, err := os.ReadFile(path)
-			if err != nil {
-				s.logger.Warningf("Error reading file: %s", err)
-				return err
-			}
-			rs := &rpb.RecordSet{}
-			if err = json.Unmarshal(b, &rs); err != nil {
-				s.logger.Warningf("Error unmarshalling file: %s", err)
-				return err
-			}
-			if rs.Id == "" {
-				rs.Id = getRecordSetId(rs)
-			}
-			result = append(result, rs)
-			return nil
-		})
+	for _, path := range s.recordCache {
+		b, err := os.ReadFile(filepath.Join(path, "record.json"))
+		if err != nil {
+			s.logger.Warningf("Error reading file: %s", err)
+			continue
+		}
+		rs := &rpb.RecordSet{}
+		if err = json.Unmarshal(b, &rs); err != nil {
+			s.logger.Warningf("Error unmarshalling file: %s", err)
+			continue
+		}
+		if rs.Id == "" {
+			rs.Id = getRecordSetId(rs)
+		}
+		result = append(result, rs)
+	}
 	sort.Slice(result, func(i int, j int) bool {
 		return result[i].Request.String() < result[j].Request.String()
 	})
@@ -207,8 +218,9 @@ func NewStorage(root string) Storage {
 	log := util.NewLogger("storage")
 	log.Infof("Storage root set to \"%s\"", root)
 	return &LocalStorage{
-		root:       root,
-		httpClient: &http.Client{},
-		logger:     log,
+		root:        root,
+		httpClient:  &http.Client{},
+		logger:      log,
+		recordCache: map[string]string{},
 	}
 }
