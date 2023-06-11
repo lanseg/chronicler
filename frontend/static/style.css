@@ -26,6 +26,11 @@
     padding-left: 8px;
 }
 
+.topheader .menubar .title a {
+    text-decoration: none;
+    color: white;
+}
+
 .topheader .menu label {
     background-color: #2F2F2F;
     height: 54px;
@@ -51,8 +56,6 @@
 .topheader .menuitem {
     text-decoration: none;
     background-color: #2F2F2F;
-    padding: 4px;
-    padding-left: 16px;
     width: 100%;
     font-size: 20px;
     border-bottom: solid 1px #4F4F4F;
@@ -79,7 +82,7 @@
 
 .controls {
     padding: 8px;
-    padding-top: 60px;
+    padding-top: 8px;
     column-gap: 8px;
     border-radius: 8px;
     display: flex;
@@ -98,6 +101,7 @@
 
 .records {
     padding: 8px;
+    padding-top: 60px;
 }
 
 .record {
@@ -109,6 +113,11 @@
 .record .content {
     padding: 4px;
     font-size: 1rem;
+    text-overflow: hidden;
+}
+
+.record .content.error {
+    border: solid 1px orange;
 }
 
 .record .datetime {

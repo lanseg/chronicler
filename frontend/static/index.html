@@ -59,9 +59,17 @@
                 const recordEl = document.createElement('div');
                 recordEl.setAttribute('id', rs["id"])
                 recordEl.setAttribute('class', 'record');
+                if (!rs["root_record"]) {
+                    recordEl.innerHTML = `<div class='content error'>No record for id <a href="?record_id=${rs["id"]}">#</a></div>`;
+                    fragment.appendChild(recordEl);
+                    continue
+                }
+                const rootRecord = rs["root_record"];
+                const timeLabel = rootRecord["time"] ?
+                    formatDateTime(new Date(rootRecord["time"] * 1000)) : "No time";
                 recordEl.innerHTML = `<div class='header'>
-                           <span class="datetime">${formatDateTime(new Date())}</span>,
-                           <span>${sourceType[rs["root_record"] ? rs["root_record"]["source"]["type"] : 0]}</span>,
+                           <span class="datetime">${timeLabel}</span>,
+                           <span>${sourceType[rootRecord["source"]["type"]]}</span>,
                            <span>${rs["record_count"]}</span>
                            <a href="?record_id=${rs["id"]}">#</a>
                          </div>
@@ -176,7 +184,7 @@
 <body>
     <nav class="topheader">
         <div class="menubar">
-            <div class="title">Chronicler</div>
+            <div class="title"><a href="/">Chronicler</a></div>
             <div class="menu">
                 <label for="menuitems_check">
                     <svg fill="#000000" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg"
@@ -193,16 +201,14 @@
         </div>
         <input type="checkbox" id="menuitems_check" />
         <div class="menuitems">
-            <div class="menuitem"><a href="#">Twitter</a></div>
-            <div class="menuitem"><a href="#">Pikabu</a></div>
-            <div class="menuitem"><a href="#">Habr</a></div>
-            <div class="menuitem"><a href="#">All</a></div>
+            <div class="menuitem">
+                <div id="recordId" class="controls">
+                    <input type="text" placeholder="Post id" class="search-input" />
+                    <button>Open</buttom>
+                </div>
+            </div>
         </div>
     </nav>
-    <div id="recordId" class="controls">
-        <input type="text" placeholder="tweet conversation id" class="search-input" />
-        <button>Open</buttom>
-    </div>
     <div class="records">
     </div>
 </body>
