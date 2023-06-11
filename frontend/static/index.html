@@ -169,13 +169,19 @@
             });
 
             if (params.get("record_id")) {
+                document.querySelector(".loader").style.display = 'inline-block';
                 getRecord(params.get("record_id")).then(data => {
                     renderRecord(data);
+                }).then(() => {
+                    document.querySelector(".loader").style.display = 'none';
                 })
             } else {
                 getRecordSets().then(data => {
                     renderRecordSets(data);
+                }).then(() => {
+                    document.querySelector(".loader").style.display = 'none';
                 });
+                document.querySelector(".loader").style.display = 'inline-block';
             }
         };
     </script>
@@ -184,7 +190,10 @@
 <body>
     <nav class="topheader">
         <div class="menubar">
-            <div class="title"><a href="/">Chronicler</a></div>
+            <div class="title">
+                <a href="/">Chronicler</a>
+            </div>
+            <div class="loader"></div>
             <div class="menu">
                 <label for="menuitems_check">
                     <svg fill="#000000" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg"
