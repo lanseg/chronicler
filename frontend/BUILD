@@ -3,7 +3,7 @@ load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library", "go_test")
 package(default_visibility = ["//visibility:public"])
 
 go_library(
-    name = "frontend",
+    name = "server",
     srcs = [
         "server.go",
     ],
@@ -17,11 +17,11 @@ go_library(
 )
 
 go_binary(
-    name = "main",
+    name = "frontend",
     srcs = ["main.go"],
     data = glob(["static/*"]),
     deps = [
-        ":frontend",
+        ":server",
         "//proto:records_go_proto",
         "//util",
     ],
@@ -34,6 +34,6 @@ go_test(
         "server_test.go",
     ],
     embed = [
-        ":frontend",
+        ":server",
     ],
 )

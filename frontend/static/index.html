@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel='stylesheet' href='style.css' />
+    <link rel='stylesheet' href='/style.css' />
     <script>
         const params = new URLSearchParams(document.location.search);
         const type = 'twitter';
         const rcid = params.get("record_id");
         const imgExtensions = ['png', 'jpg', 'svg', 'gif', 'webp'];
-        const sourceType = ["UNKNOWN", "TELEGRAM", "TWITTER", "WEB", "YOUTUBE"];
+        const sourceType = ["unknown", "telegram", "twitter", "web", "youtube"];
 
         Map.prototype.getOrElse = function (key, value) {
             return this.has(key) ? this.get(key) : value;
@@ -55,23 +55,28 @@
         function renderRecordSets(data) {
             const fragment = document.createDocumentFragment();
             const records = document.querySelector('.records');
+            const userById = new Map();
+            for (const umd of data["user_metadata"]) {
+                userById.set(umd.id, umd);
+            }
             for (const rs of data["record_sets"]) {
                 const recordEl = document.createElement('div');
                 recordEl.setAttribute('id', rs["id"])
                 recordEl.setAttribute('class', 'record');
                 if (!rs["root_record"]) {
-                    recordEl.innerHTML = `<div class='content error'>No record for id <a href="?record_id=${rs["id"]}">#</a></div>`;
+                    recordEl.innerHTML = `<div class='content error'>No record for id ${rs["id"]}</div>`;
                     fragment.appendChild(recordEl);
                     continue
                 }
                 const rootRecord = rs["root_record"];
+                const userName = userById.get(rootRecord["source"]["sender_id"]);
                 const timeLabel = rootRecord["time"] ?
                     formatDateTime(new Date(rootRecord["time"] * 1000)) : "No time";
                 recordEl.innerHTML = `<div class='header'>
+                           <span class="icon ${sourceType[rootRecord["source"]["type"]]}">&nbsp;</span>
+                           <span class="username">${userName ? userName["username"] : ""}</span>
                            <span class="datetime">${timeLabel}</span>,
-                           <span>${sourceType[rootRecord["source"]["type"]]}</span>,
-                           <span>${rs["record_count"]}</span>
-                           <a href="?record_id=${rs["id"]}">#</a>
+                           <a href="?record_id=${rs["id"]}">${rs["record_count"]}↴</a>
                          </div>
                          <div class='content'>${rs["description"]}</div>`;
                 fragment.appendChild(recordEl);
@@ -193,7 +198,9 @@
             <div class="title">
                 <a href="/">Chronicler</a>
             </div>
-            <div class="loader"></div>
+            <div class="status">
+                <div class="loader"></div>
+            </div>
             <div class="menu">
                 <label for="menuitems_check">
                     <svg fill="#000000" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg"

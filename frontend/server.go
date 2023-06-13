@@ -77,6 +77,7 @@ func (ws *WebServer) responseRecordList(w http.ResponseWriter) {
 		ws.Error(w, "Cannot enumerate records", 500)
 		return
 	}
+	userById := map[string]*rpb.UserMetadata{}
 	result := &rpb.RecordListResponse{}
 	for _, r := range records {
 		desc := ""
@@ -94,9 +95,16 @@ func (ws *WebServer) responseRecordList(w http.ResponseWriter) {
 		}
 		if len(r.Records) > 0 {
 			set.RootRecord = r.Records[0]
+			// TODO: Can be done faster
+			for _, data := range r.UserMetadata {
+				if data.Id == set.RootRecord.Source.SenderId {
+					userById[data.Id] = data
+				}
+			}
 		}
 		result.RecordSets = append(result.RecordSets, set)
 	}
+	result.UserMetadata = util.Values(userById)
 	ws.writeJson(w, result)
 }
 

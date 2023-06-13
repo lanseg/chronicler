@@ -62,7 +62,7 @@ message RecordListResponse {
     Record root_record = 4;
   }
   repeated RecordSetInfo record_sets = 1;
-  repeated UserMetadata userMetadata = 2;
+  repeated UserMetadata user_metadata = 2;
 }
 
 message Request {
