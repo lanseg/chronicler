@@ -125,7 +125,7 @@
     color: darkgray;
 }
 
-.username {
+.sourcename {
     font-weight: bold;
 }
 
@@ -184,4 +184,9 @@
 
 .icon.twitter {
     background-image: url('/icons.svg');
+}
+
+.icon.web {
+    background-image: url('/icons.svg');
+    background-position: 16px 0px;
 }

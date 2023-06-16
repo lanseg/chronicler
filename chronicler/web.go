@@ -1,13 +1,16 @@
 package chronicler
 
 import (
-	rpb "chronicler/proto/records"
-	"chronicler/util"
 	"io"
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
+
+	"chronicler/util"
 	"web/htmlparser"
+
+	rpb "chronicler/proto/records"
 )
 
 const (
@@ -74,6 +77,7 @@ func (w *Web) GetRecords(request *rpb.Request) (*rpb.RecordSet, error) {
 			Url:       requestUrl.String(),
 			Type:      rpb.SourceType_WEB,
 		},
+		Time:        time.Now().Unix(),
 		TextContent: string(body),
 	}
 	w.logger.Debugf("Parsing html content")

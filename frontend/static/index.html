@@ -59,6 +59,11 @@
             for (const umd of data["user_metadata"]) {
                 userById.set(umd.id, umd);
             }
+
+            function getUserName(record) {
+                return (userById.get(record["source"]["sender_id"]) ?? {})["username"];
+            }
+
             for (const rs of data["record_sets"]) {
                 const recordEl = document.createElement('div');
                 recordEl.setAttribute('id', rs["id"])
@@ -69,12 +74,13 @@
                     continue
                 }
                 const rootRecord = rs["root_record"];
-                const userName = userById.get(rootRecord["source"]["sender_id"]);
+
+                const srcName = getUserName(rootRecord) ?? new URL(rootRecord["source"]["url"]).host;
                 const timeLabel = rootRecord["time"] ?
                     formatDateTime(new Date(rootRecord["time"] * 1000)) : "No time";
                 recordEl.innerHTML = `<div class='header'>
                            <span class="icon ${sourceType[rootRecord["source"]["type"]]}">&nbsp;</span>
-                           <span class="username">${userName ? userName["username"] : ""}</span>
+                           <span class="sourcename">${srcName}</span>
                            <span class="datetime">${timeLabel}</span>,
                            <a href="?record_id=${rs["id"]}">${rs["record_count"]}↴</a>
                          </div>
@@ -89,7 +95,7 @@
             const records = document.querySelector('.records');
 
             const userById = new Map();
-            for (const user of data.userMetadata) {
+            for (const user of data.userMetadata ?? []) {
                 userById.set(user.id, user);
             }
 

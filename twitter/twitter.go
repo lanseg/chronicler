@@ -236,8 +236,8 @@ func (c *ClientImpl) performRequest(url url.URL) optional.Optional[[]byte] {
 		}),
 		func(resp *http.Response) ([]byte, error) {
 			defer resp.Body.Close()
-            result, err := ioutil.ReadAll(resp.Body)
-            c.logger.Debugf("RESULT: %s", string(result))
+			result, err := ioutil.ReadAll(resp.Body)
+			c.logger.Debugf("RESULT: %s", string(result))
 			return result, err
 		})
 }
