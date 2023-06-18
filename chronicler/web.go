@@ -7,10 +7,11 @@ import (
 	"strings"
 	"time"
 
+	rpb "chronicler/proto/records"
 	"chronicler/util"
 	"web/htmlparser"
 
-	rpb "chronicler/proto/records"
+	"github.com/lanseg/golang-commons/collections"
 )
 
 const (
@@ -18,7 +19,7 @@ const (
 )
 
 var (
-	webpageFileTypes = util.NewSet([]string{
+	webpageFileTypes = collections.NewSet([]string{
 		"jpg", "png", "js", "css", "json", "ico",
 	})
 )

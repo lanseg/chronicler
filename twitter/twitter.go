@@ -1,16 +1,16 @@
 package twitter
 
 import (
-	"fmt"
-	"strings"
-
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"chronicler/util"
 
+	"github.com/lanseg/golang-commons/collections"
 	"github.com/lanseg/golang-commons/optional"
 )
 
@@ -172,7 +172,7 @@ func getMissingMedia(response *Response[Tweet]) map[string]([]string) {
 }
 
 func getMissingUsers(response *Response[Tweet]) []string {
-	users := util.NewSet([]string{})
+	users := collections.NewSet([]string{})
 	for _, tweet := range response.Data {
 		users.Add(tweet.Author)
 	}
@@ -341,15 +341,15 @@ func (c *ClientImpl) GetConversation(conversationId string) (*Response[Tweet], e
 
 	missingMedia := getMissingMedia(result)
 	c.logger.Infof("Downloading missing media from tweets %s, for keys: %s",
-		strings.Join(util.Keys(missingMedia), ", "), util.Values(missingMedia))
-	if moreMedia, err := c.getMediaForTweets(util.Keys(missingMedia)).Get(); err == nil {
+		strings.Join(collections.Keys(missingMedia), ", "), collections.Values(missingMedia))
+	if moreMedia, err := c.getMediaForTweets(collections.Keys(missingMedia)).Get(); err == nil {
 		result.Includes.Media = append(result.Includes.Media, moreMedia...)
 	} else {
-		c.logger.Warningf("Failed loading media for %s: %s", util.Keys(missingMedia))
+		c.logger.Warningf("Failed loading media for %s: %s", collections.Keys(missingMedia))
 	}
 	missingMedia = getMissingMedia(result)
 	c.logger.Infof("Missing media after the download: from tweets %s, for keys: %s",
-		util.Keys(missingMedia), util.Values(missingMedia))
+		collections.Keys(missingMedia), collections.Values(missingMedia))
 
 	missingUsers := getMissingUsers(result)
 	c.logger.Infof("Downloading missing information for users: %s", missingUsers)

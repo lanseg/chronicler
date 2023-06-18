@@ -7,6 +7,8 @@ import (
 
 	rpb "chronicler/proto/records"
 	"chronicler/twitter"
+
+	"github.com/lanseg/golang-commons/collections"
 )
 
 type Twitter struct {
@@ -18,7 +20,7 @@ type Twitter struct {
 }
 
 func (t *Twitter) tweetToRecord(response *twitter.Response[twitter.Tweet]) *rpb.RecordSet {
-	seen := util.NewSet[string]([]string{})
+	seen := collections.NewSet[string]([]string{})
 	tweets := []twitter.Tweet{}
 	for _, twt := range append(response.Data, response.Includes.Tweets...) {
 		if seen.Contains(twt.Id) {

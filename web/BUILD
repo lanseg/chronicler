@@ -23,6 +23,7 @@ go_library(
     importpath = "web/tokenizer",
     deps = [
         "//util",
+        "@commons//collections",
     ],
 )
 

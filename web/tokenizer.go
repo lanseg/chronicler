@@ -1,9 +1,10 @@
 package tokenizer
 
 import (
-	"chronicler/util"
 	"strings"
 	"unicode"
+
+	"github.com/lanseg/golang-commons/collections"
 )
 
 func isSpace(s string) bool {
@@ -18,7 +19,7 @@ func isSpace(s string) bool {
 type Token struct {
 	Name   string
 	Text   string
-	Params []util.Pair[string, string]
+	Params []collections.Pair[string, string]
 }
 
 type Tokenizer struct {
@@ -72,7 +73,7 @@ func (p *Tokenizer) addTextToken(content string) *Token {
 	return p.lastToken()
 }
 
-func (p *Tokenizer) addTagToken(name string, params []util.Pair[string, string]) *Token {
+func (p *Tokenizer) addTagToken(name string, params []collections.Pair[string, string]) *Token {
 	p.tokens = append(p.tokens, &Token{
 		Name:   name,
 		Params: params,
@@ -113,7 +114,7 @@ func (p *Tokenizer) parseParamValue() string {
 }
 
 func (p *Tokenizer) parseParamList() {
-	params := []util.Pair[string, string]{}
+	params := []collections.Pair[string, string]{}
 	for !p.isEnd() && !p.isChar('>') {
 		paramName := p.parseParamName()
 		p.skipSpace()
@@ -123,9 +124,9 @@ func (p *Tokenizer) parseParamList() {
 		if p.isChar('=') {
 			p.next()
 			paramValue := p.parseParamValue()
-			params = append(params, util.AsPair(paramName, paramValue))
+			params = append(params, collections.AsPair(paramName, paramValue))
 		} else {
-			params = append(params, util.AsPair(paramName, ""))
+			params = append(params, collections.AsPair(paramName, ""))
 		}
 		p.skipSpace()
 	}
@@ -141,7 +142,7 @@ func (p *Tokenizer) parseTag() {
 		p.next()
 	}
 	if tokenBuffer.Len() != 0 {
-		p.addTagToken(tokenBuffer.String(), []util.Pair[string, string]{})
+		p.addTagToken(tokenBuffer.String(), []collections.Pair[string, string]{})
 	}
 	p.skipSpace()
 	if p.isChar('>') {

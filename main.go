@@ -8,11 +8,12 @@ import (
 	"regexp"
 
 	"chronicler"
+	rpb "chronicler/proto/records"
 	"chronicler/storage"
 	"chronicler/twitter"
 	"chronicler/util"
 
-	rpb "chronicler/proto/records"
+	"github.com/lanseg/golang-commons/collections"
 )
 
 var (
@@ -30,7 +31,7 @@ func parseRequest(s string) rpb.Request {
 	}
 
 	re := regexp.MustCompile("twitter.*/(?P<twitter_id>[0-9]+)[/]?")
-	matches := util.NewMap(re.SubexpNames(), re.FindStringSubmatch(s))
+	matches := collections.NewMap(re.SubexpNames(), re.FindStringSubmatch(s))
 	if match, ok := matches["twitter_id"]; ok && match != "" {
 		source.ChannelId = matches["twitter_id"]
 		source.Type = rpb.SourceType_TWITTER

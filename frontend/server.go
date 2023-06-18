@@ -3,16 +3,16 @@ package frontend
 import (
 	"encoding/json"
 	"fmt"
-	"strings"
-
-	"chronicler/storage"
-	"chronicler/util"
 	"net/http"
 	"net/url"
-
-	"web/htmlparser"
+	"strings"
 
 	rpb "chronicler/proto/records"
+	"chronicler/storage"
+	"chronicler/util"
+	"web/htmlparser"
+
+	"github.com/lanseg/golang-commons/collections"
 )
 
 const (
@@ -106,7 +106,7 @@ func (ws *WebServer) responseRecordList(w http.ResponseWriter) {
 		}
 		result.RecordSets = append(result.RecordSets, set)
 	}
-	result.UserMetadata = util.Values(userById)
+	result.UserMetadata = collections.Values(userById)
 	ws.writeJson(w, result)
 }
 

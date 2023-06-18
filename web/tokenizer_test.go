@@ -1,9 +1,10 @@
 package tokenizer
 
 import (
-	"chronicler/util"
 	"reflect"
 	"testing"
+
+	"github.com/lanseg/golang-commons/collections"
 )
 
 func TestTwitterClient(t *testing.T) {
@@ -31,11 +32,11 @@ func TestTwitterClient(t *testing.T) {
 			desc:  "Script special case",
 			input: "<tag>Text<script>the code</script>More text",
 			want: []*Token{
-				{Name: "tag", Params: []util.Pair[string, string]{}},
+				{Name: "tag", Params: []collections.Pair[string, string]{}},
 				{Text: "Text"},
-				{Name: "script", Params: []util.Pair[string, string]{}},
+				{Name: "script", Params: []collections.Pair[string, string]{}},
 				{Text: "the code"},
-				{Name: "/script", Params: []util.Pair[string, string]{}},
+				{Name: "/script", Params: []collections.Pair[string, string]{}},
 				{Text: "More text"},
 			},
 		},
@@ -46,16 +47,16 @@ func TestTwitterClient(t *testing.T) {
 				{Text: "Some input "},
 				{
 					Name: "tag",
-					Params: []util.Pair[string, string]{
-						util.AsPair("key", "value"),
-						util.AsPair("key", ""),
-						util.AsPair("key", "quoted value"),
-						util.AsPair("key", "also quoted"),
+					Params: []collections.Pair[string, string]{
+						collections.AsPair("key", "value"),
+						collections.AsPair("key", ""),
+						collections.AsPair("key", "quoted value"),
+						collections.AsPair("key", "also quoted"),
 					},
 				},
 				{
 					Name:   "/tag",
-					Params: []util.Pair[string, string]{},
+					Params: []collections.Pair[string, string]{},
 				},
 			},
 		},
@@ -65,8 +66,8 @@ func TestTwitterClient(t *testing.T) {
 			want: []*Token{
 				{
 					Name: "tag",
-					Params: []util.Pair[string, string]{
-						util.AsPair("data-value", "some value"),
+					Params: []collections.Pair[string, string]{
+						collections.AsPair("data-value", "some value"),
 					},
 				},
 			},
@@ -77,14 +78,14 @@ func TestTwitterClient(t *testing.T) {
 			want: []*Token{
 				{
 					Name: "tag",
-					Params: []util.Pair[string, string]{
-						util.AsPair("key", "val\\\"ue"),
+					Params: []collections.Pair[string, string]{
+						collections.AsPair("key", "val\\\"ue"),
 					},
 				},
 				{
 					Name: "tag",
-					Params: []util.Pair[string, string]{
-						util.AsPair("key", "val\\'ue"),
+					Params: []collections.Pair[string, string]{
+						collections.AsPair("key", "val\\'ue"),
 					},
 				},
 			},

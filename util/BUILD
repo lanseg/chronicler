@@ -5,7 +5,6 @@ package(default_visibility = ["//visibility:public"])
 go_library(
     name = "util",
     srcs = [
-        "collections.go",
         "common.go",
         "logging.go",
         "runners.go",
@@ -18,7 +17,6 @@ go_test(
     name = "util_test",
     size = "small",
     srcs = [
-        "collections_test.go",
         "runners_test.go",
         "textdata_test.go",
     ],

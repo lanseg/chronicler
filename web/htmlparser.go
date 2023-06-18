@@ -1,7 +1,6 @@
 package htmlparser
 
 import (
-	"chronicler/util"
 	"strings"
 	"web/tokenizer"
 
@@ -9,7 +8,7 @@ import (
 )
 
 var (
-	selfClosingTags = util.NewSet([]string{
+	selfClosingTags = collections.NewSet([]string{
 		"area", "base", "br", "col", "embed",
 		"hr", "img", "input", "link", "meta",
 		"param", "source", "track", "wbr",
@@ -39,7 +38,7 @@ func (n *Node) GetParam(paramName string) []string {
 }
 
 func (n *Node) GetElementsByTagNames(tagNames ...string) []*Node {
-	names := util.NewSet(tagNames)
+	names := collections.NewSet(tagNames)
 	return collections.IterateTree(n, getChildren).Filter(
 		func(n *Node) bool {
 			return names.Contains(n.Name)
@@ -102,7 +101,7 @@ func GetTitle(content string) string {
 func StripTags(content string) string {
 	doc := ParseHtml(content)
 	result := strings.Builder{}
-	excludedLinks := util.NewSet([]string{
+	excludedLinks := collections.NewSet([]string{
 		"script", "meta", "link", "head", "style",
 	})
 	collections.IterateTree(doc, getChildren).Filter(

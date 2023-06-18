@@ -10,5 +10,6 @@ go_binary(
         "//telegram",
         "//twitter",
         "//util",
+        "@commons//collections",
     ],
 )
