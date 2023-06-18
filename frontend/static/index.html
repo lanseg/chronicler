@@ -4,53 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel='stylesheet' href='/style.css' />
+    <script src="main.js"></script>
     <script>
         const params = new URLSearchParams(document.location.search);
-        const type = 'twitter';
         const rcid = params.get("record_id");
-        const imgExtensions = ['png', 'jpg', 'svg', 'gif', 'webp'];
-        const sourceType = ["unknown", "telegram", "twitter", "web", "youtube"];
-
-        Map.prototype.getOrElse = function (key, value) {
-            return this.has(key) ? this.get(key) : value;
-        }
-
-        function pad(number, len = 2) {
-            return String(number).padStart(2, '0');
-        }
-
-        function formatDateTime(date) {
-            return `${pad(date.getDate())}.${pad(date.getMonth() + 1)}.${date.getFullYear()} ` +
-                `${pad(date.getHours())}:${pad(date.getMinutes())}`;
-        }
-
-        function isImage(path) {
-            return imgExtensions.includes(getExtension(path.toLowerCase()));
-        }
-
-        function getExtension(path) {
-            const lastIndex = path.lastIndexOf('.');
-            return (lastIndex > -1 && lastIndex < path.length) ?
-                path.substring(lastIndex + 1) : "";
-        }
-
-        function getFileName(path) {
-            const lastIndex = path.lastIndexOf('/');
-            return (lastIndex > -1 && lastIndex < path.length) ?
-                path.substring(lastIndex + 1) : "";
-        }
-
-        async function getRecordSets() {
-            return fetch("/chronicler/")
-                .then(response => response.text())
-                .then(text => JSON.parse(text))
-        }
-
-        async function getRecord(id) {
-            return fetch(`/chronicler/${id}`)
-                .then(response => response.text())
-                .then(text => JSON.parse(text));
-        }
 
         function renderRecordSets(data) {
             const fragment = document.createDocumentFragment();
@@ -99,68 +56,30 @@
             records.append(fragment);
         }
 
-        function renderRecord(data) {
+        function renderRecord(cdata) {
             const fragment = document.createDocumentFragment();
             const records = document.querySelector('.records');
 
-            const userById = new Map();
-            for (const user of data.userMetadata ?? []) {
-                userById.set(user.id, user);
-            }
-
-            const recordById = new Map();
-            for (const record of data.records) {
-                if (!record.source) {
-                    continue;
-                }
-                recordById.set(record.source.message_id, record);
-            }
-
-            function getUserName(id) {
-                return userById.has(id) ? userById.get(id).username : id;
-            }
-
-            function getParent(record) {
-                if (record.parent) {
-                    return recordById.get(record.parent.message_id);
-                }
-                if (record.source.channel_id) {
-                    return recordById.get(record.source.channel_id);
-                }
-                return undefined;
-            }
-
-            for (const record of data.records) {
-                const date = new Date(record.time * 1000);
-                const userName = getUserName(record.source.sender_id);
-                const parent = getParent(record);
-                const parentName = parent ? getUserName(parent.source.sender_id) : 'NONE';
-                const parentMessage = parent ? parent.source.message_id : 'NONE';
-                const recordEl = document.createElement('div');
-                recordEl.setAttribute('id', record.source.message_id)
-                recordEl.setAttribute('class', 'record');
+            for (const crecord of cdata.records) {
+                const record = crecord.record;
+                const userName = cdata.getUserName(record.source.sender_id);
+                const parent = cdata.getParent(record);
+                const parentName = parent ? cdata.getUserName(parent.record.source.sender_id) : 'NONE';
+                const parentMessage = parent ? parent.record.source.message_id : 'NONE';
+                const recordEl = createElement('div', {
+                    'id': record.source.message_id,
+                    'class': 'record'
+                });
                 recordEl.innerHTML = `<div class='header'>
-                           <span class="datetime">${formatDateTime(date)}</span>
+                           <span class="datetime">${formatDateTime(crecord.date)}</span>
                            <a href="#${record.source.message_id}">#</a>
                            <span class="username">${userName}</span>
                            <span class="username">→ <a href="#${parentMessage}">${parentName}</a></span>
                          </div>
                          <div class='content'>${record.text_content}</div>`;
 
-                const images = [];
-                const others = [];
-                for (const file of record.files ?? []) {
-                    const fname = getFileName(file.file_url);
-                    if (isImage(fname)) {
-                        images.push(fname);
-                    } else {
-                        others.push(fname);
-                    }
-                }
-
-                const imagesEl = document.createElement('div')
-                imagesEl.setAttribute('class', 'images');
-                for (const file of images) {
+                const imagesEl = createElement('div', { 'class': 'images' });
+                for (const file of crecord.images) {
                     imagesEl.innerHTML += `<div class="image">
                                      <a href="chronicler/${rcid}/${encodeURIComponent(file)}">
                                      <img src="chronicler/${rcid}/${encodeURIComponent(file)}" />
@@ -168,9 +87,8 @@
                                  </div>`;
                 }
 
-                const filesEl = document.createElement('div')
-                filesEl.setAttribute('class', 'files');
-                for (const file of others) {
+                const filesEl = createElement('div', { 'class': 'files' });
+                for (const file of crecord.files) {
                     filesEl.innerHTML += `<div class="file">
                                  <a href="chronicler/${rcid}/${encodeURIComponent(file)}">${file}</a>
                              </div>`;
