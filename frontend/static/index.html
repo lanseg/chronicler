@@ -60,8 +60,17 @@
                 userById.set(umd.id, umd);
             }
 
-            function getUserName(record) {
-                return (userById.get(record["source"]["sender_id"]) ?? {})["username"];
+            function getSourceName(record) {
+                if (sourceType[record["source"]["type"]] === "web") {
+                    try {
+                        return new URL(record["source"]["url"]).host;
+                    } catch { }
+                    return rootRecord["source"]["url"];
+                }
+                if (userById.get(record["source"]["sender_id"])) {
+                    return userById.get(record["source"]["sender_id"])["username"];
+                }
+                return record["source"]["sender_id"];
             }
 
             for (const rs of data["record_sets"]) {
@@ -73,9 +82,9 @@
                     fragment.appendChild(recordEl);
                     continue
                 }
-                const rootRecord = rs["root_record"];
 
-                const srcName = getUserName(rootRecord) ?? new URL(rootRecord["source"]["url"]).host;
+                const rootRecord = rs["root_record"];
+                const srcName = getSourceName(rootRecord);
                 const timeLabel = rootRecord["time"] ?
                     formatDateTime(new Date(rootRecord["time"] * 1000)) : "No time";
                 recordEl.innerHTML = `<div class='header'>

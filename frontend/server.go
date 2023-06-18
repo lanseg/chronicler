@@ -83,14 +83,16 @@ func (ws *WebServer) responseRecordList(w http.ResponseWriter) {
 		desc := ""
 		if len(r.Records) > 0 {
 			desc = r.Records[0].TextContent
+			if r.Records[0].Source.Type == rpb.SourceType_WEB {
+				desc = htmlparser.GetTitle(desc)
+			}
 		}
-		description := htmlparser.StripTags(desc)
-		if len(description) > textSampleSize {
-			description = description[:textSampleSize]
+		if len(desc) > textSampleSize {
+			desc = desc[:textSampleSize]
 		}
 		set := &rpb.RecordListResponse_RecordSetInfo{
 			Id:          r.Id,
-			Description: description,
+			Description: desc,
 			RecordCount: int32(len(r.Records)),
 		}
 		if len(r.Records) > 0 {

@@ -85,12 +85,32 @@ func ParseHtml(content string) *Node {
 	return root
 }
 
+func GetTitle(content string) string {
+	doc := ParseHtml(content)
+	result := strings.Builder{}
+	collections.IterateTree(doc, getChildren).ForEachRemaining(
+		func(n *Node) bool {
+			if n.Parent != nil && n.Parent.Name == "title" {
+				result.WriteString(n.Text)
+				return true
+			}
+			return false
+		})
+	return result.String()
+}
+
 func StripTags(content string) string {
 	doc := ParseHtml(content)
 	result := strings.Builder{}
+	excludedLinks := util.NewSet([]string{
+		"script", "meta", "link", "head", "style",
+	})
 	collections.IterateTree(doc, getChildren).Filter(
 		func(n *Node) bool {
-			return n.Parent != nil && n.Parent.Name != "script" && n.Text != ""
+			if n.Parent == nil || (n.Name == "" && n.Text == "") {
+				return false
+			}
+			return !excludedLinks.Contains(n.Parent.Name) && !excludedLinks.Contains(n.Name)
 		}).ForEachRemaining(
 		func(n *Node) bool {
 			result.WriteString(n.Text)

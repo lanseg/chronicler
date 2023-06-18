@@ -13,6 +13,7 @@ go_library(
         "//storage",
         "//util",
         "//web:htmlparser",
+        "@commons//collections",
     ],
 )
 
