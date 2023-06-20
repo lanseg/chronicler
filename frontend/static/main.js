@@ -57,10 +57,11 @@ async function getRecord(id) {
 }
 
 class Record {
-    constructor(record) {
+    constructor(record, user) {
         this.record = record;
         this._images = [];
         this._files = [];
+        this._user = user;
 
         for (const file of record.files ?? []) {
             const fname = getFileName(file.file_url);
@@ -70,6 +71,10 @@ class Record {
                 this._files.push(fname);
             }
         }
+    }
+
+    get name() {
+        return this.user ? this.user.username : this.source.sender_id;
     }
 
     get images() {
@@ -85,25 +90,58 @@ class Record {
     }
 }
 
+class User {
+    constructor(userMetadata) {
+        this._userMetadata = userMetadata;
+    }
+
+    get id() {
+        return this._userMetadata["id"];
+    }
+
+    get name() {
+        return this._userMetadata["username"];
+    }
+
+    get quotes() {
+        return this._userMetadata["quotes"];
+    }
+}
+
 class ChroniclerData {
+
+    users = new Map();
 
     constructor(data) {
         this.data = data;
         this._records = [];
-        this.userById = new Map();
         this.recordById = new Map();
 
         for (const user of data.userMetadata ?? []) {
-            this.userById.set(user.id, user);
+            this.users.set(user.id, new User(user));
         }
 
         for (const record of data.records) {
-            const recordObj = new Record(record);
+            const recordObj = new Record(record, this.users.get(record.source.sender_id));
             this._records.push(recordObj);
             if (!record.source) {
                 continue;
             }
             this.recordById.set(record.source.message_id, recordObj);
+        }
+
+        for (const recordObj of this.recordById.values()) {
+            const parent = recordObj.record.parent;
+            if (parent) {
+                recordObj.parent = this.recordById.get(parent.message_id);
+                continue;
+            }
+
+            const source = recordObj.record.source;
+            if (source.channel_id) {
+                recordObj.parent = this.recordById.get(source.channel_id);
+            }
+
         }
     }
 
@@ -112,7 +150,7 @@ class ChroniclerData {
     }
 
     getUserName(userId) {
-        return this.userById.has(userId) ? this.userById.get(userId).username : userId;
+        return this.users.has(userId) ? this.users.get(userId).name : userId;
     }
 
     getParent(record) {

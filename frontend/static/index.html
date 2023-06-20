@@ -31,9 +31,7 @@
             }
 
             for (const rs of data["record_sets"]) {
-                const recordEl = document.createElement('div');
-                recordEl.setAttribute('id', rs["id"])
-                recordEl.setAttribute('class', 'record');
+                const recordEl = createElement("div", { "id": rs["id"], "class": "record" });
                 if (!rs["root_record"]) {
                     recordEl.innerHTML = `<div class='content error'>No record for id ${rs["id"]}</div>`;
                     fragment.appendChild(recordEl);
@@ -66,6 +64,8 @@
                 const parent = cdata.getParent(record);
                 const parentName = parent ? cdata.getUserName(parent.record.source.sender_id) : 'NONE';
                 const parentMessage = parent ? parent.record.source.message_id : 'NONE';
+
+                /* --- */
                 const recordEl = createElement('div', {
                     'id': record.source.message_id,
                     'class': 'record'
@@ -78,6 +78,7 @@
                          </div>
                          <div class='content'>${record.text_content}</div>`;
 
+                /* --- */
                 const imagesEl = createElement('div', { 'class': 'images' });
                 for (const file of crecord.images) {
                     imagesEl.innerHTML += `<div class="image">
@@ -87,6 +88,7 @@
                                  </div>`;
                 }
 
+                /* --- */
                 const filesEl = createElement('div', { 'class': 'files' });
                 for (const file of crecord.files) {
                     filesEl.innerHTML += `<div class="file">
