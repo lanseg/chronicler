@@ -58,29 +58,29 @@
             const fragment = document.createDocumentFragment();
             const records = document.querySelector('.records');
 
-            for (const crecord of cdata.records) {
-                const record = crecord.record;
-                const userName = cdata.getUserName(record.source.sender_id);
-                const parent = cdata.getParent(record);
-                const parentName = parent ? cdata.getUserName(parent.record.source.sender_id) : 'NONE';
+            for (const record of cdata.records) {
+                const userName = record.user.name;
+                const parent = record.parent;
+                const parentName = parent ? parent.user.name : 'NONE';
                 const parentMessage = parent ? parent.record.source.message_id : 'NONE';
 
                 /* --- */
                 const recordEl = createElement('div', {
-                    'id': record.source.message_id,
+                    'id': record.record.source.message_id,
                     'class': 'record'
                 });
+                console.log(record.date);
                 recordEl.innerHTML = `<div class='header'>
-                           <span class="datetime">${formatDateTime(crecord.date)}</span>
-                           <a href="#${record.source.message_id}">#</a>
+                           <span class="datetime">${formatDateTime(record.date)}</span>
+                           <a href="#${record.record.source.message_id}">#</a>
                            <span class="username">${userName}</span>
                            <span class="username">→ <a href="#${parentMessage}">${parentName}</a></span>
                          </div>
-                         <div class='content'>${record.text_content}</div>`;
+                         <div class='content'>${record.record.text_content}</div>`;
 
                 /* --- */
                 const imagesEl = createElement('div', { 'class': 'images' });
-                for (const file of crecord.images) {
+                for (const file of record.images) {
                     imagesEl.innerHTML += `<div class="image">
                                      <a href="chronicler/${rcid}/${encodeURIComponent(file)}">
                                      <img src="chronicler/${rcid}/${encodeURIComponent(file)}" />
@@ -90,7 +90,7 @@
 
                 /* --- */
                 const filesEl = createElement('div', { 'class': 'files' });
-                for (const file of crecord.files) {
+                for (const file of record.files) {
                     filesEl.innerHTML += `<div class="file">
                                  <a href="chronicler/${rcid}/${encodeURIComponent(file)}">${file}</a>
                              </div>`;

@@ -56,6 +56,24 @@ async function getRecord(id) {
         .then(data => new ChroniclerData(data));
 }
 
+class User {
+    constructor(userMetadata) {
+        this._userMetadata = userMetadata;
+    }
+
+    get id() {
+        return this._userMetadata["id"];
+    }
+
+    get name() {
+        return this._userMetadata["username"] ?? this._userMetadata["id"];
+    }
+
+    get quotes() {
+        return this._userMetadata["quotes"] ?? [];
+    }
+}
+
 class Record {
     constructor(record, user) {
         this.record = record;
@@ -73,6 +91,10 @@ class Record {
         }
     }
 
+    get user() {
+        return this._user;
+    }
+
     get name() {
         return this.user ? this.user.username : this.source.sender_id;
     }
@@ -86,25 +108,8 @@ class Record {
     }
 
     get date() {
+        console.log(this.record.time);
         return new Date(this.record.time * 1000);
-    }
-}
-
-class User {
-    constructor(userMetadata) {
-        this._userMetadata = userMetadata;
-    }
-
-    get id() {
-        return this._userMetadata["id"];
-    }
-
-    get name() {
-        return this._userMetadata["username"];
-    }
-
-    get quotes() {
-        return this._userMetadata["quotes"];
     }
 }
 
@@ -122,11 +127,14 @@ class ChroniclerData {
         }
 
         for (const record of data.records) {
-            const recordObj = new Record(record, this.users.get(record.source.sender_id));
-            this._records.push(recordObj);
             if (!record.source) {
                 continue;
             }
+            const recordObj = new Record(
+                record,
+                this.users.get(record.source.sender_id) ?? new User({ "id": record.source.sender_id })
+            );
+            this._records.push(recordObj);
             this.recordById.set(record.source.message_id, recordObj);
         }
 
@@ -147,20 +155,6 @@ class ChroniclerData {
 
     get records() {
         return this._records;
-    }
-
-    getUserName(userId) {
-        return this.users.has(userId) ? this.users.get(userId).name : userId;
-    }
-
-    getParent(record) {
-        if (record.parent) {
-            return this.recordById.get(record.parent.message_id);
-        }
-        if (record.source.channel_id) {
-            return this.recordById.get(record.source.channel_id);
-        }
-        return undefined;
     }
 
     getSourceName(record) {

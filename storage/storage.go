@@ -92,9 +92,16 @@ func (s *LocalStorage) get(link string) (*http.Response, error) {
 	return s.httpClient.Do(req)
 }
 
-func (s *LocalStorage) downloadURL(url string, target string) error {
-	s.logger.Debugf("Downloading file from %s to %s", url, target)
-	resp, err := s.get(url)
+func (s *LocalStorage) downloadURL(link string, target string) error {
+	s.logger.Debugf("Downloading file from %s to %s", link, target)
+	u, err := url.Parse(link)
+	if err != nil {
+		return err
+	}
+	if u.Scheme == "" {
+		u.Scheme = "https"
+	}
+	resp, err := s.get(u.String())
 	if err != nil {
 		return err
 	}
