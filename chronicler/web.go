@@ -3,6 +3,7 @@ package chronicler
 import (
 	"io"
 	"net/http"
+	"net/http/cookiejar"
 	"net/url"
 	"strings"
 	"time"
@@ -106,6 +107,13 @@ func NewWeb(name string, httpClient *http.Client) Chronicler {
 	if httpClient == nil {
 		logger.Infof("No http client provided, using an own new one")
 		httpClient = &http.Client{}
+
+		jar, err := cookiejar.New(nil)
+		if err != nil {
+			logger.Warningf("Got error while creating cookie jar %s", err.Error())
+		} else {
+			httpClient.Jar = jar
+		}
 	}
 	return &Web{
 		name:   name,

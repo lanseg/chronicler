@@ -9,15 +9,17 @@ import (
 )
 
 var (
-	configFile    = flag.String("config", "", "Configuration defaults.")
-	twitterApiKey = flag.String("twitter_api_key", "", "A key for the twitter api.")
-	storageRoot   = flag.String("storage_root", "chronicler_storage", "A local folder to save downloads.")
-	log           = util.NewLogger("config")
+	configFile     = flag.String("config", "", "Configuration defaults.")
+	twitterApiKey  = flag.String("twitter_api_key", "", "A key for the twitter api.")
+	telegramBotKey = flag.String("telegram_bot_key", "", "A key for the telegram bot api.")
+	storageRoot    = flag.String("storage_root", "chronicler_storage", "A local folder to save downloads.")
+	log            = util.NewLogger("config")
 )
 
 type Config struct {
-	TwitterApiKey *string `json:"twitterApiKey"`
-	StorageRoot   *string `json:"storageRoot"`
+	TwitterApiKey  *string `json:"twitterApiKey"`
+	TelegramBotKey *string `json:"telegramBotKey"`
+	StorageRoot    *string `json:"storageRoot"`
 }
 
 func GetConfig() Config {
@@ -37,6 +39,9 @@ func GetConfig() Config {
 	}
 	if *storageRoot != "" {
 		config.StorageRoot = storageRoot
+	}
+	if *telegramBotKey != "" {
+		config.TelegramBotKey = telegramBotKey
 	}
 	return config
 }

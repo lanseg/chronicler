@@ -13,7 +13,7 @@
             const fragment = document.createDocumentFragment();
             const records = document.querySelector('.records');
             const userById = new Map();
-            for (const umd of data["user_metadata"]) {
+            for (const umd of data["user_metadata"] ?? []) {
                 userById.set(umd.id, umd);
             }
 
@@ -40,13 +40,13 @@
 
                 const rootRecord = rs["root_record"];
                 const srcName = getSourceName(rootRecord);
-                const timeLabel = rootRecord["time"] ?
-                    formatDateTime(new Date(rootRecord["time"] * 1000)) : "No time";
+                const timeLabel = formatDateTime(rootRecord["time"]);
                 recordEl.innerHTML = `<div class='header'>
                            <span class="icon ${sourceType[rootRecord["source"]["type"]]}">&nbsp;</span>
                            <span class="sourcename">${srcName}</span>
                            <span class="datetime">${timeLabel}</span>,
                            <a href="?record_id=${rs["id"]}">${rs["record_count"]}↴</a>
+                           <a href="/chronicler/${rs["id"]}/record.json">json</a>
                          </div>
                          <div class='content'>${rs["description"]}</div>`;
                 fragment.appendChild(recordEl);
@@ -59,7 +59,7 @@
             const records = document.querySelector('.records');
 
             for (const record of cdata.records) {
-                const userName = record.user.name;
+                const userName = record.user.name ?? "?";
                 const parent = record.parent;
                 const parentName = parent ? parent.user.name : 'NONE';
                 const parentMessage = parent ? parent.record.source.message_id : 'NONE';
@@ -69,14 +69,13 @@
                     'id': record.record.source.message_id,
                     'class': 'record'
                 });
-                console.log(record.date);
                 recordEl.innerHTML = `<div class='header'>
-                           <span class="datetime">${formatDateTime(record.date)}</span>
+                           <span class="datetime">${formatDateTime(record.time)}</span>
                            <a href="#${record.record.source.message_id}">#</a>
                            <span class="username">${userName}</span>
                            <span class="username">→ <a href="#${parentMessage}">${parentName}</a></span>
                          </div>
-                         <div class='content'>${record.record.text_content}</div>`;
+                         <div class='content'>${record.record.text_content.replaceAll("\n", "<br/>")}</div>`;
 
                 /* --- */
                 const imagesEl = createElement('div', { 'class': 'images' });

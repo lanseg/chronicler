@@ -190,3 +190,8 @@
     background-image: url('/icons.svg');
     background-position: 16px 0px;
 }
+
+.icon.telegram {
+    background-image: url('/icons.svg');
+    background-position: 0px 16px;
+}

@@ -13,7 +13,11 @@ function pad(number, len = 2) {
     return String(number).padStart(2, '0');
 }
 
-function formatDateTime(date) {
+function formatDateTime(timestamp) {
+    if (!timestamp) {
+        return "No date";
+    }
+    const date = new Date(timestamp * 1000);
     return `${pad(date.getDate())}.${pad(date.getMonth() + 1)}.${date.getFullYear()} ` +
         `${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
@@ -107,9 +111,11 @@ class Record {
         return this._files;
     }
 
-    get date() {
-        console.log(this.record.time);
-        return new Date(this.record.time * 1000);
+    get time() {
+        if (!this.record.time) {
+            return undefined;
+        }
+        return this.record.time;
     }
 }
 
@@ -126,7 +132,7 @@ class ChroniclerData {
             this.users.set(user.id, new User(user));
         }
 
-        for (const record of data.records) {
+        for (const record of data.records ?? []) {
             if (!record.source) {
                 continue;
             }

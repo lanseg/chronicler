@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"sort"
 	"strings"
 
 	rpb "chronicler/proto/records"
@@ -106,6 +107,14 @@ func (ws *WebServer) responseRecordList(w http.ResponseWriter) {
 		}
 		result.RecordSets = append(result.RecordSets, set)
 	}
+	sort.Slice(result.RecordSets, func(i int, j int) bool {
+		if result.RecordSets[i].RootRecord == nil {
+			return false
+		} else if result.RecordSets[j].RootRecord == nil {
+			return true
+		}
+		return result.RecordSets[i].RootRecord.Time > result.RecordSets[j].RootRecord.Time
+	})
 	result.UserMetadata = collections.Values(userById)
 	ws.writeJson(w, result)
 }
