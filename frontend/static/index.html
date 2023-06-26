@@ -4,8 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel='stylesheet' href='/style.css' />
-    <script src="main.js"></script>
-    <script>
+    <script type="importmap">
+        {
+            "imports": {
+                "main": "./modules/main.js",
+                "wrappers": "./modules/wrappers.js",
+                "dom": "./modules/dom.js"
+            }
+        }
+    </script>
+    <script type="module">
+        import { getRecordSets, getRecord } from "main";
+        import { createElement, formatDateTime } from "dom";
+        import { sourceType } from "wrappers";
+
         const params = new URLSearchParams(document.location.search);
         const rcid = params.get("record_id");
 
@@ -70,6 +82,7 @@
                     'class': 'record'
                 });
                 recordEl.innerHTML = `<div class='header'>
+                           <span class="icon ${sourceType[record.record["source"]["type"]]}">&nbsp;</span>
                            <span class="datetime">${formatDateTime(record.time)}</span>
                            <a href="#${record.record.source.message_id}">#</a>
                            <span class="username">${userName}</span>

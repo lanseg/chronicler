@@ -1,66 +1,26 @@
-"use strict";
+"use strict;"
 
-/* */
 const imgExtensions = ['png', 'jpg', 'svg', 'gif', 'webp'];
-const sourceType = ["unknown", "telegram", "twitter", "web", "youtube"];
 
-/* */
-Map.prototype.getOrElse = function (key, value) {
-    return this.has(key) ? this.get(key) : value;
-}
-
-function pad(number, len = 2) {
-    return String(number).padStart(2, '0');
-}
-
-function formatDateTime(timestamp) {
-    if (!timestamp) {
-        return "No date";
-    }
-    const date = new Date(timestamp * 1000);
-    return `${pad(date.getDate())}.${pad(date.getMonth() + 1)}.${date.getFullYear()} ` +
-        `${pad(date.getHours())}:${pad(date.getMinutes())}`;
-}
-
-function isImage(path) {
+export function isImage(path) {
     return imgExtensions.includes(getExtension(path.toLowerCase()));
 }
 
-function getExtension(path) {
-    const lastIndex = path.lastIndexOf('.');
-    return (lastIndex > -1 && lastIndex < path.length) ?
-        path.substring(lastIndex + 1) : "";
-}
-
-function getFileName(path) {
+export function getFileName(path) {
     const lastIndex = path.lastIndexOf('/');
     return (lastIndex > -1 && lastIndex < path.length) ?
         path.substring(lastIndex + 1) : "";
 }
 
-function createElement(name, attributes) {
-    const el = document.createElement(name);
-    Object.entries(attributes ?? {}).map(obj => {
-        el.setAttribute(obj[0], obj[1]);
-    });
-    return el;
+export function getExtension(path) {
+    const lastIndex = path.lastIndexOf('.');
+    return (lastIndex > -1 && lastIndex < path.length) ?
+        path.substring(lastIndex + 1) : "";
 }
 
-/* */
-async function getRecordSets() {
-    return fetch("/chronicler/")
-        .then(response => response.text())
-        .then(text => JSON.parse(text))
-}
+export const sourceType = ["unknown", "telegram", "twitter", "web", "youtube"];
 
-async function getRecord(id) {
-    return fetch(`/chronicler/${id}`)
-        .then(response => response.text())
-        .then(text => JSON.parse(text))
-        .then(data => new ChroniclerData(data));
-}
-
-class User {
+export class User {
     constructor(userMetadata) {
         this._userMetadata = userMetadata;
     }
@@ -78,7 +38,7 @@ class User {
     }
 }
 
-class Record {
+export class Record {
     constructor(record, user) {
         this.record = record;
         this._images = [];
@@ -119,7 +79,7 @@ class Record {
     }
 }
 
-class ChroniclerData {
+export class ChroniclerData {
 
     users = new Map();
 

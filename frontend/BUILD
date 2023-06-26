@@ -20,7 +20,10 @@ go_library(
 go_binary(
     name = "frontend",
     srcs = ["main.go"],
-    data = glob(["static/*"]),
+    data = glob([
+        "static/*",
+        "static/modules/*",
+    ]),
     deps = [
         ":server",
         "//proto:records_go_proto",
