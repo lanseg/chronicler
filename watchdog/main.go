@@ -13,8 +13,7 @@ import (
 	"chronicler"
 	"chronicler/storage"
 	"chronicler/telegram"
-
-	//"chronicler/twitter"
+	"chronicler/twitter"
 	"chronicler/util"
 
 	rpb "chronicler/proto/records"
@@ -134,7 +133,11 @@ func main() {
 	flag.Parse()
 	cfg := chronicler.GetConfig()
 	stg := storage.NewStorage(*cfg.StorageRoot)
-	chr := chronicler.NewWeb("web", nil)
+	chroniclers := map[rpb.SourceType]chronicler.Chronicler{
+		rpb.SourceType_TWITTER: chronicler.NewTwitter("twitter",
+			twitter.NewClient(*cfg.TwitterApiKey)),
+		rpb.SourceType_WEB: chronicler.NewWeb("web", nil),
+	}
 
 	tgbot := telegram.NewBot(*cfg.TelegramBotKey)
 	cursor := int64(0)
@@ -159,6 +162,10 @@ func main() {
 				}
 				req := parseRequest(arg)
 				log.Infof("Loading attached request: %s", req)
+				chr, ok := chroniclers[req.Source.Type]
+				if !ok {
+					log.Errorf("Cannot find chronicler for type %s", req.Source.Type)
+				}
 				conv, err := chr.GetRecords(&req)
 				if err != nil {
 					log.Errorf("Failed to get conversation for id %s: %s", request, err)

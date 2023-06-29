@@ -18,19 +18,81 @@ export function getExtension(path) {
         path.substring(lastIndex + 1) : "";
 }
 
-export const sourceType = ["unknown", "telegram", "twitter", "web", "youtube"];
+/** **/
+export class SourceType {
 
-export class User {
-    constructor(userMetadata) {
-        this._userMetadata = userMetadata;
+    static byId = new Map();
+
+    constructor(id, name) {
+        this.id = id;
+        this.name = name;
+        SourceType.byId.set(id, this);
+    }
+
+    static UNKNOWN = new SourceType(0, "unknown");
+    static TELEGRAM = new SourceType(1, "telegram");
+    static TWITTER = new SourceType(2, "twitter");
+    static WEB = new SourceType(3, "web");
+    static YOUTUBE = new SourceType(4, "youtube");
+}
+
+/** **/
+export class File {
+    constructor(fileObj) {
+        this._fileObj = fileObj;
+    }
+
+    get fileId() {
+        return this._fileObj["file_id"];
+    }
+
+    get fileUrl() {
+        return this._fileObj["file_url"];
+    }
+}
+
+
+/** **/
+export class Source {
+
+    constructor(sourceObj) {
+        this._sourceObj = sourceObj;
+    }
+
+    get senderId() {
+        return this._sourceObj["sender_id"];
+    }
+
+    get channelId() {
+        return this._sourceObj["channel_id"];
+    }
+
+    get messageId() {
+        return this._sourceObj["message_id"];
+    }
+
+    get url() {
+        return this._sourceObj["url"];
+    }
+
+    get sourceType() {
+        return SourceType.byId.get(this._sourceObj["type"] ?? 0);
+    }
+}
+
+
+/** **/
+export class UserMetadata {
+    constructor(userObj) {
+        this._userObj = userObj;
     }
 
     get id() {
-        return this._userMetadata["id"];
+        return this._userObj["id"];
     }
 
     get name() {
-        return this._userMetadata["username"] ?? this._userMetadata["id"];
+        return this._userObj["username"] ?? this._userObj["id"];
     }
 
     get quotes() {
@@ -38,25 +100,29 @@ export class User {
     }
 }
 
+/** **/
 export class Record {
-    constructor(record, user) {
-        this.record = record;
-        this._images = [];
-        this._files = [];
-        this._user = user;
 
-        for (const file of record.files ?? []) {
-            const fname = getFileName(file.file_url);
-            if (isImage(fname)) {
-                this._images.push(fname);
-            } else {
-                this._files.push(fname);
-            }
+    constructor(recordObj, user) {
+        this._recordObj = recordObj;
+
+        this.time = recordObj["time"] ? new Date(recordObj["time"] * 1000) : null;
+        this.user = user;
+        if (recordObj["source"]) {
+            this.source = new Source(recordObj["source"]);
+        }
+        if (recordObj["parent"]) {
+            this.parent = new Source(recordObj["parent"]);
+        }
+
+        this._allFiles = [];
+        for (const file of recordObj["files"] ?? []) {
+            this._allFiles.push(new File(file));
         }
     }
 
-    get user() {
-        return this._user;
+    get textContent() {
+        return this._recordObj["text_content"] ?? "";
     }
 
     get name() {
@@ -64,75 +130,91 @@ export class Record {
     }
 
     get images() {
-        return this._images;
+        return [];
     }
 
     get files() {
-        return this._files;
-    }
-
-    get time() {
-        if (!this.record.time) {
-            return undefined;
-        }
-        return this.record.time;
+        return this._allFiles;
     }
 }
 
-export class ChroniclerData {
+/** **/
+export class Request {
+    constructor(requestObj) {
+        this._requestObj = requestObj;
 
-    users = new Map();
+        this.source = new Source(requestObj["source"]);
+    }
+}
 
-    constructor(data) {
-        this.data = data;
-        this._records = [];
-        this.recordById = new Map();
+/** **/
+export class RecordSet {
+    constructor(recordSetObj) {
+        this._recordSetObj = recordSetObj;
+        this._userById = new Map();
+        this.userMetadata = [];
+        this.records = [];
 
-        for (const user of data.userMetadata ?? []) {
-            this.users.set(user.id, new User(user));
+        for (let user of recordSetObj["userMetadata"] ?? []) {
+            const md = new UserMetadata(user);
+            this._userById.set(md.id, md);
+            this.userMetadata.push(md);
         }
 
-        for (const record of data.records ?? []) {
-            if (!record.source) {
-                continue;
-            }
-            const recordObj = new Record(
-                record,
-                this.users.get(record.source.sender_id) ?? new User({ "id": record.source.sender_id })
-            );
-            this._records.push(recordObj);
-            this.recordById.set(record.source.message_id, recordObj);
-        }
-
-        for (const recordObj of this.recordById.values()) {
-            const parent = recordObj.record.parent;
-            if (parent) {
-                recordObj.parent = this.recordById.get(parent.message_id);
-                continue;
-            }
-
-            const source = recordObj.record.source;
-            if (source.channel_id) {
-                recordObj.parent = this.recordById.get(source.channel_id);
-            }
-
+        for (const record of recordSetObj["records"] ?? []) {
+            this.records.push(new Record(record, record["source"] ? this._userById.get(record["source"]["sender_id"]) : null));
         }
     }
 
-    get records() {
-        return this._records;
+    get id() {
+        return this._recordSetObj["id"];
+    }
+}
+
+/** **/
+export class RecordSetInfo {
+
+    constructor(rsInfoObj, record) {
+        this._rsInfoObj = rsInfoObj;
+        this.rootRecord = record;
     }
 
-    getSourceName(record) {
-        if (sourceType[record["source"]["type"]] === "web") {
-            try {
-                return new URL(record["source"]["url"]).host;
-            } catch { }
-            return rootRecord["source"]["url"];
+    get id() {
+        return this._rsInfoObj["id"];
+    }
+
+    get description() {
+        return this._rsInfoObj["description"];
+    }
+
+    get recordCount() {
+        return this._rsInfoObj["record_count"];
+    }
+
+}
+
+export class RecordListResponse {
+    constructor(recordListObj) {
+        this._recordListObj = recordListObj;
+        this._userById = new Map();
+        this.userMetadata = [];
+        this.recordSets = [];
+
+        for (let user of recordListObj["user_metadata"] ?? []) {
+            const md = new UserMetadata(user);
+            this._userById.set(md.id, md);
+            this.userMetadata.push(md);
         }
-        if (userById.get(record["source"]["sender_id"])) {
-            return userById.get(record["source"]["sender_id"])["username"];
+
+        for (const rs of recordListObj["record_sets"] ?? []) {
+            if (rs["root_record"]) {
+                const rootRecord = new Record(rs["root_record"],
+                    rs["root_record"]["source"] ?
+                        this._userById.get(rs["root_record"]["source"]["sender_id"]) : null);
+                this.recordSets.push(new RecordSetInfo(rs, rootRecord));
+            } else {
+                this.recordSets.push(new RecordSetInfo(rs, null));
+            }
         }
-        return record["source"]["sender_id"];
     }
 }

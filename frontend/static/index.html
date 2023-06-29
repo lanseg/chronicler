@@ -7,16 +7,16 @@
     <script type="importmap">
         {
             "imports": {
-                "main": "./modules/main.js",
+                "api": "./modules/api.js",
                 "wrappers": "./modules/wrappers.js",
                 "dom": "./modules/dom.js"
             }
         }
     </script>
     <script type="module">
-        import { getRecordSets, getRecord } from "main";
+        import { getRecordSets, getRecord } from "api";
         import { createElement, formatDateTime } from "dom";
-        import { sourceType } from "wrappers";
+        import { RecordListResponse, RecordSet } from "wrappers";
 
         const params = new URLSearchParams(document.location.search);
         const rcid = params.get("record_id");
@@ -24,43 +24,41 @@
         function renderRecordSets(data) {
             const fragment = document.createDocumentFragment();
             const records = document.querySelector('.records');
-            const userById = new Map();
-            for (const umd of data["user_metadata"] ?? []) {
-                userById.set(umd.id, umd);
-            }
 
             function getSourceName(record) {
-                if (sourceType[record["source"]["type"]] === "web") {
+                if (record.source.sourceType.name === "web") {
                     try {
-                        return new URL(record["source"]["url"]).host;
+                        return new URL(record.source.url).host;
                     } catch { }
-                    return rootRecord["source"]["url"];
+                    return record.source.url;
                 }
-                if (userById.get(record["source"]["sender_id"])) {
-                    return userById.get(record["source"]["sender_id"])["username"];
+                if (record.user) {
+                    return record.user.name;
                 }
-                return record["source"]["sender_id"];
+                if (record.source.senderId) {
+                    return record.source.senderId;
+                }
+                return record.source.channelId;
             }
 
-            for (const rs of data["record_sets"]) {
+            for (const rs of data.recordSets) {
                 const recordEl = createElement("div", { "id": rs["id"], "class": "record" });
-                if (!rs["root_record"]) {
+                if (!rs.rootRecord) {
                     recordEl.innerHTML = `<div class='content error'>No record for id ${rs["id"]}</div>`;
                     fragment.appendChild(recordEl);
                     continue
                 }
 
-                const rootRecord = rs["root_record"];
-                const srcName = getSourceName(rootRecord);
-                const timeLabel = formatDateTime(rootRecord["time"]);
+                const srcName = getSourceName(rs.rootRecord);
+                const timeLabel = formatDateTime(rs.rootRecord.time);
                 recordEl.innerHTML = `<div class='header'>
-                           <span class="icon ${sourceType[rootRecord["source"]["type"]]}">&nbsp;</span>
+                           <span class="icon ${rs.rootRecord.source.sourceType.name}">&nbsp;</span>
                            <span class="sourcename">${srcName}</span>
                            <span class="datetime">${timeLabel}</span>,
-                           <a href="?record_id=${rs["id"]}">${rs["record_count"]}↴</a>
-                           <a href="/chronicler/${rs["id"]}/record.json">json</a>
+                           <a href="?record_id=${rs.id}">${rs.recordCount}↴</a>
+                           <a href="/chronicler/${rs.id}/record.json">json</a>
                          </div>
-                         <div class='content'>${rs["description"]}</div>`;
+                         <div class='content'>${rs.description}</div>`;
                 fragment.appendChild(recordEl);
             }
             records.append(fragment);
@@ -71,24 +69,24 @@
             const records = document.querySelector('.records');
 
             for (const record of cdata.records) {
-                const userName = record.user.name ?? "?";
+                const userName = record.user ? record.user.name : "?";
                 const parent = record.parent;
-                const parentName = parent ? parent.user.name : 'NONE';
-                const parentMessage = parent ? parent.record.source.message_id : 'NONE';
+                const parentName = (parent && parent.user) ? parent.user.name : 'NONE';
+                const parentMessage = (parent && parent.recourd) ? parent.record.source.message_id : 'NONE';
 
                 /* --- */
                 const recordEl = createElement('div', {
-                    'id': record.record.source.message_id,
+                    'id': record.source.messageId,
                     'class': 'record'
                 });
                 recordEl.innerHTML = `<div class='header'>
-                           <span class="icon ${sourceType[record.record["source"]["type"]]}">&nbsp;</span>
+                           <span class="icon ${record.source.sourceType.name}">&nbsp;</span>
                            <span class="datetime">${formatDateTime(record.time)}</span>
-                           <a href="#${record.record.source.message_id}">#</a>
+                           <a href="#${record.source.messageId}">#</a>
                            <span class="username">${userName}</span>
                            <span class="username">→ <a href="#${parentMessage}">${parentName}</a></span>
                          </div>
-                         <div class='content'>${record.record.text_content.replaceAll("\n", "<br/>")}</div>`;
+                         <div class='content'>${record.textContent.replaceAll("\n", "<br/>")}</div>`;
 
                 /* --- */
                 const imagesEl = createElement('div', { 'class': 'images' });
@@ -104,7 +102,7 @@
                 const filesEl = createElement('div', { 'class': 'files' });
                 for (const file of record.files) {
                     filesEl.innerHTML += `<div class="file">
-                                 <a href="chronicler/${rcid}/${encodeURIComponent(file)}">${file}</a>
+                                 <a href="chronicler/${rcid}/${encodeURIComponent(file.fileUrl)}">${file.fileUrl}</a>
                              </div>`;
                 }
                 recordEl.appendChild(imagesEl);
@@ -122,17 +120,23 @@
 
             if (params.get("record_id")) {
                 document.querySelector(".loader").style.display = 'inline-block';
-                getRecord(params.get("record_id")).then(data => {
-                    renderRecord(data);
-                }).then(() => {
-                    document.querySelector(".loader").style.display = 'none';
-                })
+                getRecord(params.get("record_id"))
+                    .then(data => new RecordSet(data))
+                    .then(data => {
+                        renderRecord(data);
+                    }).then(() => {
+                        document.querySelector(".loader").style.display = 'none';
+                    })
             } else {
-                getRecordSets().then(data => {
-                    renderRecordSets(data);
-                }).then(() => {
-                    document.querySelector(".loader").style.display = 'none';
-                });
+                document.querySelector(".loader").style.display = 'inline-block';
+                getRecordSets()
+                    .then(rsObj => new RecordListResponse(rsObj))
+                    .then(data => {
+                        renderRecordSets(data);
+                    })
+                    .then(() => {
+                        document.querySelector(".loader").style.display = 'none';
+                    });
                 document.querySelector(".loader").style.display = 'inline-block';
             }
         };
