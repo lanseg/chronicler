@@ -5,7 +5,6 @@ package(default_visibility = ["//visibility:public"])
 go_library(
     name = "util",
     srcs = [
-        "common.go",
         "logging.go",
         "runners.go",
         "textdata.go",
