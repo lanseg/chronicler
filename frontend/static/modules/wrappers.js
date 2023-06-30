@@ -2,18 +2,14 @@
 
 const imgExtensions = ['png', 'jpg', 'svg', 'gif', 'webp'];
 
-export function isImage(path) {
-    return imgExtensions.includes(getExtension(path.toLowerCase()));
-}
-
-export function getFileName(path) {
-    const lastIndex = path.lastIndexOf('/');
+function getExtension(path) {
+    const lastIndex = path.lastIndexOf('.');
     return (lastIndex > -1 && lastIndex < path.length) ?
         path.substring(lastIndex + 1) : "";
 }
 
-export function getExtension(path) {
-    const lastIndex = path.lastIndexOf('.');
+function getFileName(path) {
+    const lastIndex = path.lastIndexOf('/');
     return (lastIndex > -1 && lastIndex < path.length) ?
         path.substring(lastIndex + 1) : "";
 }
@@ -48,6 +44,14 @@ export class File {
 
     get fileUrl() {
         return this._fileObj["file_url"];
+    }
+
+    get name() {
+        return getFileName(this._fileObj["file_url"]);
+    }
+
+    get isImage() {
+        return imgExtensions.includes(getExtension(this._fileObj["file_url"].toLowerCase()));
     }
 }
 
@@ -127,10 +131,6 @@ export class Record {
 
     get name() {
         return this.user ? this.user.username : this.source.sender_id;
-    }
-
-    get images() {
-        return [];
     }
 
     get files() {

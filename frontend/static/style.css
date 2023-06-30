@@ -137,22 +137,28 @@
     font-weight: bold;
 }
 
+.fileset .title {
+    background-color: lightgray;
+    width: 100%;
+    padding: 2px;
+}
+
 .record .header {
     padding: 4px;
 }
 
-.record .images {
+.record .gallery {
     width: 100%;
     display: flex;
 }
 
-.record .images .image {
+.record .gallery .image {
     max-width: 300px;
     margin: 4px;
     width: 100%;
 }
 
-.record .images .image img {
+.record .gallery .image img {
     width: 100%;
 }
 

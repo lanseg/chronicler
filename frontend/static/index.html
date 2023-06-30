@@ -15,7 +15,7 @@
     </script>
     <script type="module">
         import { getRecordSets, getRecord } from "api";
-        import { createElement, formatDateTime } from "dom";
+        import { createElement, formatDateTime, createGallery, createFileList } from "dom";
         import { RecordListResponse, RecordSet } from "wrappers";
 
         const params = new URLSearchParams(document.location.search);
@@ -89,22 +89,12 @@
                          <div class='content'>${record.textContent.replaceAll("\n", "<br/>")}</div>`;
 
                 /* --- */
-                const imagesEl = createElement('div', { 'class': 'images' });
-                for (const file of record.images) {
-                    imagesEl.innerHTML += `<div class="image">
-                                     <a href="chronicler/${rcid}/${encodeURIComponent(file)}">
-                                     <img src="chronicler/${rcid}/${encodeURIComponent(file)}" />
-                                     </a>
-                                 </div>`;
-                }
+                const imagesEl = createGallery(rcid,
+                    record.files.filter(f => f.isImage).map(f => f.name));
 
                 /* --- */
-                const filesEl = createElement('div', { 'class': 'files' });
-                for (const file of record.files) {
-                    filesEl.innerHTML += `<div class="file">
-                                 <a href="chronicler/${rcid}/${encodeURIComponent(file.fileUrl)}">${file.fileUrl}</a>
-                             </div>`;
-                }
+                const filesEl = createFileList(rcid, record.files.map(f => f.name));
+
                 recordEl.appendChild(imagesEl);
                 recordEl.appendChild(filesEl);
                 fragment.appendChild(recordEl);

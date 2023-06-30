@@ -17,3 +17,39 @@ export function createElement(name, attributes) {
     });
     return el;
 }
+
+export function createGallery(recordId, images) {
+    if (images.length === 0) {
+        return document.createDocumentFragment();
+    }
+    const imagesEl = createElement('div', { 'class': 'fileset' });
+    const galleryEl = createElement('div', { 'class': 'gallery' });
+
+    imagesEl.innerHTML += `<div class="title">Images</div>`;
+    for (const file of images) {
+        galleryEl.innerHTML += `<div class="image">
+                          <a href="chronicler/${recordId}/${encodeURIComponent(file)}">
+                          <img src="chronicler/${recordId}/${encodeURIComponent(file)}" />
+                          </a>
+                      </div>`;
+    }
+    imagesEl.appendChild(galleryEl);
+    return imagesEl;
+}
+
+export function createFileList(recordId, files) {
+    if (files.length === 0) {
+        return document.createDocumentFragment();
+    }
+    const filesEl = createElement('div', { 'class': 'fileset ' });
+    const setEl = createElement('div', { 'class': 'files' });
+
+    filesEl.innerHTML += `<div class="title">All files</div>`;
+    for (const file of files) {
+        setEl.innerHTML += `<div class="file">
+                     <a href="chronicler/${recordId}/${encodeURIComponent(file)}">${file}</a>
+                 </div>`;
+    }
+    filesEl.appendChild(setEl);
+    return filesEl;
+}
