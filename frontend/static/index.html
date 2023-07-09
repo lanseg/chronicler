@@ -87,6 +87,9 @@
                          <div class='content'>${record.textContent.replaceAll("\n", "<br/>")}</div>`;
 
                 /* --- */
+                record.files.filter(f => !f.fileUrl).forEach(f => {
+                    console.warn(`Potentially broken file: ${f.fileUrl}`);
+                })
                 recordEl.appendChild(createGallery(rcid,
                     record.files.filter(f => f.isImage).map(f => f.name)));
                 recordEl.appendChild(createAudioPlaylist(rcid,
@@ -123,7 +126,6 @@
                     .then(() => {
                         document.querySelector(".loader").style.display = 'none';
                     });
-                document.querySelector(".loader").style.display = 'inline-block';
             }
         };
     </script>

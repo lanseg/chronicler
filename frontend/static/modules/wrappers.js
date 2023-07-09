@@ -48,14 +48,23 @@ export class File {
     }
 
     get name() {
+        if (!this._fileObj["file_url"]) {
+            return ""
+        }
         return getFileName(this._fileObj["file_url"]);
     }
 
     get isAudio() {
+        if (!this._fileObj["file_url"]) {
+            return false
+        }
         return audioExtensions.includes(getExtension(this._fileObj["file_url"].toLowerCase()));
     }
 
     get isImage() {
+        if (!this._fileObj["file_url"]) {
+            return false
+        }
         return imgExtensions.includes(getExtension(this._fileObj["file_url"].toLowerCase()));
     }
 }

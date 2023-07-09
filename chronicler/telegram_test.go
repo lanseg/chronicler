@@ -5,17 +5,26 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"reflect"
 	"testing"
 
 	"chronicler/telegram"
+
+	rpb "chronicler/proto/records"
 )
 
-// type Bot interface {
-// 	GetUpdates(chatID int64, offset int64, limit int64, timeout int64, allowedUpdates []string) ([]*Update, error)
-// 	SendMessage(chatID int64, replyId int64, text string) (*Message, error)
-// 	GetFile(fileID string) (*File, error)
-// 	GetUrl(file *File) string
-// }
+func readJson(file string, obj interface{}) error {
+	bytes, err := os.ReadFile(filepath.Join("testdata", file))
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(bytes, &obj)
+	if err != nil {
+		return err
+	}
+	return nil
+}
 
 type FakeBot struct {
 	telegram.Bot
@@ -47,30 +56,43 @@ func (b *FakeBot) GetUrl(file *telegram.File) string {
 }
 
 func NewFakeBot(datafile string) (telegram.Bot, error) {
-	bytes, err := os.ReadFile(filepath.Join("testdata", datafile))
-	if err != nil {
-		return nil, err
-	}
-
 	updates := []*telegram.Update{}
-	err = json.Unmarshal(bytes, &updates)
-	if err != nil {
+	if err := readJson(datafile, &updates); err != nil {
 		return nil, err
 	}
-
-	return &FakeBot{
-		response: updates,
-	}, nil
+	return &FakeBot{response: updates}, nil
 }
 
 func TestRequestResponse(t *testing.T) {
-	t.Run("Parse updates", func(t *testing.T) {
-		bot, err := NewFakeBot("telegram_one_update.json")
-		if err != nil {
-			t.Errorf("Cannot create new fake bot for file \"telegram_one_update.json\": %s", err)
-		}
-		tg := NewTelegramChronicler(bot)
-		ups := <-tg.GetRecords()
-		fmt.Println(ups)
-	})
+
+	for _, tc := range []struct {
+		desc         string
+		responseFile string
+		resultFile   string
+	}{
+		{
+			desc:         "Single update response",
+			responseFile: "telegram_one_update.json",
+			resultFile:   "telegram_one_update_record.json",
+		},
+	} {
+		t.Run(tc.desc, func(t *testing.T) {
+			bot, err := NewFakeBot(tc.responseFile)
+			if err != nil {
+				t.Errorf("Cannot create new fake bot for file \"%s\": %s", tc.responseFile, err)
+			}
+			tg := NewTelegramChronicler(bot)
+
+			ups := <-tg.GetRecords()
+
+			want := &rpb.RecordSet{}
+			if err = readJson(tc.resultFile, want); err != nil {
+				t.Errorf("Cannot load json with an expected result \"%s\": %s", tc.resultFile, err)
+			}
+
+			if !reflect.DeepEqual(want, ups) {
+				t.Errorf("Expected result to be:\n%v\nBut got:\n%v", want, ups)
+			}
+		})
+	}
 }
