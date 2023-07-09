@@ -8,15 +8,18 @@ go_library(
         "chronicler.go",
         "config.go",
         "twitter.go",
+        "telegram.go",
         "web.go",
     ],
     importpath = "chronicler",
     deps = [
         "//proto:records_go_proto",
         "//twitter",
+        "//telegram",
         "//util",
         "//web:htmlparser",
         "@commons//collections",
+        "@commons//optional",
     ],
 )
 
