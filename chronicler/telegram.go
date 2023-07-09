@@ -19,14 +19,14 @@ type TelegramChronicler struct {
 	Chronicler
 
 	logger   *util.Logger
-	bot      *telegram.Bot
+	bot      telegram.Bot
 	cursor   int64
 	response chan *rpb.Response
 	records  chan *rpb.RecordSet
 	requests chan *rpb.Request
 }
 
-func NewTelegramChronicler(bot *telegram.Bot) Chronicler {
+func NewTelegramChronicler(bot telegram.Bot) Chronicler {
 	src := &TelegramChronicler{
 		logger:   util.NewLogger("TelegramChronicler"),
 		bot:      bot,
@@ -49,7 +49,6 @@ func (ts *TelegramChronicler) groupRecords(updates []*telegram.Update) []*rpb.Re
 	userById := map[string]*rpb.UserMetadata{}
 
 	recordByMedia[""] = []*rpb.Record{}
-
 	for _, upd := range updates {
 		record, users := updateToRecords(upd)
 		grpId := upd.Message.MediaGroupID

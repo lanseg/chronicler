@@ -28,7 +28,9 @@ go_test(
     size = "small",
     srcs = [
         "chronicler_test.go",
+        "telegram_test.go",
     ],
+    data = glob(["testdata/*"]),
     embed = [
         ":chronicler",
     ],

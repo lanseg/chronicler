@@ -20,22 +20,31 @@ type Response[T any] struct {
 	Result T `json:"result"`
 }
 
-type Bot struct {
+type Bot interface {
+	GetUpdates(chatID int64, offset int64, limit int64, timeout int64, allowedUpdates []string) ([]*Update, error)
+	SendMessage(chatID int64, replyId int64, text string) (*Message, error)
+	GetFile(fileID string) (*File, error)
+	GetUrl(file *File) string
+}
+
+type BotImpl struct {
+	Bot
+
 	httpClient *http.Client
 	token      string
 
 	logger *util.Logger
 }
 
-func NewBot(token string) *Bot {
-	return &Bot{
+func NewBot(token string) Bot {
+	return &BotImpl{
 		token:      token,
 		httpClient: &http.Client{},
 		logger:     util.NewLogger("telegram"),
 	}
 }
 
-func (b *Bot) queryApi(apiMethod string, params url.Values) ([]byte, error) {
+func (b *BotImpl) queryApi(apiMethod string, params url.Values) ([]byte, error) {
 	resp, err := http.PostForm(fmt.Sprintf("https://api.telegram.org/bot%s/%s", b.token, apiMethod), params)
 	if err != nil {
 		return nil, err
@@ -50,7 +59,7 @@ func (b *Bot) queryApi(apiMethod string, params url.Values) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func queryAndUnmarshal[T any](b *Bot, apiMethod string, params url.Values) (T, error) {
+func queryAndUnmarshal[T any](b *BotImpl, apiMethod string, params url.Values) (T, error) {
 	var zero T
 	resultBytes, err := b.queryApi(apiMethod, params)
 	if err != nil {
@@ -67,15 +76,7 @@ func queryAndUnmarshal[T any](b *Bot, apiMethod string, params url.Values) (T, e
 	return response.Result, nil
 }
 
-func (b *Bot) GetMe() (*User, error) {
-	result, err := queryAndUnmarshal[*User](b, "getMe", url.Values{})
-	if err != nil {
-		return nil, err
-	}
-	return result, nil
-}
-
-func (b *Bot) GetUpdates(chatID int64, offset int64, limit int64, timeout int64, allowedUpdates []string) ([]*Update, error) {
+func (b *BotImpl) GetUpdates(chatID int64, offset int64, limit int64, timeout int64, allowedUpdates []string) ([]*Update, error) {
 	params := url.Values{}
 	params.Set("chat_id", fmt.Sprintf("%d", chatID))
 	params.Set("offset", fmt.Sprintf("%d", offset))
@@ -92,7 +93,7 @@ func (b *Bot) GetUpdates(chatID int64, offset int64, limit int64, timeout int64,
 	return result, nil
 }
 
-func (b *Bot) SendMessage(chatID int64, replyId int64, text string) (*Message, error) {
+func (b *BotImpl) SendMessage(chatID int64, replyId int64, text string) (*Message, error) {
 	params := url.Values{}
 	params.Set("chat_id", fmt.Sprintf("%d", chatID))
 	params.Set("text", text)
@@ -108,7 +109,7 @@ func (b *Bot) SendMessage(chatID int64, replyId int64, text string) (*Message, e
 	return result, nil
 }
 
-func (b *Bot) GetFile(fileID string) (*File, error) {
+func (b *BotImpl) GetFile(fileID string) (*File, error) {
 	params := url.Values{}
 	params.Set("file_id", fileID)
 
@@ -120,7 +121,7 @@ func (b *Bot) GetFile(fileID string) (*File, error) {
 	return result, nil
 }
 
-func (b *Bot) GetUrl(file *File) string {
+func (b *BotImpl) GetUrl(file *File) string {
 	return fmt.Sprintf("https://api.telegram.org/file/bot%s/%s",
 		b.token, file.FilePath)
 }
