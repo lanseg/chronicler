@@ -12,12 +12,17 @@ type RecordSource interface {
 	GetRecords() <-chan *rpb.RecordSet
 }
 
+type ResponseSender interface {
+	SendResponse() chan<- *rpb.Response
+}
+
 type RequestRecordSource interface {
 	RequestSource
 	RecordSource
 }
 
 type Chronicler interface {
-	GetName() string
-	GetRecords(request *rpb.Request) (*rpb.RecordSet, error)
+	RequestSource
+	RecordSource
+	ResponseSender
 }

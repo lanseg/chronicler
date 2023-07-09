@@ -166,6 +166,10 @@
     margin: 4px;
 }
 
+.fileset figcaption {
+    font-size: smaller;
+}
+
 .status {
     margin-right: 4px;
 }

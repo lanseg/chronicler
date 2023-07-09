@@ -18,6 +18,27 @@ export function createElement(name, attributes) {
     return el;
 }
 
+export function createAudioPlaylist(recordId, audios) {
+    if (audios.length === 0) {
+        return document.createDocumentFragment();
+    }
+    const imagesEl = createElement('div', { 'class': 'fileset' });
+    const galleryEl = createElement('div', { 'class': 'files' });
+
+    imagesEl.innerHTML += `<div class="title">Audio</div>`;
+    for (const file of audios) {
+        galleryEl.innerHTML += `
+                        <figure>
+                          <figcaption>${file}</figcaption>
+                          <audio controls>
+                            <source src="chronicler/${recordId}/${encodeURIComponent(file)}" >
+                          </audio>
+                        </figure>`;
+    }
+    imagesEl.appendChild(galleryEl);
+    return imagesEl;
+}
+
 export function createGallery(recordId, images) {
     if (images.length === 0) {
         return document.createDocumentFragment();

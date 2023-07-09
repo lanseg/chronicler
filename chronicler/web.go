@@ -102,7 +102,7 @@ func (w *Web) GetRecords(request *rpb.Request) (*rpb.RecordSet, error) {
 	return &rpb.RecordSet{Records: []*rpb.Record{record}}, nil
 }
 
-func NewWeb(name string, httpClient *http.Client) Chronicler {
+func NewWeb(name string, httpClient *http.Client) *Web {
 	logger := util.NewLogger(name)
 	if httpClient == nil {
 		logger.Infof("No http client provided, using an own new one")

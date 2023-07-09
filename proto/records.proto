@@ -68,3 +68,8 @@ message RecordListResponse {
 message Request {
   Source source = 1;
 }
+
+message Response {
+  Source source = 1;
+  string content = 2;
+}

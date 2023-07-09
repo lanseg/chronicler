@@ -1,6 +1,7 @@
 "use strict;"
 
 const imgExtensions = ['png', 'jpg', 'svg', 'gif', 'webp'];
+const audioExtensions = ['wav', 'mp3', 'ogg', 'oga'];
 
 function getExtension(path) {
     const lastIndex = path.lastIndexOf('.');
@@ -50,6 +51,10 @@ export class File {
         return getFileName(this._fileObj["file_url"]);
     }
 
+    get isAudio() {
+        return audioExtensions.includes(getExtension(this._fileObj["file_url"].toLowerCase()));
+    }
+
     get isImage() {
         return imgExtensions.includes(getExtension(this._fileObj["file_url"].toLowerCase()));
     }
@@ -82,6 +87,13 @@ export class Source {
     get sourceType() {
         return SourceType.byId.get(this._sourceObj["type"] ?? 0);
     }
+
+    get id() {
+        return this.messageId ??
+            this.channelId ??
+            this.senderId ??
+            (this.url ? btoa(this.url) : null);
+    }
 }
 
 
@@ -107,17 +119,13 @@ export class UserMetadata {
 /** **/
 export class Record {
 
-    constructor(recordObj, user) {
+    constructor(recordObj, source, user) {
         this._recordObj = recordObj;
 
         this.time = recordObj["time"] ? new Date(recordObj["time"] * 1000) : null;
         this.user = user;
-        if (recordObj["source"]) {
-            this.source = new Source(recordObj["source"]);
-        }
-        if (recordObj["parent"]) {
-            this.parent = new Source(recordObj["parent"]);
-        }
+        this.source = source;
+        this.parentSource = recordObj["parent"] ? new Source(recordObj["parent"]) : null;
 
         this._allFiles = [];
         for (const file of recordObj["files"] ?? []) {
@@ -152,6 +160,7 @@ export class RecordSet {
     constructor(recordSetObj) {
         this._recordSetObj = recordSetObj;
         this._userById = new Map();
+        this._recordById = new Map();
         this.userMetadata = [];
         this.records = [];
 
@@ -162,7 +171,21 @@ export class RecordSet {
         }
 
         for (const record of recordSetObj["records"] ?? []) {
-            this.records.push(new Record(record, record["source"] ? this._userById.get(record["source"]["sender_id"]) : null));
+            if (!record["source"]) {
+                this.records.push(new Record(record, null));
+                continue;
+            }
+            const source = new Source(record["source"]);
+            const newRecord = new Record(record, source, this._userById.get(source.senderId));
+            this.records.push(newRecord);
+            this._recordById.set(source.id, newRecord);
+        }
+
+        for (const record of this.records) {
+            if (!record.parentSource) {
+                continue;
+            }
+            record.parent = this._recordById.get(record.parentSource.id);
         }
     }
 
@@ -208,9 +231,8 @@ export class RecordListResponse {
 
         for (const rs of recordListObj["record_sets"] ?? []) {
             if (rs["root_record"]) {
-                const rootRecord = new Record(rs["root_record"],
-                    rs["root_record"]["source"] ?
-                        this._userById.get(rs["root_record"]["source"]["sender_id"]) : null);
+                const src = rs["root_record"]["source"] ? new Source(rs["root_record"]["source"]) : null;
+                const rootRecord = new Record(rs["root_record"], src, this._userById.get(src.senderId));
                 this.recordSets.push(new RecordSetInfo(rs, rootRecord));
             } else {
                 this.recordSets.push(new RecordSetInfo(rs, null));

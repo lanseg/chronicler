@@ -103,7 +103,7 @@ func (t *Twitter) GetRecords(request *rpb.Request) (*rpb.RecordSet, error) {
 	return t.tweetToRecord(conv), nil
 }
 
-func NewTwitter(name string, client twitter.Client) Chronicler {
+func NewTwitter(name string, client twitter.Client) *Twitter {
 	return &Twitter{
 		name:   name,
 		logger: util.NewLogger(name),
