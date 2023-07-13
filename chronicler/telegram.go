@@ -23,7 +23,6 @@ type TelegramChronicler struct {
 	cursor   int64
 	response chan *rpb.Response
 	records  chan *rpb.RecordSet
-	requests chan *rpb.Request
 }
 
 func NewTelegramChronicler(bot telegram.Bot) Chronicler {
@@ -33,87 +32,34 @@ func NewTelegramChronicler(bot telegram.Bot) Chronicler {
 		cursor:   0,
 		response: make(chan *rpb.Response),
 		records:  make(chan *rpb.RecordSet),
-		requests: make(chan *rpb.Request),
 	}
 	go src.fetchLoop()
 	go src.responseLoop()
 	return src
 }
 
-func (ts *TelegramChronicler) groupRequests(updates []*telegram.Update) []*rpb.Request {
-	return []*rpb.Request{}
+func (ts *TelegramChronicler) GetRecordSource() <-chan *rpb.RecordSet {
+	return ts.records
 }
 
-func (ts *TelegramChronicler) groupRecords(updates []*telegram.Update) []*rpb.RecordSet {
-	recordByMedia := map[string][]*rpb.Record{}
-	userById := map[string]*rpb.UserMetadata{}
+func (ts *TelegramChronicler) SubmitRequest(*rpb.Request) {
+	ts.logger.Infof("SubmitRequest not implemented on purpose")
+}
 
-	recordByMedia[""] = []*rpb.Record{}
-	for _, upd := range updates {
-		record, users := updateToRecords(upd)
-		grpId := upd.Message.MediaGroupID
-		if _, ok := recordByMedia[grpId]; !ok {
-			recordByMedia[grpId] = []*rpb.Record{}
-		}
-		recordByMedia[grpId] = append(recordByMedia[grpId], record)
-		for _, u := range users {
-			userById[u.Id] = u
-		}
-	}
+func (ts *TelegramChronicler) SendResponse(resp *rpb.Response) {
+	ts.response <- resp
+}
 
-	allRecords := recordByMedia[""]
-	aggregatedRecords := []*rpb.Record{}
-	for group, records := range recordByMedia {
-		if group == "" {
-			continue
-		}
-		rootRecord := records[0]
-		if len(records) > 1 {
-			for _, record := range records[1:] {
-				rootRecord.Links = append(rootRecord.Links, record.Links...)
-				rootRecord.Files = append(rootRecord.Files, record.Files...)
-				rootRecord.TextContent += "\n" + record.TextContent
-			}
-		}
-		aggregatedRecords = append(aggregatedRecords, rootRecord)
-	}
-
-	ts.logger.Debugf("Resolving actual file urls")
-	for _, record := range append(allRecords, aggregatedRecords...) {
+func (ts *TelegramChronicler) resolveFileUrls(rs *rpb.RecordSet) {
+	for _, record := range rs.Records {
 		for _, file := range record.Files {
-			ts.logger.Debugf("Loading file for %s", file)
+			ts.logger.Debugf("Resolving file url for %s", file)
 			fileURL, err := ts.bot.GetFile(file.FileId)
 			if err != nil {
 				ts.logger.Errorf("Cannot get actual file url for %s: %s", file.FileId, err)
 				continue
 			}
 			file.FileUrl = ts.bot.GetUrl(fileURL)
-		}
-	}
-
-	result := []*rpb.RecordSet{}
-	for _, record := range append(allRecords, aggregatedRecords...) {
-		result = append(result, &rpb.RecordSet{
-			Request:      &rpb.Request{Source: record.Source},
-			Records:      []*rpb.Record{record},
-			UserMetadata: collections.Values(userById),
-		})
-	}
-	ts.logger.Debugf("Grouped %d update(s) into %d record set(s)", len(updates), len(result))
-	return result
-}
-
-func (ts *TelegramChronicler) responseLoop() {
-	ts.logger.Infof("Starting response loop")
-	for {
-		response := <-ts.response
-		channel, _ := strconv.Atoi(response.Source.ChannelId)
-		msgid, _ := strconv.Atoi(response.Source.MessageId)
-		msg, err := ts.bot.SendMessage(int64(channel), int64(msgid), response.Content)
-		if err == nil {
-			ts.logger.Infof("Responded to channel(%d)/user(%d): %s", channel, msgid, response.Content)
-		} else {
-			ts.logger.Infof("Failed to respond to channel(%d)/user(%d): %s", channel, msg, err)
 		}
 	}
 }
@@ -123,29 +69,9 @@ func (ts *TelegramChronicler) fetchLoop() {
 	for {
 		updates := ts.waitForUpdate()
 		ts.logger.Infof("%d new updates.", len(updates))
-		if len(updates) == 0 {
-			continue
-		}
-		recordUpdates := []*telegram.Update{}
-		requestUpdates := []*telegram.Update{}
-		for _, upd := range updates {
-			if isRecordUpdate(upd) {
-				recordUpdates = append(recordUpdates, upd)
-			} else {
-				requestUpdates = append(requestUpdates, upd)
-			}
-		}
-		if len(recordUpdates) > 0 {
-			ts.logger.Infof("%d record updates", len(recordUpdates))
-			for _, rs := range ts.groupRecords(recordUpdates) {
-				ts.records <- rs
-			}
-		}
-		if len(requestUpdates) > 0 {
-			ts.logger.Infof("%d request updates", len(requestUpdates))
-			for _, request := range ts.groupRequests(requestUpdates) {
-				ts.requests <- request
-			}
+		for _, rs := range groupRecords(updates) {
+			ts.resolveFileUrls(rs)
+			ts.records <- rs
 		}
 	}
 }
@@ -166,35 +92,40 @@ func (ts *TelegramChronicler) waitForUpdate() []*telegram.Update {
 		}).Collect()
 }
 
-func (ts *TelegramChronicler) GetRecords() <-chan *rpb.RecordSet {
-	return ts.records
+func (ts *TelegramChronicler) responseLoop() {
+	ts.logger.Infof("Starting response loop")
+	for {
+		response := <-ts.response
+		channel, _ := strconv.Atoi(response.Source.ChannelId)
+		msgid, _ := strconv.Atoi(response.Source.MessageId)
+		msg, err := ts.bot.SendMessage(int64(channel), int64(msgid), response.Content)
+		if err == nil {
+			ts.logger.Infof("Responded to channel(%d)/user(%d): %s", channel, msgid, response.Content)
+		} else {
+			ts.logger.Infof("Failed to respond to channel(%d)/user(%d): %s", channel, msg, err)
+		}
+	}
 }
 
-func (ts *TelegramChronicler) GetRequest() <-chan *rpb.Request {
-	return ts.requests
-}
-
-func (ts *TelegramChronicler) SendResponse() chan<- *rpb.Response {
-	return ts.response
-}
-
-func isRecordUpdate(upd *telegram.Update) bool {
+func getUpdateSource(upd *telegram.Update) *rpb.Source {
 	msg := upd.Message
-	return msg == nil || msg.ForwardFromChat != nil || msg.MediaGroupID != "" ||
-		msg.Video != nil || msg.Photo != nil || msg.Audio != nil || msg.Voice != nil
+	if msg == nil {
+		return nil
+	}
+	return &rpb.Source{
+		SenderId:  fmt.Sprintf("%d", msg.From.ID),
+		ChannelId: fmt.Sprintf("%d", msg.Chat.ID),
+		MessageId: fmt.Sprintf("%d", msg.MessageID),
+		Type:      rpb.SourceType_TELEGRAM,
+	}
 }
 
 func updateToRecords(upd *telegram.Update) (*rpb.Record, []*rpb.UserMetadata) {
 	msg := upd.Message
 	users := []*rpb.UserMetadata{}
 	result := &rpb.Record{
-		Source: &rpb.Source{
-			SenderId:  fmt.Sprintf("%d", msg.From.ID),
-			ChannelId: fmt.Sprintf("%d", msg.Chat.ID),
-			MessageId: fmt.Sprintf("%d", msg.MessageID),
-			Type:      rpb.SourceType_TELEGRAM,
-		},
-		Time: msg.Date,
+		Source: getUpdateSource(upd),
+		Time:   msg.Date,
 	}
 	users = append(users, &rpb.UserMetadata{
 		Id:       fmt.Sprintf("%d", msg.From.ID),
@@ -252,4 +183,50 @@ func updateToRecords(upd *telegram.Update) (*rpb.Record, []*rpb.UserMetadata) {
 	sort.Strings(result.Links)
 
 	return result, users
+}
+
+func groupRecords(updates []*telegram.Update) []*rpb.RecordSet {
+	recordByMedia := map[string][]*rpb.Record{}
+	userById := map[string]*rpb.UserMetadata{}
+
+	recordByMedia[""] = []*rpb.Record{}
+	for _, upd := range updates {
+		record, users := updateToRecords(upd)
+		grpId := upd.Message.MediaGroupID
+		if _, ok := recordByMedia[grpId]; !ok {
+			recordByMedia[grpId] = []*rpb.Record{}
+		}
+		recordByMedia[grpId] = append(recordByMedia[grpId], record)
+		for _, u := range users {
+			userById[u.Id] = u
+		}
+	}
+
+	allRecords := recordByMedia[""]
+	aggregatedRecords := []*rpb.Record{}
+	for group, records := range recordByMedia {
+		if group == "" {
+			continue
+		}
+		rootRecord := records[0]
+		if len(records) > 1 {
+			for _, record := range records[1:] {
+				rootRecord.Links = append(rootRecord.Links, record.Links...)
+				rootRecord.Files = append(rootRecord.Files, record.Files...)
+				rootRecord.TextContent += "\n" + record.TextContent
+			}
+		}
+		aggregatedRecords = append(aggregatedRecords, rootRecord)
+	}
+
+	result := []*rpb.RecordSet{}
+	for _, record := range append(allRecords, aggregatedRecords...) {
+		result = append(result, &rpb.RecordSet{
+			Request:      &rpb.Request{Source: record.Source},
+			Records:      []*rpb.Record{record},
+			UserMetadata: collections.Values(userById),
+		})
+	}
+
+	return result
 }

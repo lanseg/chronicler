@@ -83,7 +83,7 @@ func TestRequestResponse(t *testing.T) {
 			}
 			tg := NewTelegramChronicler(bot)
 
-			ups := <-tg.GetRecords()
+			ups := <-tg.GetRecordSource()
 
 			want := &rpb.RecordSet{}
 			if err = readJson(tc.resultFile, want); err != nil {

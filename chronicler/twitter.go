@@ -14,9 +14,47 @@ import (
 type Twitter struct {
 	Chronicler
 
-	name   string
-	logger *util.Logger
-	client twitter.Client
+	requests chan *rpb.Request
+	records  chan *rpb.RecordSet
+	logger   *util.Logger
+	client   twitter.Client
+}
+
+func NewTwitterChronicler(client twitter.Client) Chronicler {
+	twitterChronicler := &Twitter{
+		logger:   util.NewLogger("Twitter"),
+		records:  make(chan *rpb.RecordSet),
+		requests: make(chan *rpb.Request),
+		client:   client,
+	}
+	go twitterChronicler.requestLoop()
+	return twitterChronicler
+}
+
+func (t *Twitter) GetRecordSource() <-chan *rpb.RecordSet {
+	return t.records
+}
+
+func (t *Twitter) SubmitRequest(r *rpb.Request) {
+	t.requests <- r
+}
+
+func (t *Twitter) SendResponse(*rpb.Response) {
+	t.logger.Debugf("SendResponse doesn't work for Twitter by design")
+}
+
+func (t *Twitter) requestLoop() {
+	t.logger.Debugf("Starting request loop")
+	for {
+		request := <-t.requests
+		t.logger.Debugf("Got new request: %s", request)
+		threadId := request.Source.ChannelId
+		if threadId == "" {
+			threadId = request.Source.MessageId
+		}
+		conv, _ := t.client.GetConversation(threadId)
+		t.records <- t.tweetToRecord(conv)
+	}
 }
 
 func (t *Twitter) tweetToRecord(response *twitter.Response[twitter.Tweet]) *rpb.RecordSet {
@@ -85,28 +123,4 @@ func (t *Twitter) tweetToRecord(response *twitter.Response[twitter.Tweet]) *rpb.
 		return result.Records[i].Time < result.Records[j].Time
 	})
 	return result
-}
-
-func (t *Twitter) GetName() string {
-	return t.name
-}
-
-func (t *Twitter) GetRecords(request *rpb.Request) (*rpb.RecordSet, error) {
-	threadId := request.Source.ChannelId
-	if threadId == "" {
-		threadId = request.Source.MessageId
-	}
-	conv, err := t.client.GetConversation(threadId)
-	if err != nil {
-		return nil, err
-	}
-	return t.tweetToRecord(conv), nil
-}
-
-func NewTwitter(name string, client twitter.Client) *Twitter {
-	return &Twitter{
-		name:   name,
-		logger: util.NewLogger(name),
-		client: client,
-	}
 }
