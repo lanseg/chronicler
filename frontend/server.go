@@ -119,23 +119,8 @@ func (ws *WebServer) responseRecordList(w http.ResponseWriter) {
 	ws.writeJson(w, result)
 }
 
-func (ws *WebServer) responseRecord(w http.ResponseWriter, id string) {
-	allRecords, err := ws.storage.ListRecords()
-	if err != nil {
-		ws.Error(w, "Cannot enumerate records", 500)
-		return
-	}
-	for _, r := range allRecords {
-		if r.Id == id {
-			ws.writeJson(w, r)
-			return
-		}
-	}
-	ws.Error(w, "Cannot find record with id "+id, 404)
-}
-
-func (ws *WebServer) responseFile(w http.ResponseWriter, params *DataRequest) {
-	f, err := ws.storage.GetFile(params.id, params.filename)
+func (ws *WebServer) responseFile(w http.ResponseWriter, id string, filename string) {
+	f, err := ws.storage.GetFile(id, filename)
 	if err != nil {
 		ws.Error(w, err.Error(), 500)
 		return
@@ -154,10 +139,10 @@ func (ws *WebServer) handleApiRequest(w http.ResponseWriter, r *http.Request) {
 		ws.responseRecordList(w)
 		return
 	} else if params.filename == "" {
-		ws.responseRecord(w, params.id)
+		ws.responseFile(w, params.id, "record.json")
 		return
 	} else {
-		ws.responseFile(w, params)
+		ws.responseFile(w, params.id, params.filename)
 	}
 	w.Write([]byte(":)"))
 }

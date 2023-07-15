@@ -23,9 +23,9 @@ var (
 
 func extractRequests(log *util.Logger, rs *rpb.RecordSet) []*rpb.Request {
 	result := []*rpb.Request{}
-	if len(rs.Records) != 1 {
+	if len(rs.Records) != 1 || rs.Request.Source.Type == rpb.SourceType_WEB {
 		log.Debugf(
-			"We expect exactly 1 record in RecordSet, but got %d when extracting requests",
+			"We expect exactly 1 record in RecordSet and not from web, but got %d when extracting requests",
 			len(rs.Records))
 		return result
 	}
@@ -33,10 +33,18 @@ func extractRequests(log *util.Logger, rs *rpb.RecordSet) []*rpb.Request {
 		matches := collections.NewMap(twitterRe.SubexpNames(), twitterRe.FindStringSubmatch(link))
 		if match, ok := matches["twitter_id"]; ok && match != "" {
 			result = append(result, &rpb.Request{
-				Parent: rs.Request.Source,
+				Parent: rs.Request.Parent,
 				Source: &rpb.Source{
 					ChannelId: matches["twitter_id"],
 					Type:      rpb.SourceType_TWITTER,
+				},
+			})
+		} else {
+			result = append(result, &rpb.Request{
+				Parent: rs.Request.Source,
+				Source: &rpb.Source{
+					Url:  link,
+					Type: rpb.SourceType_WEB,
 				},
 			})
 		}
@@ -53,6 +61,7 @@ func main() {
 			telegram.NewBot(*cfg.TelegramBotKey)),
 		rpb.SourceType_TWITTER: chronicler.NewTwitterChronicler(
 			twitter.NewClient(*cfg.TwitterApiKey)),
+		rpb.SourceType_WEB: chronicler.NewWeb(nil),
 	}
 
 	for srcType, chr := range chroniclers {
@@ -66,12 +75,15 @@ func main() {
 						targetChr.SubmitRequest(newRequest)
 					}
 				}
-				src := recordSet.Request.Source
-				if err := stg.SaveRecords(recordSet); err != nil {
+				err := stg.SaveRecords(recordSet)
+				responseMessage := "Saved"
+				if err != nil {
+					responseMessage = "Error"
 					log.Warningf("Error while saving a record: %s", err)
-					chr.SendResponse(&rpb.Response{Source: src, Content: err.Error()})
-				} else {
-					chr.SendResponse(&rpb.Response{Source: src, Content: "Saved"})
+				}
+				src := recordSet.Request
+				if src.Source.Type == rpb.SourceType_TELEGRAM {
+					chr.SendResponse(&rpb.Response{Source: src.Source, Content: responseMessage})
 				}
 			}
 		}(srcType, chr)

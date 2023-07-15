@@ -209,12 +209,10 @@ func groupRecords(updates []*telegram.Update) []*rpb.RecordSet {
 			continue
 		}
 		rootRecord := records[0]
-		if len(records) > 1 {
-			for _, record := range records[1:] {
-				rootRecord.Links = append(rootRecord.Links, record.Links...)
-				rootRecord.Files = append(rootRecord.Files, record.Files...)
-				rootRecord.TextContent += "\n" + record.TextContent
-			}
+		for _, record := range records[1:] {
+			rootRecord.Links = append(rootRecord.Links, record.Links...)
+			rootRecord.Files = append(rootRecord.Files, record.Files...)
+			rootRecord.TextContent += "\n" + record.TextContent
 		}
 		aggregatedRecords = append(aggregatedRecords, rootRecord)
 	}

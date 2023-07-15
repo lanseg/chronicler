@@ -40,17 +40,22 @@ func fixLink(scheme string, host string, link string) string {
 type Web struct {
 	Chronicler
 
-	name   string
-	logger *util.Logger
-	client *http.Client
+	requests chan *rpb.Request
+	records  chan *rpb.RecordSet
+	logger   *util.Logger
+	client   *http.Client
 }
 
-func (w *Web) GetName() string {
-	return w.name
+func (w *Web) GetRecordSource() <-chan *rpb.RecordSet {
+	return w.records
+}
+
+func (w *Web) SubmitRequest(r *rpb.Request) {
+	w.requests <- r
 }
 
 func (w *Web) Get(link string) (*http.Response, error) {
-	req, err := http.NewRequest("GET", link, nil)
+	req, err := http.NewRequest("GET", fixLink("https", "", link), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -58,7 +63,21 @@ func (w *Web) Get(link string) (*http.Response, error) {
 	return w.client.Do(req)
 }
 
-func (w *Web) GetRecords(request *rpb.Request) (*rpb.RecordSet, error) {
+func (w *Web) requestLoop() {
+	w.logger.Infof("Starting request loop")
+	for {
+		request := <-w.requests
+		w.logger.Infof("New request: %s", request)
+		r, err := w.getRecords(request)
+		if err != nil {
+			w.logger.Warningf("Error while doing a request: %s", err)
+		} else {
+			w.records <- r
+		}
+	}
+}
+
+func (w *Web) getRecords(request *rpb.Request) (*rpb.RecordSet, error) {
 	w.logger.Infof("Loading web page from %s", request.Source.Url)
 	response, err := w.Get(request.Source.Url)
 	if err != nil {
@@ -73,12 +92,13 @@ func (w *Web) GetRecords(request *rpb.Request) (*rpb.RecordSet, error) {
 		return nil, err
 	}
 
+	source := &rpb.Source{
+		ChannelId: requestUrl.Host,
+		Url:       requestUrl.String(),
+		Type:      rpb.SourceType_WEB,
+	}
 	record := &rpb.Record{
-		Source: &rpb.Source{
-			ChannelId: requestUrl.Host,
-			Url:       requestUrl.String(),
-			Type:      rpb.SourceType_WEB,
-		},
+		Source:      source,
 		Time:        time.Now().Unix(),
 		TextContent: string(body),
 	}
@@ -99,11 +119,17 @@ func (w *Web) GetRecords(request *rpb.Request) (*rpb.RecordSet, error) {
 	}
 	w.logger.Debugf("Done loading page: %d byte(s), %d file link(s), %d other link(s)",
 		len(body), len(record.Files), len(record.Links))
-	return &rpb.RecordSet{Records: []*rpb.Record{record}}, nil
+	return &rpb.RecordSet{
+		Request: &rpb.Request{
+			Source: source,
+			Parent: request.Parent,
+		},
+		Records: []*rpb.Record{record},
+	}, nil
 }
 
-func NewWeb(name string, httpClient *http.Client) *Web {
-	logger := util.NewLogger(name)
+func NewWeb(httpClient *http.Client) *Web {
+	logger := util.NewLogger("Web")
 	if httpClient == nil {
 		logger.Infof("No http client provided, using an own new one")
 		httpClient = &http.Client{}
@@ -115,9 +141,12 @@ func NewWeb(name string, httpClient *http.Client) *Web {
 			httpClient.Jar = jar
 		}
 	}
-	return &Web{
-		name:   name,
-		logger: logger,
-		client: httpClient,
+	result := &Web{
+		logger:   logger,
+		client:   httpClient,
+		records:  make(chan *rpb.RecordSet),
+		requests: make(chan *rpb.Request),
 	}
+	go result.requestLoop()
+	return result
 }
