@@ -57,11 +57,8 @@ func (s *LocalStorage) path(relativePath string) string {
 
 func (s *LocalStorage) mkdir(path string) error {
 	recordRoot := s.path(path)
-	s.logger.Infof("Creating directory at [%s]/%s: %s", s.root, path, recordRoot)
-	if err := os.MkdirAll(recordRoot, os.ModePerm); err != nil {
-		return err
-	}
-	return nil
+	s.logger.Debugf("Creating directory at [%s]/%s: %s", s.root, path, recordRoot)
+	return os.MkdirAll(recordRoot, os.ModePerm)
 }
 
 func (s *LocalStorage) writeFile(path string, value []byte) error {
@@ -136,10 +133,9 @@ func (s *LocalStorage) refreshCache() error {
 }
 
 func (s *LocalStorage) getRecordDir(id string) (string, bool) {
-	if result, ok := s.recordCache[id]; ok {
-		return result, true
+	if _, ok := s.recordCache[id]; !ok {
+		s.refreshCache()
 	}
-	s.refreshCache()
 	result, ok := s.recordCache[id]
 	return result, ok
 }
