@@ -4,8 +4,6 @@ import (
 	"crypto/sha512"
 	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
 	"net/url"
 	"os"
 	"path"
@@ -15,10 +13,6 @@ import (
 
 	rpb "chronicler/proto/records"
 	"chronicler/util"
-)
-
-const (
-	userAgent = "curl/7.54"
 )
 
 func getRecordSetId(set *rpb.RecordSet) string {
@@ -45,64 +39,12 @@ type Storage interface {
 type LocalStorage struct {
 	Storage
 
+	downloader *HttpDownloader
+	fs         *RelativeFS
+
 	recordCache map[string]string
-	httpClient  *http.Client
 	logger      *util.Logger
 	root        string
-}
-
-func (s *LocalStorage) path(relativePath string) string {
-	return filepath.Join(s.root, relativePath)
-}
-
-func (s *LocalStorage) mkdir(path string) error {
-	recordRoot := s.path(path)
-	s.logger.Debugf("Creating directory at [%s]/%s: %s", s.root, path, recordRoot)
-	return os.MkdirAll(recordRoot, os.ModePerm)
-}
-
-func (s *LocalStorage) writeFile(path string, value []byte) error {
-	return os.WriteFile(s.path(path), value, os.ModePerm)
-}
-
-func (s *LocalStorage) copyReader(src io.ReadCloser, dst string) error {
-	defer src.Close()
-
-	targetFile, err := os.Create(s.path(dst))
-	defer targetFile.Close()
-	if err != nil {
-		return err
-	}
-	_, err = io.Copy(targetFile, src)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (s *LocalStorage) get(link string) (*http.Response, error) {
-	req, err := http.NewRequest("GET", link, nil)
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("User-Agent", userAgent)
-	return s.httpClient.Do(req)
-}
-
-func (s *LocalStorage) downloadURL(link string, target string) error {
-	s.logger.Debugf("Downloading file from %s to %s", link, target)
-	u, err := url.Parse(link)
-	if err != nil {
-		return err
-	}
-	if u.Scheme == "" {
-		u.Scheme = "https"
-	}
-	resp, err := s.get(u.String())
-	if err != nil {
-		return err
-	}
-	return s.copyReader(resp.Body, target)
 }
 
 func (s *LocalStorage) refreshCache() error {
@@ -132,24 +74,8 @@ func (s *LocalStorage) refreshCache() error {
 		})
 }
 
-func (s *LocalStorage) getRecordDir(id string) (string, bool) {
-	if _, ok := s.recordCache[id]; !ok {
-		s.refreshCache()
-	}
-	result, ok := s.recordCache[id]
-	return result, ok
-}
-
 func (s *LocalStorage) GetFile(id string, filename string) ([]byte, error) {
-	recordDir, ok := s.getRecordDir(id)
-	if !ok {
-		return nil, fmt.Errorf("File not found: %s/%s", id, filename)
-	}
-	bytes, err := os.ReadFile(filepath.Join(recordDir, filename))
-	if err != nil {
-		return nil, err
-	}
-	return bytes, nil
+	return s.fs.Read(filepath.Join(id, filename))
 }
 
 func (s *LocalStorage) ListRecords() ([]*rpb.RecordSet, error) {
@@ -179,22 +105,18 @@ func (s *LocalStorage) ListRecords() ([]*rpb.RecordSet, error) {
 
 func (s *LocalStorage) SaveRecords(r *rpb.RecordSet) error {
 	root := getRecordSetId(r)
-	s.logger.Debugf("Saving record to %s", s.path(root))
-	if err := s.mkdir(root); err != nil {
+	s.logger.Debugf("Saving record to %s", root)
+	if err := s.fs.MkDir(root); err != nil {
 		return err
 	}
-	bytes, err := json.Marshal(r)
-	if err != nil {
-		return fmt.Errorf("Json marshalling error: %s", err)
-	}
-	if err := s.writeFile(filepath.Join(root, "record.json"), bytes); err != nil {
+	if err := s.fs.WriteJSON(filepath.Join(root, "record.json"), r); err != nil {
 		return err
 	}
 	for _, r := range r.Records {
 		for _, link := range r.Links {
 			if util.IsYoutubeLink(link) && strings.Contains(link, "v=") {
 				s.logger.Debugf("Found youtube link: %s", link)
-				if err := util.DownloadYoutube(link, s.path(root)); err != nil {
+				if err := util.DownloadYoutube(link, s.fs.Resolve(root)); err != nil {
 					s.logger.Warningf("Failed to download youtube video: %s", err)
 				}
 			}
@@ -207,7 +129,7 @@ func (s *LocalStorage) SaveRecords(r *rpb.RecordSet) error {
 				continue
 			}
 			fname := path.Base(fileUrl.Path)
-			if err := s.downloadURL(file.GetFileUrl(), filepath.Join(root, fname)); err != nil {
+			if err := s.downloader.Download(file.GetFileUrl(), s.fs.Resolve(filepath.Join(root, fname))); err != nil {
 				s.logger.Warningf("Failed to download file: %s: %s", file, err)
 			}
 		}
@@ -222,8 +144,9 @@ func NewStorage(root string) Storage {
 	log.Infof("Storage root set to \"%s\"", root)
 	return &LocalStorage{
 		root:        root,
-		httpClient:  &http.Client{},
 		logger:      log,
+		fs:          NewRelativeFS(root),
+		downloader:  NewHttpDownloader(nil),
 		recordCache: map[string]string{},
 	}
 }

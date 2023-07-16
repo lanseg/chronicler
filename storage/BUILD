@@ -5,12 +5,15 @@ package(default_visibility = ["//visibility:public"])
 go_library(
     name = "storage",
     srcs = [
+        "http_downloader.go",
+        "relative_fs.go",
         "storage.go",
     ],
     importpath = "chronicler/storage",
     deps = [
         "//proto:records_go_proto",
         "//util",
+        "@commons//optional",
     ],
 )
 
