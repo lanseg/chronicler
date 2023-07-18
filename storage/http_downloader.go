@@ -7,8 +7,6 @@ import (
 	"os"
 
 	"chronicler/util"
-
-	"github.com/lanseg/golang-commons/optional"
 )
 
 const (
@@ -33,11 +31,6 @@ func copyReader(src io.ReadCloser, dst string) error {
 	if err != nil {
 		return err
 	}
-	return nil
-}
-
-func fixUrl(link string) optional.Optional[string] {
-	optional.OfErrorNullable(url.Parse(link))
 	return nil
 }
 
