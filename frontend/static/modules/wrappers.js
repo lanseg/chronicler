@@ -185,7 +185,7 @@ export class RecordSet {
                 continue;
             }
             const source = new Source(record["source"]);
-            const newRecord = new Record(record, source, this._userById.get(source.senderId));
+            const newRecord = new Record(record, source, this._userById.get(source.id));
             this.records.push(newRecord);
             this._recordById.set(source.id, newRecord);
         }
@@ -195,6 +195,7 @@ export class RecordSet {
                 continue;
             }
             record.parent = this._recordById.get(record.parentSource.id);
+            record.parentUser = this._userById.get(record.parentSource.id);
         }
     }
 

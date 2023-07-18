@@ -21,7 +21,7 @@ const (
 
 var (
 	webpageFileTypes = collections.NewSet([]string{
-		"jpg", "png", "js", "css", "json", "ico",
+		"jpg", "png", "js", "css", "json", "ico", "webp", "gif",
 	})
 )
 
@@ -104,7 +104,7 @@ func (w *Web) getRecords(request *rpb.Request) (*rpb.RecordSet, error) {
 	}
 	w.logger.Debugf("Parsing html content")
 	root := htmlparser.ParseHtml(record.TextContent)
-	linkNodes := root.GetElementsByTagNames("a", "img", "script", "link")
+	linkNodes := root.GetElementsByTagNames("a", "img", "script", "link", "source")
 	w.logger.Debugf("Found %d external link(s)", len(linkNodes))
 	for _, node := range linkNodes {
 		for _, link := range append(node.GetParam("href"), node.GetParam("src")...) {

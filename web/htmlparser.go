@@ -31,14 +31,18 @@ type Node struct {
 }
 
 func (n *Node) GetParam(paramName string) []string {
-	if value, ok := n.Params[paramName]; ok {
+	if value, ok := n.Params[strings.ToLower(paramName)]; ok {
 		return value
 	}
 	return []string{}
 }
 
 func (n *Node) GetElementsByTagNames(tagNames ...string) []*Node {
-	names := collections.NewSet(tagNames)
+	lowerNames := make([]string, len(tagNames))
+	for i, value := range tagNames {
+		lowerNames[i] = strings.ToLower(value)
+	}
+	names := collections.NewSet(lowerNames)
 	return collections.IterateTree(n, getChildren).Filter(
 		func(n *Node) bool {
 			return names.Contains(n.Name)
@@ -48,13 +52,15 @@ func (n *Node) GetElementsByTagNames(tagNames ...string) []*Node {
 func newNode(t *tokenizer.Token) *Node {
 	params := map[string][]string{}
 	for _, param := range t.Params {
-		if _, ok := params[param.First]; !ok {
-			params[param.First] = []string{}
+		name := strings.ToLower(param.First)
+		value := strings.ToLower(param.Second)
+		if _, ok := params[name]; !ok {
+			params[name] = []string{}
 		}
-		params[param.First] = append(params[param.First], param.Second)
+		params[name] = append(params[name], value)
 	}
 	return &Node{
-		Name:     t.Name,
+		Name:     strings.ToLower(t.Name),
 		Text:     t.Text,
 		Params:   params,
 		Children: []*Node{},

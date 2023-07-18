@@ -25,20 +25,20 @@
             const fragment = document.createDocumentFragment();
             const records = document.querySelector('.records');
 
-            function getSourceName(record) {
-                if (record.source.sourceType.name === "web") {
+            function formatSource(source) {
+                if (source.sourceType.name === "web") {
                     try {
-                        return new URL(record.source.url).host;
+                        return new URL(source.url).host;
                     } catch { }
-                    return record.source.url;
+                    return source.url;
                 }
-                if (record.user) {
-                    return record.user.name;
+                if (source.senderId) {
+                    return source.senderId;
                 }
-                if (record.source.senderId) {
-                    return record.source.senderId;
-                }
-                return record.source.channelId;
+                return source.channelId;
+            }
+            function getSourceName(record) {
+                return formatSource(record.parentSource ?? record.source);
             }
 
             for (const rs of data.recordSets) {

@@ -3,6 +3,7 @@ package storage
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 
@@ -46,7 +47,11 @@ func (f *RelativeFS) Read(path string) ([]byte, error) {
 	return b, err
 }
 
-func ReadJson[T any](f *RelativeFS, path string) (*T, error) {
+func (f *RelativeFS) ListFiles(path string) ([]os.FileInfo, error) {
+	return ioutil.ReadDir(f.Resolve("."))
+}
+
+func ReadJSON[T any](f *RelativeFS, path string) (*T, error) {
 	result := new(T)
 	bytes, err := f.Read(path)
 	if err != nil {

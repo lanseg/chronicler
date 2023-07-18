@@ -2,10 +2,8 @@ package storage
 
 import (
 	"crypto/sha512"
-	"encoding/json"
 	"fmt"
 	"net/url"
-	"os"
 	"path"
 	"path/filepath"
 	"sort"
@@ -50,28 +48,23 @@ type LocalStorage struct {
 func (s *LocalStorage) refreshCache() error {
 	s.logger.Debugf("Refreshing record cache")
 	s.recordCache = map[string]string{}
-	return filepath.Walk(s.root,
-		func(path string, info os.FileInfo, err error) error {
-			if filepath.Base(path) != "record.json" {
-				return nil
-			}
-			b, err := os.ReadFile(path)
-			if err != nil {
-				s.logger.Warningf("Error reading file: %s", err)
-				return err
-			}
-			rs := &rpb.RecordSet{}
-			if err = json.Unmarshal(b, &rs); err != nil {
-				s.logger.Warningf("Error unmarshalling file: %s", err)
-				return err
-			}
-			id := rs.Id
-			if rs.Id == "" {
-				id = getRecordSetId(rs)
-			}
-			s.recordCache[id] = filepath.Dir(path)
-			return nil
-		})
+	files, err := s.fs.ListFiles("")
+	if err != nil {
+		return err
+	}
+	for _, info := range files {
+		record, err := ReadJSON[rpb.RecordSet](s.fs, filepath.Join(info.Name(), "record.json"))
+		if err != nil {
+			s.logger.Warningf("No record.json in folder %s", info.Name())
+			continue
+		}
+		id := record.Id
+		if id == "" {
+			id = getRecordSetId(record)
+		}
+		s.recordCache[id] = info.Name()
+	}
+	return nil
 }
 
 func (s *LocalStorage) GetFile(id string, filename string) ([]byte, error) {
@@ -82,14 +75,9 @@ func (s *LocalStorage) ListRecords() ([]*rpb.RecordSet, error) {
 	s.refreshCache()
 	result := []*rpb.RecordSet{}
 	for _, path := range s.recordCache {
-		b, err := os.ReadFile(filepath.Join(path, "record.json"))
+		rs, err := ReadJSON[rpb.RecordSet](s.fs, filepath.Join(path, "record.json"))
 		if err != nil {
 			s.logger.Warningf("Error reading file: %s", err)
-			continue
-		}
-		rs := &rpb.RecordSet{}
-		if err = json.Unmarshal(b, &rs); err != nil {
-			s.logger.Warningf("Error unmarshalling file: %s", err)
 			continue
 		}
 		if rs.Id == "" {
