@@ -11,6 +11,8 @@ import (
 
 	rpb "chronicler/proto/records"
 	"chronicler/util"
+
+	"github.com/lanseg/golang-commons/optional"
 )
 
 func getRecordSetId(set *rpb.RecordSet) string {
@@ -31,7 +33,7 @@ func getRecordSetId(set *rpb.RecordSet) string {
 type Storage interface {
 	SaveRecords(r *rpb.RecordSet) error
 	ListRecords() ([]*rpb.RecordSet, error)
-	GetFile(id string, filename string) ([]byte, error)
+	GetFile(id string, filename string) optional.Optional[[]byte]
 }
 
 type LocalStorage struct {
@@ -53,21 +55,19 @@ func (s *LocalStorage) refreshCache() error {
 		return err
 	}
 	for _, info := range files {
-		record, err := ReadJSON[rpb.RecordSet](s.fs, filepath.Join(info.Name(), "record.json"))
-		if err != nil {
-			s.logger.Warningf("No record.json in folder %s", info.Name())
-			continue
-		}
-		id := record.Id
-		if id == "" {
-			id = getRecordSetId(record)
-		}
-		s.recordCache[id] = info.Name()
+		ReadJSON[rpb.RecordSet](s.fs, filepath.Join(info.Name(), "record.json")).
+			IfPresent(func(record *rpb.RecordSet) {
+				id := record.Id
+				if id == "" {
+					id = getRecordSetId(record)
+				}
+				s.recordCache[id] = info.Name()
+			})
 	}
 	return nil
 }
 
-func (s *LocalStorage) GetFile(id string, filename string) ([]byte, error) {
+func (s *LocalStorage) GetFile(id string, filename string) optional.Optional[[]byte] {
 	return s.fs.Read(filepath.Join(id, filename))
 }
 
@@ -75,15 +75,13 @@ func (s *LocalStorage) ListRecords() ([]*rpb.RecordSet, error) {
 	s.refreshCache()
 	result := []*rpb.RecordSet{}
 	for _, path := range s.recordCache {
-		rs, err := ReadJSON[rpb.RecordSet](s.fs, filepath.Join(path, "record.json"))
-		if err != nil {
-			s.logger.Warningf("Error reading file: %s", err)
-			continue
-		}
-		if rs.Id == "" {
-			rs.Id = getRecordSetId(rs)
-		}
-		result = append(result, rs)
+		ReadJSON[rpb.RecordSet](s.fs, filepath.Join(path, "record.json")).
+			IfPresent(func(rs *rpb.RecordSet) {
+				if rs.Id == "" {
+					rs.Id = getRecordSetId(rs)
+				}
+				result = append(result, rs)
+			})
 	}
 	sort.Slice(result, func(i int, j int) bool {
 		return result[i].Request.String() < result[j].Request.String()

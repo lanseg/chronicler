@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 
 	"chronicler/util"
+
+	"github.com/lanseg/golang-commons/optional"
 )
 
 type RelativeFS struct {
@@ -38,27 +40,20 @@ func (f *RelativeFS) WriteJSON(path string, data interface{}) error {
 	return f.Write(path, bytes)
 }
 
-func (f *RelativeFS) Read(path string) ([]byte, error) {
-	b, err := os.ReadFile(f.Resolve(path))
-	if err != nil {
-		f.logger.Warningf("Error reading file: %s", err)
-		return nil, err
-	}
-	return b, err
+func (f *RelativeFS) Read(path string) optional.Optional[[]byte] {
+	return optional.OfError(os.ReadFile(f.Resolve(path)))
 }
 
 func (f *RelativeFS) ListFiles(path string) ([]os.FileInfo, error) {
 	return ioutil.ReadDir(f.Resolve("."))
 }
 
-func ReadJSON[T any](f *RelativeFS, path string) (*T, error) {
-	result := new(T)
-	bytes, err := f.Read(path)
-	if err != nil {
-		return nil, err
-	}
-	err = json.Unmarshal(bytes, result)
-	return result, err
+func ReadJSON[T any](f *RelativeFS, path string) optional.Optional[*T] {
+	return optional.MapErr(f.Read(path), func(bytes []byte) (*T, error) {
+		result := new(T)
+		err := json.Unmarshal(bytes, result)
+		return result, err
+	})
 }
 
 func NewRelativeFS(root string) *RelativeFS {

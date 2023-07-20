@@ -98,14 +98,11 @@ func (ws *WebServer) responseRecordList(w http.ResponseWriter) {
 		}
 		if len(r.Records) > 0 {
 			set.RootRecord = r.Records[0]
-			// TODO: Can be done faster
-			for _, data := range r.UserMetadata {
-				if data.Id == set.RootRecord.Source.SenderId {
-					userById[data.Id] = data
-				}
-			}
 		}
 		result.RecordSets = append(result.RecordSets, set)
+		for _, data := range r.UserMetadata {
+			userById[data.Id] = data
+		}
 	}
 	sort.Slice(result.RecordSets, func(i int, j int) bool {
 		if result.RecordSets[i].RootRecord == nil {
@@ -120,7 +117,7 @@ func (ws *WebServer) responseRecordList(w http.ResponseWriter) {
 }
 
 func (ws *WebServer) responseFile(w http.ResponseWriter, id string, filename string) {
-	f, err := ws.storage.GetFile(id, filename)
+	f, err := ws.storage.GetFile(id, filename).Get()
 	if err != nil {
 		ws.Error(w, err.Error(), 500)
 		return

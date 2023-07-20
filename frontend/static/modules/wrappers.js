@@ -107,34 +107,33 @@ export class Source {
 
 
 /** **/
-export class UserMetadata {
-    constructor(userObj) {
-        this._userObj = userObj;
+export class SourceMetadata {
+    constructor(metadataObj) {
+        this._metadataObj = metadataObj;
     }
 
     get id() {
-        return this._userObj["id"];
+        return this._metadataObj["id"];
     }
 
     get name() {
-        return this._userObj["username"] ?? this._userObj["id"];
+        return this._metadataObj["username"] ?? this._metadataObj["id"];
     }
 
     get quotes() {
-        return this._userMetadata["quotes"] ?? [];
+        return this._metadataObj["quotes"] ?? [];
     }
 }
 
 /** **/
 export class Record {
 
-    constructor(recordObj, source, user) {
+    constructor(recordObj, source, parent) {
         this._recordObj = recordObj;
 
         this.time = recordObj["time"] ? new Date(recordObj["time"] * 1000) : null;
-        this.user = user;
         this.source = source;
-        this.parentSource = recordObj["parent"] ? new Source(recordObj["parent"]) : null;
+        this.parent = parent;
 
         this._allFiles = [];
         for (const file of recordObj["files"] ?? []) {
@@ -144,10 +143,6 @@ export class Record {
 
     get textContent() {
         return this._recordObj["text_content"] ?? "";
-    }
-
-    get name() {
-        return this.user ? this.user.username : this.source.sender_id;
     }
 
     get files() {
@@ -170,13 +165,13 @@ export class RecordSet {
         this._recordSetObj = recordSetObj;
         this._userById = new Map();
         this._recordById = new Map();
-        this.userMetadata = [];
+        this.sourceMetadata = [];
         this.records = [];
 
-        for (let user of recordSetObj["userMetadata"] ?? []) {
-            const md = new UserMetadata(user);
+        for (let srcmd of recordSetObj["userMetadata"] ?? []) {
+            const md = new SourceMetadata(srcmd);
             this._userById.set(md.id, md);
-            this.userMetadata.push(md);
+            this.sourceMetadata.push(md);
         }
 
         for (const record of recordSetObj["records"] ?? []) {
@@ -185,7 +180,8 @@ export class RecordSet {
                 continue;
             }
             const source = new Source(record["source"]);
-            const newRecord = new Record(record, source, this._userById.get(source.id));
+            const parent = new Source(record["parent"]);
+            const newRecord = new Record(record, source, parent);
             this.records.push(newRecord);
             this._recordById.set(source.id, newRecord);
         }
@@ -227,23 +223,22 @@ export class RecordSetInfo {
 }
 
 export class RecordListResponse {
+
     constructor(recordListObj) {
         this._recordListObj = recordListObj;
-        this._userById = new Map();
-        this.userMetadata = [];
+        this.sourceMetadata = new Map();
         this.recordSets = [];
 
-        for (let user of recordListObj["user_metadata"] ?? []) {
-            const md = new UserMetadata(user);
-            this._userById.set(md.id, md);
-            this.userMetadata.push(md);
+        for (let srcmd of recordListObj["user_metadata"] ?? []) {
+            const md = new SourceMetadata(srcmd);
+            this.sourceMetadata.set(md.id, md);
         }
 
         for (const rs of recordListObj["record_sets"] ?? []) {
             if (rs["root_record"]) {
                 const src = rs["root_record"]["source"] ? new Source(rs["root_record"]["source"]) : null;
-                const rootRecord = new Record(rs["root_record"], src, this._userById.get(src.senderId));
-                this.recordSets.push(new RecordSetInfo(rs, rootRecord));
+                const parent = rs["root_record"]["parent"] ? new Source(rs["root_record"]["parent"]) : null;
+                this.recordSets.push(new RecordSetInfo(rs, new Record(rs["root_record"], src, parent)));
             } else {
                 this.recordSets.push(new RecordSetInfo(rs, null));
             }

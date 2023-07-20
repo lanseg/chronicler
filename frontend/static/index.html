@@ -24,7 +24,6 @@
         function renderRecordSets(data) {
             const fragment = document.createDocumentFragment();
             const records = document.querySelector('.records');
-
             function formatSource(source) {
                 if (source.sourceType.name === "web") {
                     try {
@@ -37,8 +36,13 @@
                 }
                 return source.channelId;
             }
+
             function getSourceName(record) {
-                return formatSource(record.parentSource ?? record.source);
+                const nameOrId = formatSource(record.parent ?? record.source);
+                if (data.sourceMetadata.get(nameOrId)) {
+                    return data.sourceMetadata.get(nameOrId).name
+                }
+                return nameOrId;
             }
 
             for (const rs of data.recordSets) {
