@@ -32,6 +32,8 @@ func fixLink(scheme string, host string, link string) string {
 	}
 	if u.Host == "" {
 		u.Host = host
+	}
+	if u.Scheme == "" {
 		u.Scheme = scheme
 	}
 	return u.String()
