@@ -25,6 +25,17 @@ var (
 	})
 )
 
+func isFileUrl(link string) bool {
+	if webpageFileTypes.Contains(link) {
+		return true
+	}
+	u, err := url.Parse(link)
+	if err != nil {
+		return false
+	}
+	return u.Scheme == "data"
+}
+
 func fixLink(scheme string, host string, link string) string {
 	u, err := url.Parse(link)
 	if err != nil {
@@ -37,6 +48,14 @@ func fixLink(scheme string, host string, link string) string {
 		u.Scheme = scheme
 	}
 	return u.String()
+}
+
+func splitSrcset(srcset []string) []string {
+	result := []string{}
+	for _, src := range srcset {
+		result = append(result, strings.Split(src, " ")[0])
+	}
+	return result
 }
 
 type Web struct {
@@ -106,13 +125,13 @@ func (w *Web) getRecords(request *rpb.Request) (*rpb.RecordSet, error) {
 	}
 	w.logger.Debugf("Parsing html content")
 	root := htmlparser.ParseHtml(record.TextContent)
-	linkNodes := root.GetElementsByTagNames("a", "img", "script", "link", "source")
+	linkNodes := root.GetElementsByTagNames("a", "img", "script", "link", "source", "srcset")
 	w.logger.Debugf("Found %d external link(s)", len(linkNodes))
 	for _, node := range linkNodes {
-		for _, link := range append(node.GetParam("href"), node.GetParam("src")...) {
+		for _, link := range append(node.GetParam("href"), append(node.GetParam("src"), splitSrcset(node.GetParam("srcset"))...)...) {
 			fixedLink := fixLink(requestUrl.Scheme, requestUrl.Host, link)
 			pos := strings.LastIndex(fixedLink, ".")
-			if pos != -1 && webpageFileTypes.Contains(fixedLink[pos+1:]) {
+			if pos != -1 && isFileUrl(fixedLink[pos+1:]) {
 				record.Files = append(record.Files, &rpb.File{FileUrl: fixedLink})
 			} else {
 				record.Links = append(record.Links, fixedLink)

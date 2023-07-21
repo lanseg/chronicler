@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"flag"
 	"fmt"
 	"regexp"
@@ -56,22 +55,6 @@ func extractRequests(log *util.Logger, rs *rpb.RecordSet) []*rpb.Request {
 func main() {
 	flag.Parse()
 
-	web := chronicler.NewWeb(nil)
-	web.SubmitRequest(&rpb.Request{
-		Source: &rpb.Source{
-			Url: "https://meduza.io/feature/2023/07/21/posle-sryva-zernovoy-sdelki-osnovnoy-koridor-dlya-vyvoza-ukrainskogo-zerna-polsha-no-varshava-uzhe-ne-tak-loyalna-kievu-kak-v-nachale-voyny",
-		},
-	})
-	js, _ := json.Marshal(<-web.GetRecordSource())
-	fmt.Println(string(js))
-
-	wwg := &sync.WaitGroup{}
-	wwg.Add(1)
-	wwg.Wait()
-	if wwg != nil {
-		return
-	}
-
 	cfg := chronicler.GetConfig()
 	stg := storage.NewStorage(*cfg.StorageRoot)
 	chroniclers := map[rpb.SourceType]chronicler.Chronicler{
@@ -106,6 +89,12 @@ func main() {
 			}
 		}(srcType, chr)
 	}
+
+	chroniclers[rpb.SourceType_WEB].SubmitRequest(&rpb.Request{
+		Source: &rpb.Source{
+			Url: "https://meduza.io/feature/2023/07/21/posle-sryva-zernovoy-sdelki-osnovnoy-koridor-dlya-vyvoza-ukrainskogo-zerna-polsha-no-varshava-uzhe-ne-tak-loyalna-kievu-kak-v-nachale-voyny",
+		},
+	})
 
 	wg := sync.WaitGroup{}
 	wg.Add(1)
