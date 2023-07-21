@@ -73,11 +73,7 @@ func (ws *WebServer) writeJson(w http.ResponseWriter, data any) {
 }
 
 func (ws *WebServer) responseRecordList(w http.ResponseWriter) {
-	records, err := ws.storage.ListRecords()
-	if err != nil {
-		ws.Error(w, "Cannot enumerate records", 500)
-		return
-	}
+	records, _ := ws.storage.ListRecords().Get()
 	userById := map[string]*rpb.UserMetadata{}
 	result := &rpb.RecordListResponse{}
 	for _, r := range records {
@@ -105,12 +101,14 @@ func (ws *WebServer) responseRecordList(w http.ResponseWriter) {
 		}
 	}
 	sort.Slice(result.RecordSets, func(i int, j int) bool {
-		if result.RecordSets[i].RootRecord == nil {
+		left := result.RecordSets[i].RootRecord
+		right := result.RecordSets[j].RootRecord
+		if left == nil {
 			return false
-		} else if result.RecordSets[j].RootRecord == nil {
+		} else if right == nil {
 			return true
 		}
-		return result.RecordSets[i].RootRecord.Time > result.RecordSets[j].RootRecord.Time
+		return left.Time > right.Time
 	})
 	result.UserMetadata = collections.Values(userById)
 	ws.writeJson(w, result)

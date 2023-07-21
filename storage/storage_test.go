@@ -70,7 +70,7 @@ func TestStorage(t *testing.T) {
 					t.Errorf("Error while saving a request: %s", saveError)
 				}
 			}
-			fromStorage, readError := s.ListRecords()
+			fromStorage, readError := s.ListRecords().Get()
 			if readError != nil {
 				t.Errorf("Error while reading a request: %s", readError)
 			}

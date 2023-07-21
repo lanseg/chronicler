@@ -32,7 +32,7 @@ func getRecordSetId(set *rpb.RecordSet) string {
 
 type Storage interface {
 	SaveRecords(r *rpb.RecordSet) error
-	ListRecords() ([]*rpb.RecordSet, error)
+	ListRecords() optional.Optional[[]*rpb.RecordSet]
 	GetFile(id string, filename string) optional.Optional[[]byte]
 }
 
@@ -71,7 +71,7 @@ func (s *LocalStorage) GetFile(id string, filename string) optional.Optional[[]b
 	return s.fs.Read(filepath.Join(id, filename))
 }
 
-func (s *LocalStorage) ListRecords() ([]*rpb.RecordSet, error) {
+func (s *LocalStorage) ListRecords() optional.Optional[[]*rpb.RecordSet] {
 	s.refreshCache()
 	result := []*rpb.RecordSet{}
 	for _, path := range s.recordCache {
@@ -86,7 +86,7 @@ func (s *LocalStorage) ListRecords() ([]*rpb.RecordSet, error) {
 	sort.Slice(result, func(i int, j int) bool {
 		return result[i].Request.String() < result[j].Request.String()
 	})
-	return result, nil
+	return optional.Of(result)
 }
 
 func (s *LocalStorage) SaveRecords(r *rpb.RecordSet) error {
