@@ -38,8 +38,8 @@ func NewTelegramChronicler(bot telegram.Bot) Chronicler {
 	return src
 }
 
-func (ts *TelegramChronicler) GetRecordSource() <-chan *rpb.RecordSet {
-	return ts.records
+func (ts *TelegramChronicler) GetRecordSet() *rpb.RecordSet {
+	return <-ts.records
 }
 
 func (ts *TelegramChronicler) SubmitRequest(*rpb.Request) {

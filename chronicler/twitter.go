@@ -31,8 +31,8 @@ func NewTwitterChronicler(client twitter.Client) Chronicler {
 	return twitterChronicler
 }
 
-func (t *Twitter) GetRecordSource() <-chan *rpb.RecordSet {
-	return t.records
+func (t *Twitter) GetRecordSet() *rpb.RecordSet {
+	return <-t.records
 }
 
 func (t *Twitter) SubmitRequest(r *rpb.Request) {

@@ -68,20 +68,21 @@ func main() {
 	for srcType, chr := range chroniclers {
 		go func(srcType rpb.SourceType, chr chronicler.Chronicler) {
 			log := util.NewLogger(fmt.Sprintf("%s Record loader", srcType))
-			recordSource := chr.GetRecordSource()
 			for {
-				recordSet := <-recordSource
+				recordSet := chr.GetRecordSet()
 				for _, newRequest := range extractRequests(log, recordSet) {
 					if targetChr, ok := chroniclers[newRequest.Source.Type]; ok {
 						targetChr.SubmitRequest(newRequest)
 					}
 				}
+
 				err := stg.SaveRecords(recordSet)
 				responseMessage := "Saved"
 				if err != nil {
 					responseMessage = "Error"
 					log.Warningf("Error while saving a record: %s", err)
 				}
+
 				src := recordSet.Request
 				if src.Source.Type == rpb.SourceType_TELEGRAM {
 					chr.SendResponse(&rpb.Response{Source: src.Source, Content: responseMessage})

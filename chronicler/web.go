@@ -67,8 +67,8 @@ type Web struct {
 	client   *http.Client
 }
 
-func (w *Web) GetRecordSource() <-chan *rpb.RecordSet {
-	return w.records
+func (w *Web) GetRecordSource() *rpb.RecordSet {
+	return <-w.records
 }
 
 func (w *Web) SubmitRequest(r *rpb.Request) {
