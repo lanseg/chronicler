@@ -39,6 +39,28 @@ export function createAudioPlaylist(recordId, audios) {
     return imagesEl;
 }
 
+export function createVideoPlaylist(recordId, videos) {
+    if (videos.length === 0) {
+        return document.createDocumentFragment();
+    }
+    const imagesEl = createElement('div', { 'class': 'fileset' });
+    const galleryEl = createElement('div', { 'class': 'gallery' });
+
+    imagesEl.innerHTML += `<div class="title">Video</div>`;
+    for (const file of videos) {
+        galleryEl.innerHTML += `
+                        <figure>
+                          <figcaption>${file}</figcaption>
+                          <video controls>
+                            <source src="chronicler/${recordId}/${encodeURIComponent(file)}" >
+                          </video>
+                        </figure>`;
+    }
+    imagesEl.appendChild(galleryEl);
+    return imagesEl;
+}
+
+
 export function createGallery(recordId, images) {
     if (images.length === 0) {
         return document.createDocumentFragment();

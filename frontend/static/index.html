@@ -15,7 +15,7 @@
     </script>
     <script type="module">
         import { getRecordSets, getRecord } from "api";
-        import { createElement, formatDateTime, createGallery, createFileList, createAudioPlaylist } from "dom";
+        import { createElement, formatDateTime, createGallery, createFileList, createAudioPlaylist, createVideoPlaylist } from "dom";
         import { RecordListResponse, RecordSet } from "wrappers";
 
         const params = new URLSearchParams(document.location.search);
@@ -101,6 +101,8 @@
                     record.files.filter(f => f.isImage).map(f => f.name)));
                 recordEl.appendChild(createAudioPlaylist(rcid,
                     record.files.filter(f => f.isAudio).map(f => f.name)));
+                recordEl.appendChild(createVideoPlaylist(rcid,
+                    record.files.filter(f => f.isVideo).map(f => f.name)));
                 recordEl.appendChild(createFileList(rcid, record.files
                     .filter(f => f.name !== "")
                     .map(f => f.name)));

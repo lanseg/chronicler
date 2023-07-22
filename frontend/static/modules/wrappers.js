@@ -2,6 +2,7 @@
 
 const imgExtensions = ['png', 'jpg', 'svg', 'gif', 'webp'];
 const audioExtensions = ['wav', 'mp3', 'ogg', 'oga'];
+const videoExtensions = ['webm', 'mp4', 'mov'];
 
 function getExtension(path) {
     const lastIndex = path.lastIndexOf('.');
@@ -59,6 +60,13 @@ export class File {
             return false
         }
         return audioExtensions.includes(getExtension(this._fileObj["file_url"].toLowerCase()));
+    }
+
+    get isVideo() {
+        if (!this._fileObj["file_url"]) {
+            return false
+        }
+        return videoExtensions.includes(getExtension(this._fileObj["file_url"].toLowerCase()));
     }
 
     get isImage() {

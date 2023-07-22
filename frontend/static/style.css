@@ -137,6 +137,7 @@
 .record .gallery {
     width: 100%;
     display: flex;
+    flex-wrap: wrap;
 }
 
 .record .gallery .image {
@@ -147,6 +148,12 @@
 
 .record .gallery .image img {
     width: 100%;
+}
+
+.record .gallery video {
+    max-width: 320px;
+    max-height: 240px;
+    margin: 4px;
 }
 
 .record .fileset .title {
