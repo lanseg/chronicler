@@ -90,12 +90,6 @@ func main() {
 		}(srcType, chr)
 	}
 
-	chroniclers[rpb.SourceType_WEB].SubmitRequest(&rpb.Request{
-		Source: &rpb.Source{
-			Url: "https://meduza.io/feature/2023/07/21/posle-sryva-zernovoy-sdelki-osnovnoy-koridor-dlya-vyvoza-ukrainskogo-zerna-polsha-no-varshava-uzhe-ne-tak-loyalna-kievu-kak-v-nachale-voyny",
-		},
-	})
-
 	wg := sync.WaitGroup{}
 	wg.Add(1)
 	wg.Wait()

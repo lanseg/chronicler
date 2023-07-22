@@ -163,15 +163,13 @@ export class Request {
 export class RecordSet {
     constructor(recordSetObj) {
         this._recordSetObj = recordSetObj;
-        this._userById = new Map();
         this._recordById = new Map();
-        this.sourceMetadata = [];
+        this.sourceMetadata = new Map();
         this.records = [];
 
         for (let srcmd of recordSetObj["userMetadata"] ?? []) {
             const md = new SourceMetadata(srcmd);
-            this._userById.set(md.id, md);
-            this.sourceMetadata.push(md);
+            this.sourceMetadata.set(md.id, md);
         }
 
         for (const record of recordSetObj["records"] ?? []) {
@@ -180,7 +178,7 @@ export class RecordSet {
                 continue;
             }
             const source = new Source(record["source"]);
-            const parent = new Source(record["parent"]);
+            const parent = record["parent"] ? new Source(record["parent"]) : null;
             const newRecord = new Record(record, source, parent);
             this.records.push(newRecord);
             this._recordById.set(source.id, newRecord);

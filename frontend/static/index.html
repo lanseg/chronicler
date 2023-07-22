@@ -21,29 +21,30 @@
         const params = new URLSearchParams(document.location.search);
         const rcid = params.get("record_id");
 
+        function formatSource(source) {
+            if (source.sourceType.name === "web") {
+                try {
+                    return new URL(source.url).host;
+                } catch { }
+                return source.url;
+            }
+            if (source.senderId) {
+                return source.senderId;
+            }
+            return source.channelId;
+        }
+
+        function getSourceName(data, parent, source) {
+            const nameOrId = formatSource(parent ?? source);
+            if (data.sourceMetadata.get(nameOrId)) {
+                return data.sourceMetadata.get(nameOrId).name
+            }
+            return nameOrId;
+        }
+
         function renderRecordSets(data) {
             const fragment = document.createDocumentFragment();
             const records = document.querySelector('.records');
-            function formatSource(source) {
-                if (source.sourceType.name === "web") {
-                    try {
-                        return new URL(source.url).host;
-                    } catch { }
-                    return source.url;
-                }
-                if (source.senderId) {
-                    return source.senderId;
-                }
-                return source.channelId;
-            }
-
-            function getSourceName(record) {
-                const nameOrId = formatSource(record.parent ?? record.source);
-                if (data.sourceMetadata.get(nameOrId)) {
-                    return data.sourceMetadata.get(nameOrId).name
-                }
-                return nameOrId;
-            }
 
             for (const rs of data.recordSets) {
                 const recordEl = createElement("div", { "id": rs["id"], "class": "record" });
@@ -52,7 +53,7 @@
                     fragment.appendChild(recordEl);
                     continue
                 }
-                const srcName = getSourceName(rs.rootRecord);
+                const srcName = getSourceName(data, rs.rootRecord.parent, rs.rootRecord.source);
                 const timeLabel = formatDateTime(rs.rootRecord.time);
                 recordEl.innerHTML = `<div class='header'>
                            <span class="icon ${rs.rootRecord.source.sourceType.name}">&nbsp;</span>
@@ -71,10 +72,12 @@
             const fragment = document.createDocumentFragment();
             const records = document.querySelector('.records');
             for (const record of cdata.records) {
-                const userName = record.user ? record.user.name : "?";
+                const source = record.source;
                 const parent = record.parent;
-                const parentName = (parent && parent.user) ? parent.user.name : 'NONE';
-                const parentMessage = (parent && parent.source) ? parent.source.messageId : 'NONE';
+
+                const recordName = source ? getSourceName(cdata, source) : 'NONE';
+                const parentName = parent ? getSourceName(cdata, null, parent) : 'NONE';
+                const parentMessage = parent ? parent.messageId : 'NONE';
 
                 /* --- */
                 const recordEl = createElement('div', {
@@ -85,7 +88,7 @@
                            <span class="icon ${record.source.sourceType.name}">&nbsp;</span>
                            <span class="datetime">${formatDateTime(record.time)}</span>
                            <a href="#${record.source.messageId}">#</a>
-                           <span class="username">${userName}</span>
+                           <span class="username">${recordName}</span>
                            <span class="username">→ <a href="#${parentMessage}">${parentName}</a></span>
                          </div>
                          <div class='content'>${record.textContent.replaceAll("\n", "<br/>")}</div>`;
@@ -98,7 +101,9 @@
                     record.files.filter(f => f.isImage).map(f => f.name)));
                 recordEl.appendChild(createAudioPlaylist(rcid,
                     record.files.filter(f => f.isAudio).map(f => f.name)));
-                recordEl.appendChild(createFileList(rcid, record.files.map(f => f.name)));
+                recordEl.appendChild(createFileList(rcid, record.files
+                    .filter(f => f.name !== "")
+                    .map(f => f.name)));
 
                 fragment.appendChild(recordEl);
             }
