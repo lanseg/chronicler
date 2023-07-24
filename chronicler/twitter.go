@@ -11,53 +11,32 @@ import (
 	"github.com/lanseg/golang-commons/collections"
 )
 
-type Twitter struct {
-	Chronicler
+type twitterRecordSource struct {
+	RecordSource
 
-	requests chan *rpb.Request
-	records  chan *rpb.RecordSet
-	logger   *util.Logger
-	client   twitter.Client
+	logger *util.Logger
+	client twitter.Client
 }
 
 func NewTwitterChronicler(client twitter.Client) Chronicler {
-	twitterChronicler := &Twitter{
-		logger:   util.NewLogger("Twitter"),
-		records:  make(chan *rpb.RecordSet),
-		requests: make(chan *rpb.Request),
-		client:   client,
+	tss := &twitterRecordSource{
+		logger: util.NewLogger("TwitterChronicler"),
+		client: client,
 	}
-	go twitterChronicler.requestLoop()
-	return twitterChronicler
+	return NewChronicler(tss, nil, false)
 }
 
-func (t *Twitter) GetRecordSet() *rpb.RecordSet {
-	return <-t.records
-}
-
-func (t *Twitter) SubmitRequest(r *rpb.Request) {
-	t.requests <- r
-}
-
-func (t *Twitter) SendResponse(*rpb.Response) {
-	t.logger.Debugf("SendResponse doesn't work for Twitter by design")
-}
-
-func (t *Twitter) requestLoop() {
-	t.logger.Debugf("Starting request loop")
-	for {
-		request := <-t.requests
-		t.logger.Debugf("Got new request: %s", request)
-		threadId := request.Source.ChannelId
-		if threadId == "" {
-			threadId = request.Source.MessageId
-		}
-		conv, _ := t.client.GetConversation(threadId)
-		t.records <- t.tweetToRecord(conv)
+func (t *twitterRecordSource) GetRequestedRecords(request *rpb.Request) []*rpb.RecordSet {
+	t.logger.Debugf("Got new request: %s", request)
+	threadId := request.Source.ChannelId
+	if threadId == "" {
+		threadId = request.Source.MessageId
 	}
+	conv, _ := t.client.GetConversation(threadId)
+	return []*rpb.RecordSet{t.tweetToRecord(conv)}
 }
 
-func (t *Twitter) tweetToRecord(response *twitter.Response[twitter.Tweet]) *rpb.RecordSet {
+func (t *twitterRecordSource) tweetToRecord(response *twitter.Response[twitter.Tweet]) *rpb.RecordSet {
 	seen := collections.NewSet[string]([]string{})
 	tweets := []twitter.Tweet{}
 	for _, twt := range append(response.Data, response.Includes.Tweets...) {

@@ -15,42 +15,24 @@ import (
 	rpb "chronicler/proto/records"
 )
 
-type TelegramChronicler struct {
-	Chronicler
+type telegramSinkSource struct {
+	SinkSource
 
-	logger   *util.Logger
-	bot      telegram.Bot
-	cursor   int64
-	response chan *rpb.Response
-	records  chan *rpb.RecordSet
+	logger *util.Logger
+	bot    telegram.Bot
+	cursor int64
 }
 
 func NewTelegramChronicler(bot telegram.Bot) Chronicler {
-	src := &TelegramChronicler{
-		logger:   util.NewLogger("TelegramChronicler"),
-		bot:      bot,
-		cursor:   0,
-		response: make(chan *rpb.Response),
-		records:  make(chan *rpb.RecordSet),
+	tss := &telegramSinkSource{
+		logger: util.NewLogger("TelegramChronicler"),
+		bot:    bot,
+		cursor: 0,
 	}
-	go src.fetchLoop()
-	go src.responseLoop()
-	return src
+	return NewChronicler(tss, tss, true)
 }
 
-func (ts *TelegramChronicler) GetRecordSet() *rpb.RecordSet {
-	return <-ts.records
-}
-
-func (ts *TelegramChronicler) SubmitRequest(*rpb.Request) {
-	ts.logger.Infof("SubmitRequest not implemented on purpose")
-}
-
-func (ts *TelegramChronicler) SendResponse(resp *rpb.Response) {
-	ts.response <- resp
-}
-
-func (ts *TelegramChronicler) resolveFileUrls(rs *rpb.RecordSet) {
+func (ts *telegramSinkSource) resolveFileUrls(rs *rpb.RecordSet) {
 	for _, record := range rs.Records {
 		for _, file := range record.Files {
 			ts.logger.Debugf("Resolving file url for %s", file)
@@ -64,19 +46,7 @@ func (ts *TelegramChronicler) resolveFileUrls(rs *rpb.RecordSet) {
 	}
 }
 
-func (ts *TelegramChronicler) fetchLoop() {
-	ts.logger.Infof("Starting fetch loop")
-	for {
-		updates := ts.waitForUpdate()
-		ts.logger.Infof("%d new updates.", len(updates))
-		for _, rs := range groupRecords(updates) {
-			ts.resolveFileUrls(rs)
-			ts.records <- rs
-		}
-	}
-}
-
-func (ts *TelegramChronicler) waitForUpdate() []*telegram.Update {
+func (ts *telegramSinkSource) waitForUpdate() []*telegram.Update {
 	ts.logger.Infof("Waiting for a new telegram update...")
 	return collections.IterateSlice(
 		optional.
@@ -92,20 +62,28 @@ func (ts *TelegramChronicler) waitForUpdate() []*telegram.Update {
 		}).Collect()
 }
 
-func (ts *TelegramChronicler) responseLoop() {
-	ts.logger.Infof("Starting response loop")
-	for {
-		response := <-ts.response
-		channel, _ := strconv.Atoi(response.Source.ChannelId)
-		msgid, _ := strconv.Atoi(response.Source.MessageId)
-		msg, err := ts.bot.SendMessage(int64(channel), int64(msgid), response.Content)
-		if err == nil {
-			ts.logger.Infof("Responded to channel(%d)/user(%d): %s", channel, msgid, response.Content)
-		} else {
-			ts.logger.Infof("Failed to respond to channel(%d)/user(%d): %s", channel, msg, err)
-		}
+func (ts *telegramSinkSource) GetRequestedRecords(*rpb.Request) []*rpb.RecordSet {
+	updates := ts.waitForUpdate()
+	records := groupRecords(updates)
+	ts.logger.Infof("%d new updates grouped into %d records.", len(updates), len(records))
+	for _, rs := range records {
+		ts.resolveFileUrls(rs)
+	}
+	return records
+}
+
+func (ts *telegramSinkSource) SendResponse(response *rpb.Response) {
+	channel, _ := strconv.Atoi(response.Source.ChannelId)
+	msgid, _ := strconv.Atoi(response.Source.MessageId)
+	msg, err := ts.bot.SendMessage(int64(channel), int64(msgid), response.Content)
+	if err == nil {
+		ts.logger.Infof("Responded to channel(%d)/user(%d): %s", channel, msgid, response.Content)
+	} else {
+		ts.logger.Infof("Failed to respond to channel(%d)/user(%d): %s", channel, msg, err)
 	}
 }
+
+//  ----------
 
 func getUpdateSource(upd *telegram.Update) *rpb.Source {
 	msg := upd.Message
@@ -218,11 +196,15 @@ func groupRecords(updates []*telegram.Update) []*rpb.RecordSet {
 	}
 
 	result := []*rpb.RecordSet{}
+	metadata := collections.Values(userById)
+	sort.Slice(metadata, func(i int, j int) bool {
+		return metadata[i].Id > metadata[j].Id
+	})
 	for _, record := range append(allRecords, aggregatedRecords...) {
 		result = append(result, &rpb.RecordSet{
 			Request:      &rpb.Request{Source: record.Source},
 			Records:      []*rpb.Record{record},
-			UserMetadata: collections.Values(userById),
+			UserMetadata: metadata,
 		})
 	}
 

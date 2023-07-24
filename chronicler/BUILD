@@ -14,6 +14,7 @@ go_library(
     importpath = "chronicler",
     deps = [
         "//proto:records_go_proto",
+        "//storage",
         "//telegram",
         "//twitter",
         "//util",

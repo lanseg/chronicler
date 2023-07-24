@@ -58,24 +58,34 @@ func splitSrcset(srcset []string) []string {
 	return result
 }
 
-type Web struct {
-	Chronicler
+type webRecordSource struct {
+	RecordSource
 
-	requests chan *rpb.Request
-	records  chan *rpb.RecordSet
-	logger   *util.Logger
-	client   *http.Client
+	logger *util.Logger
+	client *http.Client
 }
 
-func (w *Web) GetRecordSource() *rpb.RecordSet {
-	return <-w.records
+func NewWebChronicler(httpClient *http.Client) Chronicler {
+	logger := util.NewLogger("WebChronicler")
+	if httpClient == nil {
+		logger.Infof("No http client provided, using an own new one")
+		httpClient = &http.Client{}
+
+		jar, err := cookiejar.New(nil)
+		if err != nil {
+			logger.Warningf("Got error while creating cookie jar %s", err.Error())
+		} else {
+			httpClient.Jar = jar
+		}
+	}
+	wss := &webRecordSource{
+		logger: logger,
+		client: httpClient,
+	}
+	return NewChronicler(wss, nil, false)
 }
 
-func (w *Web) SubmitRequest(r *rpb.Request) {
-	w.requests <- r
-}
-
-func (w *Web) Get(link string) (*http.Response, error) {
+func (w *webRecordSource) Get(link string) (*http.Response, error) {
 	req, err := http.NewRequest("GET", fixLink("https", "", link), nil)
 	if err != nil {
 		return nil, err
@@ -84,25 +94,11 @@ func (w *Web) Get(link string) (*http.Response, error) {
 	return w.client.Do(req)
 }
 
-func (w *Web) requestLoop() {
-	w.logger.Infof("Starting request loop")
-	for {
-		request := <-w.requests
-		w.logger.Infof("New request: %s", request)
-		r, err := w.getRecords(request)
-		if err != nil {
-			w.logger.Warningf("Error while doing a request: %s", err)
-		} else {
-			w.records <- r
-		}
-	}
-}
-
-func (w *Web) getRecords(request *rpb.Request) (*rpb.RecordSet, error) {
+func (w *webRecordSource) GetRequestedRecords(request *rpb.Request) []*rpb.RecordSet {
 	w.logger.Infof("Loading web page from %s", request.Source.Url)
 	response, err := w.Get(request.Source.Url)
 	if err != nil {
-		return nil, err
+		return []*rpb.RecordSet{}
 	}
 	defer response.Body.Close()
 
@@ -110,7 +106,7 @@ func (w *Web) getRecords(request *rpb.Request) (*rpb.RecordSet, error) {
 	w.logger.Infof("Resolved actual URL as %s", requestUrl)
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
-		return nil, err
+		return []*rpb.RecordSet{}
 	}
 
 	source := &rpb.Source{
@@ -140,34 +136,13 @@ func (w *Web) getRecords(request *rpb.Request) (*rpb.RecordSet, error) {
 	}
 	w.logger.Debugf("Done loading page: %d byte(s), %d file link(s), %d other link(s)",
 		len(body), len(record.Files), len(record.Links))
-	return &rpb.RecordSet{
-		Request: &rpb.Request{
-			Source: source,
-			Parent: request.Parent,
+	return []*rpb.RecordSet{
+		&rpb.RecordSet{
+			Request: &rpb.Request{
+				Source: source,
+				Parent: request.Parent,
+			},
+			Records: []*rpb.Record{record},
 		},
-		Records: []*rpb.Record{record},
-	}, nil
-}
-
-func NewWeb(httpClient *http.Client) *Web {
-	logger := util.NewLogger("Web")
-	if httpClient == nil {
-		logger.Infof("No http client provided, using an own new one")
-		httpClient = &http.Client{}
-
-		jar, err := cookiejar.New(nil)
-		if err != nil {
-			logger.Warningf("Got error while creating cookie jar %s", err.Error())
-		} else {
-			httpClient.Jar = jar
-		}
 	}
-	result := &Web{
-		logger:   logger,
-		client:   httpClient,
-		records:  make(chan *rpb.RecordSet),
-		requests: make(chan *rpb.Request),
-	}
-	go result.requestLoop()
-	return result
 }

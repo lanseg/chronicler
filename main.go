@@ -62,7 +62,7 @@ func main() {
 			telegram.NewBot(*cfg.TelegramBotKey)),
 		rpb.SourceType_TWITTER: chronicler.NewTwitterChronicler(
 			twitter.NewClient(*cfg.TwitterApiKey)),
-		rpb.SourceType_WEB: chronicler.NewWeb(nil),
+		rpb.SourceType_WEB: chronicler.NewWebChronicler(nil),
 	}
 
 	for srcType, chr := range chroniclers {

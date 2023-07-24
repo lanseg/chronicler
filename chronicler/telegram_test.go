@@ -82,7 +82,7 @@ func TestRequestResponse(t *testing.T) {
 				t.Errorf("Cannot create new fake bot for file \"%s\": %s", tc.responseFile, err)
 			}
 			tg := NewTelegramChronicler(bot)
-
+			tg.SubmitRequest(nil)
 			ups := tg.GetRecordSet()
 
 			want := &rpb.RecordSet{}
