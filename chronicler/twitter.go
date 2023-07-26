@@ -33,7 +33,9 @@ func (t *twitterRecordSource) GetRequestedRecords(request *rpb.Request) []*rpb.R
 		threadId = request.Source.MessageId
 	}
 	conv, _ := t.client.GetConversation(threadId)
-	return []*rpb.RecordSet{t.tweetToRecord(conv)}
+    result := t.tweetToRecord(conv)
+    result.Request = request
+	return []*rpb.RecordSet{result}
 }
 
 func (t *twitterRecordSource) tweetToRecord(response *twitter.Response[twitter.Tweet]) *rpb.RecordSet {

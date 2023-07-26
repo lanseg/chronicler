@@ -118,6 +118,7 @@ func (w *webRecordSource) GetRequestedRecords(request *rpb.Request) []*rpb.Recor
 		Source:      source,
 		Time:        time.Now().Unix(),
 		TextContent: string(body),
+		RawContent:  body,
 	}
 	w.logger.Debugf("Parsing html content")
 	root := htmlparser.ParseHtml(record.TextContent)
@@ -137,7 +138,7 @@ func (w *webRecordSource) GetRequestedRecords(request *rpb.Request) []*rpb.Recor
 	w.logger.Debugf("Done loading page: %d byte(s), %d file link(s), %d other link(s)",
 		len(body), len(record.Files), len(record.Links))
 	return []*rpb.RecordSet{
-		&rpb.RecordSet{
+		{
 			Request: &rpb.Request{
 				Source: source,
 				Parent: request.Parent,
@@ -146,3 +147,4 @@ func (w *webRecordSource) GetRequestedRecords(request *rpb.Request) []*rpb.Recor
 		},
 	}
 }
+

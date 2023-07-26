@@ -104,6 +104,7 @@ func updateToRecords(upd *telegram.Update) (*rpb.Record, []*rpb.UserMetadata) {
 	result := &rpb.Record{
 		Source: getUpdateSource(upd),
 		Time:   msg.Date,
+//      RawContent: 
 	}
 	users = append(users, &rpb.UserMetadata{
 		Id:       fmt.Sprintf("%d", msg.From.ID),
