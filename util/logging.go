@@ -19,10 +19,10 @@ type Logger struct {
 
 func NewLogger(name string) *Logger {
 	return &Logger{
-		debug: log.New(os.Stdout, "DEBUG: ", logFormat),
-		info:  log.New(os.Stdout, "INFO: ", logFormat),
-		warn:  log.New(os.Stdout, "WARNING: ", logFormat),
-		err:   log.New(os.Stdout, "ERROR: ", logFormat),
+		debug: log.New(os.Stdout, fmt.Sprintf("DEBUG: %s: ", name), logFormat),
+		info:  log.New(os.Stdout, fmt.Sprintf("INFO: %s: ", name), logFormat),
+		warn:  log.New(os.Stdout, fmt.Sprintf("WARNING: %s: ", name), logFormat),
+		err:   log.New(os.Stdout, fmt.Sprintf("ERROR: %s: ", name), logFormat),
 	}
 }
 

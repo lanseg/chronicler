@@ -81,14 +81,14 @@ func (a *AdapterImpl) responseLoop() {
 	}
 }
 
-func NewAdapter(recordSrc RecordSource, respSink ResponseSink, loop bool) Adapter {
+func NewAdapter(name string, recordSrc RecordSource, respSink ResponseSink, loop bool) Adapter {
 	a := &AdapterImpl{
-		logger:       util.NewLogger("Chronicler"),
+		logger:       util.NewLogger(name),
 		recordSource: recordSrc,
 		responseSink: respSink,
 		requests:     make(chan *rpb.Request),
 	}
-	a.logger.Infof("Created new chronicler, loop is %b", loop)
+	a.logger.Infof("Created new adapter, loop is %b", loop)
 	if recordSrc != nil {
 		a.records = make(chan *rpb.RecordSet)
 		go a.requestLoop()

@@ -82,7 +82,7 @@ func NewWebAdapter(httpClient *http.Client) Adapter {
 		logger: logger,
 		client: httpClient,
 	}
-	return NewAdapter(wss, nil, false)
+	return NewAdapter("WebAdapter", wss, nil, false)
 }
 
 func (w *webRecordSource) Get(link string) (*http.Response, error) {

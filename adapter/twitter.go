@@ -23,7 +23,7 @@ func NewTwitterAdapter(client twitter.Client) Adapter {
 		logger: util.NewLogger("TwitterAdapter"),
 		client: client,
 	}
-	return NewAdapter(tss, nil, false)
+	return NewAdapter("TwitterAdapter", tss, nil, false)
 }
 
 func (t *twitterRecordSource) GetRequestedRecords(request *rpb.Request) []*rpb.RecordSet {

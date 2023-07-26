@@ -29,7 +29,7 @@ func NewTelegramAdapter(bot telegram.Bot) Adapter {
 		bot:    bot,
 		cursor: 0,
 	}
-	return NewAdapter(tss, tss, true)
+	return NewAdapter("TelegramAdapter", tss, tss, true)
 }
 
 func (ts *telegramSinkSource) resolveFileUrls(rs *rpb.RecordSet) {
