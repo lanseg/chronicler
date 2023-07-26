@@ -25,7 +25,7 @@ func extractRequests(log *util.Logger, rs *rpb.RecordSet) []*rpb.Request {
 	result := []*rpb.Request{}
 	if len(rs.Records) != 1 || rs.Request.Source.Type == rpb.SourceType_WEB {
 		log.Debugf(
-			"We expect exactly 1 record in RecordSet and not from web, but got %d when extracting requests",
+			"Expected 1 non-web record in RecordSet, but got %d when extracting requests",
 			len(rs.Records))
 		return result
 	}

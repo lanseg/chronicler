@@ -2,6 +2,7 @@ package htmlparser
 
 import (
 	"strings"
+	"unicode"
 	"web/tokenizer"
 
 	"github.com/lanseg/golang-commons/collections"
@@ -109,6 +110,7 @@ func StripTags(content string) string {
 	result := strings.Builder{}
 	excludedLinks := collections.NewSet([]string{
 		"script", "meta", "link", "head", "style",
+		"header", "footer", "nav",
 	})
 	collections.IterateTree(doc, getChildren).Filter(
 		func(n *Node) bool {
@@ -118,8 +120,23 @@ func StripTags(content string) string {
 			return !excludedLinks.Contains(n.Parent.Name) && !excludedLinks.Contains(n.Name)
 		}).ForEachRemaining(
 		func(n *Node) bool {
-			result.WriteString(n.Text)
-			result.WriteRune(' ')
+			prevSpace := false
+			empty := true
+			for _, r := range n.Text {
+				if unicode.IsSpace(r) && prevSpace {
+					continue
+				}
+				if unicode.IsSpace(r) {
+					result.WriteRune(' ')
+				} else {
+					result.WriteRune(r)
+				}
+				empty = false
+				prevSpace = unicode.IsSpace(r)
+			}
+			if !empty {
+				result.WriteRune('\n')
+			}
 			return false
 		})
 	return result.String()
