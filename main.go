@@ -6,7 +6,7 @@ import (
 	"regexp"
 	"sync"
 
-	"chronicler"
+	"chronicler/adapter"
 	"chronicler/storage"
 	"chronicler/telegram"
 	"chronicler/twitter"
@@ -55,23 +55,23 @@ func extractRequests(log *util.Logger, rs *rpb.RecordSet) []*rpb.Request {
 func main() {
 	flag.Parse()
 
-	cfg := chronicler.GetConfig()
+	cfg := GetConfig()
 	stg := storage.NewStorage(*cfg.StorageRoot)
-	chroniclers := map[rpb.SourceType]chronicler.Chronicler{
-		rpb.SourceType_TELEGRAM: chronicler.NewTelegramChronicler(
+	adapters := map[rpb.SourceType]adapter.Adapter{
+		rpb.SourceType_TELEGRAM: adapter.NewTelegramAdapter(
 			telegram.NewBot(*cfg.TelegramBotKey)),
-		rpb.SourceType_TWITTER: chronicler.NewTwitterChronicler(
+		rpb.SourceType_TWITTER: adapter.NewTwitterAdapter(
 			twitter.NewClient(*cfg.TwitterApiKey)),
-		rpb.SourceType_WEB: chronicler.NewWebChronicler(nil),
+		rpb.SourceType_WEB: adapter.NewWebAdapter(nil),
 	}
 
-	for srcType, chr := range chroniclers {
-		go func(srcType rpb.SourceType, chr chronicler.Chronicler) {
+	for srcType, chr := range adapters {
+		go func(srcType rpb.SourceType, chr adapter.Adapter) {
 			log := util.NewLogger(fmt.Sprintf("%s Record loader", srcType))
 			for {
 				recordSet := chr.GetRecordSet()
 				for _, newRequest := range extractRequests(log, recordSet) {
-					if targetChr, ok := chroniclers[newRequest.Source.Type]; ok {
+					if targetChr, ok := adapters[newRequest.Source.Type]; ok {
 						targetChr.SubmitRequest(newRequest)
 					}
 				}

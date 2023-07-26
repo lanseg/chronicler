@@ -3,15 +3,14 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 package(default_visibility = ["//visibility:public"])
 
 go_library(
-    name = "chronicler",
+    name = "adapter",
     srcs = [
-        "chronicler.go",
-        "config.go",
+        "adapter.go",
         "telegram.go",
         "twitter.go",
         "web.go",
     ],
-    importpath = "chronicler",
+    importpath = "chronicler/adapter",
     deps = [
         "//proto:records_go_proto",
         "//storage",
@@ -25,15 +24,15 @@ go_library(
 )
 
 go_test(
-    name = "chronicler_test",
+    name = "adapter_test",
     size = "small",
     srcs = [
-        "chronicler_test.go",
+        "adapter_test.go",
         "telegram_test.go",
     ],
     data = glob(["testdata/*"]),
     embed = [
-        ":chronicler",
+        ":adapter",
     ],
     deps = [
         "//proto:records_go_proto",

@@ -1,4 +1,4 @@
-package chronicler
+package adapter
 
 import (
 	"chronicler/util"
@@ -18,12 +18,12 @@ type twitterRecordSource struct {
 	client twitter.Client
 }
 
-func NewTwitterChronicler(client twitter.Client) Chronicler {
+func NewTwitterAdapter(client twitter.Client) Adapter {
 	tss := &twitterRecordSource{
-		logger: util.NewLogger("TwitterChronicler"),
+		logger: util.NewLogger("TwitterAdapter"),
 		client: client,
 	}
-	return NewChronicler(tss, nil, false)
+	return NewAdapter(tss, nil, false)
 }
 
 func (t *twitterRecordSource) GetRequestedRecords(request *rpb.Request) []*rpb.RecordSet {
@@ -33,8 +33,8 @@ func (t *twitterRecordSource) GetRequestedRecords(request *rpb.Request) []*rpb.R
 		threadId = request.Source.MessageId
 	}
 	conv, _ := t.client.GetConversation(threadId)
-    result := t.tweetToRecord(conv)
-    result.Request = request
+	result := t.tweetToRecord(conv)
+	result.Request = request
 	return []*rpb.RecordSet{result}
 }
 

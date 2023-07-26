@@ -1,4 +1,4 @@
-package chronicler
+package adapter
 
 import (
 	"fmt"
@@ -23,13 +23,13 @@ type telegramSinkSource struct {
 	cursor int64
 }
 
-func NewTelegramChronicler(bot telegram.Bot) Chronicler {
+func NewTelegramAdapter(bot telegram.Bot) Adapter {
 	tss := &telegramSinkSource{
-		logger: util.NewLogger("TelegramChronicler"),
+		logger: util.NewLogger("TelegramAdapter"),
 		bot:    bot,
 		cursor: 0,
 	}
-	return NewChronicler(tss, tss, true)
+	return NewAdapter(tss, tss, true)
 }
 
 func (ts *telegramSinkSource) resolveFileUrls(rs *rpb.RecordSet) {
@@ -104,7 +104,7 @@ func updateToRecords(upd *telegram.Update) (*rpb.Record, []*rpb.UserMetadata) {
 	result := &rpb.Record{
 		Source: getUpdateSource(upd),
 		Time:   msg.Date,
-//      RawContent: 
+		//      RawContent:
 	}
 	users = append(users, &rpb.UserMetadata{
 		Id:       fmt.Sprintf("%d", msg.From.ID),

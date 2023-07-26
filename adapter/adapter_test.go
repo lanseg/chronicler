@@ -1,4 +1,4 @@
-package chronicler
+package adapter
 
 import (
 	"testing"

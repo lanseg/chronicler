@@ -1,4 +1,4 @@
-package chronicler
+package adapter
 
 import (
 	"io"
@@ -65,8 +65,8 @@ type webRecordSource struct {
 	client *http.Client
 }
 
-func NewWebChronicler(httpClient *http.Client) Chronicler {
-	logger := util.NewLogger("WebChronicler")
+func NewWebAdapter(httpClient *http.Client) Adapter {
+	logger := util.NewLogger("WebAdapter")
 	if httpClient == nil {
 		logger.Infof("No http client provided, using an own new one")
 		httpClient = &http.Client{}
@@ -82,7 +82,7 @@ func NewWebChronicler(httpClient *http.Client) Chronicler {
 		logger: logger,
 		client: httpClient,
 	}
-	return NewChronicler(wss, nil, false)
+	return NewAdapter(wss, nil, false)
 }
 
 func (w *webRecordSource) Get(link string) (*http.Response, error) {
@@ -147,4 +147,3 @@ func (w *webRecordSource) GetRequestedRecords(request *rpb.Request) []*rpb.Recor
 		},
 	}
 }
-

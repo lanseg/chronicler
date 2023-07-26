@@ -1,4 +1,4 @@
-package chronicler
+package adapter
 
 import (
 	"encoding/json"
@@ -81,7 +81,7 @@ func TestRequestResponse(t *testing.T) {
 			if err != nil {
 				t.Errorf("Cannot create new fake bot for file \"%s\": %s", tc.responseFile, err)
 			}
-			tg := NewTelegramChronicler(bot)
+			tg := NewTelegramAdapter(bot)
 			tg.SubmitRequest(nil)
 			ups := tg.GetRecordSet()
 
