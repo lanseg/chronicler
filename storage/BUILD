@@ -13,6 +13,7 @@ go_library(
     deps = [
         "//proto:records_go_proto",
         "//util",
+        "@commons//collections",
         "@commons//optional",
     ],
 )
