@@ -12,8 +12,9 @@ function getExtension(path) {
 
 function getFileName(path) {
     const lastIndex = path.lastIndexOf('/');
+    const params = path.indexOf("?", lastIndex);
     return (lastIndex > -1 && lastIndex < path.length) ?
-        path.substring(lastIndex + 1) : "";
+        path.substring(lastIndex + 1, params == -1 ? path.length : params) : "";
 }
 
 /** **/
@@ -59,21 +60,21 @@ export class File {
         if (!this._fileObj["file_url"]) {
             return false
         }
-        return audioExtensions.includes(getExtension(this._fileObj["file_url"].toLowerCase()));
+        return audioExtensions.includes(getExtension(this.name.toLowerCase()));
     }
 
     get isVideo() {
         if (!this._fileObj["file_url"]) {
             return false
         }
-        return videoExtensions.includes(getExtension(this._fileObj["file_url"].toLowerCase()));
+        return videoExtensions.includes(getExtension(this.name.toLowerCase()));
     }
 
     get isImage() {
         if (!this._fileObj["file_url"]) {
             return false
         }
-        return imgExtensions.includes(getExtension(this._fileObj["file_url"].toLowerCase()));
+        return imgExtensions.includes(getExtension(this.name.toLowerCase()));
     }
 }
 
