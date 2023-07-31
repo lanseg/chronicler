@@ -4,7 +4,7 @@ import (
 	"chronicler/storage"
 	"chronicler/util"
 
-	rpb "chronicler/proto/records"
+	rpb "chronicler/records/proto"
 )
 
 type RecordSource interface {

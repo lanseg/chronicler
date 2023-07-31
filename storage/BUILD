@@ -11,7 +11,7 @@ go_library(
     ],
     importpath = "chronicler/storage",
     deps = [
-        "//proto:records_go_proto",
+        "//records:records_go_proto",
         "//util",
         "@commons//collections",
         "@commons//optional",

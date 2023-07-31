@@ -12,7 +12,7 @@ go_library(
     ],
     importpath = "chronicler/adapter",
     deps = [
-        "//proto:records_go_proto",
+        "//records:records_go_proto",
         "//storage",
         "//telegram",
         "//twitter",
@@ -35,6 +35,6 @@ go_test(
         ":adapter",
     ],
     deps = [
-        "//proto:records_go_proto",
+        "//records:records_go_proto",
     ],
 )

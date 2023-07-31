@@ -1,6 +1,5 @@
 load("@rules_proto//proto:defs.bzl", "proto_library")
 load("@io_bazel_rules_go//proto:def.bzl", "go_proto_library")
-load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
 proto_library(
     name = "records_proto",
@@ -9,7 +8,7 @@ proto_library(
 
 go_proto_library(
     name = "records_go_proto",
-    importpath = "chronicler/proto/records",
+    importpath = "chronicler/records/proto",
     protos = [":records_proto"],
     visibility = ["//visibility:public"],
 )

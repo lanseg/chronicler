@@ -14,7 +14,7 @@ import (
 
 	"github.com/lanseg/golang-commons/collections"
 
-	rpb "chronicler/proto/records"
+	rpb "chronicler/records/proto"
 )
 
 var (

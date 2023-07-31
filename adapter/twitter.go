@@ -5,7 +5,7 @@ import (
 	"sort"
 	"time"
 
-	rpb "chronicler/proto/records"
+	rpb "chronicler/records/proto"
 	"chronicler/twitter"
 
 	"github.com/lanseg/golang-commons/collections"

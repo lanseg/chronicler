@@ -8,7 +8,7 @@ go_binary(
     ],
     deps = [
         "//adapter",
-        "//proto:records_go_proto",
+        "//records:records_go_proto",
         "//storage",
         "//telegram",
         "//twitter",

@@ -9,7 +9,7 @@ import (
 	"sort"
 	"strings"
 
-	rpb "chronicler/proto/records"
+	rpb "chronicler/records/proto"
 	"chronicler/util"
 
 	"github.com/lanseg/golang-commons/collections"

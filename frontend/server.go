@@ -8,7 +8,7 @@ import (
 	"sort"
 	"strings"
 
-	rpb "chronicler/proto/records"
+	rpb "chronicler/records/proto"
 	"chronicler/storage"
 	"chronicler/util"
 	"web/htmlparser"

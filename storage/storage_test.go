@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	rpb "chronicler/proto/records"
+	rpb "chronicler/records/proto"
 )
 
 func newRecordSet(name string) *rpb.RecordSet {

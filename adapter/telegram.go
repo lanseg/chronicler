@@ -12,7 +12,7 @@ import (
 	"github.com/lanseg/golang-commons/collections"
 	"github.com/lanseg/golang-commons/optional"
 
-	rpb "chronicler/proto/records"
+	rpb "chronicler/records/proto"
 )
 
 type telegramSinkSource struct {

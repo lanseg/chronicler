@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	rpb "chronicler/proto/records"
+	rpb "chronicler/records/proto"
 	"chronicler/util"
 	"web/htmlparser"
 

@@ -10,7 +10,7 @@ import (
 
 	"chronicler/telegram"
 
-	rpb "chronicler/proto/records"
+	rpb "chronicler/records/proto"
 )
 
 func readJson(file string, obj interface{}) error {
