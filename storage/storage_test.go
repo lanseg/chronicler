@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"testing"
 
+	"chronicler/records"
 	rpb "chronicler/records/proto"
 )
 
@@ -18,7 +19,7 @@ func newRecordSet(name string) *rpb.RecordSet {
 			},
 		},
 	}
-	rs.Id = getRecordSetId(rs)
+	rs.Id = records.GetRecordSetId(rs)
 	return rs
 }
 
