@@ -11,6 +11,13 @@ import (
 	"github.com/lanseg/golang-commons/collections"
 )
 
+func nonNull[T any](a *T, b *T) *T {
+	if a != nil {
+		return a
+	}
+	return b
+}
+
 func nonEmpty(a string, b string) string {
 	if a != "" {
 		return a
@@ -85,14 +92,11 @@ func merge[T any](a []T, b []T, hash func(T) uint32, merger func(T, T) T) []T {
 		}
 		result = append(result, first)
 	}
-	sort.Slice(result, func(ia int, ib int) bool {
-		return hash(result[ia]) < hash(result[ib])
-	})
 	return result
 }
 
 func MergeFiles(a []*rpb.File, b []*rpb.File) []*rpb.File {
-	return merge(a, b, func(f *rpb.File) uint32 {
+	result := merge(a, b, func(f *rpb.File) uint32 {
 		return fnv32(f.FileId)
 	}, func(af *rpb.File, bf *rpb.File) *rpb.File {
 		if af.FileUrl == "" {
@@ -100,10 +104,14 @@ func MergeFiles(a []*rpb.File, b []*rpb.File) []*rpb.File {
 		}
 		return af
 	})
+	sort.Slice(result, func(a int, b int) bool {
+		return result[a].FileId < result[b].FileId
+	})
+	return result
 }
 
 func MergeUserMetadata(a []*rpb.UserMetadata, b []*rpb.UserMetadata) []*rpb.UserMetadata {
-	return merge(a, b, func(u *rpb.UserMetadata) uint32 {
+	result := merge(a, b, func(u *rpb.UserMetadata) uint32 {
 		return fnv32(u.Id)
 	}, func(au *rpb.UserMetadata, bu *rpb.UserMetadata) *rpb.UserMetadata {
 		return &rpb.UserMetadata{
@@ -112,6 +120,38 @@ func MergeUserMetadata(a []*rpb.UserMetadata, b []*rpb.UserMetadata) []*rpb.User
 			Quotes:   MergeStrings(au.Quotes, bu.Quotes),
 		}
 	})
+	sort.Slice(result, func(a int, b int) bool {
+		if result[a].Username < result[b].Username {
+			return true
+		}
+		return result[a].Id < result[b].Id
+	})
+	return result
+}
+
+func MergeRecords(a []*rpb.Record, b []*rpb.Record) []*rpb.Record {
+	result := merge(a, b, func(r *rpb.Record) uint32 {
+		return fnv32(GetRecordId(r))
+	}, func(ar *rpb.Record, br *rpb.Record) *rpb.Record {
+		result := &rpb.Record{
+			Source: nonNull(ar.Source, br.Source),
+			Parent: nonNull(ar.Parent, br.Parent),
+			Files:  MergeFiles(ar.Files, br.Files),
+			Links:  MergeStrings(ar.Links, br.Links),
+		}
+		target := ar
+		if nonEmpty(ar.TextContent, br.TextContent) == br.TextContent {
+			target = br
+		}
+		result.TextContent = target.TextContent
+		result.RawContent = target.RawContent
+		result.Time = target.Time
+		return result
+	})
+	sort.Slice(result, func(a int, b int) bool {
+		return GetRecordId(result[a]) < GetRecordId(result[b])
+	})
+	return result
 }
 
 func MergeStrings(a []string, b []string) []string {

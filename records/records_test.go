@@ -150,3 +150,119 @@ func TestMergeUserMetadata(t *testing.T) {
 		})
 	}
 }
+
+func TestMergeRecords(t *testing.T) {
+	sampleRecord := &rpb.Record{
+		Source: &rpb.Source{
+			SenderId: "Whatever",
+			Url:      "http://whatever.ru",
+		},
+		TextContent: "Sample text content",
+		RawContent:  []byte("Sample text content"),
+		Time:        100500600,
+		Files:       []*rpb.File{{FileId: "FileId1", FileUrl: "FileUrl2"}},
+		Links:       []string{"LinkA", "LinkB", "LinkC"},
+	}
+
+	for _, tc := range []struct {
+		desc string
+		a    []*rpb.Record
+		b    []*rpb.Record
+		want []*rpb.Record
+	}{
+		{
+			desc: "Two nils return empty",
+			a:    nil,
+			b:    nil,
+			want: []*rpb.Record{},
+		},
+		{
+			desc: "A not nil, b nil returns a",
+			a: []*rpb.Record{
+				sampleRecord,
+			},
+			b: nil,
+			want: []*rpb.Record{
+				sampleRecord,
+			},
+		},
+		{
+			desc: "B not nil, a nil returns b",
+			a:    nil,
+			b: []*rpb.Record{
+				sampleRecord,
+			},
+			want: []*rpb.Record{sampleRecord},
+		},
+		{
+			desc: "Both not nil",
+			a: []*rpb.Record{
+				{
+					Source: &rpb.Source{
+						SenderId: "Whatever",
+						Url:      "http://whatever.ru",
+					},
+					TextContent: "Sample text content",
+					RawContent:  []byte("Sample text content"),
+					Time:        100500600,
+					Files:       []*rpb.File{{FileId: "FileId1", FileUrl: "FileUrl1"}},
+					Links:       []string{"LinkA", "LinkB", "LinkC"},
+				},
+				{
+					Source: &rpb.Source{
+						SenderId: "Whatever",
+						Url:      "http://whatever.ru",
+					},
+					Time: 1005600,
+					Files: []*rpb.File{
+						{FileId: "FileId1", FileUrl: "FileUrl1"},
+						{FileId: "FileId2", FileUrl: "FileUrl2"},
+					},
+					Links: []string{"LinkA", "LinkD", "LinkE"},
+				},
+			},
+			b: []*rpb.Record{
+				{
+					Source: &rpb.Source{
+						SenderId: "Next one",
+						Url:      "http://whatever.ru",
+					},
+					Time:  1000000,
+					Links: []string{"LinkA", "LinkB", "LinkC"},
+				},
+			},
+			want: []*rpb.Record{
+				{
+					Source: &rpb.Source{
+						SenderId: "Next one",
+						Url:      "http://whatever.ru",
+					},
+					Time:  1000000,
+					Links: []string{"LinkA", "LinkB", "LinkC"},
+				},
+				{
+					Source: &rpb.Source{
+						SenderId: "Whatever",
+						Url:      "http://whatever.ru",
+					},
+					TextContent: "Sample text content",
+					RawContent:  []byte("Sample text content"),
+					Time:        100500600,
+					Files: []*rpb.File{
+						{FileId: "FileId1", FileUrl: "FileUrl1"},
+						{FileId: "FileId2", FileUrl: "FileUrl2"},
+					},
+					Links: []string{"LinkA", "LinkB", "LinkC", "LinkD", "LinkE"},
+				},
+			},
+		},
+	} {
+		t.Run(tc.desc, func(t *testing.T) {
+			result := MergeRecords(tc.a, tc.b)
+			if !reflect.DeepEqual(result, tc.want) {
+				t.Errorf("MergeRecords(%s, %s) expected to be %s, but got %s",
+					tc.a, tc.b, tc.want, result)
+			}
+		})
+	}
+}
