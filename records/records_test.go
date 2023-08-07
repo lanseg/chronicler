@@ -99,3 +99,54 @@ func TestMergeStrings(t *testing.T) {
 		})
 	}
 }
+
+func TestMergeUserMetadata(t *testing.T) {
+
+	for _, tc := range []struct {
+		desc string
+		a    []*rpb.UserMetadata
+		b    []*rpb.UserMetadata
+		want []*rpb.UserMetadata
+	}{
+		{
+			desc: "Two nils return empty",
+			a:    nil,
+			b:    nil,
+			want: []*rpb.UserMetadata{},
+		},
+		{
+			desc: "A not nil, b nil returns a",
+			a:    []*rpb.UserMetadata{{Id: "123", Username: "456", Quotes: []string{"a", "b", "c"}}},
+			b:    nil,
+			want: []*rpb.UserMetadata{{Id: "123", Username: "456", Quotes: []string{"a", "b", "c"}}},
+		},
+		{
+			desc: "B not nil, a nil returns b",
+			a:    nil,
+			b:    []*rpb.UserMetadata{{Id: "123", Username: "456", Quotes: []string{"a", "b", "c"}}},
+			want: []*rpb.UserMetadata{{Id: "123", Username: "456", Quotes: []string{"a", "b", "c"}}},
+		},
+		{
+			desc: "Both not nil",
+			a: []*rpb.UserMetadata{
+				{Id: "123456", Username: "789", Quotes: []string{"a", "b", "c"}},
+				{Id: "12345", Username: "", Quotes: []string{"o", "m", "g"}},
+			},
+			b: []*rpb.UserMetadata{
+				{Id: "12345", Username: "456", Quotes: []string{"d", "e", "f"}},
+				{Id: "123456", Username: "", Quotes: []string{"g", "h", "i"}},
+			},
+			want: []*rpb.UserMetadata{
+				{Id: "12345", Username: "456", Quotes: []string{"d", "e", "f", "g", "m", "o"}},
+				{Id: "123456", Username: "789", Quotes: []string{"a", "b", "c", "g", "h", "i"}}},
+		},
+	} {
+		t.Run(tc.desc, func(t *testing.T) {
+			result := MergeUserMetadata(tc.a, tc.b)
+			if !reflect.DeepEqual(result, tc.want) {
+				t.Errorf("MergeUserMetadata(%s, %s) expected to be %s, but got %s",
+					tc.a, tc.b, tc.want, result)
+			}
+		})
+	}
+}

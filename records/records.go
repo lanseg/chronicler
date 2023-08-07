@@ -11,6 +11,13 @@ import (
 	"github.com/lanseg/golang-commons/collections"
 )
 
+func nonEmpty(a string, b string) string {
+	if a != "" {
+		return a
+	}
+	return b
+}
+
 func hashSource(src *rpb.Source) string {
 	if src == nil {
 		return ""
@@ -92,6 +99,18 @@ func MergeFiles(a []*rpb.File, b []*rpb.File) []*rpb.File {
 			return bf
 		}
 		return af
+	})
+}
+
+func MergeUserMetadata(a []*rpb.UserMetadata, b []*rpb.UserMetadata) []*rpb.UserMetadata {
+	return merge(a, b, func(u *rpb.UserMetadata) uint32 {
+		return fnv32(u.Id)
+	}, func(au *rpb.UserMetadata, bu *rpb.UserMetadata) *rpb.UserMetadata {
+		return &rpb.UserMetadata{
+			Id:       au.Id,
+			Username: nonEmpty(au.Username, bu.Username),
+			Quotes:   MergeStrings(au.Quotes, bu.Quotes),
+		}
 	})
 }
 
