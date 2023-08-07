@@ -94,3 +94,11 @@ func MergeFiles(a []*rpb.File, b []*rpb.File) []*rpb.File {
 		return af
 	})
 }
+
+func MergeStrings(a []string, b []string) []string {
+	resultSet := collections.NewSet(a)
+	resultSet.AddSet(collections.NewSet(b))
+	result := resultSet.Values()
+	sort.Strings(result)
+	return result
+}

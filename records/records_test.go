@@ -56,3 +56,46 @@ func TestMergeFiles(t *testing.T) {
 		})
 	}
 }
+
+func TestMergeStrings(t *testing.T) {
+
+	for _, tc := range []struct {
+		desc string
+		a    []string
+		b    []string
+		want []string
+	}{
+		{
+			desc: "Two nils, return empty result ",
+			a:    nil,
+			b:    nil,
+			want: []string{},
+		},
+		{
+			desc: "A nil, b non nil returns b",
+			a:    nil,
+			b:    []string{"D", "E", "F", "A", "C", "B", "F", "A"},
+			want: []string{"A", "B", "C", "D", "E", "F"},
+		},
+		{
+			desc: "A non nil, b nil returns a",
+			a:    []string{"D", "E", "F", "A", "C", "B"},
+			b:    nil,
+			want: []string{"A", "B", "C", "D", "E", "F"},
+		},
+		{
+			desc: "Both non nil, returns merged and sorted",
+			a:    []string{"A", "D", "B", "F", "H"},
+			b:    []string{"E", "A", "C", "D", "H"},
+			want: []string{"A", "B", "C", "D", "E", "F", "H"},
+		},
+	} {
+		t.Run(tc.desc, func(t *testing.T) {
+			result := MergeStrings(tc.a, tc.b)
+			if !reflect.DeepEqual(result, tc.want) {
+				t.Errorf("MergeStrings(%s, %s) expected to be %s, but got %s",
+					tc.a, tc.b, tc.want, result)
+			}
+		})
+	}
+}
