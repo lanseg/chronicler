@@ -154,6 +154,15 @@ func MergeRecords(a []*rpb.Record, b []*rpb.Record) []*rpb.Record {
 	return result
 }
 
+func MergeRecordSets(a *rpb.RecordSet, b *rpb.RecordSet) *rpb.RecordSet {
+	return &rpb.RecordSet{
+		Id:           nonEmpty(a.Id, b.Id),
+		Request:      nonNull(a.Request, b.Request),
+		Records:      MergeRecords(a.Records, b.Records),
+		UserMetadata: MergeUserMetadata(a.UserMetadata, b.UserMetadata),
+	}
+}
+
 func MergeStrings(a []string, b []string) []string {
 	resultSet := collections.NewSet(a)
 	resultSet.AddSet(collections.NewSet(b))

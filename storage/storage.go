@@ -29,6 +29,7 @@ type LocalStorage struct {
 
 	downloader *HttpDownloader
 	fs         *RelativeFS
+	runner     *util.Runner
 
 	recordCache map[string]string
 	logger      *util.Logger
@@ -114,7 +115,10 @@ func (s *LocalStorage) ListRecords() optional.Optional[[]*rpb.RecordSet] {
 }
 
 func (s *LocalStorage) SaveRecords(r *rpb.RecordSet) error {
-	return s.writeRecordSet(r)
+	id := records.GetRecordSetId(r)
+	existing := ReadJSON[rpb.RecordSet](s.fs, filepath.Join(id, recordsetFileName)).
+		OrElse(&rpb.RecordSet{})
+	return s.writeRecordSet(records.MergeRecordSets(existing, r))
 }
 
 func NewStorage(root string) Storage {
@@ -123,6 +127,7 @@ func NewStorage(root string) Storage {
 	return &LocalStorage{
 		root:        root,
 		logger:      log,
+		runner:      util.NewRunner(),
 		fs:          NewRelativeFS(root),
 		downloader:  NewHttpDownloader(nil),
 		recordCache: map[string]string{},

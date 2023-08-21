@@ -33,7 +33,7 @@ func extractRequests(log *util.Logger, rs *rpb.RecordSet) []*rpb.Request {
 		matches := collections.NewMap(twitterRe.SubexpNames(), twitterRe.FindStringSubmatch(link))
 		if match, ok := matches["twitter_id"]; ok && match != "" {
 			result = append(result, &rpb.Request{
-				Parent: rs.Request.Parent,
+				Parent: rs.Request.Source,
 				Source: &rpb.Source{
 					ChannelId: matches["twitter_id"],
 					Type:      rpb.SourceType_TWITTER,
