@@ -12,6 +12,7 @@ go_library(
     ],
     importpath = "chronicler/adapter",
     deps = [
+        "//firefox",
         "//records:records_go_proto",
         "//storage",
         "//telegram",

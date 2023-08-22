@@ -56,6 +56,8 @@ type SessionParams struct {
 }
 
 type Marionette struct {
+	WebDriver
+
 	logger *util.Logger
 
 	pendingCommands map[int](chan optional.Optional[*Response])
@@ -188,10 +190,10 @@ func (m *Marionette) Close() {
 	m.logger.Infof("Disconnected")
 }
 
-func ConnectMarionette(host string, port int) optional.Optional[*Marionette] {
+func ConnectMarionette(host string, port int) optional.Optional[WebDriver] {
 	return optional.Map(
 		optional.OfError[net.Conn](net.Dial("tcp", fmt.Sprintf("%s:%d", host, port))),
-		func(c net.Conn) *Marionette {
+		func(c net.Conn) WebDriver {
 			logger := util.NewLogger("Marionette")
 			logger.Infof("Connected to Marionette at %s:%s", host, port)
 			marionette := &Marionette{

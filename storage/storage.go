@@ -1,12 +1,15 @@
 package storage
 
 import (
+	"encoding/base64"
+	"fmt"
 	"net/url"
 	"path"
 	"path/filepath"
 	"sort"
 	"strings"
 
+	"chronicler/firefox"
 	"chronicler/records"
 	rpb "chronicler/records/proto"
 	"chronicler/util"
@@ -16,6 +19,8 @@ import (
 
 const (
 	recordsetFileName = "record.json"
+	webdriverPort     = 2828
+	firefoxProfile    = "/tmp/tmp.QTFqrzeJX4/"
 )
 
 type Storage interface {
@@ -27,6 +32,7 @@ type Storage interface {
 type LocalStorage struct {
 	Storage
 
+	webdriver  firefox.WebDriver
 	downloader *HttpDownloader
 	fs         *RelativeFS
 	runner     *util.Runner
@@ -34,6 +40,16 @@ type LocalStorage struct {
 	recordCache map[string]string
 	logger      *util.Logger
 	root        string
+}
+
+func (s *LocalStorage) saveBase64(fname string) func(string) {
+	return func(content string) {
+		sDec, err := base64.StdEncoding.DecodeString(content)
+		if err != nil {
+			s.logger.Warningf("Could not decode base64: %s", err)
+		}
+		s.fs.Write(fname, sDec)
+	}
 }
 
 func (s *LocalStorage) refreshCache() error {
@@ -65,7 +81,17 @@ func (s *LocalStorage) writeRecordSet(r *rpb.RecordSet) error {
 	if err := s.fs.WriteJSON(filepath.Join(root, recordsetFileName), r); err != nil {
 		return err
 	}
-	for _, r := range r.Records {
+	for i, r := range r.Records {
+		if r.Source != nil && r.Source.Url != "" {
+			url := r.Source.Url
+
+			s.webdriver.Navigate(url)
+			s.webdriver.TakeScreenshot().IfPresent(s.saveBase64(
+				filepath.Join(root, fmt.Sprintf("screenshot_%d.png", i))))
+			s.webdriver.Print().IfPresent(s.saveBase64(
+				filepath.Join(root, fmt.Sprintf("page_%d.pdf", i))))
+		}
+
 		for _, link := range r.Links {
 			if util.IsYoutubeLink(link) && strings.Contains(link, "v=") {
 				s.logger.Debugf("Found youtube link: %s", link)
@@ -73,6 +99,7 @@ func (s *LocalStorage) writeRecordSet(r *rpb.RecordSet) error {
 					s.logger.Warningf("Failed to download youtube video: %s", err)
 				}
 			}
+
 		}
 
 		for _, file := range r.GetFiles() {
@@ -121,13 +148,22 @@ func (s *LocalStorage) SaveRecords(r *rpb.RecordSet) error {
 	return s.writeRecordSet(records.MergeRecordSets(existing, r))
 }
 
-func NewStorage(root string) Storage {
+func NewStorage(root string, webdriver firefox.WebDriver) Storage {
 	log := util.NewLogger("storage")
 	log.Infof("Storage root set to \"%s\"", root)
+
+	if webdriver == nil {
+		log.Infof("No webdriver provided, starting firefox")
+		ff := firefox.StartFirefox(webdriverPort, firefoxProfile)
+		webdriver = ff.Driver
+	}
+	webdriver.NewSession()
+
 	return &LocalStorage{
 		root:        root,
 		logger:      log,
 		runner:      util.NewRunner(),
+		webdriver:   webdriver,
 		fs:          NewRelativeFS(root),
 		downloader:  NewHttpDownloader(nil),
 		recordCache: map[string]string{},

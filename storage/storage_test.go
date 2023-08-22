@@ -4,9 +4,14 @@ import (
 	"fmt"
 	"testing"
 
+	"chronicler/firefox"
 	"chronicler/records"
 	rpb "chronicler/records/proto"
 )
+
+type FaleDriver struct {
+	firefox.WebDriver
+}
 
 func newRecordSet(name string) *rpb.RecordSet {
 	rs := &rpb.RecordSet{
@@ -65,7 +70,7 @@ func TestStorage(t *testing.T) {
 		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			s := NewStorage(t.TempDir())
+			s := NewStorage(t.TempDir(), &firefox.FakeWebDriver{})
 			for _, rec := range tc.records {
 				if saveError := s.SaveRecords(rec); saveError != nil {
 					t.Errorf("Error while saving a request: %s", saveError)

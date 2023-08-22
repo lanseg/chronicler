@@ -56,7 +56,7 @@ func main() {
 	flag.Parse()
 
 	cfg := GetConfig()
-	stg := storage.NewStorage(*cfg.StorageRoot)
+	stg := storage.NewStorage(*cfg.StorageRoot, nil)
 	adapters := map[rpb.SourceType]adapter.Adapter{
 		rpb.SourceType_TELEGRAM: adapter.NewTelegramAdapter(
 			telegram.NewBot(*cfg.TelegramBotKey)),
