@@ -47,9 +47,38 @@ func (s *LocalStorage) saveBase64(fname string) func(string) {
 		sDec, err := base64.StdEncoding.DecodeString(content)
 		if err != nil {
 			s.logger.Warningf("Could not decode base64: %s", err)
+			return
 		}
-		s.fs.Write(fname, sDec)
+		err = s.fs.Write(fname, sDec)
+		if err != nil {
+			s.logger.Warningf("Could not write decoded base64: %s", err)
+			return
+		}
+		s.logger.Debugf("Written %d byte(s) to file %s", len(sDec), fname)
 	}
+}
+
+func (s *LocalStorage) savePageView(url string, target string) {
+	s.webdriver.Navigate(url)
+	s.webdriver.TakeScreenshot().IfPresent(s.saveBase64(
+		filepath.Join(target, "page.png")))
+	s.webdriver.Print().IfPresent(s.saveBase64(
+		filepath.Join(target, "page.pdf")))
+}
+
+func (s *LocalStorage) downloadFile(root string, file *rpb.File) error {
+	fileUrl, err := url.Parse(file.GetFileUrl())
+	if err != nil || fileUrl.String() == "" {
+		s.logger.Warningf("Malformed url for file: %s", file)
+		return err
+	}
+	fname := path.Base(fileUrl.Path)
+	if err := s.downloader.Download(file.GetFileUrl(),
+		s.fs.Resolve(filepath.Join(root, fname))); err != nil {
+		s.logger.Warningf("Failed to download file: %s: %s", file, err)
+		return err
+	}
+	return nil
 }
 
 func (s *LocalStorage) refreshCache() error {
@@ -60,14 +89,15 @@ func (s *LocalStorage) refreshCache() error {
 		return err
 	}
 	for _, info := range files {
-		ReadJSON[rpb.RecordSet](s.fs, filepath.Join(info.Name(), recordsetFileName)).
-			IfPresent(func(record *rpb.RecordSet) {
-				id := record.Id
-				if id == "" {
-					id = records.GetRecordSetId(record)
-				}
-				s.recordCache[id] = info.Name()
-			})
+		r, err := ReadJSON[rpb.RecordSet](s.fs, filepath.Join(info.Name(), recordsetFileName)).Get()
+		if err != nil {
+			continue
+		}
+		id := r.Id
+		if id == "" {
+			id = records.GetRecordSetId(r)
+		}
+		s.recordCache[id] = info.Name()
 	}
 	return nil
 }
@@ -83,13 +113,9 @@ func (s *LocalStorage) writeRecordSet(r *rpb.RecordSet) error {
 	}
 	for i, r := range r.Records {
 		if r.Source != nil && r.Source.Url != "" {
-			url := r.Source.Url
-
-			s.webdriver.Navigate(url)
-			s.webdriver.TakeScreenshot().IfPresent(s.saveBase64(
-				filepath.Join(root, fmt.Sprintf("screenshot_%d.png", i))))
-			s.webdriver.Print().IfPresent(s.saveBase64(
-				filepath.Join(root, fmt.Sprintf("page_%d.pdf", i))))
+			pageView := filepath.Join(root, fmt.Sprintf("page_view_record_%d", i))
+			s.fs.MkDir(pageView)
+			s.savePageView(r.Source.Url, pageView)
 		}
 
 		for _, link := range r.Links {
@@ -103,14 +129,8 @@ func (s *LocalStorage) writeRecordSet(r *rpb.RecordSet) error {
 		}
 
 		for _, file := range r.GetFiles() {
-			fileUrl, err := url.Parse(file.GetFileUrl())
-			if err != nil || fileUrl.String() == "" {
-				s.logger.Warningf("Malformed url for file: %s", file)
+			if err := s.downloadFile(root, file); err != nil {
 				continue
-			}
-			fname := path.Base(fileUrl.Path)
-			if err := s.downloader.Download(file.GetFileUrl(), s.fs.Resolve(filepath.Join(root, fname))); err != nil {
-				s.logger.Warningf("Failed to download file: %s: %s", file, err)
 			}
 		}
 

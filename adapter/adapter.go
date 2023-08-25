@@ -106,3 +106,4 @@ func NewAdapter(name string, recordSrc RecordSource, respSink ResponseSink, loop
 	}
 	return a
 }
+

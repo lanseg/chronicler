@@ -117,11 +117,11 @@ func (w *webRecordSource) GetRequestedRecords(request *rpb.Request) []*rpb.Recor
 	record := &rpb.Record{
 		Source:      source,
 		Time:        time.Now().Unix(),
-		TextContent: string(body),
+		TextContent: htmlparser.StripTags(string(body)),
 		RawContent:  body,
 	}
 	w.logger.Debugf("Parsing html content")
-	root := htmlparser.ParseHtml(record.TextContent)
+	root := htmlparser.ParseHtml(string(body))
 	linkNodes := root.GetElementsByTagNames("a", "img", "script", "link", "source", "srcset")
 	w.logger.Debugf("Found %d external link(s)", len(linkNodes))
 	for _, node := range linkNodes {
