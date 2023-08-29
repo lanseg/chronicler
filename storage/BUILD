@@ -25,6 +25,7 @@ go_test(
     size = "small",
     srcs = [
         "storage_test.go",
+        "relative_fs_test.go",
     ],
     embed = [
         ":storage",

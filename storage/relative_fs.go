@@ -18,6 +18,11 @@ type RelativeFS struct {
 	root string
 }
 
+func (f *RelativeFS) Exists(relativePath string) bool {
+    info, err := os.Stat(f.Resolve(relativePath))
+    return os.IsNotExist(err)
+}
+
 func (f *RelativeFS) Resolve(relativePath string) string {
 	return filepath.Join(f.root, relativePath)
 }
