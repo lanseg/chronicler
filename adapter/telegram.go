@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 
+	"chronicler/records"
 	"chronicler/telegram"
 	"chronicler/util"
 
@@ -202,11 +203,11 @@ func groupRecords(updates []*telegram.Update) []*rpb.RecordSet {
 		return metadata[i].Id > metadata[j].Id
 	})
 	for _, record := range append(allRecords, aggregatedRecords...) {
-		result = append(result, &rpb.RecordSet{
-			Request:      &rpb.Request{Source: record.Source},
-			Records:      []*rpb.Record{record},
-			UserMetadata: metadata,
-		})
+		result = append(result, records.NewRecordSet(
+			[]*rpb.Record{record},
+			metadata,
+		))
+		result[len(result)-1].Request = &rpb.Request{Source: record.Source}
 	}
 
 	return result

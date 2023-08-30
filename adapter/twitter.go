@@ -5,6 +5,7 @@ import (
 	"sort"
 	"time"
 
+	"chronicler/records"
 	rpb "chronicler/records/proto"
 	"chronicler/twitter"
 
@@ -55,7 +56,7 @@ func (t *twitterRecordSource) tweetToRecord(response *twitter.Response[twitter.T
 		media[bestMedia.Id] = bestMedia
 	}
 
-	records := map[string]*rpb.Record{}
+	recordsById := map[string]*rpb.Record{}
 	for _, tweet := range tweets {
 		twRecord := &rpb.Record{
 			Source: &rpb.Source{
@@ -80,12 +81,13 @@ func (t *twitterRecordSource) tweetToRecord(response *twitter.Response[twitter.T
 				FileUrl: m.Url,
 			})
 		}
-		records[tweet.Id] = twRecord
+		recordsById[tweet.Id] = twRecord
 	}
 
-	result := &rpb.RecordSet{}
+	um := []*rpb.UserMetadata{}
+	rs := []*rpb.Record{}
 	for _, user := range response.Includes.Users {
-		result.UserMetadata = append(result.UserMetadata, &rpb.UserMetadata{
+		um = append(um, &rpb.UserMetadata{
 			Id:       user.Id,
 			Username: user.Username,
 			Quotes:   []string{user.Name},
@@ -93,15 +95,15 @@ func (t *twitterRecordSource) tweetToRecord(response *twitter.Response[twitter.T
 	}
 	for _, tweet := range tweets {
 		for _, ref := range tweet.Reference {
-			if refTweet, ok := records[ref.Id]; ok {
-				records[tweet.Id].Parent = records[refTweet.Source.MessageId].Source
+			if refTweet, ok := recordsById[ref.Id]; ok {
+				recordsById[tweet.Id].Parent = recordsById[refTweet.Source.MessageId].Source
 			}
 		}
-		result.Records = append(result.Records, records[tweet.Id])
+		rs = append(rs, recordsById[tweet.Id])
 	}
 
-	sort.Slice(result.Records, func(i int, j int) bool {
-		return result.Records[i].Time < result.Records[j].Time
+	sort.Slice(rs, func(i int, j int) bool {
+		return rs[i].Time < rs[j].Time
 	})
-	return result
+	return records.NewRecordSet(rs, um)
 }

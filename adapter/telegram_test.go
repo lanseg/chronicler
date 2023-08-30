@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"reflect"
 	"testing"
 
 	"chronicler/telegram"
@@ -84,14 +83,12 @@ func TestRequestResponse(t *testing.T) {
 			tg := NewTelegramAdapter(bot)
 			tg.SubmitRequest(nil)
 			ups := tg.GetRecordSet()
-
 			want := &rpb.RecordSet{}
 			if err = readJson(tc.resultFile, want); err != nil {
 				t.Errorf("Cannot load json with an expected result \"%s\": %s", tc.resultFile, err)
 			}
-
-			if !reflect.DeepEqual(want, ups) {
-				t.Errorf("Expected result to be:\n%v\nBut got:\n%v", want, ups)
+			if fmt.Sprintf("%+v", want) != fmt.Sprintf("%+v", ups) {
+				t.Errorf("Expected result to be:\n%+v\nBut got:\n%+v", want, ups)
 			}
 		})
 	}
