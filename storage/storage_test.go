@@ -9,7 +9,7 @@ import (
 	rpb "chronicler/records/proto"
 )
 
-type FaleDriver struct {
+type FakeDriver struct {
 	firefox.WebDriver
 }
 

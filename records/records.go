@@ -9,21 +9,8 @@ import (
 	rpb "chronicler/records/proto"
 
 	"github.com/lanseg/golang-commons/collections"
+	cm "github.com/lanseg/golang-commons/common"
 )
-
-func nonNull[T any](a *T, b *T) *T {
-	if a != nil {
-		return a
-	}
-	return b
-}
-
-func nonEmpty(a string, b string) string {
-	if a != "" {
-		return a
-	}
-	return b
-}
 
 func hashSource(src *rpb.Source) string {
 	if src == nil {
@@ -36,6 +23,21 @@ func hashSource(src *rpb.Source) string {
 	checksum = append(checksum, []byte(src.Url)...)
 	checksum = append(checksum, byte(src.Type))
 	return fmt.Sprintf("%x", sha512.Sum512(checksum))
+}
+
+func NewRecordSet(rs []*rpb.Record, umd []*rpb.UserMetadata) *rpb.RecordSet {
+	checksum := []byte{}
+	for _, r := range rs {
+		checksum = append(checksum, []byte(fmt.Sprintf("%s", r))...)
+	}
+	for _, u := range umd {
+		checksum = append(checksum, []byte(fmt.Sprintf("%s", u))...)
+	}
+	return &rpb.RecordSet{
+		Id:           fmt.Sprintf("%x", sha512.Sum512(checksum)),
+		Records:      rs,
+		UserMetadata: umd,
+	}
 }
 
 func GetRecordId(record *rpb.Record) string {
@@ -116,7 +118,7 @@ func MergeUserMetadata(a []*rpb.UserMetadata, b []*rpb.UserMetadata) []*rpb.User
 	}, func(au *rpb.UserMetadata, bu *rpb.UserMetadata) *rpb.UserMetadata {
 		return &rpb.UserMetadata{
 			Id:       au.Id,
-			Username: nonEmpty(au.Username, bu.Username),
+			Username: cm.IfEmpty(au.Username, bu.Username),
 			Quotes:   MergeStrings(au.Quotes, bu.Quotes),
 		}
 	})
@@ -134,13 +136,13 @@ func MergeRecords(a []*rpb.Record, b []*rpb.Record) []*rpb.Record {
 		return fnv32(GetRecordId(r))
 	}, func(ar *rpb.Record, br *rpb.Record) *rpb.Record {
 		result := &rpb.Record{
-			Source: nonNull(ar.Source, br.Source),
-			Parent: nonNull(ar.Parent, br.Parent),
+			Source: cm.IfNull(ar.Source, br.Source),
+			Parent: cm.IfNull(ar.Parent, br.Parent),
 			Files:  MergeFiles(ar.Files, br.Files),
 			Links:  MergeStrings(ar.Links, br.Links),
 		}
 		target := ar
-		if nonEmpty(ar.TextContent, br.TextContent) == br.TextContent {
+		if cm.IfEmpty(ar.TextContent, br.TextContent) == br.TextContent {
 			target = br
 		}
 		result.TextContent = target.TextContent
@@ -156,8 +158,8 @@ func MergeRecords(a []*rpb.Record, b []*rpb.Record) []*rpb.Record {
 
 func MergeRecordSets(a *rpb.RecordSet, b *rpb.RecordSet) *rpb.RecordSet {
 	return &rpb.RecordSet{
-		Id:           nonEmpty(a.Id, b.Id),
-		Request:      nonNull(a.Request, b.Request),
+		Id:           cm.IfEmpty(a.Id, b.Id),
+		Request:      cm.IfNull(a.Request, b.Request),
 		Records:      MergeRecords(a.Records, b.Records),
 		UserMetadata: MergeUserMetadata(a.UserMetadata, b.UserMetadata),
 	}

@@ -19,8 +19,8 @@ type RelativeFS struct {
 }
 
 func (f *RelativeFS) Exists(relativePath string) bool {
-    info, err := os.Stat(f.Resolve(relativePath))
-    return os.IsNotExist(err)
+	_, err := os.Stat(f.Resolve(relativePath))
+	return os.IsNotExist(err)
 }
 
 func (f *RelativeFS) Resolve(relativePath string) string {

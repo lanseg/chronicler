@@ -22,6 +22,7 @@ go_library(
     deps = [
         ":records_go_proto",
         "@commons//collections",
+        "@commons//common",
     ],
 )
 
