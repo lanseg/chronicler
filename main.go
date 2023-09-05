@@ -23,7 +23,8 @@ var (
 
 func extractRequests(log *util.Logger, rs *rpb.RecordSet) []*rpb.Request {
 	result := []*rpb.Request{}
-	if len(rs.Records) != 1 || rs.Request.Source.Type == rpb.SourceType_WEB {
+	origin := rs.Request.Origin
+	if len(rs.Records) != 1 || (origin != nil && origin.Type == rpb.SourceType_WEB) {
 		log.Debugf(
 			"Expected 1 non-web record in RecordSet, but got %d when extracting requests",
 			len(rs.Records))
@@ -33,16 +34,16 @@ func extractRequests(log *util.Logger, rs *rpb.RecordSet) []*rpb.Request {
 		matches := collections.NewMap(twitterRe.SubexpNames(), twitterRe.FindStringSubmatch(link))
 		if match, ok := matches["twitter_id"]; ok && match != "" {
 			result = append(result, &rpb.Request{
-				Parent: rs.Request.Source,
-				Source: &rpb.Source{
+				Origin: rs.Request.Origin,
+				Target: &rpb.Source{
 					ChannelId: matches["twitter_id"],
 					Type:      rpb.SourceType_TWITTER,
 				},
 			})
 		} else {
 			result = append(result, &rpb.Request{
-				Parent: rs.Request.Source,
-				Source: &rpb.Source{
+				Origin: rs.Request.Origin,
+				Target: &rpb.Source{
 					Url:  link,
 					Type: rpb.SourceType_WEB,
 				},
@@ -71,7 +72,7 @@ func main() {
 			for {
 				recordSet := chr.GetRecordSet()
 				for _, newRequest := range extractRequests(log, recordSet) {
-					if targetChr, ok := adapters[newRequest.Source.Type]; ok {
+					if targetChr, ok := adapters[newRequest.Target.Type]; ok {
 						targetChr.SubmitRequest(newRequest)
 					}
 				}
@@ -84,8 +85,11 @@ func main() {
 				}
 
 				src := recordSet.Request
-				if src.Source.Type == rpb.SourceType_TELEGRAM {
-					chr.SendResponse(&rpb.Response{Source: src.Source, Content: responseMessage})
+				if src.Origin.Type == rpb.SourceType_TELEGRAM {
+					chr.SendResponse(&rpb.Response{
+						Source:  src.Origin,
+						Content: responseMessage,
+					})
 				}
 			}
 		}(srcType, chr)

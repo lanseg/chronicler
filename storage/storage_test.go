@@ -16,7 +16,7 @@ type FakeDriver struct {
 func newRecordSet(name string) *rpb.RecordSet {
 	rs := &rpb.RecordSet{
 		Request: &rpb.Request{
-			Source: &rpb.Source{
+			Target: &rpb.Source{
 				SenderId:  "SenderId" + name,
 				ChannelId: "ChannelId" + name,
 				MessageId: "MessageId" + name,

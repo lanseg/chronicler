@@ -95,8 +95,8 @@ func (w *webRecordSource) Get(link string) (*http.Response, error) {
 }
 
 func (w *webRecordSource) GetRequestedRecords(request *rpb.Request) []*rpb.RecordSet {
-	w.logger.Infof("Loading web page from %s", request.Source.Url)
-	response, err := w.Get(request.Source.Url)
+	w.logger.Infof("Loading web page from %s", request.Target.Url)
+	response, err := w.Get(request.Target.Url)
 	if err != nil {
 		return []*rpb.RecordSet{}
 	}
@@ -140,8 +140,8 @@ func (w *webRecordSource) GetRequestedRecords(request *rpb.Request) []*rpb.Recor
 	return []*rpb.RecordSet{
 		{
 			Request: &rpb.Request{
-				Source: source,
-				Parent: request.Parent,
+				Target: source,
+				Origin: request.Origin,
 			},
 			Records: []*rpb.Record{record},
 		},

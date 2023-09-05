@@ -29,9 +29,9 @@ func NewTwitterAdapter(client twitter.Client) Adapter {
 
 func (t *twitterRecordSource) GetRequestedRecords(request *rpb.Request) []*rpb.RecordSet {
 	t.logger.Debugf("Got new request: %s", request)
-	threadId := request.Source.ChannelId
+	threadId := request.Target.ChannelId
 	if threadId == "" {
-		threadId = request.Source.MessageId
+		threadId = request.Target.MessageId
 	}
 	conv, _ := t.client.GetConversation(threadId)
 	result := t.tweetToRecord(conv)

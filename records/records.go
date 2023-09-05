@@ -52,11 +52,11 @@ func GetRecordSetId(set *rpb.RecordSet) string {
 	if set.Request == nil {
 		return ""
 	}
-	if set.Request.Parent != nil {
-		return hashSource(set.Request.Parent)
+	if set.Request.Origin != nil {
+		return hashSource(set.Request.Origin)
 	}
-	if set.Request.Source != nil {
-		return hashSource(set.Request.Source)
+	if set.Request.Target != nil {
+		return hashSource(set.Request.Target)
 	}
 	return ""
 }

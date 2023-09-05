@@ -67,8 +67,9 @@ message RecordListResponse {
 }
 
 message Request {
-  Source source = 1;
-  Source parent = 2;
+  string parent = 1;
+  Source origin = 2;
+  Source target = 3;
 }
 
 message Response {

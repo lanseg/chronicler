@@ -1,0 +1,59 @@
+{
+    "id": "8445858583bc6356ee1b93d6944be633f8221d0283fba7aef94a37c60a3e5e177aafed1665e542a945db18dc6d18d924a1770e9852f23fd51204f877171beec2",
+    "request": {
+        "origin": {
+            "sender_id": "348274414",
+            "channel_id": "348274414",
+            "message_id": "1543",
+            "type": 1
+        }
+    },
+    "records": [
+        {
+            "source": {
+                "sender_id": "348274414",
+                "channel_id": "348274414",
+                "message_id": "1543",
+                "type": 1
+            },
+            "parent": {
+                "channel_id": "-1001055562978",
+                "message_id": "67286",
+                "type": 1
+            },
+            "text_content": "🤡Путин: сегодня открывают двери для учеников 160 новых школ\n\nТем временем «новые школы», два примера из разных концов страны: школа на Сахалине (на видео) и школа в Подмосковье (на фото)",
+            "time": 1693574781,
+            "files": [
+                {
+                    "file_id": "BAACAgQAAxkBAAIGBGTx5n0d0eDdMvwhZeSpLwf8auXlAAKpEQAC6zyIU1Ola8UK6vmVMAQ",
+                    "file_url": "https://telegram/url/&{ %!s(int64=0)  BAACAgQAAxkBAAIGBGTx5n0d0eDdMvwhZeSpLwf8auXlAAKpEQAC6zyIU1Ola8UK6vmVMAQ}"
+                },
+                {
+                    "file_id": "BAACAgQAAxkBAAIGBWTx5n3MMwR7IUT9owG_HjjNeckaAAKqEQAC6zyIUw9LnudCdJ-3MAQ",
+                    "file_url": "https://telegram/url/&{ %!s(int64=0)  BAACAgQAAxkBAAIGBWTx5n3MMwR7IUT9owG_HjjNeckaAAKqEQAC6zyIUw9LnudCdJ-3MAQ}"
+                },
+                {
+                    "file_id": "AgACAgQAAxkBAAIGBmTx5n1n_WlC2MiIRPin4tenHnYjAAJavjEb6zyIUwjzi3BuGuRzAQADAgADeQADMAQ",
+                    "file_url": "https://telegram/url/&{ %!s(int64=0)  AgACAgQAAxkBAAIGBmTx5n1n_WlC2MiIRPin4tenHnYjAAJavjEb6zyIUwjzi3BuGuRzAQADAgADeQADMAQ}"
+                },
+                {
+                    "file_id": "AgACAgQAAxkBAAIGB2Tx5n1CEu95iE4_7h2dwWIAAfznkgACW74xG-s8iFP-1vHW2Qps1AEAAwIAA3kAAzAE",
+                    "file_url": "https://telegram/url/&{ %!s(int64=0)  AgACAgQAAxkBAAIGB2Tx5n1CEu95iE4_7h2dwWIAAfznkgACW74xG-s8iFP-1vHW2Qps1AEAAwIAA3kAAzAE}"
+                }
+            ]
+        }
+    ],
+    "userMetadata": [
+        {
+            "id": "348274414",
+            "username": "lanseg"
+        },
+        {
+            "id": "-1001055562978",
+            "username": "chtddd",
+            "quotes": [
+                "ЧТД"
+            ]
+        }
+    ]
+}

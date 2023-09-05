@@ -63,7 +63,6 @@ func NewFakeBot(datafile string) (telegram.Bot, error) {
 }
 
 func TestRequestResponse(t *testing.T) {
-
 	for _, tc := range []struct {
 		desc         string
 		responseFile string
@@ -74,6 +73,11 @@ func TestRequestResponse(t *testing.T) {
 			responseFile: "telegram_one_update.json",
 			resultFile:   "telegram_one_update_record.json",
 		},
+		{
+			desc:         "Multiple update response",
+			responseFile: "telegram_multiple_updates.json",
+			resultFile:   "telegram_multiple_updates_record.json",
+		},
 	} {
 		t.Run(tc.desc, func(t *testing.T) {
 			bot, err := NewFakeBot(tc.responseFile)
@@ -83,6 +87,7 @@ func TestRequestResponse(t *testing.T) {
 			tg := NewTelegramAdapter(bot)
 			tg.SubmitRequest(nil)
 			ups := tg.GetRecordSet()
+
 			want := &rpb.RecordSet{}
 			if err = readJson(tc.resultFile, want); err != nil {
 				t.Errorf("Cannot load json with an expected result \"%s\": %s", tc.resultFile, err)

@@ -84,131 +84,158 @@ func (ts *telegramSinkSource) SendResponse(response *rpb.Response) {
 	}
 }
 
-//  ----------
-
-func getUpdateSource(upd *telegram.Update) *rpb.Source {
-	msg := upd.Message
-	if msg == nil {
-		return nil
-	}
-	return &rpb.Source{
-		SenderId:  fmt.Sprintf("%d", msg.From.ID),
-		ChannelId: fmt.Sprintf("%d", msg.Chat.ID),
-		MessageId: fmt.Sprintf("%d", msg.MessageID),
-		Type:      rpb.SourceType_TELEGRAM,
-	}
-}
-
-func updateToRecords(upd *telegram.Update) (*rpb.Record, []*rpb.UserMetadata) {
-	msg := upd.Message
-	users := []*rpb.UserMetadata{}
-	result := &rpb.Record{
-		Source: getUpdateSource(upd),
-		Time:   msg.Date,
-		//      RawContent:
-	}
-	users = append(users, &rpb.UserMetadata{
-		Id:       fmt.Sprintf("%d", msg.From.ID),
-		Username: msg.From.Username,
-	})
-
-	if msg.ForwardFromMessageID != 0 {
-		result.Parent = &rpb.Source{
-			MessageId: fmt.Sprintf("%d", msg.ForwardFromMessageID),
-		}
-	}
-	if msg.ForwardFromChat != nil {
-		if result.Parent == nil {
-			result.Parent = &rpb.Source{}
-		}
-		users = append(users, &rpb.UserMetadata{
-			Id:       fmt.Sprintf("%d", msg.ForwardFromChat.ID),
-			Username: msg.ForwardFromChat.Username,
-			Quotes:   []string{msg.ForwardFromChat.Title},
-		})
-		result.Parent.ChannelId = fmt.Sprintf("%d", msg.ForwardFromChat.ID)
-	}
-	if result.Parent != nil {
-		result.Parent.Type = rpb.SourceType_TELEGRAM
-	}
-
-	textContent := []string{}
-	if len(msg.Caption) != 0 {
-		textContent = append(textContent, msg.Caption)
-	}
-	if len(msg.Text) != 0 {
-		textContent = append(textContent, msg.Text)
-	}
-	result.TextContent = strings.Replace(strings.Join(textContent, "\n"), "\n\n", "\n", -1)
-	for _, e := range msg.Entities {
-		if (e.Type == "url" || e.Type == "text_link") && e.URL != "" {
-			result.Links = append(result.Links, e.URL)
-		}
-	}
-	if msg.Video != nil {
-		result.Files = append(result.Files, &rpb.File{FileId: msg.Video.FileID})
-	}
-	if msg.Photo != nil {
-		result.Files = append(result.Files, &rpb.File{
-			FileId: telegram.GetLargestImage(msg.Photo).FileID,
-		})
-	}
-	if msg.Audio != nil {
-		result.Files = append(result.Files, &rpb.File{FileId: msg.Audio.FileID})
-	}
-	if msg.Voice != nil {
-		result.Files = append(result.Files, &rpb.File{FileId: msg.Voice.FileID})
-	}
-	result.Links = collections.Unique(append(result.Links, util.FindWebLinks(result.TextContent)...))
-	sort.Strings(result.Links)
-
-	return result, users
-}
+// ----------
 
 func groupRecords(updates []*telegram.Update) []*rpb.RecordSet {
-	recordByMedia := map[string][]*rpb.Record{}
-	userById := map[string]*rpb.UserMetadata{}
-
-	recordByMedia[""] = []*rpb.Record{}
-	for _, upd := range updates {
-		record, users := updateToRecords(upd)
-		grpId := upd.Message.MediaGroupID
-		if _, ok := recordByMedia[grpId]; !ok {
-			recordByMedia[grpId] = []*rpb.Record{}
+	grouped := collections.GroupBy(updates, func(u *telegram.Update) string {
+		if u.Message == nil {
+			return ""
 		}
-		recordByMedia[grpId] = append(recordByMedia[grpId], record)
-		for _, u := range users {
-			userById[u.Id] = u
-		}
-	}
-
-	allRecords := recordByMedia[""]
-	aggregatedRecords := []*rpb.Record{}
-	for group, records := range recordByMedia {
-		if group == "" {
-			continue
-		}
-		rootRecord := records[0]
-		for _, record := range records[1:] {
-			rootRecord.Links = append(rootRecord.Links, record.Links...)
-			rootRecord.Files = append(rootRecord.Files, record.Files...)
-			rootRecord.TextContent += "\n" + record.TextContent
-		}
-		aggregatedRecords = append(aggregatedRecords, rootRecord)
-	}
-
-	result := []*rpb.RecordSet{}
-	metadata := collections.Values(userById)
-	sort.Slice(metadata, func(i int, j int) bool {
-		return metadata[i].Id > metadata[j].Id
+		return u.Message.MediaGroupID
 	})
-	for _, record := range append(allRecords, aggregatedRecords...) {
-		result = append(result, records.NewRecordSet(
-			[]*rpb.Record{record},
-			metadata,
-		))
-		result[len(result)-1].Request = &rpb.Request{Source: record.Source}
+	result := []*rpb.RecordSet{}
+	for _, v := range grouped {
+		record, users := updateToRecords(v)
+		rs := records.NewRecordSet([]*rpb.Record{record}, users)
+		rs.Request = &rpb.Request{Origin: record.Source}
+		result = append(result, rs)
+	}
+	return result
+}
+
+func chatToMetadata(c *telegram.Chat) *rpb.UserMetadata {
+	quotes := []string{}
+	if c.Title != "" {
+		quotes = append(quotes, c.Title)
+	}
+	return &rpb.UserMetadata{
+		Id:       fmt.Sprintf("%d", c.ID),
+		Username: c.Username,
+		Quotes:   quotes,
+	}
+}
+
+func userToMetadata(u *telegram.User) *rpb.UserMetadata {
+	quotes := []string{}
+	if u.FirstName != "" || u.LastName != "" {
+		quotes = append(quotes, strings.TrimSpace(fmt.Sprintf("%s %s", u.FirstName, u.LastName)))
+	}
+	return &rpb.UserMetadata{
+		Id:       fmt.Sprintf("%d", u.ID),
+		Username: u.Username,
+		Quotes:   quotes,
+	}
+}
+
+func videoToFile(v *telegram.Video) *rpb.File {
+	return &rpb.File{
+		FileId: v.FileID,
+	}
+}
+
+func photoToFile(photos []*telegram.PhotoSize) *rpb.File {
+	largestPhoto := telegram.GetLargestImage(photos)
+	return &rpb.File{
+		FileId: largestPhoto.FileID,
+	}
+}
+
+func audioToFile(audio *telegram.Audio) *rpb.File {
+	return &rpb.File{
+		FileId: audio.FileID,
+	}
+}
+
+func voiceToFile(voice *telegram.Voice) *rpb.File {
+	return &rpb.File{
+		FileId: voice.FileID,
+	}
+}
+
+func entitiesToLinks(ets []*telegram.MessageEntity) []string {
+	result := []string{}
+	for _, e := range ets {
+		if (e.Type == "text_link" || e.Type == "url") && e.URL != "" {
+			result = append(result, e.URL)
+		}
+	}
+	return result
+}
+
+func toSource(msg int64, chat int64, user int64) *rpb.Source {
+	src := &rpb.Source{
+		Type: rpb.SourceType_TELEGRAM,
+	}
+	if msg != 0 {
+		src.MessageId = fmt.Sprintf("%d", msg)
+	}
+	if chat != 0 {
+		src.ChannelId = fmt.Sprintf("%d", chat)
+	}
+	if user != 0 {
+		src.SenderId = fmt.Sprintf("%d", user)
+	}
+	return src
+}
+
+func updateToRecords(upds []*telegram.Update) (*rpb.Record, []*rpb.UserMetadata) {
+	result := &rpb.Record{}
+	users := map[string]*rpb.UserMetadata{}
+
+	for _, vv := range upds {
+		msg := vv.Message
+		users[fmt.Sprintf("%d", msg.Chat.ID)] = chatToMetadata(msg.Chat)
+		result.Source = toSource(msg.MessageID, msg.Chat.ID, msg.From.ID)
+
+		if result.Time == 0 || result.Time > msg.Date {
+			result.Time = msg.Date
+		}
+
+		if msg.ForwardFromChat != nil {
+			ffId := int64(0)
+			ffChat := msg.ForwardFromChat
+			if msg.ForwardFrom != nil {
+				ffId = msg.ForwardFrom.ID
+			}
+			users[fmt.Sprintf("%d", ffChat)] = chatToMetadata(ffChat)
+			result.Parent = toSource(msg.ForwardFromMessageID, msg.ForwardFromChat.ID, ffId)
+		}
+
+		if msg.Video != nil {
+			result.Files = append(result.Files, videoToFile(msg.Video))
+		}
+
+		if msg.Photo != nil {
+			result.Files = append(result.Files, photoToFile(msg.Photo))
+		}
+
+		if msg.Audio != nil {
+			result.Files = append(result.Files, audioToFile(msg.Audio))
+		}
+
+		if msg.Voice != nil {
+			result.Files = append(result.Files, voiceToFile(msg.Voice))
+		}
+
+		if msg.Entities != nil {
+			result.Links = append(result.Links, entitiesToLinks(msg.Entities)...)
+		}
+
+		if msg.Caption != "" {
+			result.TextContent += strings.TrimSpace(msg.Caption) + "\n"
+		}
+
+		if msg.Text != "" {
+			result.TextContent += strings.TrimSpace(msg.Text) + "\n"
+		}
 	}
 
-	return result
+	sort.Strings(result.Links)
+	result.TextContent = strings.TrimSpace(result.TextContent)
+
+	userData := collections.Values(users)
+	sort.Slice(userData, func(i int, j int) bool {
+		return userData[j].Id < userData[i].Id
+	})
+	return result, userData
 }
