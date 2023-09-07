@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"chronicler/records"
 	rpb "chronicler/records/proto"
 	"chronicler/util"
 	"web/htmlparser"
@@ -24,6 +25,10 @@ var (
 		"jpg", "png", "js", "css", "json", "ico", "webp", "gif",
 	})
 )
+
+type HttpClient interface {
+	Do(request *http.Request) (*http.Response, error)
+}
 
 func isFileUrl(link string) bool {
 	if webpageFileTypes.Contains(link) {
@@ -61,26 +66,33 @@ func splitSrcset(srcset []string) []string {
 type webRecordSource struct {
 	RecordSource
 
-	logger *util.Logger
-	client *http.Client
+	timeSource func() time.Time
+	logger     *util.Logger
+	client     HttpClient
 }
 
-func NewWebAdapter(httpClient *http.Client) Adapter {
+func NewWebAdapter(httpClient HttpClient) Adapter {
+	return createWebAdapter(httpClient, time.Now)
+}
+
+func createWebAdapter(httpClient HttpClient, timeSource func() time.Time) Adapter {
 	logger := util.NewLogger("WebAdapter")
 	if httpClient == nil {
 		logger.Infof("No http client provided, using an own new one")
-		httpClient = &http.Client{}
-
 		jar, err := cookiejar.New(nil)
 		if err != nil {
+			httpClient = &http.Client{}
 			logger.Warningf("Got error while creating cookie jar %s", err.Error())
 		} else {
-			httpClient.Jar = jar
+			httpClient = &http.Client{
+				Jar: jar,
+			}
 		}
 	}
 	wss := &webRecordSource{
-		logger: logger,
-		client: httpClient,
+		logger:     logger,
+		client:     httpClient,
+		timeSource: timeSource,
 	}
 	return NewAdapter("WebAdapter", wss, nil, false)
 }
@@ -116,7 +128,7 @@ func (w *webRecordSource) GetRequestedRecords(request *rpb.Request) []*rpb.Recor
 	}
 	record := &rpb.Record{
 		Source:      source,
-		Time:        time.Now().Unix(),
+		Time:        w.timeSource().Unix(),
 		TextContent: htmlparser.StripTags(string(body)),
 		RawContent:  body,
 	}
@@ -137,13 +149,7 @@ func (w *webRecordSource) GetRequestedRecords(request *rpb.Request) []*rpb.Recor
 	}
 	w.logger.Debugf("Done loading page: %d byte(s), %d file link(s), %d other link(s)",
 		len(body), len(record.Files), len(record.Links))
-	return []*rpb.RecordSet{
-		{
-			Request: &rpb.Request{
-				Target: source,
-				Origin: request.Origin,
-			},
-			Records: []*rpb.Record{record},
-		},
-	}
+	rs := records.NewRecordSet([]*rpb.Record{record}, []*rpb.UserMetadata{})
+	rs.Request = &rpb.Request{Target: source, Origin: request.Origin}
+	return []*rpb.RecordSet{rs}
 }

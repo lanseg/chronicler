@@ -30,7 +30,9 @@ go_test(
     size = "small",
     srcs = [
         "adapter_test.go",
+        "testutil.go",
         "telegram_test.go",
+        "web_test.go",
     ],
     data = glob(["testdata/*"]),
     embed = [

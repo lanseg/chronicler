@@ -1,0 +1,20 @@
+{
+    "id": "5ccac97fa2a5727aa667068f883f7081b14393c6118221f17c8b8437e5bbb33b978efafd601d7f1a540cbd868d12f16678a270edf8931cbef32fe08d42923a80",
+    "request": {
+        "target": {
+            "channel_id": "google.com",
+            "url": "https://google.com",
+            "type": 3
+        }
+    },
+    "records": [{
+        "source": {
+            "channel_id": "google.com",
+            "url": "https://google.com",
+            "type": 3
+        },
+        "text_content": "Hello there \n",
+        "raw_content": "SGVsbG8gdGhlcmUK",
+        "time": 1257894000
+    }]
+}

@@ -1,29 +1,13 @@
 package adapter
 
 import (
-	"encoding/json"
 	"fmt"
-	"os"
-	"path/filepath"
 	"testing"
 
 	"chronicler/telegram"
 
 	rpb "chronicler/records/proto"
 )
-
-func readJson(file string, obj interface{}) error {
-	bytes, err := os.ReadFile(filepath.Join("testdata", file))
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(bytes, &obj)
-	if err != nil {
-		return err
-	}
-	return nil
-}
 
 type FakeBot struct {
 	telegram.Bot
