@@ -31,14 +31,7 @@ type HttpClient interface {
 }
 
 func isFileUrl(link string) bool {
-	if webpageFileTypes.Contains(link) {
-		return true
-	}
-	u, err := url.Parse(link)
-	if err != nil {
-		return false
-	}
-	return u.Scheme == "data"
+	return webpageFileTypes.Contains(link)
 }
 
 func fixLink(scheme string, host string, link string) string {

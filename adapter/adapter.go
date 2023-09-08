@@ -64,7 +64,6 @@ func (a *AdapterImpl) requestLoop() {
 	a.logger.Infof("Starting request loop")
 	for {
 		request := <-a.requests
-		a.logger.Infof("New request %s", request)
 		records := a.recordSource.GetRequestedRecords(request)
 		for _, recordSet := range records {
 			a.records <- recordSet
@@ -88,7 +87,7 @@ func NewAdapter(name string, recordSrc RecordSource, respSink ResponseSink, loop
 		responseSink: respSink,
 		requests:     make(chan *rpb.Request),
 	}
-	a.logger.Infof("Created new adapter, loop is %b", loop)
+	a.logger.Infof("Created new adapter, loop is %v", loop)
 	if recordSrc != nil {
 		a.records = make(chan *rpb.RecordSet)
 		go a.requestLoop()

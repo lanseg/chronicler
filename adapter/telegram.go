@@ -230,8 +230,11 @@ func updateToRecords(upds []*telegram.Update) (*rpb.Record, []*rpb.UserMetadata)
 		}
 	}
 
-	sort.Strings(result.Links)
 	result.TextContent = strings.TrimSpace(result.TextContent)
+	result.Links = collections.Unique(
+		append(result.Links, util.FindWebLinks(result.TextContent)...))
+
+	sort.Strings(result.Links)
 
 	userData := collections.Values(users)
 	sort.Slice(userData, func(i int, j int) bool {

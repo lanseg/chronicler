@@ -116,6 +116,13 @@ func (s *LocalStorage) writeRecordSet(r *rpb.RecordSet) error {
 			pageView := filepath.Join(root, fmt.Sprintf("page_view_record_%d", i))
 			s.fs.MkDir(pageView)
 			s.savePageView(r.Source.Url, pageView)
+			r.Files = append(r.Files, &rpb.File{
+				FileId:  "page_view_png",
+				FileUrl: pageView + "/page.png",
+			}, &rpb.File{
+				FileId:  "page_view_pdf",
+				FileUrl: pageView + "/page.pdf",
+			})
 		}
 
 		for _, link := range r.Links {
