@@ -15,5 +15,6 @@ go_binary(
         "//util",
         "//web:htmlparser",
         "@commons//collections",
+        "@commons//common",
     ],
 )

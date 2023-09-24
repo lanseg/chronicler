@@ -5,7 +5,6 @@ import (
 	"sort"
 	"time"
 
-	"chronicler/records"
 	rpb "chronicler/records/proto"
 	"chronicler/twitter"
 
@@ -35,7 +34,7 @@ func (t *twitterRecordSource) GetRequestedRecords(request *rpb.Request) []*rpb.R
 	}
 	conv, _ := t.client.GetConversation(threadId)
 	result := t.tweetToRecord(conv)
-	result.Request = request
+	result.Id = request.Id
 	return []*rpb.RecordSet{result}
 }
 
@@ -105,5 +104,8 @@ func (t *twitterRecordSource) tweetToRecord(response *twitter.Response[twitter.T
 	sort.Slice(rs, func(i int, j int) bool {
 		return rs[i].Time < rs[j].Time
 	})
-	return records.NewRecordSet(rs, um)
+	return &rpb.RecordSet{
+		Records:      rs,
+		UserMetadata: um,
+	}
 }

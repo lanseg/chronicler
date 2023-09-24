@@ -9,6 +9,10 @@ import (
 	rpb "chronicler/records/proto"
 )
 
+const (
+	testingUuid = "1a468cef-1368-408a-a20b-86b32d94a460"
+)
+
 type FakeBot struct {
 	telegram.Bot
 
@@ -69,8 +73,9 @@ func TestRequestResponse(t *testing.T) {
 				t.Errorf("Cannot create new fake bot for file \"%s\": %s", tc.responseFile, err)
 			}
 			tg := NewTelegramAdapter(bot)
-			tg.SubmitRequest(nil)
+			tg.SubmitRequest(&rpb.Request{Id: testingUuid})
 			ups := tg.GetRecordSet()
+			ups.Id = testingUuid
 
 			want := &rpb.RecordSet{}
 			if err = readJson(tc.resultFile, want); err != nil {

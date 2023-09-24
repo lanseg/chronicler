@@ -8,7 +8,6 @@ import (
 	"strings"
 	"time"
 
-	"chronicler/records"
 	rpb "chronicler/records/proto"
 	"chronicler/util"
 	"web/htmlparser"
@@ -142,7 +141,10 @@ func (w *webRecordSource) GetRequestedRecords(request *rpb.Request) []*rpb.Recor
 	}
 	w.logger.Debugf("Done loading page: %d byte(s), %d file link(s), %d other link(s)",
 		len(body), len(record.Files), len(record.Links))
-	rs := records.NewRecordSet([]*rpb.Record{record}, []*rpb.UserMetadata{})
-	rs.Request = &rpb.Request{Target: source, Origin: request.Origin}
+	rs := &rpb.RecordSet{
+		Id:           request.Id,
+		Records:      []*rpb.Record{record},
+		UserMetadata: []*rpb.UserMetadata{},
+	}
 	return []*rpb.RecordSet{rs}
 }

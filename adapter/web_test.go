@@ -13,6 +13,10 @@ import (
 	rpb "chronicler/records/proto"
 )
 
+const (
+	webRequestUuid = "1a468cef-1368-408a-a20b-86b32d94a460"
+)
+
 type FakeHttpClient struct {
 	HttpClient
 
@@ -21,7 +25,6 @@ type FakeHttpClient struct {
 
 func (fh *FakeHttpClient) Do(r *http.Request) (*http.Response, error) {
 	bts, err := os.ReadFile(filepath.Join("testdata", fh.file))
-	fmt.Printf("HERE: %v %v\n", string(bts), err)
 	if err != nil {
 		return nil, err
 	}
@@ -54,6 +57,7 @@ func TestWebRequestResponse(t *testing.T) {
 					return time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC)
 				})
 			web.SubmitRequest(&rpb.Request{
+				Id:     webRequestUuid,
 				Target: &rpb.Source{Url: "google.com"},
 			})
 			ups := web.GetRecordSet()

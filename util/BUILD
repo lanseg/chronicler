@@ -8,6 +8,7 @@ go_library(
         "logging.go",
         "runners.go",
         "textdata.go",
+        "uuid.go",
     ],
     importpath = "chronicler/util",
 )
@@ -18,6 +19,7 @@ go_test(
     srcs = [
         "runners_test.go",
         "textdata_test.go",
+        "uuid_test.go",
     ],
     embed = [
         ":util",

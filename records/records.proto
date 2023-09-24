@@ -20,6 +20,7 @@ enum FetchStatus {
 message File {
   string file_id = 1;
   string file_url = 2;
+  string local_url = 3;
 }
 
 message Source {
@@ -48,7 +49,6 @@ message UserMetadata {
 
 message RecordSet {
   string id = 1;
-  Request request = 2;
   repeated Record records = 3;
   repeated UserMetadata userMetadata = 4;
 }
@@ -67,7 +67,7 @@ message RecordListResponse {
 }
 
 message Request {
-  string parent = 1;
+  string id = 1;
   Source origin = 2;
   Source target = 3;
 }

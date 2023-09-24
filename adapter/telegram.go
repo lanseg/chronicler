@@ -63,11 +63,12 @@ func (ts *telegramSinkSource) waitForUpdate() []*telegram.Update {
 		}).Collect()
 }
 
-func (ts *telegramSinkSource) GetRequestedRecords(*rpb.Request) []*rpb.RecordSet {
+func (ts *telegramSinkSource) GetRequestedRecords(request *rpb.Request) []*rpb.RecordSet {
 	updates := ts.waitForUpdate()
 	records := groupRecords(updates)
 	ts.logger.Infof("%d new updates grouped into %d records.", len(updates), len(records))
 	for _, rs := range records {
+		rs.Id = util.UUID4()
 		ts.resolveFileUrls(rs)
 	}
 	return records
@@ -97,7 +98,6 @@ func groupRecords(updates []*telegram.Update) []*rpb.RecordSet {
 	for _, v := range grouped {
 		record, users := updateToRecords(v)
 		rs := records.NewRecordSet([]*rpb.Record{record}, users)
-		rs.Request = &rpb.Request{Origin: record.Source}
 		result = append(result, rs)
 	}
 	return result

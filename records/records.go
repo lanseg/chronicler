@@ -45,22 +45,6 @@ func GetRecordId(record *rpb.Record) string {
 		[]byte(hashSource(record.Source)+hashSource(record.Parent))))
 }
 
-func GetRecordSetId(set *rpb.RecordSet) string {
-	if set.Id != "" {
-		return set.Id
-	}
-	if set.Request == nil {
-		return ""
-	}
-	if set.Request.Origin != nil {
-		return hashSource(set.Request.Origin)
-	}
-	if set.Request.Target != nil {
-		return hashSource(set.Request.Target)
-	}
-	return ""
-}
-
 func fnv32(s string) uint32 {
 	h := fnv.New32a()
 	h.Write([]byte(s))
@@ -159,7 +143,6 @@ func MergeRecords(a []*rpb.Record, b []*rpb.Record) []*rpb.Record {
 func MergeRecordSets(a *rpb.RecordSet, b *rpb.RecordSet) *rpb.RecordSet {
 	return &rpb.RecordSet{
 		Id:           cm.IfEmpty(a.Id, b.Id),
-		Request:      cm.IfNull(a.Request, b.Request),
 		Records:      MergeRecords(a.Records, b.Records),
 		UserMetadata: MergeUserMetadata(a.UserMetadata, b.UserMetadata),
 	}

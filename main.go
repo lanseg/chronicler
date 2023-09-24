@@ -23,32 +23,27 @@ var (
 
 func extractRequests(log *util.Logger, rs *rpb.RecordSet) []*rpb.Request {
 	result := []*rpb.Request{}
-	origin := rs.Request.Origin
-	if len(rs.Records) != 1 || (origin != nil && origin.Type == rpb.SourceType_WEB) {
-		log.Debugf(
-			"Expected 1 non-web record in RecordSet, but got %d when extracting requests",
-			len(rs.Records))
-		return result
+	if len(rs.Records) == 1 && rs.Records[0].Source.Type == rpb.SourceType_WEB {
+		return []*rpb.Request{}
 	}
 	for _, link := range rs.Records[0].Links {
 		matches := collections.NewMap(twitterRe.SubexpNames(), twitterRe.FindStringSubmatch(link))
-		if match, ok := matches["twitter_id"]; ok && match != "" {
-			result = append(result, &rpb.Request{
-				Origin: rs.Request.Origin,
-				Target: &rpb.Source{
-					ChannelId: matches["twitter_id"],
-					Type:      rpb.SourceType_TWITTER,
-				},
-			})
-		} else {
-			result = append(result, &rpb.Request{
-				Origin: rs.Request.Origin,
-				Target: &rpb.Source{
-					Url:  link,
-					Type: rpb.SourceType_WEB,
-				},
-			})
+		newRequest := &rpb.Request{
+			Id: rs.Id,
 		}
+
+		if match, ok := matches["twitter_id"]; ok && match != "" {
+			newRequest.Target = &rpb.Source{
+				ChannelId: matches["twitter_id"],
+				Type:      rpb.SourceType_TWITTER,
+			}
+		} else {
+			newRequest.Target = &rpb.Source{
+				Url:  link,
+				Type: rpb.SourceType_WEB,
+			}
+		}
+		result = append(result, newRequest)
 	}
 	return result
 }
@@ -73,24 +68,26 @@ func main() {
 				recordSet := chr.GetRecordSet()
 				for _, newRequest := range extractRequests(log, recordSet) {
 					if targetChr, ok := adapters[newRequest.Target.Type]; ok {
-						targetChr.SubmitRequest(newRequest)
+						go targetChr.SubmitRequest(newRequest)
 					}
 				}
-
-				err := stg.SaveRecords(recordSet)
-				responseMessage := "Saved"
-				if err != nil {
-					responseMessage = "Error"
-					log.Warningf("Error while saving a record: %s", err)
+				if srcType == rpb.SourceType_TELEGRAM {
+					fmt.Printf("HERE: %v\n", recordSet)
 				}
+				stg.SaveRecords(recordSet)
+				//responseMessage := "Saved"
+				//if err != nil {
+				//	responseMessage = "Error"
+				//	log.Warningf("Error while saving a record: %s", err)
+				//}
 
-				src := recordSet.Request
-				if src.Origin.Type == rpb.SourceType_TELEGRAM {
-					chr.SendResponse(&rpb.Response{
-						Source:  src.Origin,
-						Content: responseMessage,
-					})
-				}
+				// src := recordSet.Request
+				// if src.Origin.Type == rpb.SourceType_TELEGRAM {
+				//	chr.SendResponse(&rpb.Response{
+				//		Source:  src.Origin,
+				//		Content: responseMessage,
+				//	})
+				//}
 			}
 		}(srcType, chr)
 	}

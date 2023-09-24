@@ -64,6 +64,10 @@ func (a *AdapterImpl) requestLoop() {
 	a.logger.Infof("Starting request loop")
 	for {
 		request := <-a.requests
+		if request == nil || request.Id == "" {
+			a.logger.Warningf("Request without an ID, skipping it: %v", request)
+			continue
+		}
 		records := a.recordSource.GetRequestedRecords(request)
 		for _, recordSet := range records {
 			a.records <- recordSet
@@ -99,7 +103,9 @@ func NewAdapter(name string, recordSrc RecordSource, respSink ResponseSink, loop
 	if loop {
 		go func() {
 			for {
-				a.SubmitRequest(nil)
+				a.SubmitRequest(&rpb.Request{
+					Id: util.UUID4(),
+				})
 			}
 		}()
 	}

@@ -73,11 +73,12 @@ func (s *LocalStorage) downloadFile(root string, file *rpb.File) error {
 		return err
 	}
 	fname := path.Base(fileUrl.Path)
-	if err := s.downloader.Download(file.GetFileUrl(),
-		s.fs.Resolve(filepath.Join(root, fname))); err != nil {
-		s.logger.Warningf("Failed to download file: %s: %s", file, err)
+    local := s.fs.Resolve(filepath.Join(root, fname))
+	if err := s.downloader.Download(file.GetFileUrl(), local); err != nil {
+        s.logger.Warningf("Failed to download file %s to %s: %s", file, local, err)
 		return err
 	}
+    file.LocalUrl = local
 	return nil
 }
 
@@ -91,19 +92,31 @@ func (s *LocalStorage) refreshCache() error {
 	for _, info := range files {
 		r, err := ReadJSON[rpb.RecordSet](s.fs, filepath.Join(info.Name(), recordsetFileName)).Get()
 		if err != nil {
+			s.logger.Warningf("Broken record, cannot parse %s: %s", info.Name(), err)
 			continue
 		}
 		id := r.Id
 		if id == "" {
-			id = records.GetRecordSetId(r)
+			s.logger.Warningf("Broken record, empty id: %s.", info.Name())
+			continue
 		}
 		s.recordCache[id] = info.Name()
 	}
 	return nil
 }
 
+func (s *LocalStorage) SaveRecords(r *rpb.RecordSet) error {
+	mergedSet := records.MergeRecordSets(
+		ReadJSON[rpb.RecordSet](s.fs, filepath.Join(r.Id, recordsetFileName)).
+			OrElse(&rpb.RecordSet{}), r)
+	return s.writeRecordSet(mergedSet)
+}
+
 func (s *LocalStorage) writeRecordSet(r *rpb.RecordSet) error {
-	root := records.GetRecordSetId(r)
+	root := r.Id
+	if root == "" {
+		return fmt.Errorf("Record must have an ID")
+	}
 	s.logger.Debugf("Saving record to %s", root)
 	if err := s.fs.MkDir(root); err != nil {
 		return err
@@ -118,10 +131,10 @@ func (s *LocalStorage) writeRecordSet(r *rpb.RecordSet) error {
 			s.savePageView(r.Source.Url, pageView)
 			r.Files = append(r.Files, &rpb.File{
 				FileId:  "page_view_png",
-				FileUrl: pageView + "/page.png",
+                LocalUrl: pageView + "/page.png",
 			}, &rpb.File{
 				FileId:  "page_view_pdf",
-				FileUrl: pageView + "/page.pdf",
+				LocalUrl: pageView + "/page.pdf",
 			})
 		}
 
@@ -157,22 +170,16 @@ func (s *LocalStorage) ListRecords() optional.Optional[[]*rpb.RecordSet] {
 		ReadJSON[rpb.RecordSet](s.fs, filepath.Join(path, recordsetFileName)).
 			IfPresent(func(rs *rpb.RecordSet) {
 				if rs.Id == "" {
-					rs.Id = records.GetRecordSetId(rs)
+					s.logger.Warningf("Broken record %s: empty id", path)
+					return
 				}
 				result = append(result, rs)
 			})
 	}
 	sort.Slice(result, func(i int, j int) bool {
-		return result[i].Request.String() < result[j].Request.String()
+		return result[i].Id < result[j].Id
 	})
 	return optional.Of(result)
-}
-
-func (s *LocalStorage) SaveRecords(r *rpb.RecordSet) error {
-	id := records.GetRecordSetId(r)
-	existing := ReadJSON[rpb.RecordSet](s.fs, filepath.Join(id, recordsetFileName)).
-		OrElse(&rpb.RecordSet{})
-	return s.writeRecordSet(records.MergeRecordSets(existing, r))
 }
 
 func NewStorage(root string, webdriver firefox.WebDriver) Storage {
