@@ -7,6 +7,7 @@ go_library(
     srcs = [
         "http_downloader.go",
         "relative_fs.go",
+        "overlay.go",
         "storage.go",
     ],
     importpath = "chronicler/storage",
@@ -16,8 +17,8 @@ go_library(
         "//records:records_go_proto",
         "//util",
         "@commons//collections",
-        "@commons//optional",
         "@commons//common",
+        "@commons//optional",
     ],
 )
 
@@ -27,6 +28,7 @@ go_test(
     srcs = [
         "relative_fs_test.go",
         "storage_test.go",
+        "overlay_test.go",
     ],
     embed = [
         ":storage",

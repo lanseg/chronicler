@@ -73,12 +73,12 @@ func (s *LocalStorage) downloadFile(root string, file *rpb.File) error {
 		return err
 	}
 	fname := path.Base(fileUrl.Path)
-    local := s.fs.Resolve(filepath.Join(root, fname))
+	local := s.fs.Resolve(filepath.Join(root, fname))
 	if err := s.downloader.Download(file.GetFileUrl(), local); err != nil {
-        s.logger.Warningf("Failed to download file %s to %s: %s", file, local, err)
+		s.logger.Warningf("Failed to download file %s to %s: %s", file, local, err)
 		return err
 	}
-    file.LocalUrl = local
+	file.LocalUrl = local
 	return nil
 }
 
@@ -130,10 +130,10 @@ func (s *LocalStorage) writeRecordSet(r *rpb.RecordSet) error {
 			s.fs.MkDir(pageView)
 			s.savePageView(r.Source.Url, pageView)
 			r.Files = append(r.Files, &rpb.File{
-				FileId:  "page_view_png",
-                LocalUrl: pageView + "/page.png",
+				FileId:   "page_view_png",
+				LocalUrl: pageView + "/page.png",
 			}, &rpb.File{
-				FileId:  "page_view_pdf",
+				FileId:   "page_view_pdf",
 				LocalUrl: pageView + "/page.pdf",
 			})
 		}
