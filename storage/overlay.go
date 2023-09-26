@@ -1,12 +1,12 @@
 package storage
 
 import (
+	"chronicler/util"
 	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
-
-	"chronicler/util"
+	"regexp"
 
 	"github.com/lanseg/golang-commons/optional"
 )
@@ -14,6 +14,8 @@ import (
 const (
 	mappingFile = "mapping.json"
 )
+
+var nonAlphanumericRegex = regexp.MustCompile(`[^a-zA-Z0-9\\. ]+`)
 
 type IdSource func() string
 
@@ -77,6 +79,14 @@ func NewOverlay(root string, idSrc IdSource) *Overlay {
 	return ol
 }
 
+func safeName(path string) string {
+	safeName := nonAlphanumericRegex.ReplaceAllString(path, "_")
+	if len(safeName) > 200 {
+		safeName = safeName[len(safeName)-200:]
+	}
+	return safeName
+}
+
 func read(path string) optional.Optional[[]byte] {
 	return optional.OfError(os.ReadFile(path))
 }
@@ -127,7 +137,7 @@ func (o *Overlay) readMapping() {
 }
 
 func (o *Overlay) Write(originalName string, bytes []byte) optional.Optional[*Entity] {
-	name := o.idSrc()
+	name := safeName(originalName)
 	return optional.Map(
 		write(filepath.Join(o.root, name), bytes),
 		func(int) *Entity {

@@ -2,12 +2,12 @@ package storage
 
 import (
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
-	"net/url"
-	"path"
+	"io/ioutil"
 	"path/filepath"
-	"sort"
 	"strings"
+    "sort"
 
 	"chronicler/firefox"
 	"chronicler/records"
@@ -34,7 +34,7 @@ type LocalStorage struct {
 
 	webdriver  firefox.WebDriver
 	downloader *HttpDownloader
-	fs         *RelativeFS
+	overlay    *Overlay
 	runner     *util.Runner
 
 	recordCache map[string]string
@@ -42,106 +42,99 @@ type LocalStorage struct {
 	root        string
 }
 
-func (s *LocalStorage) saveBase64(fname string) func(string) {
+func fromJson[T any](bytes []byte) (*T, error) {
+	result := new(T)
+	err := json.Unmarshal(bytes, result)
+	if err != nil {
+		return nil, err
+	}
+	return result, err
+}
+
+func (s *LocalStorage) getOverlay(id string) *Overlay {
+	overlayRoot := filepath.Join(s.root, id)
+	if s.overlay == nil || s.overlay.root != overlayRoot {
+		s.overlay = NewOverlay(overlayRoot, util.UUID4)
+	}
+	return s.overlay
+}
+
+func (s *LocalStorage) saveBase64(id string, fname string) func(string) {
 	return func(content string) {
 		sDec, err := base64.StdEncoding.DecodeString(content)
 		if err != nil {
 			s.logger.Warningf("Could not decode base64: %s", err)
 			return
 		}
-		err = s.fs.Write(fname, sDec)
+		written, err := s.getOverlay(id).Write(fname, sDec).Get()
 		if err != nil {
 			s.logger.Warningf("Could not write decoded base64: %s", err)
 			return
 		}
-		s.logger.Debugf("Written %d byte(s) to file %s", len(sDec), fname)
+		s.logger.Debugf("Written %d byte(s) to file %s", written, fname)
 	}
 }
 
-func (s *LocalStorage) savePageView(url string, target string) {
+func (s *LocalStorage) savePageView(id string, url string) {
 	s.webdriver.Navigate(url)
-	s.webdriver.TakeScreenshot().IfPresent(s.saveBase64(
-		filepath.Join(target, "page.png")))
-	s.webdriver.Print().IfPresent(s.saveBase64(
-		filepath.Join(target, "page.pdf")))
+	s.webdriver.TakeScreenshot().IfPresent(
+		s.saveBase64(id, "pageview_page.png"))
+	s.webdriver.Print().IfPresent(
+		s.saveBase64(id, "pageview_page.png"))
 }
 
-func (s *LocalStorage) downloadFile(root string, file *rpb.File) error {
-	fileUrl, err := url.Parse(file.GetFileUrl())
-	if err != nil || fileUrl.String() == "" {
-		s.logger.Warningf("Malformed url for file: %s", file)
-		return err
-	}
-	fname := path.Base(fileUrl.Path)
-	local := s.fs.Resolve(filepath.Join(root, fname))
-	if err := s.downloader.Download(file.GetFileUrl(), local); err != nil {
-		s.logger.Warningf("Failed to download file %s to %s: %s", file, local, err)
-		return err
-	}
-	file.LocalUrl = local
-	return nil
-}
-
-func (s *LocalStorage) refreshCache() error {
-	s.logger.Debugf("Refreshing record cache")
-	s.recordCache = map[string]string{}
-	files, err := s.fs.ListFiles("")
+func (s *LocalStorage) downloadFile(id string, link string) error {
+	o := s.getOverlay(id)
+	data, err := s.downloader.Download(link)
 	if err != nil {
+		s.logger.Warningf("Failed to download file %s: %s", link, err)
 		return err
 	}
-	for _, info := range files {
-		r, err := ReadJSON[rpb.RecordSet](s.fs, filepath.Join(info.Name(), recordsetFileName)).Get()
-		if err != nil {
-			s.logger.Warningf("Broken record, cannot parse %s: %s", info.Name(), err)
-			continue
-		}
-		id := r.Id
-		if id == "" {
-			s.logger.Warningf("Broken record, empty id: %s.", info.Name())
-			continue
-		}
-		s.recordCache[id] = info.Name()
-	}
-	return nil
+	_, err = o.Write(link, data).Get()
+	return err
 }
 
 func (s *LocalStorage) SaveRecords(r *rpb.RecordSet) error {
+	if r.Id == "" {
+		return fmt.Errorf("Record without an id")
+	}
+	o := s.getOverlay(r.Id)
 	mergedSet := records.MergeRecordSets(
-		ReadJSON[rpb.RecordSet](s.fs, filepath.Join(r.Id, recordsetFileName)).
-			OrElse(&rpb.RecordSet{}), r)
+		optional.MapErr(o.Read(recordsetFileName),
+			fromJson[rpb.RecordSet],
+		).OrElse(&rpb.RecordSet{}), r)
 	return s.writeRecordSet(mergedSet)
 }
 
-func (s *LocalStorage) writeRecordSet(r *rpb.RecordSet) error {
-	root := r.Id
-	if root == "" {
+func (s *LocalStorage) writeRecordSet(rs *rpb.RecordSet) error {
+	if rs.Id == "" {
 		return fmt.Errorf("Record must have an ID")
 	}
-	s.logger.Debugf("Saving record to %s", root)
-	if err := s.fs.MkDir(root); err != nil {
+	o := s.getOverlay(rs.Id)
+	bytes, err := json.Marshal(rs)
+	if err != nil {
 		return err
 	}
-	if err := s.fs.WriteJSON(filepath.Join(root, recordsetFileName), r); err != nil {
+	_, err = o.Write(recordsetFileName, bytes).Get()
+	if err != nil {
 		return err
 	}
-	for i, r := range r.Records {
+	for _, r := range rs.Records {
 		if r.Source != nil && r.Source.Url != "" {
-			pageView := filepath.Join(root, fmt.Sprintf("page_view_record_%d", i))
-			s.fs.MkDir(pageView)
-			s.savePageView(r.Source.Url, pageView)
+			s.savePageView(rs.Id, r.Source.Url)
 			r.Files = append(r.Files, &rpb.File{
 				FileId:   "page_view_png",
-				LocalUrl: pageView + "/page.png",
+				LocalUrl: "pageview_page.png",
 			}, &rpb.File{
 				FileId:   "page_view_pdf",
-				LocalUrl: pageView + "/page.pdf",
+				LocalUrl: "pageview_page.pdf",
 			})
 		}
 
 		for _, link := range r.Links {
 			if util.IsYoutubeLink(link) && strings.Contains(link, "v=") {
 				s.logger.Debugf("Found youtube link: %s", link)
-				if err := util.DownloadYoutube(link, s.fs.Resolve(root)); err != nil {
+				if err := util.DownloadYoutube(link, s.root); err != nil {
 					s.logger.Warningf("Failed to download youtube video: %s", err)
 				}
 			}
@@ -149,31 +142,32 @@ func (s *LocalStorage) writeRecordSet(r *rpb.RecordSet) error {
 		}
 
 		for _, file := range r.GetFiles() {
-			if err := s.downloadFile(root, file); err != nil {
+			if err := s.downloadFile(rs.Id, file.FileUrl); err != nil {
 				continue
 			}
 		}
 
 	}
-	s.logger.Infof("Saved new record to %s", root)
+	s.logger.Infof("Saved new record to %s", rs.Id)
 	return nil
 }
 
 func (s *LocalStorage) GetFile(id string, filename string) optional.Optional[[]byte] {
-	return s.fs.Read(filepath.Join(id, filename))
+	return s.getOverlay(id).Read(filename)
 }
 
 func (s *LocalStorage) ListRecords() optional.Optional[[]*rpb.RecordSet] {
-	s.refreshCache()
 	result := []*rpb.RecordSet{}
-	for _, path := range s.recordCache {
-		ReadJSON[rpb.RecordSet](s.fs, filepath.Join(path, recordsetFileName)).
-			IfPresent(func(rs *rpb.RecordSet) {
-				if rs.Id == "" {
-					s.logger.Warningf("Broken record %s: empty id", path)
-					return
-				}
-				result = append(result, rs)
+	files, err := ioutil.ReadDir(s.root)
+	if err != nil {
+		return optional.OfError([]*rpb.RecordSet{}, err)
+	}
+	for _, f := range files {
+		optional.MapErr(
+			s.getOverlay(f.Name()).Read(recordsetFileName),
+			fromJson[rpb.RecordSet]).
+			IfPresent(func(r *rpb.RecordSet) {
+				result = append(result, r)
 			})
 	}
 	sort.Slice(result, func(i int, j int) bool {
@@ -198,7 +192,6 @@ func NewStorage(root string, webdriver firefox.WebDriver) Storage {
 		logger:      log,
 		runner:      util.NewRunner(),
 		webdriver:   webdriver,
-		fs:          NewRelativeFS(root),
 		downloader:  NewHttpDownloader(nil),
 		recordCache: map[string]string{},
 	}

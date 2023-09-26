@@ -4,7 +4,6 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"os"
 
 	"chronicler/util"
 )
@@ -19,21 +18,6 @@ type HttpDownloader struct {
 	logger *util.Logger
 }
 
-func copyReader(src io.ReadCloser, dst string) error {
-	defer src.Close()
-
-	targetFile, err := os.Create(dst)
-	defer targetFile.Close()
-	if err != nil {
-		return err
-	}
-	_, err = io.Copy(targetFile, src)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
 func (d *HttpDownloader) get(link string) (*http.Response, error) {
 	req, err := http.NewRequest("GET", link, nil)
 	if err != nil {
@@ -43,20 +27,20 @@ func (d *HttpDownloader) get(link string) (*http.Response, error) {
 	return d.httpClient.Do(req)
 }
 
-func (d *HttpDownloader) Download(link string, target string) error {
-	d.logger.Debugf("Downloading file from %s to %s", link, target)
+func (d *HttpDownloader) Download(link string) ([]byte, error) {
+	d.logger.Debugf("Downloading file from %s", link)
 	u, err := url.Parse(link)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if u.Scheme == "" {
 		u.Scheme = "https"
 	}
 	resp, err := d.get(u.String())
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return copyReader(resp.Body, target)
+	return io.ReadAll(resp.Body)
 }
 
 func NewHttpDownloader(client *http.Client) *HttpDownloader {
