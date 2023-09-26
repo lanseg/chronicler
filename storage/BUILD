@@ -6,8 +6,8 @@ go_library(
     name = "storage",
     srcs = [
         "http_downloader.go",
-        "relative_fs.go",
         "overlay.go",
+        "relative_fs.go",
         "storage.go",
     ],
     importpath = "chronicler/storage",
@@ -26,9 +26,9 @@ go_test(
     name = "storage_test",
     size = "small",
     srcs = [
+        "overlay_test.go",
         "relative_fs_test.go",
         "storage_test.go",
-        "overlay_test.go",
     ],
     embed = [
         ":storage",

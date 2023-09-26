@@ -2,6 +2,7 @@ package storage
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -17,9 +18,9 @@ const (
 type IdSource func() string
 
 type Entity struct {
-	Id         string `json:"id"`
-	LocalName  string `json:"local_name"`
-	ActualName string `json:"actual_name"`
+	Id           string `json:"id"`
+	Name         string `json:"name"`
+	OriginalName string `json:"original_name"`
 }
 
 type Mapping struct {
@@ -29,18 +30,28 @@ type Mapping struct {
 }
 
 func (m *Mapping) updateMappingIfNeeded() {
+	if m.Entities == nil {
+		m.Entities = []*Entity{}
+		m.entityByName = map[string]*Entity{}
+	}
 	if len(m.entityByName) == len(m.Entities) {
 		return
 	}
 	m.entityByName = map[string]*Entity{}
 	for _, e := range m.Entities {
-		m.entityByName[e.LocalName] = e
+		m.entityByName[e.OriginalName] = e
 	}
 }
 
-func (m *Mapping) getEntity(realName string) *Entity {
+func (m *Mapping) addEntity(e *Entity) {
 	m.updateMappingIfNeeded()
-	return m.entityByName[realName]
+	m.entityByName[e.OriginalName] = e
+	m.Entities = append(m.Entities, e)
+}
+
+func (m *Mapping) getEntity(originalName string) *Entity {
+	m.updateMappingIfNeeded()
+	return m.entityByName[originalName]
 }
 
 type Overlay struct {
@@ -53,9 +64,10 @@ type Overlay struct {
 
 func NewOverlay(root string, idSrc IdSource) *Overlay {
 	ol := &Overlay{
-		root:   root,
-		idSrc:  idSrc,
-		logger: util.NewLogger("Overlay"),
+		root:    root,
+		idSrc:   idSrc,
+		mapping: &Mapping{},
+		logger:  util.NewLogger("Overlay"),
 	}
 	if err := os.MkdirAll(root, os.ModePerm); err != nil {
 		ol.logger.Warningf("Could not create directory at %s: %s", root, err)
@@ -112,4 +124,25 @@ func (o *Overlay) readMapping() {
 	}
 	o.mapping = a
 	o.logger.Infof("Read %d record(s) from %s", len(a.Entities), path)
+}
+
+func (o *Overlay) Write(originalName string, bytes []byte) optional.Optional[*Entity] {
+	name := o.idSrc()
+	return optional.Map(
+		write(filepath.Join(o.root, name), bytes),
+		func(int) *Entity {
+			e := &Entity{o.idSrc(), name, originalName}
+			o.mapping.addEntity(e)
+			o.saveMapping()
+			o.logger.Debugf("Saved %s to %s", originalName, name)
+			return e
+		})
+}
+
+func (o *Overlay) Read(originalName string) optional.Optional[[]byte] {
+	e := o.mapping.getEntity(originalName)
+	if e == nil {
+		return optional.OfError([]byte{}, fmt.Errorf("No entity with name %s", originalName))
+	}
+	return read(filepath.Join(o.root, e.Name))
 }
