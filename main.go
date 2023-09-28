@@ -65,29 +65,31 @@ func main() {
 		go func(srcType rpb.SourceType, chr adapter.Adapter) {
 			log := util.NewLogger(fmt.Sprintf("%s Record loader", srcType))
 			for {
-				recordSet := chr.GetRecordSet()
+				response := chr.GetResponse()
+				if response == nil {
+					log.Warningf("Empty responses from %s", srcType)
+					continue
+				}
+
+				recordSet := response.Result[0]
+				request := response.Request
 				for _, newRequest := range extractRequests(log, recordSet) {
 					if targetChr, ok := adapters[newRequest.Target.Type]; ok {
 						go targetChr.SubmitRequest(newRequest)
 					}
 				}
-				if srcType == rpb.SourceType_TELEGRAM {
-					fmt.Printf("HERE: %v\n", recordSet)
-				}
-				stg.SaveRecords(recordSet)
-				//responseMessage := "Saved"
-				//if err != nil {
-				//	responseMessage = "Error"
-				//	log.Warningf("Error while saving a record: %s", err)
-				//}
+				err := stg.SaveRecords(recordSet)
 
-				// src := recordSet.Request
-				// if src.Origin.Type == rpb.SourceType_TELEGRAM {
-				//	chr.SendResponse(&rpb.Response{
-				//		Source:  src.Origin,
-				//		Content: responseMessage,
-				//	})
-				//}
+				responseMessage := "Saved"
+				if err != nil {
+					responseMessage = "Error"
+					log.Warningf("Error while saving a record: %s", err)
+				}
+
+				if request.Origin != nil && request.Origin.Type == rpb.SourceType_TELEGRAM {
+					chr.SendMessage(&rpb.Message{
+						Target: request.Origin, Content: []byte(responseMessage)})
+				}
 			}
 		}(srcType, chr)
 	}

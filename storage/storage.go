@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"path/filepath"
+	"sort"
 	"strings"
-    "sort"
 
 	"chronicler/firefox"
 	"chronicler/records"
@@ -71,7 +71,7 @@ func (s *LocalStorage) saveBase64(id string, fname string) func(string) {
 			s.logger.Warningf("Could not write decoded base64: %s", err)
 			return
 		}
-		s.logger.Debugf("Written %d byte(s) to file %s", written, fname)
+		s.logger.Debugf("Written %d byte(s) to file %v", written, fname)
 	}
 }
 

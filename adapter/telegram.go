@@ -74,14 +74,15 @@ func (ts *telegramSinkSource) GetRequestedRecords(request *rpb.Request) []*rpb.R
 	return records
 }
 
-func (ts *telegramSinkSource) SendResponse(response *rpb.Response) {
-	channel, _ := strconv.Atoi(response.Source.ChannelId)
-	msgid, _ := strconv.Atoi(response.Source.MessageId)
-	msg, err := ts.bot.SendMessage(int64(channel), int64(msgid), response.Content)
+func (ts *telegramSinkSource) SendMessage(message *rpb.Message) {
+	channel, _ := strconv.Atoi(message.Target.ChannelId)
+	msgid, _ := strconv.Atoi(message.Target.MessageId)
+	content := string(message.Content)
+	_, err := ts.bot.SendMessage(int64(channel), int64(msgid), content)
 	if err == nil {
-		ts.logger.Infof("Responded to channel(%d)/user(%d): %s", channel, msgid, response.Content)
+		ts.logger.Infof("Responded to channel(%d)/user(%d): %s", channel, msgid, content)
 	} else {
-		ts.logger.Infof("Failed to respond to channel(%d)/user(%d): %s", channel, msg, err)
+		ts.logger.Infof("Failed to respond to channel(%d)/user(%d): %s", channel, msgid, err)
 	}
 }
 

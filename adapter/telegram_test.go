@@ -74,7 +74,7 @@ func TestRequestResponse(t *testing.T) {
 			}
 			tg := NewTelegramAdapter(bot)
 			tg.SubmitRequest(&rpb.Request{Id: testingUuid})
-			ups := tg.GetRecordSet()
+			ups := tg.GetResponse().Result[0]
 			ups.Id = testingUuid
 
 			want := &rpb.RecordSet{}

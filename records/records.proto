@@ -73,6 +73,12 @@ message Request {
 }
 
 message Response {
-  Source source = 1;
-  string content = 2;
+  Request request = 1;
+  repeated RecordSet result = 2;
 }
+
+message Message {
+  Source target = 1;
+  bytes content = 2;
+}
+

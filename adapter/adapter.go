@@ -11,20 +11,19 @@ type RecordSource interface {
 	GetRequestedRecords(*rpb.Request) []*rpb.RecordSet
 }
 
-type ResponseSink interface {
-	SendResponse(*rpb.Response)
+type MessageSink interface {
+	SendMessage(*rpb.Message)
 }
 
 type SinkSource interface {
 	RecordSource
-	ResponseSink
+	MessageSink
 }
 
 type Adapter interface {
-	GetRecordSet() *rpb.RecordSet
-
+	GetResponse() *rpb.Response
 	SubmitRequest(*rpb.Request)
-	SendResponse(*rpb.Response)
+	SendMessage(*rpb.Message)
 }
 
 type AdapterImpl struct {
@@ -32,73 +31,78 @@ type AdapterImpl struct {
 
 	logger       *util.Logger
 	recordSource RecordSource
-	responseSink ResponseSink
+	messageSink  MessageSink
 	storage      storage.Storage
 
 	requests chan *rpb.Request
+	messages chan *rpb.Message
 	response chan *rpb.Response
-	records  chan *rpb.RecordSet
 }
 
-func (a *AdapterImpl) GetRecordSet() *rpb.RecordSet {
-	if a.records == nil {
+func (a *AdapterImpl) GetResponse() *rpb.Response {
+	if a.response == nil {
 		a.logger.Warningf("Record source is not configured for this chronicler")
 		return nil
 	}
-	return <-a.records
+	return <-a.response
 }
 
 func (a *AdapterImpl) SubmitRequest(req *rpb.Request) {
 	a.requests <- req
 }
 
-func (a *AdapterImpl) SendResponse(resp *rpb.Response) {
-	if a.response == nil {
-		a.logger.Warningf("Response sink is not configured for this chronicler")
+func (a *AdapterImpl) SendMessage(msg *rpb.Message) {
+	if a.messages == nil {
+		a.logger.Warningf("Message sink is not configured for this chronicler")
 		return
 	}
-	a.response <- resp
+	a.messages <- msg
 }
 
-func (a *AdapterImpl) requestLoop() {
-	a.logger.Infof("Starting request loop")
+func (a *AdapterImpl) requestResponseLoop() {
+	a.logger.Infof("Starting request response loop")
 	for {
 		request := <-a.requests
-		if request == nil || request.Id == "" {
-			a.logger.Warningf("Request without an ID, skipping it: %v", request)
+		if request == nil {
+			a.logger.Warningf("Got empty request, skipping fetch")
 			continue
 		}
-		records := a.recordSource.GetRequestedRecords(request)
-		for _, recordSet := range records {
-			a.records <- recordSet
+
+		recordSets := a.recordSource.GetRequestedRecords(request)
+		if len(recordSets) == 0 {
+			a.logger.Warningf("Empty response for request %v", request)
+		}
+		a.response <- &rpb.Response{
+			Request: request,
+			Result:  recordSets,
 		}
 	}
 }
 
-func (a *AdapterImpl) responseLoop() {
-	a.logger.Infof("Starting response loop")
+func (a *AdapterImpl) messageLoop() {
+	a.logger.Infof("Starting message loop")
 	for {
-		response := <-a.response
-		a.logger.Infof("New response to %s", response.Source)
-		a.responseSink.SendResponse(response)
+		msg := <-a.messages
+		a.logger.Infof("New message to %s", msg.Target)
+		a.messageSink.SendMessage(msg)
 	}
 }
 
-func NewAdapter(name string, recordSrc RecordSource, respSink ResponseSink, loop bool) Adapter {
+func NewAdapter(name string, recordSrc RecordSource, msgSink MessageSink, loop bool) Adapter {
 	a := &AdapterImpl{
 		logger:       util.NewLogger(name),
 		recordSource: recordSrc,
-		responseSink: respSink,
+		messageSink:  msgSink,
 		requests:     make(chan *rpb.Request),
 	}
 	a.logger.Infof("Created new adapter, loop is %v", loop)
 	if recordSrc != nil {
-		a.records = make(chan *rpb.RecordSet)
-		go a.requestLoop()
-	}
-	if respSink != nil {
 		a.response = make(chan *rpb.Response)
-		go a.responseLoop()
+		go a.requestResponseLoop()
+	}
+	if msgSink != nil {
+		a.messages = make(chan *rpb.Message)
+		go a.messageLoop()
 	}
 	if loop {
 		go func() {

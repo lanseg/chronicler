@@ -60,7 +60,7 @@ func TestWebRequestResponse(t *testing.T) {
 				Id:     webRequestUuid,
 				Target: &rpb.Source{Url: "google.com"},
 			})
-			ups := web.GetRecordSet()
+			ups := web.GetResponse().Result[0]
 
 			want := &rpb.RecordSet{}
 			if err := readJson(tc.resultFile, want); err != nil {
