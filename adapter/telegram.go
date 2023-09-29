@@ -16,8 +16,8 @@ import (
 	rpb "chronicler/records/proto"
 )
 
-type telegramSinkSource struct {
-	SinkSource
+type telegramAdapter struct {
+	Adapter
 
 	logger *util.Logger
 	bot    telegram.Bot
@@ -25,15 +25,14 @@ type telegramSinkSource struct {
 }
 
 func NewTelegramAdapter(bot telegram.Bot) Adapter {
-	tss := &telegramSinkSource{
+	return &telegramAdapter{
 		logger: util.NewLogger("TelegramAdapter"),
 		bot:    bot,
 		cursor: 0,
 	}
-	return NewAdapter("TelegramAdapter", tss, tss, true)
 }
 
-func (ts *telegramSinkSource) resolveFileUrls(rs *rpb.RecordSet) {
+func (ts *telegramAdapter) resolveFileUrls(rs *rpb.RecordSet) {
 	for _, record := range rs.Records {
 		for _, file := range record.Files {
 			ts.logger.Debugf("Resolving file url for %s", file)
@@ -47,7 +46,7 @@ func (ts *telegramSinkSource) resolveFileUrls(rs *rpb.RecordSet) {
 	}
 }
 
-func (ts *telegramSinkSource) waitForUpdate() []*telegram.Update {
+func (ts *telegramAdapter) waitForUpdate() []*telegram.Update {
 	ts.logger.Infof("Waiting for a new telegram update...")
 	return collections.IterateSlice(
 		optional.
@@ -63,18 +62,29 @@ func (ts *telegramSinkSource) waitForUpdate() []*telegram.Update {
 		}).Collect()
 }
 
-func (ts *telegramSinkSource) GetRequestedRecords(request *rpb.Request) []*rpb.RecordSet {
+func (ts *telegramAdapter) GetResponse(request *rpb.Request) []*rpb.Response {
 	updates := ts.waitForUpdate()
-	records := groupRecords(updates)
-	ts.logger.Infof("%d new updates grouped into %d records.", len(updates), len(records))
-	for _, rs := range records {
-		rs.Id = util.UUID4()
-		ts.resolveFileUrls(rs)
+	if len(updates) == 0 {
+		ts.logger.Debugf("No updates for request: %s", request)
+		return []*rpb.Response{}
 	}
-	return records
+	records := groupRecords(updates)
+	ts.logger.Infof("%d new updates grouped into %d record sets.", len(updates), len(records))
+
+	result := []*rpb.Response{}
+	for _, rs := range records {
+		ts.resolveFileUrls(rs)
+		result = append(result, &rpb.Response{
+			Request: &rpb.Request{
+				Origin: rs.Records[0].Source,
+			},
+			Result: []*rpb.RecordSet{rs},
+		})
+	}
+	return result
 }
 
-func (ts *telegramSinkSource) SendMessage(message *rpb.Message) {
+func (ts *telegramAdapter) SendMessage(message *rpb.Message) {
 	channel, _ := strconv.Atoi(message.Target.ChannelId)
 	msgid, _ := strconv.Atoi(message.Target.MessageId)
 	content := string(message.Content)
@@ -99,6 +109,7 @@ func groupRecords(updates []*telegram.Update) []*rpb.RecordSet {
 	for _, v := range grouped {
 		record, users := updateToRecords(v)
 		rs := records.NewRecordSet([]*rpb.Record{record}, users)
+		rs.Id = util.UUID4()
 		result = append(result, rs)
 	}
 	return result

@@ -55,9 +55,7 @@ func splitSrcset(srcset []string) []string {
 	return result
 }
 
-type webRecordSource struct {
-	RecordSource
-
+type webAdapter struct {
 	timeSource func() time.Time
 	logger     *util.Logger
 	client     HttpClient
@@ -81,15 +79,14 @@ func createWebAdapter(httpClient HttpClient, timeSource func() time.Time) Adapte
 			}
 		}
 	}
-	wss := &webRecordSource{
+	return &webAdapter{
 		logger:     logger,
 		client:     httpClient,
 		timeSource: timeSource,
 	}
-	return NewAdapter("WebAdapter", wss, nil, false)
 }
 
-func (w *webRecordSource) Get(link string) (*http.Response, error) {
+func (w *webAdapter) Get(link string) (*http.Response, error) {
 	req, err := http.NewRequest("GET", fixLink("https", "", link), nil)
 	if err != nil {
 		return nil, err
@@ -98,11 +95,18 @@ func (w *webRecordSource) Get(link string) (*http.Response, error) {
 	return w.client.Do(req)
 }
 
-func (w *webRecordSource) GetRequestedRecords(request *rpb.Request) []*rpb.RecordSet {
+func (w *webAdapter) SendMessage(*rpb.Message) {
+	w.logger.Infof("Web adapter cannot send messages")
+}
+
+func (w *webAdapter) GetResponse(request *rpb.Request) []*rpb.Response {
 	w.logger.Infof("Loading web page from %s", request.Target.Url)
 	response, err := w.Get(request.Target.Url)
 	if err != nil {
-		return []*rpb.RecordSet{}
+		return []*rpb.Response{{
+			Request: request,
+			Result:  []*rpb.RecordSet{},
+		}}
 	}
 	defer response.Body.Close()
 
@@ -110,7 +114,10 @@ func (w *webRecordSource) GetRequestedRecords(request *rpb.Request) []*rpb.Recor
 	w.logger.Infof("Resolved actual URL as %s", requestUrl)
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
-		return []*rpb.RecordSet{}
+		return []*rpb.Response{{
+			Request: request,
+			Result:  []*rpb.RecordSet{},
+		}}
 	}
 
 	source := &rpb.Source{
@@ -146,5 +153,8 @@ func (w *webRecordSource) GetRequestedRecords(request *rpb.Request) []*rpb.Recor
 		Records:      []*rpb.Record{record},
 		UserMetadata: []*rpb.UserMetadata{},
 	}
-	return []*rpb.RecordSet{rs}
+	return []*rpb.Response{{
+		Request: request,
+		Result:  []*rpb.RecordSet{rs},
+	}}
 }

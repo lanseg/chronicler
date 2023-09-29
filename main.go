@@ -52,48 +52,90 @@ func main() {
 	flag.Parse()
 
 	cfg := GetConfig()
-	stg := storage.NewStorage(*cfg.StorageRoot, nil)
+	storage := storage.NewStorage(*cfg.StorageRoot, nil)
+
+	tgBot := telegram.NewBot(*cfg.TelegramBotKey)
+	twClient := twitter.NewClient(*cfg.TwitterApiKey)
+
 	adapters := map[rpb.SourceType]adapter.Adapter{
-		rpb.SourceType_TELEGRAM: adapter.NewTelegramAdapter(
-			telegram.NewBot(*cfg.TelegramBotKey)),
-		rpb.SourceType_TWITTER: adapter.NewTwitterAdapter(
-			twitter.NewClient(*cfg.TwitterApiKey)),
-		rpb.SourceType_WEB: adapter.NewWebAdapter(nil),
+		rpb.SourceType_TELEGRAM: adapter.NewTelegramAdapter(tgBot),
+		rpb.SourceType_TWITTER:  adapter.NewTwitterAdapter(twClient),
+		rpb.SourceType_WEB:      adapter.NewWebAdapter(nil),
 	}
 
-	for srcType, chr := range adapters {
-		go func(srcType rpb.SourceType, chr adapter.Adapter) {
-			log := util.NewLogger(fmt.Sprintf("%s Record loader", srcType))
-			for {
-				response := chr.GetResponse()
-				if response == nil {
-					log.Warningf("Empty responses from %s", srcType)
-					continue
-				}
+	requests := make(chan *rpb.Request)
+	response := make(chan *rpb.Response)
+	messages := make(chan *rpb.Message)
 
-				recordSet := response.Result[0]
-				request := response.Request
-				for _, newRequest := range extractRequests(log, recordSet) {
-					if targetChr, ok := adapters[newRequest.Target.Type]; ok {
-						go targetChr.SubmitRequest(newRequest)
-					}
-				}
-				err := stg.SaveRecords(recordSet)
-
-				responseMessage := "Saved"
-				if err != nil {
-					responseMessage = "Error"
-					log.Warningf("Error while saving a record: %s", err)
-				}
-
-				if request.Origin != nil && request.Origin.Type == rpb.SourceType_TELEGRAM {
-					chr.SendMessage(&rpb.Message{
-						Target: request.Origin, Content: []byte(responseMessage)})
+	go (func() {
+		logger := util.NewLogger("Chronicler")
+		logger.Infof("Starting chronicler thread")
+		for {
+			newRequest := <-requests
+			logger.Infof("Got new request: %s", newRequest)
+			if a, ok := adapters[newRequest.Target.Type]; ok {
+				for _, resp := range a.GetResponse(newRequest) {
+					response <- resp
 				}
 			}
-		}(srcType, chr)
-	}
+			logger.Infof("No handler for request: %s", newRequest)
+		}
+	})()
 
+	go (func() {
+		logger := util.NewLogger("Storage")
+		logger.Infof("Starting storage thread")
+		for {
+			result := <-response
+			logger.Infof("Got new response for request %s", result.Request)
+			for _, records := range result.Result {
+				msg := fmt.Sprintf("Saved as %s", records.Id)
+				if err := storage.SaveRecords(records); err != nil {
+					msg = fmt.Sprintf("Error while saving %s", records.Id)
+				}
+				if result.Request != nil && result.Request.Origin != nil {
+					messages <- &rpb.Message{
+						Target:  result.Request.Origin,
+						Content: []byte(msg),
+					}
+				}
+			}
+			for _, records := range result.Result {
+				for _, req := range extractRequests(logger, records) {
+					requests <- req
+				}
+			}
+		}
+	})()
+
+	go (func() {
+		logger := util.NewLogger("Messages")
+		logger.Infof("Starting message thread")
+		for {
+			newMessage := <-messages
+			logger.Infof("Got new message to send: %s", newMessage)
+			if a, ok := adapters[newMessage.Target.Type]; ok {
+				a.SendMessage(newMessage)
+			}
+			logger.Infof("No adapter for message %s", newMessage)
+		}
+	})()
+
+	go (func() {
+		logger := util.NewLogger("Telegram AutoRequest")
+		logger.Infof("Starting telegram periodic fetcher")
+		for {
+			responses := adapters[rpb.SourceType_TELEGRAM].GetResponse(&rpb.Request{
+				Id: util.UUID4(),
+			})
+			if len(responses) == 0 {
+				continue
+			}
+			for _, resp := range responses {
+				response <- resp
+			}
+		}
+	})()
 	wg := sync.WaitGroup{}
 	wg.Add(1)
 	wg.Wait()

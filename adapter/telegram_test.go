@@ -73,8 +73,7 @@ func TestRequestResponse(t *testing.T) {
 				t.Errorf("Cannot create new fake bot for file \"%s\": %s", tc.responseFile, err)
 			}
 			tg := NewTelegramAdapter(bot)
-			tg.SubmitRequest(&rpb.Request{Id: testingUuid})
-			ups := tg.GetResponse().Result[0]
+			ups := tg.GetResponse(&rpb.Request{Id: testingUuid})[0].Result[0]
 			ups.Id = testingUuid
 
 			want := &rpb.RecordSet{}

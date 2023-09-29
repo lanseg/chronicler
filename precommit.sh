@@ -1,7 +1,7 @@
 #!/usr/bin/bash
 set -eio pipefail
 
-# find -name BUILD -print -exec buildifier {} \;
+find -name BUILD -print -exec buildifier {} \;
 find -iname '*go' -print \
   -exec gofmt -s -w {} \; \
   -exec goimports -l -w {} \;

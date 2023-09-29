@@ -11,22 +11,25 @@ import (
 	"github.com/lanseg/golang-commons/collections"
 )
 
-type twitterRecordSource struct {
-	RecordSource
+type twitterAdapter struct {
+	Adapter
 
 	logger *util.Logger
 	client twitter.Client
 }
 
 func NewTwitterAdapter(client twitter.Client) Adapter {
-	tss := &twitterRecordSource{
+	return &twitterAdapter{
 		logger: util.NewLogger("TwitterAdapter"),
 		client: client,
 	}
-	return NewAdapter("TwitterAdapter", tss, nil, false)
 }
 
-func (t *twitterRecordSource) GetRequestedRecords(request *rpb.Request) []*rpb.RecordSet {
+func (t *twitterAdapter) SendMessage(*rpb.Message) {
+	t.logger.Warningf("TwitterAdapter cannot send messages")
+}
+
+func (t *twitterAdapter) GetResponse(request *rpb.Request) []*rpb.Response {
 	t.logger.Debugf("Got new request: %s", request)
 	threadId := request.Target.ChannelId
 	if threadId == "" {
@@ -35,10 +38,13 @@ func (t *twitterRecordSource) GetRequestedRecords(request *rpb.Request) []*rpb.R
 	conv, _ := t.client.GetConversation(threadId)
 	result := t.tweetToRecord(conv)
 	result.Id = request.Id
-	return []*rpb.RecordSet{result}
+	return []*rpb.Response{{
+		Request: request,
+		Result:  []*rpb.RecordSet{result},
+	}}
 }
 
-func (t *twitterRecordSource) tweetToRecord(response *twitter.Response[twitter.Tweet]) *rpb.RecordSet {
+func (t *twitterAdapter) tweetToRecord(response *twitter.Response[twitter.Tweet]) *rpb.RecordSet {
 	seen := collections.NewSet[string]([]string{})
 	tweets := []twitter.Tweet{}
 	for _, twt := range append(response.Data, response.Includes.Tweets...) {

@@ -56,11 +56,10 @@ func TestWebRequestResponse(t *testing.T) {
 				func() time.Time {
 					return time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC)
 				})
-			web.SubmitRequest(&rpb.Request{
+			ups := web.GetResponse(&rpb.Request{
 				Id:     webRequestUuid,
 				Target: &rpb.Source{Url: "google.com"},
-			})
-			ups := web.GetResponse().Result[0]
+			})[0].Result[0]
 
 			want := &rpb.RecordSet{}
 			if err := readJson(tc.resultFile, want); err != nil {
