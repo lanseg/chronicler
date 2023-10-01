@@ -12,6 +12,7 @@ go_library(
         "//util",
         "@commons//collections",
         "@commons//optional",
+        "@commons//common",
     ],
 )
 

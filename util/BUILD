@@ -5,12 +5,13 @@ package(default_visibility = ["//visibility:public"])
 go_library(
     name = "util",
     srcs = [
-        "logging.go",
         "runners.go",
         "textdata.go",
-        "uuid.go",
     ],
     importpath = "chronicler/util",
+    deps = [
+      "@commons//common"
+    ],
 )
 
 go_test(
@@ -19,7 +20,6 @@ go_test(
     srcs = [
         "runners_test.go",
         "textdata_test.go",
-        "uuid_test.go",
     ],
     embed = [
         ":util",

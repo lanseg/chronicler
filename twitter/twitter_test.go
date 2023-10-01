@@ -1,7 +1,6 @@
 package twitter
 
 import (
-	"chronicler/util"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -9,6 +8,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+    cm "github.com/lanseg/golang-commons/common" 
 )
 
 const (
@@ -38,7 +39,7 @@ func NewFakeClient(responses ...string) Client {
 			},
 		},
 		token:  fakeToken,
-		logger: util.NewLogger("test-twitter"),
+		logger: cm.NewLogger("test-twitter"),
 	}
 }
 

@@ -8,6 +8,7 @@ import (
 	"chronicler/util"
 
 	"github.com/lanseg/golang-commons/optional"
+    cm "github.com/lanseg/golang-commons/common" 
 )
 
 const (
@@ -17,7 +18,7 @@ const (
 type Firefox struct {
 	port          int
 	profileFolder string
-	logger        *util.Logger
+	logger        *cm.Logger
 
 	Runner *util.Runner
 	Driver WebDriver
@@ -29,7 +30,7 @@ func NewFirefox(profileFolder string, remotePort int) optional.Optional[*Firefox
 }
 
 func StartFirefox(remotePort int, profileFolder string) *Firefox {
-	logger := util.NewLogger("Firefox")
+	logger := cm.NewLogger("Firefox")
 	logger.Infof("Starting firefox on %d and profile %s", remotePort, profileFolder)
 	if _, err := os.Stat(profileFolder); os.IsNotExist(err) {
 		logger.Infof("Creating profile directory: %s", profileFolder)

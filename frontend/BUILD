@@ -15,6 +15,7 @@ go_library(
         "//util",
         "//web:htmlparser",
         "@commons//collections",
+        "@commons//common",
     ],
 )
 
@@ -29,6 +30,7 @@ go_binary(
         ":server",
         "//records:records_go_proto",
         "//util",
+        "@commons//common",
     ],
 )
 

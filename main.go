@@ -10,10 +10,9 @@ import (
 	"chronicler/storage"
 	"chronicler/telegram"
 	"chronicler/twitter"
-	"chronicler/util"
 
 	"github.com/lanseg/golang-commons/collections"
-
+    cm "github.com/lanseg/golang-commons/common"
 	rpb "chronicler/records/proto"
 )
 
@@ -21,7 +20,7 @@ var (
 	twitterRe = regexp.MustCompile("twitter.*/(?P<twitter_id>[0-9]+)[/]?")
 )
 
-func extractRequests(log *util.Logger, rs *rpb.RecordSet) []*rpb.Request {
+func extractRequests(log *cm.Logger, rs *rpb.RecordSet) []*rpb.Request {
 	result := []*rpb.Request{}
 	if len(rs.Records) == 1 && rs.Records[0].Source.Type == rpb.SourceType_WEB {
 		return []*rpb.Request{}
@@ -68,7 +67,7 @@ func main() {
 	messages := make(chan *rpb.Message)
 
 	go (func() {
-		logger := util.NewLogger("Chronicler")
+		logger := cm.NewLogger("Chronicler")
 		logger.Infof("Starting chronicler thread")
 		for {
 			newRequest := <-requests
@@ -83,7 +82,7 @@ func main() {
 	})()
 
 	go (func() {
-		logger := util.NewLogger("Storage")
+		logger := cm.NewLogger("Storage")
 		logger.Infof("Starting storage thread")
 		for {
 			result := <-response
@@ -109,7 +108,7 @@ func main() {
 	})()
 
 	go (func() {
-		logger := util.NewLogger("Messages")
+		logger := cm.NewLogger("Messages")
 		logger.Infof("Starting message thread")
 		for {
 			newMessage := <-messages
@@ -122,11 +121,11 @@ func main() {
 	})()
 
 	go (func() {
-		logger := util.NewLogger("Telegram AutoRequest")
+		logger := cm.NewLogger("Telegram AutoRequest")
 		logger.Infof("Starting telegram periodic fetcher")
 		for {
 			responses := adapters[rpb.SourceType_TELEGRAM].GetResponse(&rpb.Request{
-				Id: util.UUID4(),
+				Id: cm.UUID4(),
 			})
 			if len(responses) == 0 {
 				continue

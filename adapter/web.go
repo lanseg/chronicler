@@ -9,10 +9,10 @@ import (
 	"time"
 
 	rpb "chronicler/records/proto"
-	"chronicler/util"
 	"web/htmlparser"
 
 	"github.com/lanseg/golang-commons/collections"
+    cm "github.com/lanseg/golang-commons/common"
 )
 
 const (
@@ -57,7 +57,7 @@ func splitSrcset(srcset []string) []string {
 
 type webAdapter struct {
 	timeSource func() time.Time
-	logger     *util.Logger
+	logger     *cm.Logger
 	client     HttpClient
 }
 
@@ -66,7 +66,7 @@ func NewWebAdapter(httpClient HttpClient) Adapter {
 }
 
 func createWebAdapter(httpClient HttpClient, timeSource func() time.Time) Adapter {
-	logger := util.NewLogger("WebAdapter")
+	logger := cm.NewLogger("WebAdapter")
 	if httpClient == nil {
 		logger.Infof("No http client provided, using an own new one")
 		jar, err := cookiejar.New(nil)

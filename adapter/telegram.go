@@ -8,10 +8,11 @@ import (
 
 	"chronicler/records"
 	"chronicler/telegram"
-	"chronicler/util"
+    "chronicler/util"
 
 	"github.com/lanseg/golang-commons/collections"
 	"github.com/lanseg/golang-commons/optional"
+    cm "github.com/lanseg/golang-commons/common"
 
 	rpb "chronicler/records/proto"
 )
@@ -19,14 +20,14 @@ import (
 type telegramAdapter struct {
 	Adapter
 
-	logger *util.Logger
+	logger *cm.Logger
 	bot    telegram.Bot
 	cursor int64
 }
 
 func NewTelegramAdapter(bot telegram.Bot) Adapter {
 	return &telegramAdapter{
-		logger: util.NewLogger("TelegramAdapter"),
+		logger: cm.NewLogger("TelegramAdapter"),
 		bot:    bot,
 		cursor: 0,
 	}
@@ -109,7 +110,7 @@ func groupRecords(updates []*telegram.Update) []*rpb.RecordSet {
 	for _, v := range grouped {
 		record, users := updateToRecords(v)
 		rs := records.NewRecordSet([]*rpb.Record{record}, users)
-		rs.Id = util.UUID4()
+		rs.Id = cm.UUID4()
 		result = append(result, rs)
 	}
 	return result

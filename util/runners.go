@@ -3,13 +3,14 @@ package util
 import (
 	"fmt"
 	"io"
-
 	"os/exec"
 	"path/filepath"
+
+    cm "github.com/lanseg/golang-commons/common" 
 )
 
 type Runner struct {
-	logger *Logger
+	logger *cm.Logger
 
 	done chan error
 }
@@ -70,7 +71,7 @@ func DownloadYoutube(video string, targetDir string) error {
 
 func NewRunner() *Runner {
 	return &Runner{
-		logger: NewLogger("Runner"),
+		logger: cm.NewLogger("Runner"),
 		done:   make(chan error),
 	}
 }

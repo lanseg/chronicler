@@ -22,6 +22,7 @@ go_library(
         "//web:htmlparser",
         "@commons//collections",
         "@commons//optional",
+        "@commons//common",
     ],
 )
 

@@ -15,6 +15,7 @@ import (
 	"chronicler/util"
 
 	"github.com/lanseg/golang-commons/optional"
+    cm "github.com/lanseg/golang-commons/common" 
 )
 
 const (
@@ -38,7 +39,7 @@ type LocalStorage struct {
 	runner     *util.Runner
 
 	recordCache map[string]string
-	logger      *util.Logger
+	logger      *cm.Logger
 	root        string
 }
 
@@ -54,7 +55,7 @@ func fromJson[T any](bytes []byte) (*T, error) {
 func (s *LocalStorage) getOverlay(id string) *Overlay {
 	overlayRoot := filepath.Join(s.root, id)
 	if s.overlay == nil || s.overlay.root != overlayRoot {
-		s.overlay = NewOverlay(overlayRoot, util.UUID4)
+		s.overlay = NewOverlay(overlayRoot, cm.UUID4)
 	}
 	return s.overlay
 }
@@ -177,7 +178,7 @@ func (s *LocalStorage) ListRecords() optional.Optional[[]*rpb.RecordSet] {
 }
 
 func NewStorage(root string, webdriver firefox.WebDriver) Storage {
-	log := util.NewLogger("storage")
+	log := cm.NewLogger("storage")
 	log.Infof("Storage root set to \"%s\"", root)
 
 	if webdriver == nil {

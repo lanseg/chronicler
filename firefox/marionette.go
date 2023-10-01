@@ -1,13 +1,13 @@
 package firefox
 
 import (
-	"chronicler/util"
 	"encoding/json"
 	"fmt"
 	"net"
 	"strconv"
 
 	"github.com/lanseg/golang-commons/optional"
+    cm "github.com/lanseg/golang-commons/common" 
 )
 
 type Response struct {
@@ -58,7 +58,7 @@ type SessionParams struct {
 type Marionette struct {
 	WebDriver
 
-	logger *util.Logger
+	logger *cm.Logger
 
 	pendingCommands map[int](chan optional.Optional[*Response])
 	driverVersion   *DriverVersion
@@ -194,7 +194,7 @@ func ConnectMarionette(host string, port int) optional.Optional[WebDriver] {
 	return optional.Map(
 		optional.OfError[net.Conn](net.Dial("tcp", fmt.Sprintf("%s:%d", host, port))),
 		func(c net.Conn) WebDriver {
-			logger := util.NewLogger("Marionette")
+			logger := cm.NewLogger("Marionette")
 			logger.Infof("Connected to Marionette at %s:%s", host, port)
 			marionette := &Marionette{
 				messageCounter:  1,

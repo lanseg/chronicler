@@ -8,10 +8,9 @@ import (
 	"net/url"
 	"strings"
 
-	"chronicler/util"
-
 	"github.com/lanseg/golang-commons/collections"
 	"github.com/lanseg/golang-commons/optional"
+    cm "github.com/lanseg/golang-commons/common" 
 )
 
 var (
@@ -144,14 +143,14 @@ type ClientImpl struct {
 	httpClient *http.Client
 	token      string
 
-	logger *util.Logger
+	logger *cm.Logger
 }
 
 func NewClient(token string) Client {
 	return &ClientImpl{
 		token:      token,
 		httpClient: &http.Client{},
-		logger:     util.NewLogger("twitter"),
+		logger:     cm.NewLogger("twitter"),
 	}
 }
 

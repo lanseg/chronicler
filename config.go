@@ -3,9 +3,10 @@ package main
 import (
 	"flag"
 
-	"chronicler/util"
 	"encoding/json"
 	"os"
+
+    cm "github.com/lanseg/golang-commons/common"
 )
 
 var (
@@ -13,7 +14,7 @@ var (
 	twitterApiKey  = flag.String("twitter_api_key", "", "A key for the twitter api.")
 	telegramBotKey = flag.String("telegram_bot_key", "", "A key for the telegram bot api.")
 	storageRoot    = flag.String("storage_root", "", "A local folder to save downloads.")
-	log            = util.NewLogger("config")
+	log            = cm.NewLogger("config")
 )
 
 type Config struct {

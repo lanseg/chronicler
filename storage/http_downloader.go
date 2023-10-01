@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"chronicler/util"
+    cm "github.com/lanseg/golang-commons/common" 
 )
 
 const (
@@ -15,7 +15,7 @@ const (
 type HttpDownloader struct {
 	httpClient *http.Client
 
-	logger *util.Logger
+	logger *cm.Logger
 }
 
 func (d *HttpDownloader) get(link string) (*http.Response, error) {
@@ -44,7 +44,7 @@ func (d *HttpDownloader) Download(link string) ([]byte, error) {
 }
 
 func NewHttpDownloader(client *http.Client) *HttpDownloader {
-	logger := util.NewLogger("storage")
+	logger := cm.NewLogger("storage")
 	if client == nil {
 		logger.Debugf("No http client provided for Downloader. Using custom one.")
 		client = &http.Client{}

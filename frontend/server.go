@@ -11,10 +11,10 @@ import (
 	"chronicler/firefox"
 	rpb "chronicler/records/proto"
 	"chronicler/storage"
-	"chronicler/util"
 	"web/htmlparser"
 
 	"github.com/lanseg/golang-commons/collections"
+    cm "github.com/lanseg/golang-commons/common" 
 )
 
 const (
@@ -52,7 +52,7 @@ type WebServer struct {
 	staticFileServer http.Handler
 	storage          storage.Storage
 	server           *http.Server
-	logger           *util.Logger
+	logger           *cm.Logger
 }
 
 func (ws *WebServer) Error(w http.ResponseWriter, msg string, code int) {
@@ -154,7 +154,7 @@ func (ws *WebServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func NewServer(port int, storageRoot string, staticFiles string) *http.Server {
 	server := &WebServer{
-		logger:           util.NewLogger("frontend"),
+		logger:           cm.NewLogger("frontend"),
 		storage:          storage.NewStorage(storageRoot, &firefox.FakeWebDriver{}),
 		staticFileServer: http.FileServer(http.Dir(staticFiles)),
 	}

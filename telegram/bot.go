@@ -9,7 +9,8 @@ import (
 	"net/http"
 	"net/url"
 
-	"chronicler/util"
+
+    cm "github.com/lanseg/golang-commons/common" 
 )
 
 type Response[T any] struct {
@@ -33,14 +34,14 @@ type BotImpl struct {
 	httpClient *http.Client
 	token      string
 
-	logger *util.Logger
+	logger *cm.Logger
 }
 
 func NewBot(token string) Bot {
 	return &BotImpl{
 		token:      token,
 		httpClient: &http.Client{},
-		logger:     util.NewLogger("telegram"),
+		logger:     cm.NewLogger("telegram"),
 	}
 }
 

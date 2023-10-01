@@ -22,5 +22,6 @@ go_library(
     importpath = "chronicler/telegram",
     deps = [
         "//util",
+        "@commons//common",
     ],
 )

@@ -1,7 +1,6 @@
 package adapter
 
 import (
-	"chronicler/util"
 	"sort"
 	"time"
 
@@ -9,18 +8,19 @@ import (
 	"chronicler/twitter"
 
 	"github.com/lanseg/golang-commons/collections"
+    cm "github.com/lanseg/golang-commons/common"
 )
 
 type twitterAdapter struct {
 	Adapter
 
-	logger *util.Logger
+	logger *cm.Logger
 	client twitter.Client
 }
 
 func NewTwitterAdapter(client twitter.Client) Adapter {
 	return &twitterAdapter{
-		logger: util.NewLogger("TwitterAdapter"),
+		logger: cm.NewLogger("TwitterAdapter"),
 		client: client,
 	}
 }

@@ -5,20 +5,19 @@ import (
 	"os"
 
 	"chronicler/frontend"
-	"chronicler/util"
+
+    cm "github.com/lanseg/golang-commons/common"
 )
 
 var (
 	port        = flag.Int("port", 8080, "Port for the http server")
 	storageRoot = flag.String("storage_root", "chronicler_storage", "A local folder to save downloads.")
 	staticRoot  = flag.String("static_root", "frontend/static", "Root directory with the web page files. ")
-
-	log = util.NewLogger("main")
 )
 
 func main() {
 	flag.Parse()
-	logger := util.NewLogger("main")
+	logger := cm.NewLogger("main")
 
 	cwd, _ := os.Getwd()
 	logger.Infof("Currect directory: %s", cwd)
@@ -28,6 +27,6 @@ func main() {
 
 	server := frontend.NewServer(*port, *storageRoot, *staticRoot)
 	if err := server.ListenAndServe(); err != nil {
-		log.Errorf("Failed to start server: %s", err)
+		logger.Errorf("Failed to start server: %s", err)
 	}
 }

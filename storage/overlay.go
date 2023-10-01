@@ -1,7 +1,6 @@
 package storage
 
 import (
-	"chronicler/util"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -9,6 +8,7 @@ import (
 	"regexp"
 
 	"github.com/lanseg/golang-commons/optional"
+    cm "github.com/lanseg/golang-commons/common" 
 )
 
 const (
@@ -57,7 +57,7 @@ func (m *Mapping) getEntity(originalName string) *Entity {
 }
 
 type Overlay struct {
-	logger *util.Logger
+	logger *cm.Logger
 
 	idSrc   IdSource
 	mapping *Mapping
@@ -69,7 +69,7 @@ func NewOverlay(root string, idSrc IdSource) *Overlay {
 		root:    root,
 		idSrc:   idSrc,
 		mapping: &Mapping{},
-		logger:  util.NewLogger("Overlay"),
+		logger:  cm.NewLogger("Overlay"),
 	}
 	if err := os.MkdirAll(root, os.ModePerm); err != nil {
 		ol.logger.Warningf("Could not create directory at %s: %s", root, err)
