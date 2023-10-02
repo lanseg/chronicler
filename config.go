@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"os"
 
-    cm "github.com/lanseg/golang-commons/common"
+	cm "github.com/lanseg/golang-commons/common"
 )
 
 var (

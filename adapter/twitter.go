@@ -8,7 +8,7 @@ import (
 	"chronicler/twitter"
 
 	"github.com/lanseg/golang-commons/collections"
-    cm "github.com/lanseg/golang-commons/common"
+	cm "github.com/lanseg/golang-commons/common"
 )
 
 type twitterAdapter struct {

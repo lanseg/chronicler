@@ -8,11 +8,11 @@ import (
 
 	"chronicler/records"
 	"chronicler/telegram"
-    "chronicler/util"
+	"chronicler/util"
 
 	"github.com/lanseg/golang-commons/collections"
+	cm "github.com/lanseg/golang-commons/common"
 	"github.com/lanseg/golang-commons/optional"
-    cm "github.com/lanseg/golang-commons/common"
 
 	rpb "chronicler/records/proto"
 )

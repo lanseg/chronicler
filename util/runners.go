@@ -6,7 +6,7 @@ import (
 	"os/exec"
 	"path/filepath"
 
-    cm "github.com/lanseg/golang-commons/common" 
+	cm "github.com/lanseg/golang-commons/common"
 )
 
 type Runner struct {

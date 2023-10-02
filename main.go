@@ -11,9 +11,9 @@ import (
 	"chronicler/telegram"
 	"chronicler/twitter"
 
-	"github.com/lanseg/golang-commons/collections"
-    cm "github.com/lanseg/golang-commons/common"
 	rpb "chronicler/records/proto"
+	"github.com/lanseg/golang-commons/collections"
+	cm "github.com/lanseg/golang-commons/common"
 )
 
 var (

@@ -14,8 +14,8 @@ import (
 	rpb "chronicler/records/proto"
 	"chronicler/util"
 
+	cm "github.com/lanseg/golang-commons/common"
 	"github.com/lanseg/golang-commons/optional"
-    cm "github.com/lanseg/golang-commons/common" 
 )
 
 const (
@@ -154,6 +154,7 @@ func (s *LocalStorage) writeRecordSet(rs *rpb.RecordSet) error {
 }
 
 func (s *LocalStorage) GetFile(id string, filename string) optional.Optional[[]byte] {
+    s.logger.Infof("GetFile %s %s", id, filename)
 	return s.getOverlay(id).Read(filename)
 }
 
