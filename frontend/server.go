@@ -32,16 +32,18 @@ func (d DataRequest) String() string {
 
 func parseUrlRequest(link *url.URL) (*DataRequest, error) {
 	path := link.Path
+	query := link.Query()
 	params := DataRequest{}
 	for i, param := range strings.Split(strings.TrimPrefix(path, "/chronicler/"), "/") {
 		switch i {
 		case 0:
 			params.id = param
-		case 1:
-			params.filename = param
 		default:
 			return nil, fmt.Errorf("Unsupported path parameter #%d: %s", i, param)
 		}
+	}
+	if query["file"] != nil {
+		params.filename = query.Get("file")
 	}
 	return &params, nil
 }

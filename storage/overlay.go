@@ -74,11 +74,11 @@ func NewOverlay(root string, idSrc IdSource) *Overlay {
 	if err := os.MkdirAll(root, os.ModePerm); err != nil {
 		ol.logger.Warningf("Could not create directory at %s: %s", root, err)
 	}
-    
-    ol.readMapping()
-    if !exists(ol.getMappingPath()) {
-      ol.saveMapping()
-    }
+
+	ol.readMapping()
+	if !exists(ol.getMappingPath()) {
+		ol.saveMapping()
+	}
 
 	return ol
 }
@@ -92,8 +92,8 @@ func safeName(path string) string {
 }
 
 func exists(path string) bool {
-   _, err := os.Stat(path)
-  return os.IsNotExist(err)
+	_, err := os.Stat(path)
+	return os.IsNotExist(err)
 }
 
 func read(path string) optional.Optional[[]byte] {

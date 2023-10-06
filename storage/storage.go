@@ -81,7 +81,7 @@ func (s *LocalStorage) savePageView(id string, url string) {
 	s.webdriver.TakeScreenshot().IfPresent(
 		s.saveBase64(id, "pageview_page.png"))
 	s.webdriver.Print().IfPresent(
-		s.saveBase64(id, "pageview_page.png"))
+		s.saveBase64(id, "pageview_page.pdf"))
 }
 
 func (s *LocalStorage) downloadFile(id string, link string) error {
@@ -149,12 +149,17 @@ func (s *LocalStorage) writeRecordSet(rs *rpb.RecordSet) error {
 		}
 
 	}
+ 	_, err = o.Write(recordsetFileName, bytes).Get()
+	if err != nil {
+		return err
+	}
+	   
 	s.logger.Infof("Saved new record to %s", rs.Id)
 	return nil
 }
 
 func (s *LocalStorage) GetFile(id string, filename string) optional.Optional[[]byte] {
-    s.logger.Infof("GetFile %s %s", id, filename)
+	s.logger.Infof("GetFile %s %s", id, filename)
 	return s.getOverlay(id).Read(filename)
 }
 

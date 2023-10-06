@@ -79,6 +79,7 @@
                 const parentName = parent ? getSourceName(cdata, null, parent) : 'NONE';
                 const parentMessage = parent ? parent.messageId : 'NONE';
 
+                console.log(record)
                 /* --- */
                 const recordEl = createElement('div', {
                     'id': record.source.messageId,
@@ -98,15 +99,13 @@
                     console.warn(`Potentially broken file: ${f.fileUrl}`);
                 })
                 recordEl.appendChild(createGallery(rcid,
-                    record.files.filter(f => f.isImage).map(f => f.name)));
+                    record.files.filter(f => f.isImage)));
                 recordEl.appendChild(createAudioPlaylist(rcid,
-                    record.files.filter(f => f.isAudio).map(f => f.name)));
+                    record.files.filter(f => f.isAudio)));
                 recordEl.appendChild(createVideoPlaylist(rcid,
-                    record.files.filter(f => f.isVideo).map(f => f.name)));
-                recordEl.appendChild(createFileList(rcid, record.files
-                    .filter(f => f.name !== "")
-                    .map(f => f.name)));
-
+                    record.files.filter(f => f.isVideo)));
+                recordEl.appendChild(createFileList(rcid, 
+                    record.files));
                 fragment.appendChild(recordEl);
             }
             records.append(fragment);
