@@ -11,10 +11,9 @@ function getExtension(path) {
 }
 
 function getFileName(path) {
-    const lastIndex = path.lastIndexOf('/');
-    const params = path.indexOf("?", lastIndex);
-    return (lastIndex > -1 && lastIndex < path.length) ?
-        path.substring(lastIndex + 1, params == -1 ? path.length : params) : "";
+    const nameStart = path.lastIndexOf('/') + 1;
+    const nameEnd = path.indexOf("?", nameStart);
+    return path.substring(nameStart, nameEnd == -1 ? path.length : nameEnd);
 }
 
 /** **/
@@ -46,14 +45,14 @@ export class File {
     }
 
     get fileUrl() {
-        return this._fileObj["file_url"];
+        return this._fileObj["file_url"] ?? this._fileObj["local_url"];
     }
 
     get name() {
-        if (!this._fileObj["file_url"]) {
+        if (!this.fileUrl) {
             return ""
         }
-        return getFileName(this._fileObj["file_url"]);
+        return getFileName(this.fileUrl);
     }
 
     get isAudio() {

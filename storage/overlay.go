@@ -52,7 +52,6 @@ func (m *Mapping) addEntity(e *Entity) {
 }
 
 func (m *Mapping) getEntity(originalName string) *Entity {
-	m.updateMappingIfNeeded()
 	return m.entityByName[originalName]
 }
 
@@ -142,6 +141,7 @@ func (o *Overlay) readMapping() {
 		return
 	}
 	o.mapping = a
+    o.mapping.updateMappingIfNeeded()
 	o.logger.Infof("Read %d record(s) from %s", len(a.Entities), path)
 }
 

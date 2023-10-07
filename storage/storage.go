@@ -111,16 +111,7 @@ func (s *LocalStorage) writeRecordSet(rs *rpb.RecordSet) error {
 	if rs.Id == "" {
 		return fmt.Errorf("Record must have an ID")
 	}
-	o := s.getOverlay(rs.Id)
-	bytes, err := json.Marshal(rs)
-	if err != nil {
-		return err
-	}
-	_, err = o.Write(recordsetFileName, bytes).Get()
-	if err != nil {
-		return err
-	}
-	for _, r := range rs.Records {
+    for _, r := range rs.Records {
 		if r.Source != nil && r.Source.Url != "" {
 			s.savePageView(rs.Id, r.Source.Url)
 			r.Files = append(r.Files, &rpb.File{
@@ -149,11 +140,17 @@ func (s *LocalStorage) writeRecordSet(rs *rpb.RecordSet) error {
 		}
 
 	}
- 	_, err = o.Write(recordsetFileName, bytes).Get()
+	o := s.getOverlay(rs.Id)
+	bytes, err := json.Marshal(rs)
 	if err != nil {
 		return err
 	}
-	   
+
+	_, err = o.Write(recordsetFileName, bytes).Get()
+	if err != nil {
+		return err
+	}
+
 	s.logger.Infof("Saved new record to %s", rs.Id)
 	return nil
 }

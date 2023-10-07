@@ -89,6 +89,7 @@ export function createFileList(recordId, files) {
 
     filesEl.innerHTML += `<div class="title">All files</div>`;
     for (const file of files) {
+        console.log(file.name);
         setEl.innerHTML += `<div class="file">
                      <a href="chronicler/${recordId}?file=${encodeURIComponent(file.fileUrl)}">${file.name}</a>
                  </div>`;

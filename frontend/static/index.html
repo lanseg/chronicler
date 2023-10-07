@@ -79,7 +79,6 @@
                 const parentName = parent ? getSourceName(cdata, null, parent) : 'NONE';
                 const parentMessage = parent ? parent.messageId : 'NONE';
 
-                console.log(record)
                 /* --- */
                 const recordEl = createElement('div', {
                     'id': record.source.messageId,
@@ -95,6 +94,7 @@
                          <div class='content'>${record.textContent.replaceAll("\n", "<br/>")}</div>`;
 
                 /* --- */
+                console.log(record.files);
                 record.files.filter(f => !f.fileUrl).forEach(f => {
                     console.warn(`Potentially broken file: ${f.fileUrl}`);
                 })
