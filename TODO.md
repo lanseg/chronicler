@@ -1,6 +1,6 @@
 # TODOs
 
-# # Backend and frontend
+## Backend and frontend
 
 1. Fix detecting twitter adapter
 2. Fix truncating in the middle of the unicode byte
@@ -10,7 +10,7 @@
 6. Simple search / filtering
 7. Add geodata section and parameter
 
-# # More adapters
+## More adapters
 
 1. Habr
 2. Pikabu
