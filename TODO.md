@@ -9,9 +9,11 @@
 5. View number of photos/docs/audios/videos
 6. Simple search / filtering
 7. Add geodata section and parameter
+8. Add automatic wrapper adapter
 
 ## More adapters
 
 1. Habr
 2. Pikabu
-
+3. Youtube
+4. Pikabu userbot
