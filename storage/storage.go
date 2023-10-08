@@ -111,7 +111,7 @@ func (s *LocalStorage) writeRecordSet(rs *rpb.RecordSet) error {
 	if rs.Id == "" {
 		return fmt.Errorf("Record must have an ID")
 	}
-    for _, r := range rs.Records {
+	for _, r := range rs.Records {
 		if r.Source != nil && r.Source.Url != "" {
 			s.savePageView(rs.Id, r.Source.Url)
 			r.Files = append(r.Files, &rpb.File{

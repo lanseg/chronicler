@@ -30,13 +30,25 @@
     color: white;
 }
 
-.topheader .menu label {
-    background-color: black;
-    height: 54px;
-    width: 54px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.topheader .menubar .menu .hamburger-lines {
+  padding: 10px;
+  display: block;
+  height: 26px;
+  width: 32px;
+  top: 17px;
+  left: 20px;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.topheader .menubar .menu .hamburger-lines .line {
+  display: block;
+  height: 2px;
+  width: 100%;
+  border-radius: 10px;
+  background: white;
 }
 
 #menuitems_check {
@@ -130,6 +142,11 @@
     font-size: 16px;
 }
 
+.record .title {
+    font-size: 16px;
+    padding: 8px;
+}
+
 .sourcename {
     font-weight: bold;
 }
@@ -156,11 +173,10 @@
     margin: 4px;
 }
 
-.record .fileset .title {
+.record .title {
     background-color: lightgray;
     width: 100%;
     box-sizing: border-box;
-    padding: 2px;
 }
 
 .record .files {

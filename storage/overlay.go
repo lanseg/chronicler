@@ -141,7 +141,7 @@ func (o *Overlay) readMapping() {
 		return
 	}
 	o.mapping = a
-    o.mapping.updateMappingIfNeeded()
+	o.mapping.updateMappingIfNeeded()
 	o.logger.Infof("Read %d record(s) from %s", len(a.Entities), path)
 }
 
