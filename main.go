@@ -17,32 +17,42 @@ import (
 )
 
 var (
-	twitterRe = regexp.MustCompile("twitter.*/(?P<twitter_id>[0-9]+)[/]?")
+	twitterRe = regexp.MustCompile("(twitter|x.com).*/(?P<twitter_id>[0-9]+)[/]?")
 )
 
-func extractRequests(log *cm.Logger, rs *rpb.RecordSet) []*rpb.Request {
+func findTwitterSource(link string) *rpb.Source {
+	matches := collections.NewMap(twitterRe.SubexpNames(), twitterRe.FindStringSubmatch(link))
+	if match, ok := matches["twitter_id"]; ok && match != "" {
+		return &rpb.Source{
+			ChannelId: matches["twitter_id"],
+			Type:      rpb.SourceType_TWITTER,
+		}
+	}
+	return nil
+}
+
+func linkToTarget(link string) *rpb.Source {
+	return &rpb.Source{
+		Url:  link,
+		Type: rpb.SourceType_WEB,
+	}
+}
+
+func extractRequests(adapters []adapter.Adapter, rs *rpb.RecordSet) []*rpb.Request {
 	result := []*rpb.Request{}
 	if len(rs.Records) == 1 && rs.Records[0].Source.Type == rpb.SourceType_WEB {
-		return []*rpb.Request{}
+		return result
 	}
 	for _, link := range rs.Records[0].Links {
-		matches := collections.NewMap(twitterRe.SubexpNames(), twitterRe.FindStringSubmatch(link))
-		newRequest := &rpb.Request{
-			Id: rs.Id,
-		}
-
-		if match, ok := matches["twitter_id"]; ok && match != "" {
-			newRequest.Target = &rpb.Source{
-				ChannelId: matches["twitter_id"],
-				Type:      rpb.SourceType_TWITTER,
-			}
-		} else {
-			newRequest.Target = &rpb.Source{
-				Url:  link,
-				Type: rpb.SourceType_WEB,
+		for _, a := range adapters {
+			if target := a.MatchLink(link); target != nil {
+				result = append(result, &rpb.Request{
+					Id:     rs.Id,
+					Target: target,
+				})
+				break
 			}
 		}
-		result = append(result, newRequest)
 	}
 	return result
 }
@@ -60,6 +70,10 @@ func main() {
 		rpb.SourceType_TELEGRAM: adapter.NewTelegramAdapter(tgBot),
 		rpb.SourceType_TWITTER:  adapter.NewTwitterAdapter(twClient),
 		rpb.SourceType_WEB:      adapter.NewWebAdapter(nil),
+	}
+	linkMatchers := []adapter.Adapter{
+		adapters[rpb.SourceType_TWITTER],
+		adapters[rpb.SourceType_WEB],
 	}
 
 	requests := make(chan *rpb.Request)
@@ -100,7 +114,7 @@ func main() {
 				}
 			}
 			for _, records := range result.Result {
-				for _, req := range extractRequests(logger, records) {
+				for _, req := range extractRequests(linkMatchers, records) {
 					requests <- req
 				}
 			}

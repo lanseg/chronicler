@@ -5,6 +5,7 @@ import (
 )
 
 type Adapter interface {
+	MatchLink(link string) *rpb.Source
 	GetResponse(*rpb.Request) []*rpb.Response
 	SendMessage(*rpb.Message)
 }

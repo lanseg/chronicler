@@ -71,3 +71,43 @@ func TestWebRequestResponse(t *testing.T) {
 		})
 	}
 }
+
+func newWebSrc(url string) *rpb.Source {
+	return &rpb.Source{
+		Url:  url,
+		Type: rpb.SourceType_WEB,
+	}
+}
+
+func TestWebLinkMatcher(t *testing.T) {
+	for _, tc := range []struct {
+		desc string
+		link string
+		want *rpb.Source
+	}{
+		{
+			desc: "link with and postfix prefix matches",
+			link: "http://somelink.com/whatever?param&b=c",
+			want: newWebSrc("http://somelink.com/whatever?param&b=c"),
+		},
+		{
+			desc: "double slash link matches",
+			link: "//somelink.com",
+			want: newWebSrc("//somelink.com"),
+		},
+		{
+			desc: "empty string doesnt match",
+			link: "",
+			want: nil,
+		},
+	} {
+		t.Run(tc.desc, func(t *testing.T) {
+			tg := NewWebAdapter(nil)
+
+			result := tg.MatchLink(tc.link)
+			if fmt.Sprintf("%+v", tc.want) != fmt.Sprintf("%+v", result) {
+				t.Errorf("Expected result to be:\n%+v\nBut got:\n%+v", tc.want, result)
+			}
+		})
+	}
+}

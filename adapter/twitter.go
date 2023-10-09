@@ -1,6 +1,7 @@
 package adapter
 
 import (
+	"regexp"
 	"sort"
 	"time"
 
@@ -11,18 +12,35 @@ import (
 	cm "github.com/lanseg/golang-commons/common"
 )
 
+const (
+	twitterRe = "(\\.|^|//)(twitter|x.com).*/(?P<twitter_id>[0-9]+)[/]?"
+)
+
 type twitterAdapter struct {
 	Adapter
 
-	logger *cm.Logger
-	client twitter.Client
+	linkMatcher *regexp.Regexp
+	logger      *cm.Logger
+	client      twitter.Client
 }
 
 func NewTwitterAdapter(client twitter.Client) Adapter {
 	return &twitterAdapter{
-		logger: cm.NewLogger("TwitterAdapter"),
-		client: client,
+		linkMatcher: regexp.MustCompile(twitterRe),
+		logger:      cm.NewLogger("TwitterAdapter"),
+		client:      client,
 	}
+}
+
+func (t *twitterAdapter) MatchLink(link string) *rpb.Source {
+	matches := collections.NewMap(t.linkMatcher.SubexpNames(), t.linkMatcher.FindStringSubmatch(link))
+	if match, ok := matches["twitter_id"]; ok && match != "" {
+		return &rpb.Source{
+			ChannelId: matches["twitter_id"],
+			Type:      rpb.SourceType_TWITTER,
+		}
+	}
+	return nil
 }
 
 func (t *twitterAdapter) SendMessage(*rpb.Message) {

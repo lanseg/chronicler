@@ -63,6 +63,10 @@ func (ts *telegramAdapter) waitForUpdate() []*telegram.Update {
 		}).Collect()
 }
 
+func (ts *telegramAdapter) MatchLink(link string) *rpb.Source {
+	return nil
+}
+
 func (ts *telegramAdapter) GetResponse(request *rpb.Request) []*rpb.Response {
 	updates := ts.waitForUpdate()
 	if len(updates) == 0 {

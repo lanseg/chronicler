@@ -2,7 +2,7 @@
 
 ## Backend and frontend
 
-1. Fix detecting twitter adapter
+1. ~Fix detecting twitter adapter~
 2. Fix truncating in the middle of the unicode byte
 3. Add deleting/hiding records
 4. Add section for docs
@@ -16,4 +16,4 @@
 1. Habr
 2. Pikabu
 3. Youtube
-4. Pikabu userbot
+4. Telegram userbot

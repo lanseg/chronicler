@@ -86,6 +86,20 @@ func createWebAdapter(httpClient HttpClient, timeSource func() time.Time) Adapte
 	}
 }
 
+func (w *webAdapter) MatchLink(link string) *rpb.Source {
+	if link == "" {
+		return nil
+	}
+	u, err := url.Parse(link)
+	if err != nil {
+		return nil
+	}
+	return &rpb.Source{
+		Url:  u.String(),
+		Type: rpb.SourceType_WEB,
+	}
+}
+
 func (w *webAdapter) Get(link string) (*http.Response, error) {
 	req, err := http.NewRequest("GET", fixLink("https", "", link), nil)
 	if err != nil {

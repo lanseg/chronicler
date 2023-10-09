@@ -32,6 +32,7 @@ go_test(
     srcs = [
         "adapter_test.go",
         "telegram_test.go",
+        "twitter_test.go",
         "testutil.go",
         "web_test.go",
     ],
