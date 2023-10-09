@@ -88,7 +88,14 @@ func (ws *WebServer) responseRecordList(w http.ResponseWriter) {
 			}
 		}
 		if len(desc) > textSampleSize {
-			desc = desc[:textSampleSize]
+			sb := strings.Builder{}
+			for i, r := range desc {
+				if i >= textSampleSize {
+					break
+				}
+				sb.WriteRune(r)
+			}
+			desc = sb.String()
 		}
 		set := &rpb.RecordListResponse_RecordSetInfo{
 			Id:          r.Id,

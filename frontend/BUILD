@@ -37,6 +37,10 @@ go_binary(
 go_test(
     name = "frontend_test",
     size = "small",
+    data = glob([
+        "static/*",
+        "static/modules/*",
+    ]),
     srcs = [
         "server_test.go",
     ],
