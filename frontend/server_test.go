@@ -37,11 +37,11 @@ func TestFrontend(t *testing.T) {
 		{"simple test", fmt.Sprintf("http://localhost:%d/", testingPort)},
 	} {
 		t.Run(tc.desc, func(t *testing.T) {
-          data, err := get(tc.url)
-          if err != nil {
-            t.Errorf("Could not fetch data from %s", tc.url)
-          }
-          fmt.Printf("HERE: %s", string(data))
+			data, err := get(tc.url)
+			if err != nil {
+				t.Errorf("Could not fetch data from %s", tc.url)
+			}
+			fmt.Printf("HERE: %s", string(data))
 		})
 	}
 }
