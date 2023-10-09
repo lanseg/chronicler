@@ -3,7 +3,7 @@
 ## Backend and frontend
 
 1. ~Fix detecting twitter adapter~
-2. Fix truncating in the middle of the unicode byte
+2. ~Fix truncating in the middle of the unicode byte~
 3. Add deleting/hiding records
 4. Add section for docs
 5. View number of photos/docs/audios/videos

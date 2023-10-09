@@ -80,14 +80,14 @@ export function createGallery(recordId, images) {
     return imagesEl;
 }
 
-export function createFileList(recordId, files) {
+export function createFileList(recordId, title, files) {
     if (files.length === 0) {
         return document.createDocumentFragment();
     }
     const filesEl = createElement('div', { 'class': 'fileset ' });
     const setEl = createElement('div', { 'class': 'files' });
 
-    filesEl.innerHTML += `<div class="title">All files</div>`;
+    filesEl.innerHTML += `<div class="title">${title}</div>`;
     for (const file of files) {
         setEl.innerHTML += `<div class="file">
                      <a href="chronicler/${recordId}?file=${encodeURIComponent(file.fileUrl)}">${file.name}</a>

@@ -107,7 +107,9 @@
                     record.files.filter(f => f.isAudio)));
                 recordEl.appendChild(createVideoPlaylist(rcid,
                     record.files.filter(f => f.isVideo)));
-                recordEl.appendChild(createFileList(rcid, 
+                recordEl.appendChild(createFileList(rcid, "Documents",
+                    record.files.filter(f => f.isDocument)));
+                recordEl.appendChild(createFileList(rcid, "All files",
                     record.files));
                 fragment.appendChild(recordEl);
             }
