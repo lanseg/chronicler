@@ -31,31 +31,31 @@
 }
 
 .topheader .menubar .menu .hamburger-lines {
-  padding: 10px;
-  display: block;
-  height: 26px;
-  width: 32px;
-  top: 17px;
-  left: 20px;
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+    padding: 10px;
+    display: block;
+    height: 26px;
+    width: 32px;
+    top: 17px;
+    left: 20px;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 .topheader .menubar .menu .hamburger-lines .line {
-  display: block;
-  height: 2px;
-  width: 100%;
-  border-radius: 10px;
-  background: white;
+    display: block;
+    height: 2px;
+    width: 100%;
+    border-radius: 10px;
+    background: white;
 }
 
 #menuitems_check {
     display: none;
 }
 
-#menuitems_check:checked~.menuitems {
+#menuitems_check:checked ~ .menuitems {
     display: block;
 }
 
@@ -66,10 +66,10 @@
 
 .topheader .menuitem {
     text-decoration: none;
-    background-color: #2F2F2F;
+    background-color: #2f2f2f;
     width: 100%;
     font-size: 20px;
-    border-bottom: solid 1px #4F4F4F;
+    border-bottom: solid 1px #4f4f4f;
 }
 
 .topheader .menuitem a {
@@ -77,11 +77,11 @@
 }
 
 .topheader .menuitem:active {
-    background-color: #4F4F4F;
+    background-color: #4f4f4f;
 }
 
 .topheader .menu label:active {
-    background-color: #4F4F4F;
+    background-color: #4f4f4f;
 }
 
 .records {
@@ -218,15 +218,15 @@
 }
 
 .icon.twitter {
-    background-image: url('/icons.svg');
+    background-image: url("/icons.svg");
 }
 
 .icon.web {
-    background-image: url('/icons.svg');
+    background-image: url("/icons.svg");
     background-position: 16px 0px;
 }
 
 .icon.telegram {
-    background-image: url('/icons.svg');
+    background-image: url("/icons.svg");
     background-position: 0px 16px;
 }

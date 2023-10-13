@@ -1,25 +1,23 @@
-"use strict;"
+"use strict;";
 
-const imgExtensions = ['png', 'jpg', 'svg', 'gif', 'webp'];
-const audioExtensions = ['wav', 'mp3', 'ogg', 'oga'];
-const videoExtensions = ['webm', 'mp4', 'mov'];
-const docExtensions = ['pdf'];
+const imgExtensions = ["png", "jpg", "svg", "gif", "webp"];
+const audioExtensions = ["wav", "mp3", "ogg", "oga"];
+const videoExtensions = ["webm", "mp4", "mov"];
+const docExtensions = ["pdf"];
 
 function getExtension(path) {
-    const lastIndex = path.lastIndexOf('.');
-    return (lastIndex > -1 && lastIndex < path.length) ?
-        path.substring(lastIndex + 1) : "";
+    const lastIndex = path.lastIndexOf(".");
+    return lastIndex > -1 && lastIndex < path.length ? path.substring(lastIndex + 1) : "";
 }
 
 function getFileName(path) {
-    const nameStart = path.lastIndexOf('/') + 1;
+    const nameStart = path.lastIndexOf("/") + 1;
     const nameEnd = path.indexOf("?", nameStart);
     return path.substring(nameStart, nameEnd == -1 ? path.length : nameEnd);
 }
 
 /** **/
 export class SourceType {
-
     static byId = new Map();
 
     constructor(id, name) {
@@ -51,44 +49,42 @@ export class File {
 
     get name() {
         if (!this.fileUrl) {
-            return ""
+            return "";
         }
         return getFileName(this.fileUrl);
     }
 
     get isAudio() {
         if (!this.fileUrl) {
-            return false
+            return false;
         }
         return audioExtensions.includes(getExtension(this.name.toLowerCase()));
     }
 
     get isVideo() {
         if (!this.fileUrl) {
-            return false
+            return false;
         }
         return videoExtensions.includes(getExtension(this.name.toLowerCase()));
     }
 
     get isImage() {
         if (!this.fileUrl) {
-            return false
+            return false;
         }
         return imgExtensions.includes(getExtension(this.name.toLowerCase()));
     }
 
     get isDocument() {
         if (!this.fileUrl) {
-            return false
+            return false;
         }
         return docExtensions.includes(getExtension(this.name.toLowerCase()));
     }
 }
 
-
 /** **/
 export class Source {
-
     constructor(sourceObj) {
         this._sourceObj = sourceObj;
     }
@@ -114,13 +110,11 @@ export class Source {
     }
 
     get id() {
-        return this.messageId ??
-            this.channelId ??
-            this.senderId ??
-            (this.url ? btoa(this.url) : null);
+        return (
+            this.messageId ?? this.channelId ?? this.senderId ?? (this.url ? btoa(this.url) : null)
+        );
     }
 }
-
 
 /** **/
 export class SourceMetadata {
@@ -143,7 +137,6 @@ export class SourceMetadata {
 
 /** **/
 export class Record {
-
     constructor(recordObj, source, parent) {
         this._recordObj = recordObj;
 
@@ -216,7 +209,6 @@ export class RecordSet {
 
 /** **/
 export class RecordSetInfo {
-
     constructor(rsInfoObj, record) {
         this._rsInfoObj = rsInfoObj;
         this.rootRecord = record;
@@ -233,11 +225,9 @@ export class RecordSetInfo {
     get recordCount() {
         return this._rsInfoObj["record_count"];
     }
-
 }
 
 export class RecordListResponse {
-
     constructor(recordListObj) {
         this._recordListObj = recordListObj;
         this.sourceMetadata = new Map();
@@ -250,9 +240,15 @@ export class RecordListResponse {
 
         for (const rs of recordListObj["record_sets"] ?? []) {
             if (rs["root_record"]) {
-                const src = rs["root_record"]["source"] ? new Source(rs["root_record"]["source"]) : null;
-                const parent = rs["root_record"]["parent"] ? new Source(rs["root_record"]["parent"]) : null;
-                this.recordSets.push(new RecordSetInfo(rs, new Record(rs["root_record"], src, parent)));
+                const src = rs["root_record"]["source"]
+                    ? new Source(rs["root_record"]["source"])
+                    : null;
+                const parent = rs["root_record"]["parent"]
+                    ? new Source(rs["root_record"]["parent"])
+                    : null;
+                this.recordSets.push(
+                    new RecordSetInfo(rs, new Record(rs["root_record"], src, parent)),
+                );
             } else {
                 this.recordSets.push(new RecordSetInfo(rs, null));
             }

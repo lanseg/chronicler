@@ -1,182 +1,104 @@
 <html>
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel='stylesheet' href='/style.css' />
-    <script type="importmap">
-        {
-            "imports": {
-                "api": "./modules/api.js",
-                "wrappers": "./modules/wrappers.js",
-                "dom": "./modules/dom.js"
-            }
-        }
-    </script>
-    <script type="module">
-        import { getRecordSets, getRecord } from "api";
-        import { createElement, formatDateTime, createGallery, createFileList, createAudioPlaylist, createVideoPlaylist } from "dom";
-        import { RecordListResponse, RecordSet } from "wrappers";
-
-        const params = new URLSearchParams(document.location.search);
-        const rcid = params.get("record_id");
-
-        function formatSource(source) {
-            if (source.sourceType.name === "web") {
-                try {
-                    return new URL(source.url).host;
-                } catch { }
-                return source.url;
-            }
-            if (source.senderId) {
-                return source.senderId;
-            }
-            return source.channelId;
-        }
-
-        function getSourceName(data, parent, source) {
-            const nameOrId = formatSource(parent ?? source);
-            if (data.sourceMetadata.get(nameOrId)) {
-                return data.sourceMetadata.get(nameOrId).name
-            }
-            return nameOrId;
-        }
-
-        function renderRecordSets(data) {
-            const fragment = document.createDocumentFragment();
-            const records = document.querySelector('.records');
-
-            for (const rs of data.recordSets) {
-                const recordEl = createElement("div", { "id": rs["id"], "class": "record" });
-                if (!rs.rootRecord) {
-                    recordEl.innerHTML = `<div class='content error'>No record for id ${rs["id"]}</div>`;
-                    fragment.appendChild(recordEl);
-                    continue
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" href="/style.css" />
+        <script type="importmap">
+            {
+                "imports": {
+                    "api": "./modules/api.js",
+                    "wrappers": "./modules/wrappers.js",
+                    "dom": "./modules/dom.js"
                 }
-                const srcName = getSourceName(data, rs.rootRecord.parent, rs.rootRecord.source);
-                const timeLabel = formatDateTime(rs.rootRecord.time);
-                recordEl.innerHTML = `<div class='header'>
-                           <span class="icon ${rs.rootRecord.source.sourceType.name}">&nbsp;</span>
-                           <span class="sourcename">${srcName}</span>
-                           <span class="datetime">${timeLabel}</span>,
-                           <a href="?record_id=${rs.id}">${rs.recordCount}↴</a>
-                           <a href="/chronicler/${rs.id}/record.json">json</a>
-                         </div>
-                         <div class='content'>${rs.description}</div>`;
-                fragment.appendChild(recordEl);
             }
-            records.append(fragment);
-        }
+        </script>
+        <script type="module">
+            import { getRecordSets, getRecord } from "api";
+            import { createRecord, createRecordSet } from "dom";
+            import { RecordListResponse, RecordSet } from "wrappers";
 
-        function renderRecord(cdata) {
-            const fragment = document.createDocumentFragment();
-            const records = document.querySelector('.records');
-            for (const record of cdata.records) {
-                const source = record.source;
-                const parent = record.parent;
+            const params = new URLSearchParams(document.location.search);
+            const rcid = params.get("record_id");
 
-                const recordName = source ? getSourceName(cdata, source) : 'NONE';
-                const parentName = parent ? getSourceName(cdata, null, parent) : 'NONE';
-                const parentMessage = parent ? parent.messageId : 'NONE';
-
-                /* --- */
-                const recordEl = createElement('div', {
-                    'id': record.source.messageId,
-                    'class': 'record'
-                });
-                recordEl.innerHTML = `<div class='header'>
-                           <span class="icon ${record.source.sourceType.name}">&nbsp;</span>
-                           <span class="datetime">${formatDateTime(record.time)}</span>
-                           <a href="#${record.source.messageId}">#</a>
-                           <span class="username">${recordName}</span>
-                           <span class="username">→ <a href="#${parentMessage}">${parentName}</a></span>
-                         </div>
-                         <div class='content'>${record.textContent.replaceAll("\n", "<br/>")}</div>`;
-
-                /* --- */
-                record.files.filter(f => !f.fileUrl).forEach(f => {
-                    console.warn(`Potentially broken file: ${f.fileUrl}`);
-                });
-                record.files.sort((a, b) => {
-                  return a.name.localeCompare(b.name);
-                });
-                
-                recordEl.appendChild(createGallery(rcid,
-                    record.files.filter(f => f.isImage)));
-                recordEl.appendChild(createAudioPlaylist(rcid,
-                    record.files.filter(f => f.isAudio)));
-                recordEl.appendChild(createVideoPlaylist(rcid,
-                    record.files.filter(f => f.isVideo)));
-                recordEl.appendChild(createFileList(rcid, "Documents",
-                    record.files.filter(f => f.isDocument)));
-                recordEl.appendChild(createFileList(rcid, "All files",
-                    record.files));
-                fragment.appendChild(recordEl);
+            function renderRecordSets(data) {
+                const fragment = document.createDocumentFragment();
+                const records = document.querySelector(".records");
+                for (const rs of data.recordSets) {
+                    fragment.appendChild(createRecordSet(rs, data.sourceMetadata));
+                }
+                records.append(fragment);
             }
-            records.append(fragment);
-        }
 
-        window.onload = () => {
-            document.querySelector("#recordId .search-input").value = rcid;
-            document.querySelector("#recordId button").addEventListener('click', () => {
-                window.location.href = "?record_id=" + document.querySelector("#recordId .search-input").value;
-            });
-
-            if (params.get("record_id")) {
-                document.querySelector(".loader").style.display = 'inline-block';
-                getRecord(params.get("record_id"))
-                    .then(data => new RecordSet(data))
-                    .then(data => {
-                        renderRecord(data);
-                    }).then(() => {
-                        document.querySelector(".loader").style.display = 'none';
-                    })
-            } else {
-                document.querySelector(".loader").style.display = 'inline-block';
-                getRecordSets()
-                    .then(rsObj => new RecordListResponse(rsObj))
-                    .then(data => {
-                        renderRecordSets(data);
-                    })
-                    .then(() => {
-                        document.querySelector(".loader").style.display = 'none';
-                    });
+            function renderRecord(cdata) {
+                const fragment = document.createDocumentFragment();
+                const records = document.querySelector(".records");
+                for (const record of cdata.records) {
+                    fragment.appendChild(createRecord(rcid, record, cdata.sourceMetadata));
+                }
+                records.append(fragment);
             }
-        };
-    </script>
-</head>
 
-<body>
-    <nav class="topheader">
-        <div class="menubar">
-            <div class="title">
-                <a href="/">Chronicler</a>
-            </div>
-            <div class="status">
-                <div class="loader"></div>
-            </div>
-            <div class="menu">
-              <label for="menuitems_check">
-                <div class="hamburger-lines">
-                  <span class="line"></span>
-                  <span class="line"></span>
-                  <span class="line"></span>
+            window.onload = () => {
+                document.querySelector("#recordId .search-input").value = rcid;
+                document.querySelector("#recordId button").addEventListener("click", () => {
+                    const rid = document.querySelector("#recordId .search-input").value;
+                    window.location.href = "?record_id=" + rid;
+                });
+
+                if (params.get("record_id")) {
+                    document.querySelector(".loader").style.display = "inline-block";
+                    getRecord(params.get("record_id"))
+                        .then((data) => new RecordSet(data))
+                        .then((data) => {
+                            renderRecord(data);
+                        })
+                        .then(() => {
+                            document.querySelector(".loader").style.display = "none";
+                        });
+                } else {
+                    document.querySelector(".loader").style.display = "inline-block";
+                    getRecordSets()
+                        .then((rsObj) => new RecordListResponse(rsObj))
+                        .then((data) => {
+                            renderRecordSets(data);
+                        })
+                        .then(() => {
+                            document.querySelector(".loader").style.display = "none";
+                        });
+                }
+            };
+        </script>
+    </head>
+
+    <body>
+        <nav class="topheader">
+            <div class="menubar">
+                <div class="title">
+                    <a href="/">Chronicler</a>
                 </div>
-              </label>
-            </div>
-        </div>
-        <input type="checkbox" id="menuitems_check" />
-        <div class="menuitems">
-            <div class="menuitem">
-                <div id="recordId" class="controls">
-                    <input type="text" placeholder="Post id" class="search-input" />
-                    <button>Open</buttom>
+                <div class="status">
+                    <div class="loader"></div>
+                </div>
+                <div class="menu">
+                    <label for="menuitems_check">
+                        <div class="hamburger-lines">
+                            <span class="line"></span>
+                            <span class="line"></span>
+                            <span class="line"></span>
+                        </div>
+                    </label>
                 </div>
             </div>
-        </div>
-    </nav>
-    <div class="records">
-    </div>
-</body>
-
+            <input type="checkbox" id="menuitems_check" />
+            <div class="menuitems">
+                <div class="menuitem">
+                    <div id="recordId" class="controls">
+                        <input type="text" placeholder="Post id" class="search-input" />
+                        <button>Open</button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+        <div class="records"></div>
+    </body>
 </html>
