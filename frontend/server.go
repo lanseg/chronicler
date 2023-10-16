@@ -82,20 +82,16 @@ func (ws *WebServer) responseRecordList(w http.ResponseWriter) {
 	for _, r := range records {
 		desc := ""
 		if len(r.Records) > 0 {
-			desc = r.Records[0].TextContent
+			desc = cm.IfEmpty(
+				string(r.Records[0].RawContent),
+				r.Records[0].TextContent)
+
 			if r.Records[0].Source.Type == rpb.SourceType_WEB {
 				desc = htmlparser.GetTitle(desc)
 			}
 		}
 		if len(desc) > textSampleSize {
-			sb := strings.Builder{}
-			for i, r := range desc {
-				if i >= textSampleSize {
-					break
-				}
-				sb.WriteRune(r)
-			}
-			desc = sb.String()
+			desc = cm.Ellipsis(desc, textSampleSize, true)
 		}
 		set := &rpb.RecordListResponse_RecordSetInfo{
 			Id:          r.Id,

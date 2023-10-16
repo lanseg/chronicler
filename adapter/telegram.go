@@ -53,13 +53,13 @@ func (ts *telegramAdapter) waitForUpdate() []*telegram.Update {
 		optional.
 			OfError(ts.bot.GetUpdates(int64(0), ts.cursor, 100, 100, []string{})).
 			OrElse([]*telegram.Update{})).
-		Filter(func(u *telegram.Update) bool {
-			return u.Message != nil
-		}).
 		Peek(func(u *telegram.Update) {
 			if ts.cursor <= u.UpdateID {
 				ts.cursor = u.UpdateID + 1
 			}
+		}).
+		Filter(func(u *telegram.Update) bool {
+			return u.Message != nil
 		}).Collect()
 }
 

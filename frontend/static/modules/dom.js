@@ -133,16 +133,25 @@ export function createRecordSet(rs, metadata) {
         recordEl.innerHTML = `<div class='content error'>No record for id ${rs["id"]}</div>`;
         return recordEl;
     }
-    const srcName = getSourceName(metadata, rs.rootRecord.source, rs.rootRecord.parent);
+    const senderName = getSourceName(metadata, rs.rootRecord.source, rs.rootRecord.parent);
+    const srcName = rs.rootRecord.parent ? `${getSourceName(metadata, rs.rootRecord.parent)}` : "";
+
     const timeLabel = formatDateTime(rs.rootRecord.time);
     recordEl.innerHTML = `<div class='header'>
         <span class="icon ${rs.rootRecord.source.sourceType.name}">&nbsp;</span>
-        <span class="sourcename">${srcName}</span>
+        <div class="origin"></div>
         <span class="datetime">${timeLabel}</span>
         <a href="?record_id=${rs.id}">${rs.recordCount}</a>
         <a href="/chronicler/${rs.id}?file=record.json">json<a>
       </div>
       <div class="content">${rs.description}</div>`;
+    const origin = recordEl.querySelector(".origin");
+
+    if (srcName === "") {
+        origin.innerHTML = `<span class="source">${senderName}</span>`;
+    } else {
+        origin.innerHTML = `<span class="source">${srcName}</span> ${senderName}`;
+    }
     return recordEl;
 }
 

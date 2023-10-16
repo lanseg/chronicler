@@ -142,12 +142,16 @@
     font-size: 16px;
 }
 
+.record .header .origin {
+    display: inline-block;
+}
+
 .record .title {
     font-size: 16px;
     padding: 8px;
 }
 
-.sourcename {
+.record .source {
     font-weight: bold;
 }
 
