@@ -146,48 +146,81 @@
     display: inline-block;
 }
 
-.record .title {
-    font-size: 16px;
-    padding: 8px;
-}
-
 .record .source {
     font-weight: bold;
 }
 
-.record .gallery {
-    width: 100%;
-    display: flex;
-    flex-wrap: wrap;
+/* --- Section --- */
+.record .section {
+    border-bottom: solid 1px darkgray;
 }
 
-.record .gallery .image {
-    max-width: 300px;
-    margin: 4px;
-    width: 100%;
-}
-
-.record .gallery .image img {
-    width: 100%;
-}
-
-.record .gallery video {
-    max-width: 320px;
-    max-height: 240px;
-    margin: 4px;
-}
-
-.record .title {
+.record .section .header {
+    font-size: 16px;
+    padding: 8px;
     background-color: lightgray;
     width: 100%;
     box-sizing: border-box;
 }
 
-.record .files {
+.record .section .toggler_status {
+    display: inline-block;
+
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    border-left: 5px solid currentColor;
+
+    vertical-align: middle;
+    margin-right: 0.7rem;
+    transform: translateY(-2px);
+
+    transition: transform 0.2s ease-out;
+}
+
+.record .section input.toggler {
+    display: none;
+}
+
+.record .section .content {
+    display: none;
+}
+
+.record .section input.toggler:checked ~ .content {
+    display: block;
+}
+
+.record .section .toggler:checked ~ .header .toggler_status {
+    transform: rotate(90deg) translateX(-3px);
+}
+
+/* --- section gallery --- */
+.record .section .gallery {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.record .section .gallery .image {
+    max-width: 300px;
+    margin: 4px;
+    width: 100%;
+}
+
+.record .section .gallery .image img {
+    width: 100%;
+}
+
+.record .section .gallery video {
+    max-width: 320px;
+    max-height: 240px;
     margin: 4px;
 }
 
-.fileset figcaption {
+.record .section .files {
+    margin: 4px;
+}
+
+.record .section figcaption {
     font-size: smaller;
 }
 

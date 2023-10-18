@@ -41,14 +41,35 @@ function createElement(name, attributes) {
     return el;
 }
 
+var _togglerCounter = 0;
+
+function createRecordSection(recordId, title) {
+    const togglerId = `${recordId}_toggler${_togglerCounter}`;
+    const element = createElement("div", { class: "section" });
+    element.innerHTML += `
+    <input class="toggler" type="checkbox" id="${togglerId}" />     
+    <div class="header">
+      <label class="toggler" for="${togglerId}">
+        <div class="title">
+          <span class="toggler_status"></span>${title}
+        </div>
+      </label>
+    </div>
+    <div class="content">
+    </div>
+    `;
+    _togglerCounter++;
+    return element;
+}
+
 function createAudioPlaylist(recordId, audios) {
     if (audios.length === 0) {
         return document.createDocumentFragment();
     }
-    const imagesEl = createElement("div", { class: "fileset" });
+    const sectionEl = createRecordSection(recordId, `Audio ${audios.length}`);
+    const section = sectionEl.querySelector(".content");
     const galleryEl = createElement("div", { class: "files" });
 
-    imagesEl.innerHTML += `<div class="title">Audio</div>`;
     for (const file of audios) {
         galleryEl.innerHTML += `
                         <figure>
@@ -60,18 +81,18 @@ function createAudioPlaylist(recordId, audios) {
                           </audio>
                         </figure>`;
     }
-    imagesEl.appendChild(galleryEl);
-    return imagesEl;
+    section.appendChild(galleryEl);
+    return sectionEl;
 }
 
 function createVideoPlaylist(recordId, videos) {
     if (videos.length === 0) {
         return document.createDocumentFragment();
     }
-    const imagesEl = createElement("div", { class: "fileset" });
+    const sectionEl = createRecordSection(recordId, `Video (${videos.length})`);
+    const section = sectionEl.querySelector(".content");
     const galleryEl = createElement("div", { class: "gallery" });
 
-    imagesEl.innerHTML += `<div class="title">Video</div>`;
     for (const file of videos) {
         galleryEl.innerHTML += `
                         <figure>
@@ -83,18 +104,18 @@ function createVideoPlaylist(recordId, videos) {
                           </video>
                         </figure>`;
     }
-    imagesEl.appendChild(galleryEl);
-    return imagesEl;
+    section.appendChild(galleryEl);
+    return sectionEl;
 }
 
 function createGallery(recordId, images) {
     if (images.length === 0) {
         return document.createDocumentFragment();
     }
-    const imagesEl = createElement("div", { class: "fileset" });
+    const sectionEl = createRecordSection(recordId, `Images (${images.length})`);
+    const section = sectionEl.querySelector(".content");
     const galleryEl = createElement("div", { class: "gallery" });
 
-    imagesEl.innerHTML += `<div class="title">Images</div>`;
     for (const file of images) {
         galleryEl.innerHTML += `<div class="image">
                           <a href="chronicler/${recordId}?file=${encodeURIComponent(file.fileUrl)}">
@@ -104,18 +125,18 @@ function createGallery(recordId, images) {
                           </a>
                       </div>`;
     }
-    imagesEl.appendChild(galleryEl);
-    return imagesEl;
+    section.appendChild(galleryEl);
+    return sectionEl;
 }
 
 function createFileList(recordId, title, files) {
     if (files.length === 0) {
         return document.createDocumentFragment();
     }
-    const filesEl = createElement("div", { class: "fileset " });
+    const sectionEl = createRecordSection(recordId, `${title} (${files.length})`);
+    const section = sectionEl.querySelector(".content");
     const setEl = createElement("div", { class: "files" });
 
-    filesEl.innerHTML += `<div class="title">${title}</div>`;
     for (const file of files) {
         setEl.innerHTML += `<div class="file">
                      <a href="chronicler/${recordId}?file=${encodeURIComponent(file.fileUrl)}">${
@@ -123,8 +144,8 @@ function createFileList(recordId, title, files) {
                      }</a>
                  </div>`;
     }
-    filesEl.appendChild(setEl);
-    return filesEl;
+    section.appendChild(setEl);
+    return sectionEl;
 }
 
 export function createRecordSet(rs, metadata) {

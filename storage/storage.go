@@ -5,15 +5,18 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+    "os"
 	"path/filepath"
 	"sort"
 	"strings"
+    "time"
 
 	"chronicler/firefox"
 	"chronicler/records"
 	rpb "chronicler/records/proto"
 	"chronicler/util"
 
+	"github.com/lanseg/golang-commons/collections"
 	cm "github.com/lanseg/golang-commons/common"
 	"github.com/lanseg/golang-commons/optional"
 )
@@ -38,9 +41,11 @@ type LocalStorage struct {
 	overlay    *Overlay
 	runner     *util.Runner
 
-	recordCache map[string]string
-	logger      *cm.Logger
-	root        string
+	logger *cm.Logger
+	modTime time.Time
+    root   string
+
+	recordCache map[string]*rpb.RecordSet
 }
 
 func fromJson[T any](bytes []byte) (*T, error) {
@@ -76,6 +81,14 @@ func (s *LocalStorage) saveBase64(id string, fname string) func(string) {
 	}
 }
 
+func (s *LocalStorage) getRecord(id string) optional.Optional[*rpb.RecordSet] {
+	return optional.MapErr(
+		s.getOverlay(id).Read(recordsetFileName),
+		func(bytes []byte) (*rpb.RecordSet, error) {
+			return fromJson[rpb.RecordSet](bytes)
+		})
+}
+
 func (s *LocalStorage) savePageView(id string, url string) {
 	s.webdriver.Navigate(url)
 	s.webdriver.TakeScreenshot().IfPresent(
@@ -99,11 +112,8 @@ func (s *LocalStorage) SaveRecords(r *rpb.RecordSet) error {
 	if r.Id == "" {
 		return fmt.Errorf("Record without an id")
 	}
-	o := s.getOverlay(r.Id)
-	mergedSet := records.MergeRecordSets(
-		optional.MapErr(o.Read(recordsetFileName),
-			fromJson[rpb.RecordSet],
-		).OrElse(&rpb.RecordSet{}), r)
+	mergedSet := records.MergeRecordSets(s.getRecord(r.Id).OrElse(&rpb.RecordSet{}), r)
+    s.touch()
 	return s.writeRecordSet(mergedSet)
 }
 
@@ -151,6 +161,7 @@ func (s *LocalStorage) writeRecordSet(rs *rpb.RecordSet) error {
 		return err
 	}
 
+	s.recordCache[rs.Id] = rs
 	s.logger.Infof("Saved new record to %s", rs.Id)
 	return nil
 }
@@ -161,23 +172,52 @@ func (s *LocalStorage) GetFile(id string, filename string) optional.Optional[[]b
 }
 
 func (s *LocalStorage) ListRecords() optional.Optional[[]*rpb.RecordSet] {
+    if s.isDirty() {
+        s.refreshCache()
+        s.modTime = time.Now()
+    }
+	return optional.Of(collections.Values(s.recordCache))
+}
+
+func (s *LocalStorage) getAllRecords() optional.Optional[[]*rpb.RecordSet] {
 	result := []*rpb.RecordSet{}
 	files, err := ioutil.ReadDir(s.root)
 	if err != nil {
 		return optional.OfError([]*rpb.RecordSet{}, err)
 	}
 	for _, f := range files {
-		optional.MapErr(
-			s.getOverlay(f.Name()).Read(recordsetFileName),
-			fromJson[rpb.RecordSet]).
-			IfPresent(func(r *rpb.RecordSet) {
-				result = append(result, r)
-			})
+		s.getRecord(f.Name()).IfPresent(func(r *rpb.RecordSet) {
+			result = append(result, r)
+		})
 	}
 	sort.Slice(result, func(i int, j int) bool {
 		return result[i].Id < result[j].Id
 	})
 	return optional.Of(result)
+}
+
+func (s *LocalStorage) touch() {
+    os.WriteFile(filepath.Join(".storage_dirty"), []byte{}, os.ModePerm)
+    s.modTime = time.Now()
+}
+
+func (s *LocalStorage) isDirty() bool {
+  stat, err := os.Stat(filepath.Join(".storage_dirty"))
+  return os.IsNotExist(err) || stat.ModTime().After(s.modTime)
+}
+
+func (s *LocalStorage) refreshCache() {
+	s.logger.Infof("Refreshing cache")
+	s.getAllRecords().IfPresent(func(allRecords []*rpb.RecordSet) {
+		s.logger.Infof("Found %d records", len(allRecords))
+		s.recordCache = map[string]*rpb.RecordSet{}
+		for k, v := range collections.GroupBy(allRecords, func(rs *rpb.RecordSet) string {
+			return rs.Id
+		}) {
+			s.recordCache[k] = v[0]
+		}
+	})
+
 }
 
 func NewStorage(root string, webdriver firefox.WebDriver) Storage {
@@ -191,12 +231,13 @@ func NewStorage(root string, webdriver firefox.WebDriver) Storage {
 	}
 	webdriver.NewSession()
 
-	return &LocalStorage{
-		root:        root,
-		logger:      log,
-		runner:      util.NewRunner(),
-		webdriver:   webdriver,
-		downloader:  NewHttpDownloader(nil),
-		recordCache: map[string]string{},
+	ls := &LocalStorage{
+		root:       root,
+		logger:     log,
+		runner:     util.NewRunner(),
+		webdriver:  webdriver,
+		downloader: NewHttpDownloader(nil),
 	}
+	ls.refreshCache()
+	return ls
 }
