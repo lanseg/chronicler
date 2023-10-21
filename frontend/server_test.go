@@ -41,7 +41,7 @@ func TestFrontend(t *testing.T) {
 			if err != nil {
 				t.Errorf("Could not fetch data from %s", tc.url)
 			}
-			fmt.Printf("HERE: %s", string(data))
+			fmt.Println(string(data)[:100])
 		})
 	}
 }

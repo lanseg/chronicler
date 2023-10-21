@@ -1,4 +1,4 @@
-package firefox
+package webdriver
 
 import (
 	"github.com/lanseg/golang-commons/optional"
@@ -13,21 +13,21 @@ type WebDriver interface {
 	ExecuteScript(string) optional.Optional[string]
 }
 
-type FakeWebDriver struct {
+type NoopWebdriver struct {
 	WebDriver
 }
 
-func (f *FakeWebDriver) NewSession()     {}
-func (f *FakeWebDriver) Navigate(string) {}
-func (f *FakeWebDriver) GetPageSource() optional.Optional[string] {
+func (*NoopWebdriver) NewSession()     {}
+func (*NoopWebdriver) Navigate(string) {}
+func (*NoopWebdriver) GetPageSource() optional.Optional[string] {
 	return optional.Of("")
 }
-func (f *FakeWebDriver) TakeScreenshot() optional.Optional[string] {
+func (*NoopWebdriver) TakeScreenshot() optional.Optional[string] {
 	return optional.Of("")
 }
-func (f *FakeWebDriver) Print() optional.Optional[string] {
+func (*NoopWebdriver) Print() optional.Optional[string] {
 	return optional.Of("")
 }
-func (f *FakeWebDriver) ExecuteScript(string) optional.Optional[string] {
+func (*NoopWebdriver) ExecuteScript(string) optional.Optional[string] {
 	return optional.Of("")
 }

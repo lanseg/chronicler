@@ -12,7 +12,7 @@ go_library(
     ],
     importpath = "chronicler/adapter",
     deps = [
-        "//firefox",
+        "//webdriver",
         "//records",
         "//records:records_go_proto",
         "//storage",

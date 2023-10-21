@@ -1,4 +1,4 @@
-package firefox
+package webdriver
 
 import (
 	"encoding/json"

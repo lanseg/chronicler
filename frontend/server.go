@@ -8,9 +8,9 @@ import (
 	"sort"
 	"strings"
 
-	"chronicler/firefox"
 	rpb "chronicler/records/proto"
 	"chronicler/storage"
+	"chronicler/webdriver"
 	"web/htmlparser"
 
 	"github.com/lanseg/golang-commons/collections"
@@ -160,7 +160,7 @@ func (ws *WebServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func NewServer(port int, storageRoot string, staticFiles string) *http.Server {
 	server := &WebServer{
 		logger:           cm.NewLogger("frontend"),
-		storage:          storage.NewStorage(storageRoot, &firefox.FakeWebDriver{}),
+		storage:          storage.NewStorage(storageRoot, &webdriver.NoopWebdriver{}),
 		staticFileServer: http.FileServer(http.Dir(staticFiles)),
 	}
 

@@ -5,16 +5,16 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-    "os"
+	"os"
 	"path/filepath"
 	"sort"
 	"strings"
-    "time"
+	"time"
 
-	"chronicler/firefox"
 	"chronicler/records"
 	rpb "chronicler/records/proto"
 	"chronicler/util"
+	"chronicler/webdriver"
 
 	"github.com/lanseg/golang-commons/collections"
 	cm "github.com/lanseg/golang-commons/common"
@@ -36,14 +36,14 @@ type Storage interface {
 type LocalStorage struct {
 	Storage
 
-	webdriver  firefox.WebDriver
+	driver     webdriver.WebDriver
 	downloader *HttpDownloader
 	overlay    *Overlay
 	runner     *util.Runner
 
-	logger *cm.Logger
+	logger  *cm.Logger
 	modTime time.Time
-    root   string
+	root    string
 
 	recordCache map[string]*rpb.RecordSet
 }
@@ -90,10 +90,10 @@ func (s *LocalStorage) getRecord(id string) optional.Optional[*rpb.RecordSet] {
 }
 
 func (s *LocalStorage) savePageView(id string, url string) {
-	s.webdriver.Navigate(url)
-	s.webdriver.TakeScreenshot().IfPresent(
+	s.driver.Navigate(url)
+	s.driver.TakeScreenshot().IfPresent(
 		s.saveBase64(id, "pageview_page.png"))
-	s.webdriver.Print().IfPresent(
+	s.driver.Print().IfPresent(
 		s.saveBase64(id, "pageview_page.pdf"))
 }
 
@@ -113,7 +113,7 @@ func (s *LocalStorage) SaveRecords(r *rpb.RecordSet) error {
 		return fmt.Errorf("Record without an id")
 	}
 	mergedSet := records.MergeRecordSets(s.getRecord(r.Id).OrElse(&rpb.RecordSet{}), r)
-    s.touch()
+	s.touch()
 	return s.writeRecordSet(mergedSet)
 }
 
@@ -172,10 +172,10 @@ func (s *LocalStorage) GetFile(id string, filename string) optional.Optional[[]b
 }
 
 func (s *LocalStorage) ListRecords() optional.Optional[[]*rpb.RecordSet] {
-    if s.isDirty() {
-        s.refreshCache()
-        s.modTime = time.Now()
-    }
+	if s.isDirty() {
+		s.refreshCache()
+		s.modTime = time.Now()
+	}
 	return optional.Of(collections.Values(s.recordCache))
 }
 
@@ -197,13 +197,13 @@ func (s *LocalStorage) getAllRecords() optional.Optional[[]*rpb.RecordSet] {
 }
 
 func (s *LocalStorage) touch() {
-    os.WriteFile(filepath.Join(".storage_dirty"), []byte{}, os.ModePerm)
-    s.modTime = time.Now()
+	os.WriteFile(filepath.Join(".storage_dirty"), []byte{}, os.ModePerm)
+	s.modTime = time.Now()
 }
 
 func (s *LocalStorage) isDirty() bool {
-  stat, err := os.Stat(filepath.Join(".storage_dirty"))
-  return os.IsNotExist(err) || stat.ModTime().After(s.modTime)
+	stat, err := os.Stat(filepath.Join(".storage_dirty"))
+	return os.IsNotExist(err) || stat.ModTime().After(s.modTime)
 }
 
 func (s *LocalStorage) refreshCache() {
@@ -220,22 +220,22 @@ func (s *LocalStorage) refreshCache() {
 
 }
 
-func NewStorage(root string, webdriver firefox.WebDriver) Storage {
+func NewStorage(root string, driver webdriver.WebDriver) Storage {
 	log := cm.NewLogger("storage")
 	log.Infof("Storage root set to \"%s\"", root)
 
-	if webdriver == nil {
+	if driver == nil {
 		log.Infof("No webdriver provided, starting firefox")
-		ff := firefox.StartFirefox(webdriverPort, firefoxProfile)
-		webdriver = ff.Driver
+		ff := webdriver.StartFirefox(webdriverPort, firefoxProfile)
+		driver = ff.Driver
 	}
-	webdriver.NewSession()
+	driver.NewSession()
 
 	ls := &LocalStorage{
 		root:       root,
 		logger:     log,
 		runner:     util.NewRunner(),
-		webdriver:  webdriver,
+		driver:     driver,
 		downloader: NewHttpDownloader(nil),
 	}
 	ls.refreshCache()
