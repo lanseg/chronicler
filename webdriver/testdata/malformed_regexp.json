@@ -1,0 +1,10 @@
+    [
+        {
+            "match": "http.*pikabu.ru/story/.*",
+            "before": "pikabu_expand_comments.js"
+        },
+        {
+            "match": "http://malformed[regex",
+            "before": "malformed_regex"
+        }
+    ]

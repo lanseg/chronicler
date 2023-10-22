@@ -1,0 +1,6 @@
+    [
+        {
+            "match": "http.*pikabu.ru/story/.*",
+            "before": "pikabu_expand_comments.js"
+        }
+    ]
