@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"strings"
 )
 
 // Scenario
@@ -16,8 +17,8 @@ type Scenario interface {
 type ScenarioImpl struct {
 	Scenario
 
-	Match  string `json: match`
-	Before string `json: before`
+	Match  string   `json: match`
+	Before []string `json: before`
 
 	re *regexp.Regexp
 }
@@ -39,7 +40,7 @@ func (s *ScenarioImpl) Matches(url string) bool {
 }
 
 func (s *ScenarioImpl) BeforeScript() string {
-	return s.Before
+	return strings.Join(s.Before, "\n")
 }
 
 // ScenarioLibary

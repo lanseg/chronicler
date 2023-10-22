@@ -1,0 +1,16 @@
+[
+    {
+        "match": "http.*pikabu.ru/story/.*",
+        "before": [
+            "let showComments = document.querySelectorAll('.comments__more-button:not(.hidden)');",
+            "let expandComments = document.querySelectorAll('.comment-toggle-children.comment-toggle-children_collapse');",
+            "let loadMore = document.querySelectorAll('.comment__more');",
+            "let extraPosts = document.querySelectorAll('.stories-feed');",
+            "extraPosts.forEach((e) => e.remove());",
+            "showComments.forEach(e => e.click());",
+            "loadMore.forEach(e => e.click());",
+            "expandComments.forEach(e => e.click());",
+            "return expandComments.length + loadMore.length + showComments.length + extraPosts.length;"
+        ]
+    }
+]
