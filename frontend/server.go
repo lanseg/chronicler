@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"sort"
+    "sort"
 	"strings"
 
+	"chronicler/records"
 	rpb "chronicler/records/proto"
 	"chronicler/storage"
 	"chronicler/webdriver"
@@ -76,14 +77,13 @@ func (ws *WebServer) writeJson(w http.ResponseWriter, data any) {
 }
 
 func (ws *WebServer) responseRecordList(w http.ResponseWriter) {
-	records, _ := ws.storage.ListRecords().Get()
+	rs, _ := ws.storage.ListRecords().Get()
+	rs = records.SortRecordSets(rs)
+
 	userById := map[string]*rpb.UserMetadata{}
 	result := &rpb.RecordListResponse{}
-	for _, r := range records {
+	for _, r := range rs {
 		desc := ""
-        sort.Slice(r.Records, func (i int, j int) bool {
-           return r.Records[i].Time < r.Records[j].Time
-        })
 		if len(r.Records) > 0 {
 			desc = cm.IfEmpty(
 				string(r.Records[0].RawContent),
@@ -114,11 +114,13 @@ func (ws *WebServer) responseRecordList(w http.ResponseWriter) {
 		right := result.RecordSets[j].RootRecord
 		if left == nil {
 			return false
-		} else if right == nil {
+		} 
+        if right == nil {
 			return true
 		}
 		return left.Time > right.Time
 	})
+
 	result.UserMetadata = collections.Values(userById)
 	ws.writeJson(w, result)
 }
@@ -129,6 +131,17 @@ func (ws *WebServer) responseFile(w http.ResponseWriter, id string, filename str
 		ws.Error(w, err.Error(), 500)
 		return
 	}
+    if filename == "record.json" {
+        rs := &rpb.RecordSet{}
+        err = json.Unmarshal(f, rs)
+        if err != nil {
+            ws.Error(w, err.Error(), 500)
+            return
+        }
+        rs.Records = records.SortRecords(rs.Records)
+        ws.writeJson(w, rs)
+        return 
+    }
 	w.Write(f)
 }
 

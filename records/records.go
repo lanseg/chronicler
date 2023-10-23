@@ -25,6 +25,10 @@ func hashSource(src *rpb.Source) string {
 	return fmt.Sprintf("%x", sha512.Sum512(checksum))
 }
 
+func getRecordId(r *rpb.Record) string {
+	return hashSource(r.Source) + hashSource(r.Parent)
+}
+
 func NewRecordSet(rs []*rpb.Record, umd []*rpb.UserMetadata) *rpb.RecordSet {
 	checksum := []byte{}
 	for _, r := range rs {
@@ -38,11 +42,6 @@ func NewRecordSet(rs []*rpb.Record, umd []*rpb.UserMetadata) *rpb.RecordSet {
 		Records:      rs,
 		UserMetadata: umd,
 	}
-}
-
-func GetRecordId(record *rpb.Record) string {
-	return fmt.Sprintf("%x", sha512.Sum512(
-		[]byte(hashSource(record.Source)+hashSource(record.Parent))))
 }
 
 func fnv32(s string) uint32 {
@@ -117,7 +116,7 @@ func MergeUserMetadata(a []*rpb.UserMetadata, b []*rpb.UserMetadata) []*rpb.User
 
 func MergeRecords(a []*rpb.Record, b []*rpb.Record) []*rpb.Record {
 	result := merge(a, b, func(r *rpb.Record) uint32 {
-		return fnv32(GetRecordId(r))
+		return fnv32(getRecordId(r))
 	}, func(ar *rpb.Record, br *rpb.Record) *rpb.Record {
 		result := &rpb.Record{
 			Source: cm.IfNull(ar.Source, br.Source),
@@ -134,9 +133,7 @@ func MergeRecords(a []*rpb.Record, b []*rpb.Record) []*rpb.Record {
 		result.Time = target.Time
 		return result
 	})
-	sort.Slice(result, func(a int, b int) bool {
-		return GetRecordId(result[a]) < GetRecordId(result[b])
-	})
+	SortRecords(result)
 	return result
 }
 
@@ -154,4 +151,42 @@ func MergeStrings(a []string, b []string) []string {
 	result := resultSet.Values()
 	sort.Strings(result)
 	return result
+}
+
+func SortRecords(r []*rpb.Record) []*rpb.Record {
+	if r == nil {
+		return r
+	}
+	sort.Slice(r, func(i int, j int) bool {
+		if r[i].Time == r[j].Time {
+			return getRecordId(r[i]) < getRecordId(r[j])
+		}
+		return r[i].Time < r[j].Time
+	})
+	return r
+}
+
+func SortRecordSets(rs []*rpb.RecordSet) []*rpb.RecordSet {
+	if rs == nil {
+		return rs
+	}
+	for _, rset := range rs {
+		rset.Records = SortRecords(rset.Records)
+	}
+	sort.Slice(rs, func(i int, j int) bool {
+		if len(rs[i].Records) == 0 && len(rs[j].Records) == 0 {
+			return rs[i].Id < rs[j].Id
+		}
+		if len(rs[i].Records) == 0 && len(rs[j].Records) != 0 {
+			return true
+		}
+		if len(rs[i].Records) != 0 && len(rs[j].Records) == 0 {
+			return false
+		}
+		if rs[i].Records[0].Time < rs[j].Records[0].Time {
+			return true
+		}
+		return rs[i].Id < rs[j].Id
+	})
+	return rs
 }
