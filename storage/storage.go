@@ -178,7 +178,12 @@ func (s *LocalStorage) ListRecords() optional.Optional[[]*rpb.RecordSet] {
 	}
 	values := collections.Values(s.recordCache)
 	sort.Slice(values, func(i int, j int) bool {
-		return values[i].Id < values[j].Id
+		rsa := values[i]
+		rsb := values[j]
+		if len(rsa.Records) == 0 || len(rsb.Records) == 0 {
+			return rsa.Id < rsb.Id
+		}
+		return values[i].Records[0].Time < values[j].Records[0].Time
 	})
 	return optional.Of(values)
 }

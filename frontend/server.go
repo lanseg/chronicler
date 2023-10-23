@@ -81,6 +81,9 @@ func (ws *WebServer) responseRecordList(w http.ResponseWriter) {
 	result := &rpb.RecordListResponse{}
 	for _, r := range records {
 		desc := ""
+        sort.Slice(r.Records, func (i int, j int) bool {
+           return r.Records[i].Time < r.Records[j].Time
+        })
 		if len(r.Records) > 0 {
 			desc = cm.IfEmpty(
 				string(r.Records[0].RawContent),
