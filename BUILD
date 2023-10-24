@@ -14,6 +14,7 @@ go_binary(
         "//twitter",
         "//util",
         "//web:htmlparser",
+        "//webdriver",
         "@commons//collections",
         "@commons//common",
     ],

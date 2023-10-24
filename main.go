@@ -10,6 +10,7 @@ import (
 	"chronicler/storage"
 	"chronicler/telegram"
 	"chronicler/twitter"
+	"chronicler/webdriver"
 
 	rpb "chronicler/records/proto"
 	"github.com/lanseg/golang-commons/collections"
@@ -19,6 +20,18 @@ import (
 var (
 	twitterRe = regexp.MustCompile("(twitter|x.com).*/(?P<twitter_id>[0-9]+)[/]?")
 )
+
+const (
+	webdriverPort  = 2828
+	firefoxProfile = "/tmp/tmp.QTFqrzeJX4/"
+)
+
+func initWebdriver() webdriver.WebDriver {
+	ff := webdriver.StartFirefox(webdriverPort, firefoxProfile)
+	driver := ff.Driver
+	driver.NewSession()
+	return driver
+}
 
 func findTwitterSource(link string) *rpb.Source {
 	matches := collections.NewMap(twitterRe.SubexpNames(), twitterRe.FindStringSubmatch(link))
@@ -43,6 +56,7 @@ func extractRequests(adapters []adapter.Adapter, rs *rpb.RecordSet) []*rpb.Reque
 	if len(rs.Records) == 1 && rs.Records[0].Source.Type == rpb.SourceType_WEB {
 		return result
 	}
+	fmt.Printf("HERE %s\n", rs)
 	for _, link := range rs.Records[0].Links {
 		for _, a := range adapters {
 			if target := a.MatchLink(link); target != nil {
@@ -61,7 +75,7 @@ func main() {
 	flag.Parse()
 
 	cfg := GetConfig()
-	storage := storage.NewStorage(*cfg.StorageRoot, nil)
+	storage := storage.NewStorage(*cfg.StorageRoot, initWebdriver())
 
 	tgBot := telegram.NewBot(*cfg.TelegramBotKey)
 	twClient := twitter.NewClient(*cfg.TwitterApiKey)

@@ -10,17 +10,19 @@ import (
 )
 
 var (
-	configFile     = flag.String("config", "", "Configuration defaults.")
-	twitterApiKey  = flag.String("twitter_api_key", "", "A key for the twitter api.")
-	telegramBotKey = flag.String("telegram_bot_key", "", "A key for the telegram bot api.")
-	storageRoot    = flag.String("storage_root", "", "A local folder to save downloads.")
-	log            = cm.NewLogger("config")
+	configFile      = flag.String("config", "", "Configuration defaults.")
+	twitterApiKey   = flag.String("twitter_api_key", "", "A key for the twitter api.")
+	telegramBotKey  = flag.String("telegram_bot_key", "", "A key for the telegram bot api.")
+	storageRoot     = flag.String("storage_root", "", "A local folder to save downloads.")
+	scenarioLibrary = flag.String("scenario_library", "", "A list of scripts that adapt webpages for loading.")
+	log             = cm.NewLogger("config")
 )
 
 type Config struct {
-	TwitterApiKey  *string `json:"twitterApiKey"`
-	TelegramBotKey *string `json:"telegramBotKey"`
-	StorageRoot    *string `json:"storageRoot"`
+	TwitterApiKey   *string `json:"twitterApiKey"`
+	TelegramBotKey  *string `json:"telegramBotKey"`
+	StorageRoot     *string `json:"storageRoot"`
+	ScenarioLibrary *string `json:"ScenarioLibrary"`
 }
 
 func GetConfig() Config {
@@ -43,6 +45,9 @@ func GetConfig() Config {
 	}
 	if *telegramBotKey != "" {
 		config.TelegramBotKey = telegramBotKey
+	}
+	if *scenarioLibrary != "" {
+		config.ScenarioLibrary = scenarioLibrary
 	}
 	return config
 }

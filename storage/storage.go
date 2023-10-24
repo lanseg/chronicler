@@ -233,13 +233,6 @@ func NewStorage(root string, driver webdriver.WebDriver) Storage {
 	log := cm.NewLogger("storage")
 	log.Infof("Storage root set to \"%s\"", root)
 
-	if driver == nil {
-		log.Infof("No webdriver provided, starting firefox")
-		ff := webdriver.StartFirefox(webdriverPort, firefoxProfile)
-		driver = ff.Driver
-	}
-	driver.NewSession()
-
 	ls := &LocalStorage{
 		root:       root,
 		logger:     log,
