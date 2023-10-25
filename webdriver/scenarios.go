@@ -48,6 +48,14 @@ type ScenarioLibrary interface {
 	Matches(url string) Scenario
 }
 
+type NoopScenarioLibrary struct {
+	ScenarioLibrary
+}
+
+func (sl *NoopScenarioLibrary) Matches(url string) Scenario {
+	return nil
+}
+
 type ScenarioLibraryImpl struct {
 	ScenarioLibrary
 

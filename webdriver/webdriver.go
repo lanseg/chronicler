@@ -11,6 +11,7 @@ type WebDriver interface {
 	TakeScreenshot() optional.Optional[string]
 	Print() optional.Optional[string]
 	ExecuteScript(string) optional.Optional[string]
+	SetScenarios(ScenarioLibrary)
 }
 
 type NoopWebdriver struct {
@@ -30,4 +31,6 @@ func (*NoopWebdriver) Print() optional.Optional[string] {
 }
 func (*NoopWebdriver) ExecuteScript(string) optional.Optional[string] {
 	return optional.Of("")
+}
+func (*NoopWebdriver) SetScenarios(ScenarioLibrary) {
 }

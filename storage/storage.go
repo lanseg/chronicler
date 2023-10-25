@@ -217,9 +217,9 @@ func (s *LocalStorage) isDirty() bool {
 
 func (s *LocalStorage) refreshCache() {
 	s.logger.Infof("Refreshing cache")
+    s.recordCache = map[string]*rpb.RecordSet{}
 	s.getAllRecords().IfPresent(func(allRecords []*rpb.RecordSet) {
 		s.logger.Infof("Found %d records", len(allRecords))
-		s.recordCache = map[string]*rpb.RecordSet{}
 		for k, v := range collections.GroupBy(allRecords, func(rs *rpb.RecordSet) string {
 			return rs.Id
 		}) {

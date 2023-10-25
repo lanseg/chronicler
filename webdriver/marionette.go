@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net"
 	"strconv"
+	"time"
 
 	cm "github.com/lanseg/golang-commons/common"
 	"github.com/lanseg/golang-commons/optional"
@@ -65,6 +66,7 @@ type Marionette struct {
 	sessionParams   *SessionParams
 	messageCounter  int
 	connection      net.Conn
+	scenarios       ScenarioLibrary
 }
 
 func (m *Marionette) reader() {
@@ -163,6 +165,20 @@ func (m *Marionette) Navigate(url string) {
 	m.write("WebDriver:Navigate", struct {
 		Url string `json:"url"`
 	}{Url: url})
+
+	if s := m.scenarios.Matches(url); s != nil {
+		m.logger.Debugf("Found matching scenario for %s", url)
+		done := false
+		for i := 0; i < 10 && !done; i++ {
+			m.ExecuteScript(s.BeforeScript()).IfPresent(func(s string) {
+				if s != "true" && s != "false" {
+                    m.logger.Infof("Expecting result to be true or false, but got '%s'", s)
+                }
+                done = s == "true"
+			})
+			time.Sleep(10 * time.Second)
+		}
+	}
 }
 
 func (m *Marionette) GetPageSource() optional.Optional[string] {
@@ -185,6 +201,10 @@ func (m *Marionette) ExecuteScript(script string) optional.Optional[string] {
 		getStringValue)
 }
 
+func (m *Marionette) SetScenarios(s ScenarioLibrary) {
+	m.scenarios = s
+}
+
 func (m *Marionette) Close() {
 	m.connection.Close()
 	m.logger.Infof("Disconnected")
@@ -201,6 +221,7 @@ func ConnectMarionette(host string, port int) optional.Optional[WebDriver] {
 				logger:          logger,
 				connection:      c,
 				pendingCommands: map[int](chan optional.Optional[*Response]){},
+				scenarios:       &NoopScenarioLibrary{},
 			}
 			go marionette.reader()
 			return marionette
