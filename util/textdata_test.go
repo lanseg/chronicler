@@ -47,12 +47,6 @@ func TestLinkCheckers(t *testing.T) {
 			link:    ytLinkFake,
 			want:    false,
 		},
-		{
-			desc:    "twitter regular checker success",
-			checker: IsTwitterLink,
-			link:    twitterLinkPost,
-			want:    true,
-		},
 	} {
 		t.Run(tc.desc, func(t *testing.T) {
 			for _, prefix := range []string{"http://", "https://", ""} {
@@ -73,38 +67,6 @@ func TestLinkFinders(t *testing.T) {
 		text   string
 		want   []string
 	}{
-		{
-			desc:   "youtube regular finder success",
-			finder: FindYoutubeLinks,
-			text:   ytLinkFull,
-			want:   []string{ytLinkFull},
-		},
-		{
-			desc:   "youtube short finder success",
-			finder: FindYoutubeLinks,
-			text:   ytLinkShort,
-			want:   []string{ytLinkShort},
-		},
-		{
-			desc:   "youtube mobile finder success",
-			finder: FindYoutubeLinks,
-			text:   ytLinkMobile,
-			want:   []string{ytLinkMobile},
-		},
-		{
-			desc:   "fake youtube not matched",
-			finder: FindYoutubeLinks,
-			text:   ytLinkFake,
-			want:   []string{},
-		},
-		{
-			desc:   "multiple youtube links",
-			finder: FindYoutubeLinks,
-			text: fmt.Sprintf("Lorem %s ipsum dolor %s %s sit amet, consectetur adipiscing elit,"+
-				"sed do eiusmod tempor %s incididunt ut labore et dolore magna aliqua.",
-				ytLinkFull, ytLinkFake, ytLinkMobile, ytLinkShort),
-			want: []string{ytLinkFull, ytLinkMobile, ytLinkShort},
-		},
 		{
 			desc:   "multiple youtube links web finder",
 			finder: FindWebLinks,
@@ -128,14 +90,6 @@ func TestLinkFinders(t *testing.T) {
 				"sed do eiusmod tempor https://%s incididunt ut labore et dolore magna aliqua.",
 				ytLinkFull, tgLinkShort, ytLinkMobile, twitterLinkPost),
 			want: []string{"http://" + ytLinkFull, "https://" + tgLinkShort, ytLinkMobile, "https://" + twitterLinkPost},
-		},
-		{
-			desc:   "Find twitter id full link",
-			finder: FindTwitterIds,
-			text:   "twitter.com/Some_user/status/1234567890123456789?qwodmqwodm1=123",
-			want: []string{
-				"1234567890123456789",
-			},
 		},
 	} {
 		t.Run(tc.desc, func(t *testing.T) {

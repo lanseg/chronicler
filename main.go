@@ -19,7 +19,7 @@ import (
 
 var (
 	twitterRe = regexp.MustCompile("(twitter|x.com).*/(?P<twitter_id>[0-9]+)[/]?")
-    logger = cm.NewLogger("main")
+	logger    = cm.NewLogger("main")
 )
 
 const (
@@ -31,13 +31,13 @@ func initWebdriver(scenarios string) webdriver.WebDriver {
 	ff := webdriver.StartFirefox(webdriverPort, firefoxProfile)
 	driver := ff.Driver
 	driver.NewSession()
-    sc, err := webdriver.LoadScenarios(scenarios)
-    if err != nil {
-        logger.Warningf("Cannot load webdriver scenarios from %s: %s", scenarios, err)
-    } else {
-        logger.Infof("Loaded scenarios from %s", scenarios)
-        driver.SetScenarios(sc)
-    }
+	sc, err := webdriver.LoadScenarios(scenarios)
+	if err != nil {
+		logger.Warningf("Cannot load webdriver scenarios from %s: %s", scenarios, err)
+	} else {
+		logger.Infof("Loaded scenarios from %s", scenarios)
+		driver.SetScenarios(sc)
+	}
 	return driver
 }
 

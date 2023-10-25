@@ -172,9 +172,9 @@ func (m *Marionette) Navigate(url string) {
 		for i := 0; i < 10 && !done; i++ {
 			m.ExecuteScript(s.BeforeScript()).IfPresent(func(s string) {
 				if s != "true" && s != "false" {
-                    m.logger.Infof("Expecting result to be true or false, but got '%s'", s)
-                }
-                done = s == "true"
+					m.logger.Infof("Expecting result to be true or false, but got '%s'", s)
+				}
+				done = s == "true"
 			})
 			time.Sleep(10 * time.Second)
 		}

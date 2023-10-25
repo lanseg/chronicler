@@ -23,23 +23,8 @@ func IsYoutubeLink(link string) bool {
 	return ytLink.Match([]byte(link))
 }
 
-func FindYoutubeLinks(text string) []string {
-	return ytLinkFind.FindAllString(text, -1)
-}
-
 func FindWebLinks(text string) []string {
 	return webLinkFind.FindAllString(text, -1)
 }
 
-func IsTwitterLink(text string) bool {
-	return twLink.Match([]byte(text))
-}
 
-func FindTwitterIds(text string) []string {
-	result := []string{}
-	ids := twLink.FindAllStringSubmatch(text, -1)
-	for _, groups := range ids {
-		result = append(result, groups[3])
-	}
-	return result
-}
