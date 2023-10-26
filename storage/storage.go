@@ -36,7 +36,7 @@ type Storage interface {
 type LocalStorage struct {
 	Storage
 
-	driver     webdriver.WebDriver
+	driver     *webdriver.ExclusiveWebDriver
 	downloader *HttpDownloader
 	overlay    *Overlay
 	runner     *util.Runner
@@ -90,11 +90,14 @@ func (s *LocalStorage) getRecord(id string) optional.Optional[*rpb.RecordSet] {
 }
 
 func (s *LocalStorage) savePageView(id string, url string) {
-	s.driver.Navigate(url)
-	s.driver.TakeScreenshot().IfPresent(
-		s.saveBase64(id, "pageview_page.png"))
-	s.driver.Print().IfPresent(
-		s.saveBase64(id, "pageview_page.pdf"))
+	s.driver.Batch(func(d webdriver.WebDriver) {
+		d.Navigate(url)
+		d.TakeScreenshot().IfPresent(s.saveBase64(id, "pageview_page.png"))
+		d.Print().IfPresent(s.saveBase64(id, "pageview_page.pdf"))
+		d.GetPageSource().IfPresent(func(src string) {
+			s.getOverlay(id).Write("pageview_page.html", []byte(src))
+		})
+	})
 }
 
 func (s *LocalStorage) downloadFile(id string, link string) error {
@@ -130,6 +133,9 @@ func (s *LocalStorage) writeRecordSet(rs *rpb.RecordSet) error {
 			}, &rpb.File{
 				FileId:   "page_view_pdf",
 				LocalUrl: "pageview_page.pdf",
+			}, &rpb.File{
+				FileId:   "page_view_html",
+				LocalUrl: "pageview_page.html",
 			})
 		}
 
@@ -229,7 +235,7 @@ func (s *LocalStorage) refreshCache() {
 
 }
 
-func NewStorage(root string, driver webdriver.WebDriver) Storage {
+func NewStorage(root string, driver *webdriver.ExclusiveWebDriver) Storage {
 	log := cm.NewLogger("storage")
 	log.Infof("Storage root set to \"%s\"", root)
 

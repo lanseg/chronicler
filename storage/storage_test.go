@@ -61,7 +61,7 @@ func TestStorage(t *testing.T) {
 		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			s := NewStorage(t.TempDir(), &webdriver.NoopWebdriver{})
+			s := NewStorage(t.TempDir(), &webdriver.ExclusiveWebDriver{})
 			for _, rec := range tc.records {
 				if saveError := s.SaveRecords(rec); saveError != nil {
 					t.Errorf("Error while saving a request: %s", saveError)

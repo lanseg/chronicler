@@ -26,5 +26,3 @@ func IsYoutubeLink(link string) bool {
 func FindWebLinks(text string) []string {
 	return webLinkFind.FindAllString(text, -1)
 }
-
-

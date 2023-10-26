@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"testing"
+	"time"
 )
 
 const (
@@ -26,10 +27,11 @@ func TestFrontend(t *testing.T) {
 	server := NewServer(testingPort, "storage_root", "static")
 	go (func() {
 		if err := server.ListenAndServe(); err != nil {
-			t.Fatalf("Could not start a server")
+			t.Fatalf("Could not start a server: %s", err)
 		}
 	})()
 
+	time.Sleep(3 * time.Second)
 	for _, tc := range []struct {
 		desc string
 		url  string
@@ -41,7 +43,10 @@ func TestFrontend(t *testing.T) {
 			if err != nil {
 				t.Errorf("Could not fetch data from %s", tc.url)
 			}
-			fmt.Println(string(data)[:100])
+			if len(data) > 100 {
+				data = data[:100]
+			}
+			fmt.Println(string(data))
 		})
 	}
 }

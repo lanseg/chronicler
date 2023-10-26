@@ -22,23 +22,19 @@ var (
 	logger    = cm.NewLogger("main")
 )
 
-const (
-	webdriverPort  = 2828
-	firefoxProfile = "/tmp/tmp.QTFqrzeJX4/"
-)
-
-func initWebdriver(scenarios string) webdriver.WebDriver {
-	ff := webdriver.StartFirefox(webdriverPort, firefoxProfile)
-	driver := ff.Driver
-	driver.NewSession()
-	sc, err := webdriver.LoadScenarios(scenarios)
-	if err != nil {
-		logger.Warningf("Cannot load webdriver scenarios from %s: %s", scenarios, err)
-	} else {
-		logger.Infof("Loaded scenarios from %s", scenarios)
-		driver.SetScenarios(sc)
-	}
-	return driver
+func initWebdriver(scenarios string) *webdriver.ExclusiveWebDriver {
+	wd, _ := webdriver.Connect().Get()
+	wd.Batch(func(d webdriver.WebDriver) {
+		d.NewSession()
+		sc, err := webdriver.LoadScenarios(scenarios)
+		if err != nil {
+			logger.Warningf("Cannot load webdriver scenarios from %s: %s", scenarios, err)
+		} else {
+			logger.Infof("Loaded scenarios from %s", scenarios)
+			d.SetScenarios(sc)
+		}
+	})
+	return wd
 }
 
 func findTwitterSource(link string) *rpb.Source {

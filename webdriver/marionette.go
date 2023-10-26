@@ -7,6 +7,8 @@ import (
 	"strconv"
 	"time"
 
+	"chronicler/util"
+
 	cm "github.com/lanseg/golang-commons/common"
 	"github.com/lanseg/golang-commons/optional"
 )
@@ -168,16 +170,13 @@ func (m *Marionette) Navigate(url string) {
 
 	if s := m.scenarios.Matches(url); s != nil {
 		m.logger.Debugf("Found matching scenario for %s", url)
-		done := false
-		for i := 0; i < 10 && !done; i++ {
-			m.ExecuteScript(s.BeforeScript()).IfPresent(func(s string) {
-				if s != "true" && s != "false" {
-					m.logger.Infof("Expecting result to be true or false, but got '%s'", s)
-				}
-				done = s == "true"
-			})
-			time.Sleep(10 * time.Second)
-		}
+		util.WaitFor(func() (bool, error) {
+			result, err := m.ExecuteScript(s.BeforeScript()).Get()
+			if result != "true" && result != "false" {
+				return false, fmt.Errorf("Unexpected value: %s", result)
+			}
+			return result == "true", err
+		}, 5, 10*time.Second)
 	}
 }
 
@@ -210,7 +209,7 @@ func (m *Marionette) Close() {
 	m.logger.Infof("Disconnected")
 }
 
-func ConnectMarionette(host string, port int) optional.Optional[WebDriver] {
+func connectMarionette(host string, port int) optional.Optional[WebDriver] {
 	return optional.Map(
 		optional.OfError[net.Conn](net.Dial("tcp", fmt.Sprintf("%s:%d", host, port))),
 		func(c net.Conn) WebDriver {

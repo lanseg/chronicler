@@ -176,7 +176,7 @@ func (ws *WebServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func NewServer(port int, storageRoot string, staticFiles string) *http.Server {
 	server := &WebServer{
 		logger:           cm.NewLogger("frontend"),
-		storage:          storage.NewStorage(storageRoot, &webdriver.NoopWebdriver{}),
+		storage:          storage.NewStorage(storageRoot, &webdriver.ExclusiveWebDriver{}),
 		staticFileServer: http.FileServer(http.Dir(staticFiles)),
 	}
 

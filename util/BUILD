@@ -7,10 +7,12 @@ go_library(
     srcs = [
         "runners.go",
         "textdata.go",
+        "waiter.go",
     ],
     importpath = "chronicler/util",
     deps = [
-      "@commons//common"
+      "@commons//common",
+      "@commons//optional",
     ],
 )
 
