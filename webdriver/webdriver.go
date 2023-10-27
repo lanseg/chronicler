@@ -58,6 +58,12 @@ func (e *ExclusiveWebDriver) Batch(do func(driver WebDriver)) {
 	do(e.driver)
 }
 
+func WrapExclusive(driver WebDriver) *ExclusiveWebDriver {
+	return &ExclusiveWebDriver{
+		driver: driver,
+	}
+}
+
 func Connect() optional.Optional[*ExclusiveWebDriver] {
 	driver, err := connectMarionette(webdriverAddress, webdriverPort).Get()
 	if err == nil {

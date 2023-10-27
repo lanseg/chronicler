@@ -9,6 +9,7 @@ import (
 	"time"
 
 	rpb "chronicler/records/proto"
+	"chronicler/webdriver"
 	"web/htmlparser"
 
 	"github.com/lanseg/golang-commons/collections"
@@ -59,13 +60,14 @@ type webAdapter struct {
 	timeSource func() time.Time
 	logger     *cm.Logger
 	client     HttpClient
+	driver     *webdriver.ExclusiveWebDriver
 }
 
-func NewWebAdapter(httpClient HttpClient) Adapter {
-	return createWebAdapter(httpClient, time.Now)
+func NewWebAdapter(httpClient HttpClient, driver *webdriver.ExclusiveWebDriver) Adapter {
+	return createWebAdapter(httpClient, driver, time.Now)
 }
 
-func createWebAdapter(httpClient HttpClient, timeSource func() time.Time) Adapter {
+func createWebAdapter(httpClient HttpClient, driver *webdriver.ExclusiveWebDriver, timeSource func() time.Time) Adapter {
 	logger := cm.NewLogger("WebAdapter")
 	if httpClient == nil {
 		logger.Infof("No http client provided, using an own new one")
@@ -83,6 +85,7 @@ func createWebAdapter(httpClient HttpClient, timeSource func() time.Time) Adapte
 		logger:     logger,
 		client:     httpClient,
 		timeSource: timeSource,
+		driver:     driver,
 	}
 }
 
@@ -115,6 +118,7 @@ func (w *webAdapter) SendMessage(*rpb.Message) {
 
 func (w *webAdapter) GetResponse(request *rpb.Request) []*rpb.Response {
 	w.logger.Infof("Loading web page from %s", request.Target.Url)
+     
 	response, err := w.Get(request.Target.Url)
 	if err != nil {
 		return []*rpb.Response{{

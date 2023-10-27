@@ -78,7 +78,8 @@ func main() {
 	flag.Parse()
 
 	cfg := GetConfig()
-	storage := storage.NewStorage(*cfg.StorageRoot, initWebdriver(*cfg.ScenarioLibrary))
+	webDriver := initWebdriver(*cfg.ScenarioLibrary)
+	storage := storage.NewStorage(*cfg.StorageRoot, webDriver)
 
 	tgBot := telegram.NewBot(*cfg.TelegramBotKey)
 	twClient := twitter.NewClient(*cfg.TwitterApiKey)
@@ -86,7 +87,7 @@ func main() {
 	adapters := map[rpb.SourceType]adapter.Adapter{
 		rpb.SourceType_TELEGRAM: adapter.NewTelegramAdapter(tgBot),
 		rpb.SourceType_TWITTER:  adapter.NewTwitterAdapter(twClient),
-		rpb.SourceType_WEB:      adapter.NewWebAdapter(nil),
+		rpb.SourceType_WEB:      adapter.NewWebAdapter(nil, webDriver),
 	}
 	linkMatchers := []adapter.Adapter{
 		adapters[rpb.SourceType_TWITTER],

@@ -11,6 +11,7 @@ import (
 	"time"
 
 	rpb "chronicler/records/proto"
+	"chronicler/webdriver"
 )
 
 const (
@@ -52,7 +53,9 @@ func TestWebRequestResponse(t *testing.T) {
 		},
 	} {
 		t.Run(tc.desc, func(t *testing.T) {
-			web := createWebAdapter(NewFakeHttp(tc.responseFile),
+			web := createWebAdapter(
+				NewFakeHttp(tc.responseFile),
+				webdriver.WrapExclusive(&webdriver.NoopWebdriver{}),
 				func() time.Time {
 					return time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC)
 				})
@@ -102,7 +105,7 @@ func TestWebLinkMatcher(t *testing.T) {
 		},
 	} {
 		t.Run(tc.desc, func(t *testing.T) {
-			tg := NewWebAdapter(nil)
+			tg := NewWebAdapter(nil, webdriver.WrapExclusive(&webdriver.NoopWebdriver{}))
 
 			result := tg.MatchLink(tc.link)
 			if fmt.Sprintf("%+v", tc.want) != fmt.Sprintf("%+v", result) {
