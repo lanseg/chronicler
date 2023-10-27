@@ -12,10 +12,16 @@ import (
 
 	rpb "chronicler/records/proto"
 	"chronicler/webdriver"
+
+	"github.com/lanseg/golang-commons/optional"
 )
 
 const (
 	webRequestUuid = "1a468cef-1368-408a-a20b-86b32d94a460"
+)
+
+var (
+	fakeTime = time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC)
 )
 
 type FakeHttpClient struct {
@@ -36,8 +42,37 @@ func (fh *FakeHttpClient) Do(r *http.Request) (*http.Response, error) {
 	}, nil
 }
 
-func NewFakeHttp(file string) HttpClient {
+func newFakeHttp(file string) HttpClient {
 	return &FakeHttpClient{file: file}
+}
+
+type fakeWebDriver struct {
+	webdriver.NoopWebdriver
+
+	file string
+	url  string
+}
+
+func (fd *fakeWebDriver) Navigate(url string) {
+	fd.url = url
+}
+
+func (fd *fakeWebDriver) GetPageSource() optional.Optional[string] {
+	return optional.Map(
+		optional.OfError(os.ReadFile(filepath.Join("testdata", fd.file))),
+		func(b []byte) string {
+			return string(b)
+		})
+}
+
+func (fd *fakeWebDriver) GetCurrentURL() optional.Optional[string] {
+	return optional.Of(fd.url)
+}
+
+func newFakeWebdriver(file string) webdriver.WebDriver {
+	return &fakeWebDriver{
+		file: file,
+	}
 }
 
 func TestWebRequestResponse(t *testing.T) {
@@ -54,11 +89,10 @@ func TestWebRequestResponse(t *testing.T) {
 	} {
 		t.Run(tc.desc, func(t *testing.T) {
 			web := createWebAdapter(
-				NewFakeHttp(tc.responseFile),
-				webdriver.WrapExclusive(&webdriver.NoopWebdriver{}),
-				func() time.Time {
-					return time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC)
-				})
+				newFakeHttp(tc.responseFile),
+				webdriver.WrapExclusive(newFakeWebdriver(tc.responseFile)),
+				func() time.Time { return fakeTime })
+
 			ups := web.GetResponse(&rpb.Request{
 				Id:     webRequestUuid,
 				Target: &rpb.Source{Url: "google.com"},

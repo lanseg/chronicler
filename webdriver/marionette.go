@@ -184,6 +184,10 @@ func (m *Marionette) GetPageSource() optional.Optional[string] {
 	return optional.Map(m.write("WebDriver:GetPageSource", struct{}{}), getStringValue)
 }
 
+func (m *Marionette) GetCurrentURL() optional.Optional[string] {
+	return optional.Map(m.write("WebDriver:GetCurrentURL", struct{}{}), getStringValue)
+}
+
 func (m *Marionette) TakeScreenshot() optional.Optional[string] {
 	return optional.Map(m.write("WebDriver:TakeScreenshot", struct{}{}), getStringValue)
 }

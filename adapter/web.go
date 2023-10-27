@@ -1,7 +1,6 @@
 package adapter
 
 import (
-	"io"
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
@@ -118,44 +117,44 @@ func (w *webAdapter) SendMessage(*rpb.Message) {
 
 func (w *webAdapter) GetResponse(request *rpb.Request) []*rpb.Response {
 	w.logger.Infof("Loading web page from %s", request.Target.Url)
-     
-	response, err := w.Get(request.Target.Url)
-	if err != nil {
-		return []*rpb.Response{{
-			Request: request,
-			Result:  []*rpb.RecordSet{},
-		}}
-	}
-	defer response.Body.Close()
 
-	requestUrl := response.Request.URL
+	body := []byte{}
+	actualUrl := request.Target.Url
+	w.driver.Batch(func(d webdriver.WebDriver) {
+		d.Navigate(request.Target.Url)
+		d.GetCurrentURL().IfPresent(func(url string) {
+			actualUrl = url
+		})
+		d.GetPageSource().IfPresent(func(bodyStr string) {
+			body = []byte(bodyStr)
+		})
+	})
+
+	requestUrl, _ := url.Parse(fixLink("https", "", actualUrl))
 	w.logger.Infof("Resolved actual URL as %s", requestUrl)
-	body, err := io.ReadAll(response.Body)
-	if err != nil {
-		return []*rpb.Response{{
-			Request: request,
-			Result:  []*rpb.RecordSet{},
-		}}
-	}
-
-	source := &rpb.Source{
-		ChannelId: requestUrl.Host,
-		Url:       requestUrl.String(),
-		Type:      rpb.SourceType_WEB,
-	}
 	record := &rpb.Record{
-		Source:      source,
+		Source: &rpb.Source{
+			ChannelId: requestUrl.Host,
+			Url:       requestUrl.String(),
+			Type:      rpb.SourceType_WEB,
+		},
 		Time:        w.timeSource().Unix(),
 		TextContent: htmlparser.StripTags(string(body)),
 		RawContent:  body,
 	}
+
 	w.logger.Debugf("Parsing html content")
 	root := htmlparser.ParseHtml(string(body))
+	knownLinks := collections.NewSet([]string{})
 	linkNodes := root.GetElementsByTagNames("a", "img", "script", "link", "source", "srcset")
 	w.logger.Debugf("Found %d external link(s)", len(linkNodes))
 	for _, node := range linkNodes {
 		for _, link := range append(node.GetParam("href"), append(node.GetParam("src"), splitSrcset(node.GetParam("srcset"))...)...) {
 			fixedLink := fixLink(requestUrl.Scheme, requestUrl.Host, link)
+			if knownLinks.Contains(fixedLink) {
+				continue
+			}
+			knownLinks.Add(fixedLink)
 			pos := strings.LastIndex(fixedLink, ".")
 			if pos != -1 && isFileUrl(fixedLink[pos+1:]) {
 				record.Files = append(record.Files, &rpb.File{FileUrl: fixedLink})

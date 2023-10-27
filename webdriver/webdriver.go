@@ -18,10 +18,13 @@ const (
 
 type WebDriver interface {
 	NewSession()
+
 	Navigate(string)
 	GetPageSource() optional.Optional[string]
-	TakeScreenshot() optional.Optional[string]
+	GetCurrentURL() optional.Optional[string]
 	Print() optional.Optional[string]
+	TakeScreenshot() optional.Optional[string]
+
 	ExecuteScript(string) optional.Optional[string]
 	SetScenarios(ScenarioLibrary)
 }
@@ -33,6 +36,9 @@ type NoopWebdriver struct {
 func (*NoopWebdriver) NewSession()     {}
 func (*NoopWebdriver) Navigate(string) {}
 func (*NoopWebdriver) GetPageSource() optional.Optional[string] {
+	return optional.Of("")
+}
+func (*NoopWebdriver) GetCurrentURL() optional.Optional[string] {
 	return optional.Of("")
 }
 func (*NoopWebdriver) TakeScreenshot() optional.Optional[string] {
