@@ -75,7 +75,7 @@ function createAudioPlaylist(recordId, audios) {
                         <figure>
                           <figcaption>${file.name}</figcaption>
                           <audio controls>
-                            <source src="chronicler/${recordId}?file=${encodeURIComponent(
+                            <source src="/chronicler/records/${recordId}?file=${encodeURIComponent(
                                 file.fileUrl,
                             )}" >
                           </audio>
@@ -98,7 +98,7 @@ function createVideoPlaylist(recordId, videos) {
                         <figure>
                           <figcaption>${file.name}</figcaption>
                           <video controls>
-                            <source src="chronicler/${recordId}?file=${encodeURIComponent(
+                            <source src="/chronicler/records/${recordId}?file=${encodeURIComponent(
                                 file.fileUrl,
                             )}" >
                           </video>
@@ -118,8 +118,10 @@ function createGallery(recordId, images) {
 
     for (const file of images) {
         galleryEl.innerHTML += `<div class="image">
-                          <a href="chronicler/${recordId}?file=${encodeURIComponent(file.fileUrl)}">
-                          <img src="chronicler/${recordId}?file=${encodeURIComponent(
+                          <a href="/chronicler/records/${recordId}?file=${encodeURIComponent(
+                              file.fileUrl,
+                          )}">
+                          <img src="/chronicler/records/${recordId}?file=${encodeURIComponent(
                               file.fileUrl,
                           )}" />
                           </a>
@@ -139,9 +141,9 @@ function createFileList(recordId, title, files) {
 
     for (const file of files) {
         setEl.innerHTML += `<div class="file">
-                     <a href="chronicler/${recordId}?file=${encodeURIComponent(file.fileUrl)}">${
-                         file.name
-                     }</a>
+                     <a href="/chronicler/records/${recordId}?file=${encodeURIComponent(
+                         file.fileUrl,
+                     )}">${file.name}</a>
                  </div>`;
     }
     section.appendChild(setEl);
@@ -163,7 +165,7 @@ export function createRecordSet(rs, metadata) {
         <div class="origin"></div>
         <span class="datetime">${timeLabel}</span>
         <a href="?record_id=${rs.id}">${rs.recordCount}</a>
-        <a href="/chronicler/${rs.id}?file=record.json">json<a>
+        <a href="/chronicler/records/${rs.id}?file=record.json">json<a>
       </div>
       <div class="content">${rs.description}</div>`;
     const origin = recordEl.querySelector(".origin");

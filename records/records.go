@@ -157,7 +157,16 @@ func SortRecords(r []*rpb.Record) []*rpb.Record {
 	if r == nil {
 		return r
 	}
+
 	sort.Slice(r, func(i int, j int) bool {
+		if r[i].Parent != nil && r[j].Parent != nil {
+			if hashSource(r[i].Parent) == hashSource(r[j].Source) {
+				return true
+			}
+			if hashSource(r[i].Source) == hashSource(r[j].Parent) {
+				return false
+			}
+		}
 		if r[i].Time == r[j].Time {
 			return getRecordId(r[i]) < getRecordId(r[j])
 		}

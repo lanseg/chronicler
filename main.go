@@ -118,7 +118,7 @@ func main() {
 		logger.Infof("Starting storage thread")
 		for {
 			result := <-response
-			logger.Infof("Got new response for request %s", result.Request)
+			logger.Infof("Got new response for request %s (%s)", result.Request, result.Request.Origin)
 			for _, records := range result.Result {
 				msg := fmt.Sprintf("Saved as %s", records.Id)
 				if err := storage.SaveRecords(records); err != nil {

@@ -6,6 +6,7 @@ go_library(
     name = "server",
     srcs = [
         "server.go",
+        "pathparam_handler.go",
     ],
     importpath = "chronicler/frontend",
     deps = [
@@ -44,6 +45,7 @@ go_test(
     ]),
     srcs = [
         "server_test.go",
+        "pathparam_handler_test.go",
     ],
     embed = [
         ":server",

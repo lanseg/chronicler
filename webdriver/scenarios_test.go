@@ -14,17 +14,18 @@ func TestScenarios(t *testing.T) {
 	for _, sci := range []*ScenarioImpl{
 		{
 			Match:  "some.*match",
-			Before: []string{"Before path"},
+			Before: "beforescript.js",
 		},
 		{
 			Match:  "^http://exact.site/match$",
-			Before: []string{"Exact match"},
+			Before: "beforescript.js",
 		},
 		{
 			Match:  "noRegexpMatch",
-			Before: []string{"No regexp match"},
+			Before: "beforescript.js",
 		},
 	} {
+		sci.root = "testdata"
 		scenarios.scenarios = append(scenarios.scenarios, sci)
 	}
 
@@ -41,7 +42,7 @@ func TestScenarios(t *testing.T) {
 		{
 			name: "single scenario matches",
 			url:  "http://exact.site/match",
-			want: "Exact match",
+			want: "return true; //before",
 		},
 		{
 			name: "multiple scenarios match",
@@ -57,7 +58,7 @@ func TestScenarios(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			mch := scenarios.Matches(tc.url)
 			if (mch == nil && tc.want != "") || (mch != nil && mch.BeforeScript() != tc.want) {
-				t.Errorf("Expected to match %s, but got %s", tc.want, mch)
+				t.Errorf("Expected to match %v, but got %v", tc.want, mch)
 			}
 		})
 	}
@@ -90,12 +91,13 @@ func TestScenarioLoad(t *testing.T) {
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			sc, err := LoadScenarios(filepath.Join("testdata", tc.file))
-			if (err != nil && !tc.wantErr) || (err == nil && tc.wantErr) {
-				t.Errorf("Unexpected error or no error when expected: %s", err)
+			if err == nil && tc.wantErr {
+				t.Errorf("No expected error")
 			}
-			if sc != nil {
-				fmt.Println(sc)
+			if err != nil && !tc.wantErr {
+				t.Errorf("Unexpected error %s", err)
 			}
+			fmt.Println(sc)
 		})
 	}
 }

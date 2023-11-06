@@ -13,4 +13,4 @@ if [ $? -ne 0 ]; then
  exit 1
 fi
 
-find frontend/ -iname '*css' -o -iname '*js' -o -iname '*html' | xargs prettier --print-width 100 --tab-width 4 --write
+find -iname '*css' -o -iname '*js' -o -iname '*html' | xargs prettier --print-width 100 --tab-width 4 --write

@@ -1,17 +1,10 @@
 [
     {
         "match": "http.*site.ru/story/.",
-        "before": [
-            "first line",
-            "second line",
-            "third line"
-        ]
+        "before": "beforescript.js"
     },
     {
         "match": "https://exactMatch.com",
-        "before": [
-            "first line",
-            "second line"
-        ]
+        "before": "beforescript.js"
     }
 ]

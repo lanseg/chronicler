@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 )
@@ -17,8 +18,10 @@ type Scenario interface {
 type ScenarioImpl struct {
 	Scenario
 
-	Match  string   `json: match`
-	Before []string `json: before`
+	Match        string `json: match`
+	Before       string `json: before`
+	beforeScript string
+	root         string
 
 	re *regexp.Regexp
 }
@@ -33,14 +36,22 @@ func (s *ScenarioImpl) init() error {
 }
 
 func (s *ScenarioImpl) Matches(url string) bool {
-	if s.re == nil {
-		s.init()
+	if s.re == nil && s.init() != nil {
+
 	}
 	return s.re.FindString(url) != ""
 }
 
 func (s *ScenarioImpl) BeforeScript() string {
-	return strings.Join(s.Before, "\n")
+	if s.beforeScript != "" {
+		return s.beforeScript
+	}
+	script, err := os.ReadFile(filepath.Join(s.root, s.Before))
+	if err != nil {
+		script = []byte(fmt.Sprintf("return false; //%s", err.Error()))
+	}
+	s.beforeScript = strings.TrimSpace(string(script))
+	return s.beforeScript
 }
 
 // ScenarioLibary
@@ -82,9 +93,13 @@ func LoadScenarios(path string) (ScenarioLibrary, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	root := filepath.Dir(path)
 	result := []Scenario{}
 	for _, s := range scenarios {
+		s.root = root
+		if err = s.init(); err != nil {
+			return nil, err
+		}
 		result = append(result, s)
 	}
 	return &ScenarioLibraryImpl{

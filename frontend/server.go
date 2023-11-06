@@ -4,9 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"net/url"
 	"sort"
-	"strings"
 
 	"chronicler/records"
 	rpb "chronicler/records/proto"
@@ -22,49 +20,14 @@ const (
 	textSampleSize = 512
 )
 
-type DataRequest struct {
-	id       string
-	filename string
-}
-
-func (d DataRequest) String() string {
-	return fmt.Sprintf("DataRequest {id: \"%s\", file: \"%s\"}", d.id, d.filename)
-}
-
-func parseUrlRequest(link *url.URL) (*DataRequest, error) {
-	path := link.Path
-	query := link.Query()
-	params := DataRequest{}
-	for i, param := range strings.Split(strings.TrimPrefix(path, "/chronicler/"), "/") {
-		switch i {
-		case 0:
-			params.id = param
-		default:
-			return nil, fmt.Errorf("Unsupported path parameter #%d: %s", i, param)
-		}
-	}
-	if query["file"] != nil {
-		params.filename = query.Get("file")
-	}
-	return &params, nil
-}
-
 type WebServer struct {
-	http.Handler
-
-	staticFileServer http.Handler
-	storage          storage.Storage
-	server           *http.Server
-	logger           *cm.Logger
+	storage storage.Storage
+	logger  *cm.Logger
 }
 
 func (ws *WebServer) Error(w http.ResponseWriter, msg string, code int) {
 	ws.logger.Warningf("HTTP %d: %s", code, msg)
 	http.Error(w, msg, code)
-}
-
-func (ws *WebServer) handleRecordRequest(w http.ResponseWriter, r *http.Request) {
-	ws.logger.Infof("Requesting record: %s", r.URL.String())
 }
 
 func (ws *WebServer) writeJson(w http.ResponseWriter, data any) {
@@ -76,7 +39,7 @@ func (ws *WebServer) writeJson(w http.ResponseWriter, data any) {
 	w.Write(bytes)
 }
 
-func (ws *WebServer) responseRecordList(w http.ResponseWriter) {
+func (ws *WebServer) handleRecordSetList(p PathParams, w http.ResponseWriter, r *http.Request) {
 	rs, _ := ws.storage.ListRecords().Get()
 	rs = records.SortRecordSets(rs)
 
@@ -145,43 +108,30 @@ func (ws *WebServer) responseFile(w http.ResponseWriter, id string, filename str
 	w.Write(f)
 }
 
-func (ws *WebServer) handleApiRequest(w http.ResponseWriter, r *http.Request) {
-	params, err := parseUrlRequest(r.URL)
-	ws.logger.Infof("Request [api]: %s (%s)", r.URL.String(), params)
-	if err != nil {
-		ws.Error(w, err.Error(), 422)
-		return
+func (ws *WebServer) handleRecord(p PathParams, w http.ResponseWriter, r *http.Request) {
+	ws.logger.Infof("Request [api]: %s", p)
+	queryParams := r.URL.Query()
+	filename := "record.json"
+	if queryParams["file"] != nil {
+		filename = queryParams.Get("file")
 	}
-	if params.id == "" && params.filename == "" {
-		ws.responseRecordList(w)
-		return
-	} else if params.filename == "" {
-		ws.responseFile(w, params.id, "record.json")
-		return
-	} else {
-		ws.responseFile(w, params.id, params.filename)
-	}
-	w.Write([]byte(":)"))
-}
-
-func (ws *WebServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if strings.HasPrefix(r.URL.Path, "/chronicler") {
-		ws.handleApiRequest(w, r)
-		return
-	}
-	ws.logger.Infof("Request [static]: %s", r.URL.Path)
-	ws.staticFileServer.ServeHTTP(w, r)
+	ws.responseFile(w, p["recordId"], filename)
 }
 
 func NewServer(port int, storageRoot string, staticFiles string) *http.Server {
 	server := &WebServer{
-		logger:           cm.NewLogger("frontend"),
-		storage:          storage.NewStorage(storageRoot, &webdriver.ExclusiveWebDriver{}),
-		staticFileServer: http.FileServer(http.Dir(staticFiles)),
+		logger:  cm.NewLogger("frontend"),
+		storage: storage.NewStorage(storageRoot, &webdriver.ExclusiveWebDriver{}),
 	}
+
+	handler := &PathParamHandler{
+		elseHandler: http.FileServer(http.Dir(staticFiles)),
+	}
+	handler.Handle("/chronicler/records/{recordId}", server.handleRecord)
+	handler.Handle("/chronicler/records", server.handleRecordSetList)
 
 	return &http.Server{
 		Addr:    fmt.Sprintf(":%d", port),
-		Handler: server,
+		Handler: handler,
 	}
 }
