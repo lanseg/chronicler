@@ -171,7 +171,11 @@ func (m *Marionette) Navigate(url string) {
 	if s := m.scenarios.Matches(url); s != nil {
 		m.logger.Debugf("Found matching scenario for %s", url)
 		util.WaitFor(func() (bool, error) {
-			result, err := m.ExecuteScript(s.BeforeScript()).Get()
+			script, err := s.BeforeAll()
+			if err != nil {
+				return false, err
+			}
+			result, err := m.ExecuteScript(script).Get()
 			if result != "true" && result != "false" {
 				return false, fmt.Errorf("Unexpected value: %s", result)
 			}

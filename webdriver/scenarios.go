@@ -12,46 +12,69 @@ import (
 // Scenario
 type Scenario interface {
 	Matches(url string) bool
-	BeforeScript() string
+	BeforeAll() (string, error)
+	BeforePrint() (string, error)
+}
+
+type ScenarioConfig struct {
+	Match       string `json: match`
+	BeforeAll   string `json: beforeAll`
+	BeforePrint string `json: beforePrint`
 }
 
 type ScenarioImpl struct {
 	Scenario
 
-	Match        string `json: match`
-	Before       string `json: before`
-	beforeScript string
-	root         string
-
-	re *regexp.Regexp
+	root    string
+	config  ScenarioConfig
+	scripts map[string]string
+	match   *regexp.Regexp
 }
 
 func (s *ScenarioImpl) init() error {
-	re, err := regexp.CompilePOSIX(fmt.Sprintf("^%s$", s.Match))
+	re, err := regexp.CompilePOSIX(fmt.Sprintf("^%s$", s.config.Match))
 	if err != nil {
 		return err
 	}
-	s.re = re
+	s.match = re
 	return nil
 }
 
-func (s *ScenarioImpl) Matches(url string) bool {
-	if s.re == nil && s.init() != nil {
-
+func (s *ScenarioImpl) getContent(name string) (string, error) {
+	if s.scripts == nil {
+		s.scripts = map[string]string{}
 	}
-	return s.re.FindString(url) != ""
+	if content, ok := s.scripts[name]; ok {
+		return content, nil
+	}
+	scriptBytes, err := os.ReadFile(filepath.Join(s.root, name))
+	if err != nil {
+		return "", err
+	}
+	s.scripts[name] = strings.TrimSpace(string(scriptBytes))
+	return s.scripts[name], nil
+
 }
 
-func (s *ScenarioImpl) BeforeScript() string {
-	if s.beforeScript != "" {
-		return s.beforeScript
+func (s *ScenarioImpl) Matches(url string) bool {
+	if s.match == nil && s.init() != nil {
+		return false
 	}
-	script, err := os.ReadFile(filepath.Join(s.root, s.Before))
-	if err != nil {
-		script = []byte(fmt.Sprintf("return false; //%s", err.Error()))
+	return s.match.FindString(url) != ""
+}
+
+func (s *ScenarioImpl) BeforeAll() (string, error) {
+	if s.config.BeforeAll != "" {
+		return s.getContent(s.config.BeforeAll)
 	}
-	s.beforeScript = strings.TrimSpace(string(script))
-	return s.beforeScript
+	return "", nil
+}
+
+func (s *ScenarioImpl) BeforePrint() (string, error) {
+	if s.config.BeforePrint != "" {
+		return s.getContent(s.config.BeforePrint)
+	}
+	return "", nil
 }
 
 // ScenarioLibary
@@ -88,19 +111,22 @@ func LoadScenarios(path string) (ScenarioLibrary, error) {
 	if err != nil {
 		return nil, err
 	}
-	scenarios := []*ScenarioImpl{}
-	err = json.Unmarshal(data, &scenarios)
+	configs := []*ScenarioConfig{}
+	err = json.Unmarshal(data, &configs)
 	if err != nil {
 		return nil, err
 	}
 	root := filepath.Dir(path)
 	result := []Scenario{}
-	for _, s := range scenarios {
-		s.root = root
-		if err = s.init(); err != nil {
+	for _, cfg := range configs {
+		newScenario := &ScenarioImpl{
+			config: *cfg,
+			root:   root,
+		}
+		if err = newScenario.init(); err != nil {
 			return nil, err
 		}
-		result = append(result, s)
+		result = append(result, newScenario)
 	}
 	return &ScenarioLibraryImpl{
 		scenarios: result,

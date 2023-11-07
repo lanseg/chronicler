@@ -13,16 +13,22 @@ func TestScenarios(t *testing.T) {
 	}
 	for _, sci := range []*ScenarioImpl{
 		{
-			Match:  "some.*match",
-			Before: "beforescript.js",
+			config: ScenarioConfig{
+				Match:     "some.*match",
+				BeforeAll: "beforescript.js",
+			},
 		},
 		{
-			Match:  "^http://exact.site/match$",
-			Before: "beforescript.js",
+			config: ScenarioConfig{
+				Match:     "^http://exact.site/match$",
+				BeforeAll: "beforescript.js",
+			},
 		},
 		{
-			Match:  "noRegexpMatch",
-			Before: "beforescript.js",
+			config: ScenarioConfig{
+				Match:     "noRegexpMatch",
+				BeforeAll: "beforescript.js",
+			},
 		},
 	} {
 		sci.root = "testdata"
@@ -57,7 +63,17 @@ func TestScenarios(t *testing.T) {
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			mch := scenarios.Matches(tc.url)
-			if (mch == nil && tc.want != "") || (mch != nil && mch.BeforeScript() != tc.want) {
+			if mch == nil && tc.want == "" {
+				return
+			}
+
+			ba, err := mch.BeforeAll()
+			if err != nil {
+				t.Errorf("Unexpected error %s", err)
+				return
+			}
+
+			if ba != tc.want {
 				t.Errorf("Expected to match %v, but got %v", tc.want, mch)
 			}
 		})

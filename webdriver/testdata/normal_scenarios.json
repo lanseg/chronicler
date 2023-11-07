@@ -1,6 +1,6 @@
     [
         {
             "match": "http.*site.ru/story/.*",
-            "before": "beforescript.js"
+            "beforeAll": "beforescript.js"
         }
     ]
