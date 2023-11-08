@@ -15,6 +15,7 @@ import (
 	rpb "chronicler/records/proto"
 	"github.com/lanseg/golang-commons/collections"
 	cm "github.com/lanseg/golang-commons/common"
+	"github.com/lanseg/golang-commons/optional"
 )
 
 var (
@@ -23,18 +24,18 @@ var (
 )
 
 func initWebdriver(scenarios string) *webdriver.ExclusiveWebDriver {
-	wd, _ := webdriver.Connect().Get()
-	wd.Batch(func(d webdriver.WebDriver) {
-		d.NewSession()
-		sc, err := webdriver.LoadScenarios(scenarios)
-		if err != nil {
-			logger.Warningf("Cannot load webdriver scenarios from %s: %s", scenarios, err)
-		} else {
+	ww, _ := optional.MapErr(webdriver.Connect(),
+		func(wd webdriver.WebDriver) (webdriver.WebDriver, error) {
+			wd.NewSession()
+			sc, err := webdriver.LoadScenarios(scenarios)
+			if err != nil {
+				logger.Warningf("Cannot load webdriver scenarios from %s: %s", scenarios, err)
+				return nil, err
+			}
 			logger.Infof("Loaded scenarios from %s", scenarios)
-			d.SetScenarios(sc)
-		}
-	})
-	return wd
+			return webdriver.NewScenarioWebdriver(wd, sc), nil
+		}).Get()
+	return webdriver.WrapExclusive(ww)
 }
 
 func findTwitterSource(link string) *rpb.Source {

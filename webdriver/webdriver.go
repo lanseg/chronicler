@@ -26,7 +26,6 @@ type WebDriver interface {
 	TakeScreenshot() optional.Optional[string]
 
 	ExecuteScript(string) optional.Optional[string]
-	SetScenarios(ScenarioLibrary)
 }
 
 type NoopWebdriver struct {
@@ -50,8 +49,6 @@ func (*NoopWebdriver) Print() optional.Optional[string] {
 func (*NoopWebdriver) ExecuteScript(string) optional.Optional[string] {
 	return optional.Of("")
 }
-func (*NoopWebdriver) SetScenarios(ScenarioLibrary) {
-}
 
 type ExclusiveWebDriver struct {
 	driver WebDriver
@@ -70,22 +67,15 @@ func WrapExclusive(driver WebDriver) *ExclusiveWebDriver {
 	}
 }
 
-func Connect() optional.Optional[*ExclusiveWebDriver] {
+func Connect() optional.Optional[WebDriver] {
 	driver, err := connectMarionette(webdriverAddress, webdriverPort).Get()
 	if err == nil {
-		return optional.OfNullable(&ExclusiveWebDriver{
-			driver: driver,
-		})
+		return optional.Of(driver)
 	}
 
 	startFirefox(webdriverPort, browserProfileFolder)
 
-	return optional.Map(
-		util.WaitForPresent(func() optional.Optional[WebDriver] {
-			return connectMarionette(webdriverAddress, webdriverPort)
-		}, connectRetries, connectRetryInterval), func(driver WebDriver) *ExclusiveWebDriver {
-			return &ExclusiveWebDriver{
-				driver: driver,
-			}
-		})
+	return util.WaitForPresent(func() optional.Optional[WebDriver] {
+		return connectMarionette(webdriverAddress, webdriverPort)
+	}, connectRetries, connectRetryInterval)
 }

@@ -8,6 +8,7 @@ go_library(
         "firefox.go",
         "marionette.go",
         "scenarios.go",
+        "scenario_webdriver.go",
         "webdriver.go",
     ],
     importpath = "chronicler/webdriver",

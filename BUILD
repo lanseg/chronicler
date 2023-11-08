@@ -17,5 +17,6 @@ go_binary(
         "//webdriver",
         "@commons//collections",
         "@commons//common",
+        "@commons//optional",
     ],
 )
