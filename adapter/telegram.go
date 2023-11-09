@@ -70,7 +70,6 @@ func (ts *telegramAdapter) MatchLink(link string) *rpb.Source {
 func (ts *telegramAdapter) GetResponse(request *rpb.Request) []*rpb.Response {
 	updates := ts.waitForUpdate()
 	if len(updates) == 0 {
-		ts.logger.Debugf("No updates for request: %s", request)
 		return []*rpb.Response{}
 	}
 	records := groupRecords(updates)

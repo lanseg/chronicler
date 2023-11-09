@@ -1,0 +1,7 @@
+[
+    {
+        "match": "http.*pikabu.ru/story/.*",
+        "beforeAll": "pikabu_expand_all.js",
+        "beforePrint": "pikabu_cleanup.js"
+    }
+]
