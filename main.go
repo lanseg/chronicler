@@ -21,6 +21,7 @@ import (
 var (
 	twitterRe = regexp.MustCompile("(twitter|x.com).*/(?P<twitter_id>[0-9]+)[/]?")
 	logger    = cm.NewLogger("main")
+    telegramRequestUUID = cm.UUID4()
 )
 
 func initWebdriver(scenarios string) *webdriver.ExclusiveWebDriver {
@@ -158,7 +159,7 @@ func main() {
 		logger.Infof("Starting telegram periodic fetcher")
 		for {
 			responses := adapters[rpb.SourceType_TELEGRAM].GetResponse(&rpb.Request{
-				Id: cm.UUID4(),
+				Id: telegramRequestUUID,
 			})
 			if len(responses) == 0 {
 				continue

@@ -48,7 +48,6 @@ func (ts *telegramAdapter) resolveFileUrls(rs *rpb.RecordSet) {
 }
 
 func (ts *telegramAdapter) waitForUpdate() []*telegram.Update {
-	ts.logger.Infof("Waiting for a new telegram update...")
 	return collections.IterateSlice(
 		optional.
 			OfError(ts.bot.GetUpdates(int64(0), ts.cursor, 100, 100, []string{})).
