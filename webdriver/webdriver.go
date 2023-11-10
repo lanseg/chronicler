@@ -1,11 +1,11 @@
 package webdriver
 
 import (
-	"chronicler/util"
 	"sync"
 	"time"
 
-	"github.com/lanseg/golang-commons/optional"
+	"github.com/lanseg/golang-commons/concurrent"
+    "github.com/lanseg/golang-commons/optional"
 )
 
 const (
@@ -72,10 +72,8 @@ func Connect() optional.Optional[WebDriver] {
 	if err == nil {
 		return optional.Of(driver)
 	}
-
 	startFirefox(webdriverPort, browserProfileFolder)
-
-	return util.WaitForPresent(func() optional.Optional[WebDriver] {
+	return concurrent.WaitForSomething(func() optional.Optional[WebDriver] {
 		return connectMarionette(webdriverAddress, webdriverPort)
-	}, connectRetries, connectRetryInterval)
+	})
 }

@@ -17,6 +17,7 @@ go_library(
         "@commons//collections",
         "@commons//optional",
         "@commons//common",
+        "@commons//concurrent",
     ],
 )
 

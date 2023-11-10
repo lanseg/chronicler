@@ -7,7 +7,6 @@ go_library(
     srcs = [
         "runners.go",
         "textdata.go",
-        "waiter.go",
     ],
     importpath = "chronicler/util",
     deps = [

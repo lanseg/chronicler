@@ -19,9 +19,9 @@ import (
 )
 
 var (
-	twitterRe = regexp.MustCompile("(twitter|x.com).*/(?P<twitter_id>[0-9]+)[/]?")
-	logger    = cm.NewLogger("main")
-    telegramRequestUUID = cm.UUID4()
+	twitterRe           = regexp.MustCompile("(twitter|x.com).*/(?P<twitter_id>[0-9]+)[/]?")
+	logger              = cm.NewLogger("main")
+	telegramRequestUUID = cm.UUID4()
 )
 
 func initWebdriver(scenarios string) *webdriver.ExclusiveWebDriver {

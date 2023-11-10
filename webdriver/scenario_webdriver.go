@@ -1,13 +1,9 @@
 package webdriver
 
 import (
-	"fmt"
-	"time"
-
-	"chronicler/util"
-
 	cm "github.com/lanseg/golang-commons/common"
-	"github.com/lanseg/golang-commons/optional"
+	"github.com/lanseg/golang-commons/concurrent"
+    "github.com/lanseg/golang-commons/optional"
 )
 
 type scenarioWebdriver struct {
@@ -29,13 +25,9 @@ func (wd *scenarioWebdriver) getScenario() optional.Optional[Scenario] {
 }
 
 func (wd *scenarioWebdriver) runScenario(script string) {
-	util.WaitFor(func() (bool, error) {
-		result, err := wd.baseDriver.ExecuteScript(script).Get()
-		if result != "true" && result != "false" {
-			return false, fmt.Errorf("Unexpected value: %s", result)
-		}
-		return result == "true", err
-	}, 5, 10*time.Second)
+	concurrent.WaitForValue("true", func() optional.Optional[string] {
+		return wd.baseDriver.ExecuteScript(script)
+	})
 }
 
 func (wd *scenarioWebdriver) NewSession() {
