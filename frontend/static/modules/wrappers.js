@@ -79,7 +79,8 @@ export class File {
         if (!this.fileUrl) {
             return false;
         }
-        return docExtensions.includes(getExtension(this.name.toLowerCase()));
+        return this.name.startsWith('pageview_page') ||
+          docExtensions.includes(getExtension(this.name.toLowerCase()));
     }
 }
 

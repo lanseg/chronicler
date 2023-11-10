@@ -3,7 +3,7 @@ package webdriver
 import (
 	cm "github.com/lanseg/golang-commons/common"
 	"github.com/lanseg/golang-commons/concurrent"
-    "github.com/lanseg/golang-commons/optional"
+	"github.com/lanseg/golang-commons/optional"
 )
 
 type scenarioWebdriver struct {

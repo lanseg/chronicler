@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/lanseg/golang-commons/concurrent"
-    "github.com/lanseg/golang-commons/optional"
+	"github.com/lanseg/golang-commons/optional"
 )
 
 const (
