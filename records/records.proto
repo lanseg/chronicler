@@ -7,7 +7,7 @@ enum SourceType {
   TELEGRAM      = 1;
   TWITTER       = 2;
   WEB           = 3;
-  YOUTUBE       = 4;
+  PIKABU        = 4;
 }
 
 enum FetchStatus {

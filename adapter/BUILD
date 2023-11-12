@@ -6,6 +6,7 @@ go_library(
     name = "adapter",
     srcs = [
         "adapter.go",
+        "pikabu.go",
         "telegram.go",
         "twitter.go",
         "web.go",
@@ -31,6 +32,7 @@ go_test(
     size = "small",
     srcs = [
         "adapter_test.go",
+        "pikabu_test.go",
         "telegram_test.go",
         "twitter_test.go",
         "testutil.go",
