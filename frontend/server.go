@@ -10,14 +10,9 @@ import (
 	rpb "chronicler/records/proto"
 	"chronicler/storage"
 	"chronicler/webdriver"
-	"web/htmlparser"
 
 	"github.com/lanseg/golang-commons/collections"
 	cm "github.com/lanseg/golang-commons/common"
-)
-
-const (
-	textSampleSize = 512
 )
 
 type WebServer struct {
@@ -46,28 +41,7 @@ func (ws *WebServer) handleRecordSetList(p PathParams, w http.ResponseWriter, r 
 	userById := map[string]*rpb.UserMetadata{}
 	result := &rpb.RecordListResponse{}
 	for _, r := range rs {
-		desc := ""
-		if len(r.Records) > 0 {
-			desc = cm.IfEmpty(
-				string(r.Records[0].RawContent),
-				r.Records[0].TextContent)
-
-			if r.Records[0].Source.Type == rpb.SourceType_WEB {
-				desc = htmlparser.GetTitle(desc)
-			}
-		}
-		if len(desc) > textSampleSize {
-			desc = cm.Ellipsis(desc, textSampleSize, true)
-		}
-		set := &rpb.RecordListResponse_RecordSetInfo{
-			Id:          r.Id,
-			Description: desc,
-			RecordCount: int32(len(r.Records)),
-		}
-		if len(r.Records) > 0 {
-			set.RootRecord = r.Records[0]
-		}
-		result.RecordSets = append(result.RecordSets, set)
+		result.RecordSets = append(result.RecordSets, records.CreatePreview(r))
 		for _, data := range r.UserMetadata {
 			userById[data.Id] = data
 		}

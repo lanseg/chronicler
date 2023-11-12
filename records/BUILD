@@ -21,6 +21,7 @@ go_library(
     visibility = ["//visibility:public"],
     deps = [
         ":records_go_proto",
+        "//web:htmlparser",
         "@commons//collections",
         "@commons//common",
     ],

@@ -7,9 +7,14 @@ import (
 	"sort"
 
 	rpb "chronicler/records/proto"
+	"web/htmlparser"
 
 	"github.com/lanseg/golang-commons/collections"
 	cm "github.com/lanseg/golang-commons/common"
+)
+
+const (
+	textSampleSize = 512
 )
 
 func hashSource(src *rpb.Source) string {
@@ -198,4 +203,32 @@ func SortRecordSets(rs []*rpb.RecordSet) []*rpb.RecordSet {
 		return rs[i].Id < rs[j].Id
 	})
 	return rs
+}
+
+func CreatePreview(rs *rpb.RecordSet) *rpb.RecordSetPreview {
+	if len(rs.Records) == 0 {
+		return &rpb.RecordSetPreview{
+			Id:          rs.Id,
+			Description: "",
+			RecordCount: 0,
+		}
+	}
+
+	description := ""
+	r := rs.Records[0]
+	if r.Source.Type == rpb.SourceType_WEB {
+		description = htmlparser.GetTitle(string(r.RawContent))
+	} else {
+		description = cm.IfEmpty(r.TextContent, string(r.RawContent))
+	}
+
+	if len(description) > textSampleSize {
+		description = cm.Ellipsis(description, textSampleSize, true)
+	}
+	return &rpb.RecordSetPreview{
+		Id:          rs.Id,
+		Description: description,
+		RecordCount: int32(len(rs.Records)),
+		RootRecord:  r,
+	}
 }
