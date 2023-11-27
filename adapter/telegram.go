@@ -6,7 +6,6 @@ import (
 	"strconv"
 	"strings"
 
-	"chronicler/records"
 	"chronicler/telegram"
 	"chronicler/util"
 
@@ -111,8 +110,11 @@ func groupRecords(updates []*telegram.Update) []*rpb.RecordSet {
 	result := []*rpb.RecordSet{}
 	for _, v := range grouped {
 		record, users := updateToRecords(v)
-		rs := records.NewRecordSet([]*rpb.Record{record}, users)
-		rs.Id = cm.UUID4()
+		rs := &rpb.RecordSet{
+			Id:           cm.UUID4(),
+			Records:      []*rpb.Record{record},
+			UserMetadata: users,
+		}
 		result = append(result, rs)
 	}
 	return result

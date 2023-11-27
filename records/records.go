@@ -7,10 +7,10 @@ import (
 	"sort"
 
 	rpb "chronicler/records/proto"
-	"web/htmlparser"
 
 	"github.com/lanseg/golang-commons/collections"
 	cm "github.com/lanseg/golang-commons/common"
+	"github.com/lanseg/golang-commons/tinyhtml"
 )
 
 const (
@@ -217,7 +217,7 @@ func CreatePreview(rs *rpb.RecordSet) *rpb.RecordSetPreview {
 	description := ""
 	r := rs.Records[0]
 	if r.Source.Type == rpb.SourceType_WEB {
-		description = htmlparser.GetTitle(string(r.RawContent))
+		description = tinyhtml.GetTitle(string(r.RawContent))
 	} else {
 		description = cm.IfEmpty(r.TextContent, string(r.RawContent))
 	}

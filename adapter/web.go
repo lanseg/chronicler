@@ -9,10 +9,10 @@ import (
 
 	rpb "chronicler/records/proto"
 	"chronicler/webdriver"
-	"web/htmlparser"
 
 	"github.com/lanseg/golang-commons/collections"
 	cm "github.com/lanseg/golang-commons/common"
+	"github.com/lanseg/golang-commons/tinyhtml"
 )
 
 const (
@@ -47,12 +47,8 @@ func fixLink(scheme string, host string, link string) string {
 	return u.String()
 }
 
-func splitSrcset(srcset []string) []string {
-	result := []string{}
-	for _, src := range srcset {
-		result = append(result, strings.Split(src, " ")[0])
-	}
-	return result
+func splitSrcset(srcset string) []string {
+	return []string{strings.Split(srcset, " ")[0]}
 }
 
 type webAdapter struct {
@@ -139,17 +135,17 @@ func (w *webAdapter) GetResponse(request *rpb.Request) []*rpb.Response {
 			Type:      rpb.SourceType_WEB,
 		},
 		Time:        w.timeSource().Unix(),
-		TextContent: htmlparser.StripTags(string(body)),
+		TextContent: tinyhtml.StripTags(string(body)),
 		RawContent:  body,
 	}
 
 	w.logger.Debugf("Parsing html content")
-	root := htmlparser.ParseHtml(string(body))
+	root, _ := tinyhtml.ParseHtml(string(body))
 	knownLinks := collections.NewSet([]string{})
-	linkNodes := root.GetElementsByTagNames("a", "img", "script", "link", "source", "srcset")
+	linkNodes := root.GetElementsByTagAndClass("a")
 	w.logger.Debugf("Found %d external link(s)", len(linkNodes))
 	for _, node := range linkNodes {
-		for _, link := range append(node.GetParam("href"), append(node.GetParam("src"), splitSrcset(node.GetParam("srcset"))...)...) {
+		for _, link := range append(splitSrcset(node.Params["srcset"]), node.Params["href"], node.Params["src"]) {
 			fixedLink := fixLink(requestUrl.Scheme, requestUrl.Host, link)
 			if knownLinks.Contains(fixedLink) {
 				continue

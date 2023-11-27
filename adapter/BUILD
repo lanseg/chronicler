@@ -20,7 +20,7 @@ go_library(
         "//telegram",
         "//twitter",
         "//util",
-        "//web:htmlparser",
+        "//tinyhtml",
         "@commons//collections",
         "@commons//optional",
         "@commons//common",

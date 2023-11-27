@@ -12,8 +12,6 @@ import (
 
 	rpb "chronicler/records/proto"
 	"chronicler/webdriver"
-
-	"github.com/lanseg/golang-commons/optional"
 )
 
 const (
@@ -44,35 +42,6 @@ func (fh *FakeHttpClient) Do(r *http.Request) (*http.Response, error) {
 
 func newFakeHttp(file string) HttpClient {
 	return &FakeHttpClient{file: file}
-}
-
-type fakeWebDriver struct {
-	webdriver.NoopWebdriver
-
-	file string
-	url  string
-}
-
-func (fd *fakeWebDriver) Navigate(url string) {
-	fd.url = url
-}
-
-func (fd *fakeWebDriver) GetPageSource() optional.Optional[string] {
-	return optional.Map(
-		optional.OfError(os.ReadFile(filepath.Join("testdata", fd.file))),
-		func(b []byte) string {
-			return string(b)
-		})
-}
-
-func (fd *fakeWebDriver) GetCurrentURL() optional.Optional[string] {
-	return optional.Of(fd.url)
-}
-
-func newFakeWebdriver(file string) webdriver.WebDriver {
-	return &fakeWebDriver{
-		file: file,
-	}
 }
 
 func TestWebRequestResponse(t *testing.T) {

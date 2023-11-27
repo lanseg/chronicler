@@ -13,7 +13,7 @@ go_binary(
         "//telegram",
         "//twitter",
         "//util",
-        "//web:htmlparser",
+        "//tinyhtml",
         "//webdriver",
         "@commons//collections",
         "@commons//common",

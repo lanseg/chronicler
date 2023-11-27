@@ -136,7 +136,7 @@ func (m *Marionette) onDataRead(data []byte) {
 		return
 	}
 	response := &Response{MessageId: id, Result: result[3]}
-	m.logger.Infof("Response id:%d err:%v result:%p [%v]", response.MessageId, response.Error, result[3], result[3])
+	m.logger.Infof("Response id:%d err:%v result:%p [%p]", response.MessageId, response.Error, result[3], result[3])
 	ch <- optional.OfNullable(response)
 }
 
