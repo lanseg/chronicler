@@ -59,14 +59,20 @@ func (n *Node) InnerHTML() string {
 }
 
 func (n *Node) GetElementsByTagAndClass(tag string, classes ...string) []*Node {
-	result := n.iterateChildren().Filter(func(node *Node) bool {
+	return n.iterateChildren().Filter(func(node *Node) bool {
 		data, ok := node.Params["class"]
 		if tag != node.Name || (!ok && len(classes) > 0) {
 			return false
 		}
 		return collections.NewSet(strings.Split(data, " ")).ContainsAll(classes)
-	})
-	return result.Collect()
+	}).Collect()
+}
+
+func (n *Node) GetElementsByTags(tags ...string) []*Node {
+    tagSet := collections.NewSet(tags)
+	return n.iterateChildren().Filter(func(node *Node) bool {
+		return tagSet.Contains(node.Name)
+	}).Collect()
 }
 
 func (n *Node) GetAttribute(attr string) optional.Optional[string] {
@@ -166,24 +172,23 @@ func dump(n *Node, prefix string) {
 }
 
 func GetTitle(s string) string {
-    nodes, _ := ParseHtml(s)
-    titles := nodes.GetElementsByTagAndClass("title")
-    if len(titles) == 0 || len(titles[0].Children) == 0{
-      return ""
-    }
-    return titles[0].Children[0].Value
+	nodes, _ := ParseHtml(s)
+	titles := nodes.GetElementsByTagAndClass("title")
+	if len(titles) == 0 || len(titles[0].Children) == 0 {
+		return ""
+	}
+	return titles[0].Children[0].Value
 }
 
 func StripTags(s string) string {
-    nodes, _ := ParseHtml(s)
-    result := strings.Builder{}
-    nodes.iterateChildren().ForEachRemaining(func (n *Node) bool {
-        if n.Name != "#text" || n.Value == "" {
-          return false
-        }
-        result.WriteString(n.Value)
-        return false
-    })
-    dump(nodes, "")
+	nodes, _ := ParseHtml(s)
+	result := strings.Builder{}
+	nodes.iterateChildren().ForEachRemaining(func(n *Node) bool {
+		if n.Name != "#text" || n.Value == "" {
+			return false
+		}
+		result.WriteString(n.Value)
+		return false
+	})
 	return result.String()
 }

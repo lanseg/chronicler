@@ -144,6 +144,7 @@ func main() {
 				result.Request.Origin, len(result.Result))
 			for _, records := range result.Result {
 				for _, req := range extractRequests(linkMatchers, records) {
+					req.Origin = result.Request.Origin
 					requests <- req
 				}
 			}

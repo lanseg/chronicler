@@ -142,8 +142,8 @@ func (w *webAdapter) GetResponse(request *rpb.Request) []*rpb.Response {
 	w.logger.Debugf("Parsing html content")
 	root, _ := tinyhtml.ParseHtml(string(body))
 	knownLinks := collections.NewSet([]string{})
-	linkNodes := root.GetElementsByTagAndClass("a")
-	w.logger.Debugf("Found %d external link(s)", len(linkNodes))
+	linkNodes := root.GetElementsByTags("a", "img", "script", "link", "source", "srcset")
+
 	for _, node := range linkNodes {
 		for _, link := range append(splitSrcset(node.Params["srcset"]), node.Params["href"], node.Params["src"]) {
 			fixedLink := fixLink(requestUrl.Scheme, requestUrl.Host, link)

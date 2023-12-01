@@ -87,7 +87,7 @@ func tokenize(doc string) []*Token {
 		lastOfType: map[State]*Token{},
 		tokens:     []*Token{},
 	}
-    asRunes := []rune(doc)
+	asRunes := []rune(doc)
 	for i, r := range asRunes {
 		switch state {
 		case ERROR:
@@ -220,6 +220,6 @@ func tokenize(doc string) []*Token {
 			}
 		}
 	}
-    tokens.push(len(asRunes), DATA)
+	tokens.push(len(asRunes), DATA)
 	return tokens.tokens
 }

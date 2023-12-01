@@ -33,7 +33,6 @@ func (fh *FakeHttpClient) Do(r *http.Request) (*http.Response, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	return &http.Response{
 		Body:    io.NopCloser(bytes.NewReader(bts)),
 		Request: r,

@@ -13,7 +13,7 @@ func TestTinyHtml(t *testing.T) {
 	}{
 		{
 			name: "Test some html",
-			path: "testdata/basic_valid.html",
+			path: "/home/lans/devel/chronist/page.html",
 		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
