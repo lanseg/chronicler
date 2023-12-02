@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"os"
 
 	"chronicler/frontend"
@@ -9,23 +8,25 @@ import (
 	cm "github.com/lanseg/golang-commons/common"
 )
 
-var (
-	port        = flag.Int("port", 8080, "Port for the http server")
-	storageRoot = flag.String("storage_root", "chronicler_storage", "A local folder to save downloads.")
-	staticRoot  = flag.String("static_root", "frontend/static", "Root directory with the web page files. ")
-)
+type FrontendConfig struct {
+    StorageRoot *string `json:storageRoot`
+    StaticRoot *string `json:staticRoot`
+    FrontendPort *int `json:frontendPort`
+}
 
 func main() {
-	flag.Parse()
-	logger := cm.NewLogger("main")
+    logger := cm.NewLogger("main")
+    cfg, err := cm.GetConfig[FrontendConfig](os.Args[1:], "config")
+    if err != nil {
+      logger.Errorf("Could not load configs: %s", err)
+      os.Exit(-1)
+    }
 
-	cwd, _ := os.Getwd()
-	logger.Infof("Currect directory: %s", cwd)
-	logger.Infof("Storage root: %s", *storageRoot)
-	logger.Infof("Static files root: %s", *staticRoot)
-	logger.Infof("Starting server on port %d", *port)
+	logger.Infof("Storage root: %s", *cfg.StorageRoot)
+	logger.Infof("Static files root: %s", *cfg.StaticRoot)
+	logger.Infof("Starting server on port %d", *cfg.FrontendPort)
 
-	server := frontend.NewServer(*port, *storageRoot, *staticRoot)
+	server := frontend.NewServer(*cfg.FrontendPort, *cfg.StorageRoot, *cfg.StaticRoot)
 	if err := server.ListenAndServe(); err != nil {
 		logger.Errorf("Failed to start server: %s", err)
 	}

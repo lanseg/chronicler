@@ -11,10 +11,10 @@ func TestTinyHtml(t *testing.T) {
 		name string
 		path string
 	}{
-		{
-			name: "Test some html",
-			path: "/home/lans/devel/chronist/page.html",
-		},
+//		{
+//			name: "Test some html",
+//			path: "/home/lans/devel/chronist/page.html",
+//		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			file, err := os.ReadFile(tc.path)
