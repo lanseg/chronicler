@@ -69,7 +69,7 @@ func (n *Node) GetElementsByTagAndClass(tag string, classes ...string) []*Node {
 }
 
 func (n *Node) GetElementsByTags(tags ...string) []*Node {
-    tagSet := collections.NewSet(tags)
+	tagSet := collections.NewSet(tags)
 	return n.iterateChildren().Filter(func(node *Node) bool {
 		return tagSet.Contains(node.Name)
 	}).Collect()

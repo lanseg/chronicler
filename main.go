@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"regexp"
 	"sync"
 
 	"chronicler/adapter"
@@ -13,13 +12,11 @@ import (
 	"chronicler/webdriver"
 
 	rpb "chronicler/records/proto"
-	"github.com/lanseg/golang-commons/collections"
 	cm "github.com/lanseg/golang-commons/common"
 	"github.com/lanseg/golang-commons/optional"
 )
 
 var (
-	twitterRe           = regexp.MustCompile("(twitter|x.com).*/(?P<twitter_id>[0-9]+)[/]?")
 	logger              = cm.NewLogger("main")
 	telegramRequestUUID = cm.UUID4()
 )
@@ -37,24 +34,6 @@ func initWebdriver(scenarios string) *webdriver.ExclusiveWebDriver {
 			return webdriver.NewScenarioWebdriver(wd, sc), nil
 		}).Get()
 	return webdriver.WrapExclusive(ww)
-}
-
-func findTwitterSource(link string) *rpb.Source {
-	matches := collections.NewMap(twitterRe.SubexpNames(), twitterRe.FindStringSubmatch(link))
-	if match, ok := matches["twitter_id"]; ok && match != "" {
-		return &rpb.Source{
-			ChannelId: matches["twitter_id"],
-			Type:      rpb.SourceType_TWITTER,
-		}
-	}
-	return nil
-}
-
-func linkToTarget(link string) *rpb.Source {
-	return &rpb.Source{
-		Url:  link,
-		Type: rpb.SourceType_WEB,
-	}
 }
 
 func extractRequests(adapters []adapter.Adapter, rs *rpb.RecordSet) []*rpb.Request {
