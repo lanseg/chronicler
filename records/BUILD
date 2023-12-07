@@ -21,7 +21,7 @@ go_library(
     visibility = ["//visibility:public"],
     deps = [
         ":records_go_proto",
-        "//tinyhtml",
+        "@commons//almosthtml",
         "@commons//collections",
         "@commons//common",
     ],

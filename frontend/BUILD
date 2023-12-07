@@ -15,9 +15,9 @@ go_library(
         "//records:records_go_proto",
         "//storage",
         "//util",
+        "@commons//almosthtml",
         "@commons//collections",
         "@commons//common",
-        "//tinyhtml",
     ],
 )
 

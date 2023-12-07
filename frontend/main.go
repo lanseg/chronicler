@@ -9,18 +9,18 @@ import (
 )
 
 type FrontendConfig struct {
-    StorageRoot *string `json:storageRoot`
-    StaticRoot *string `json:staticRoot`
-    FrontendPort *int `json:frontendPort`
+	StorageRoot  *string `json:storageRoot`
+	StaticRoot   *string `json:staticRoot`
+	FrontendPort *int    `json:frontendPort`
 }
 
 func main() {
-    logger := cm.NewLogger("main")
-    cfg, err := cm.GetConfig[FrontendConfig](os.Args[1:], "config")
-    if err != nil {
-      logger.Errorf("Could not load configs: %s", err)
-      os.Exit(-1)
-    }
+	logger := cm.NewLogger("main")
+	cfg, err := cm.GetConfig[FrontendConfig](os.Args[1:], "config")
+	if err != nil {
+		logger.Errorf("Could not load configs: %s", err)
+		os.Exit(-1)
+	}
 
 	logger.Infof("Storage root: %s", *cfg.StorageRoot)
 	logger.Infof("Static files root: %s", *cfg.StaticRoot)

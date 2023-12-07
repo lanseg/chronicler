@@ -12,7 +12,6 @@ go_binary(
         "//telegram",
         "//twitter",
         "//util",
-        "//tinyhtml",
         "//webdriver",
         "@commons//collections",
         "@commons//common",

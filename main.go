@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-    "os"
+	"os"
 	"sync"
 
 	"chronicler/adapter"
@@ -22,10 +22,10 @@ var (
 )
 
 type Config struct {
-    TwitterApiKey   *string `json:"twitterApiKey"`
-    TelegramBotKey  *string `json:"telegramBotKey"`
-    StorageRoot     *string `json:"storageRoot"`
-    ScenarioLibrary *string `json:"scenarioLibrary"`
+	TwitterApiKey   *string `json:"twitterApiKey"`
+	TelegramBotKey  *string `json:"telegramBotKey"`
+	StorageRoot     *string `json:"storageRoot"`
+	ScenarioLibrary *string `json:"scenarioLibrary"`
 }
 
 func initWebdriver(scenarios string) *webdriver.ExclusiveWebDriver {
@@ -64,14 +64,14 @@ func extractRequests(adapters []adapter.Adapter, rs *rpb.RecordSet) []*rpb.Reque
 
 func main() {
 	cfg, err := cm.GetConfig[Config](os.Args[1:], "config")
-    if err != nil {
-        logger.Errorf("Could not load config: %s", err)
-        os.Exit(-1)
-    }
-    logger.Infof("Config.StorageRoot: %s", *cfg.StorageRoot)
-    logger.Infof("Config.ScenarioLibry: %s", *cfg.ScenarioLibrary)
-    logger.Infof("TwitterApiKey: %d", len(*cfg.TwitterApiKey))
-    logger.Infof("TelegramBotKey: %d", len(*cfg.TelegramBotKey))
+	if err != nil {
+		logger.Errorf("Could not load config: %s", err)
+		os.Exit(-1)
+	}
+	logger.Infof("Config.StorageRoot: %s", *cfg.StorageRoot)
+	logger.Infof("Config.ScenarioLibry: %s", *cfg.ScenarioLibrary)
+	logger.Infof("TwitterApiKey: %d", len(*cfg.TwitterApiKey))
+	logger.Infof("TelegramBotKey: %d", len(*cfg.TelegramBotKey))
 
 	webDriver := initWebdriver(*cfg.ScenarioLibrary)
 	storage := storage.NewStorage(*cfg.StorageRoot, webDriver)

@@ -1,21 +1,34 @@
+// At first, loading all comments
 const showComments = document.querySelectorAll(".comments__more-button:not(.hidden)");
+if (showComments.length > 0) {
+    showComments.forEach((e) => e.click());
+    return false;
+}
+const loadMore = document.querySelectorAll(".comment__more");
+if (loadMore.length > 0) {
+    loadMore.forEach((e) => e.click());
+    return false;
+}
+
+// Expanding comment branch if any
+const expandBranch = document.querySelectorAll(".comment-toggle-children__label");
+if (expandBranch.length > 0) {
+    expandBranch.forEach((e) => e.click());
+    return false;
+}
+
+// Then expanding all comments
 const expandComments = document.querySelectorAll(
     ".comment-toggle-children.comment-toggle-children_collapse",
 );
-const loadMore = document.querySelectorAll(".comment__more");
+if (expandComments.length > 0) {
+    expandComments.forEach((e) => e.click);
+    return false;
+}
+
+// Loading lazy images after all
 const imgs = [...document.querySelectorAll("img")];
-
-// Expand posts and comments
-showComments.forEach((e) => e.click());
-loadMore.forEach((e) => e.click());
-expandComments.forEach((e) => e.click());
-
-// Load all lazy images
 imgs.filter((img) => img.src === "").forEach(
     (img) => img.getAttribute("data-large-image") ?? img.getAttribute("data-src"),
 );
-
-// Wait for all images to load
-const imagesReady = imgs.map((img) => img.complete).reduce((a, b) => a & b, true);
-
-return Boolean(expandComments.length + loadMore.length + showComments.length === 0 && imagesReady);
+return Boolean(imgs.map((img) => img.complete).reduce((a, b) => a & b, true));

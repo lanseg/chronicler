@@ -10,9 +10,9 @@ import (
 	rpb "chronicler/records/proto"
 	"chronicler/webdriver"
 
+	"github.com/lanseg/golang-commons/almosthtml"
 	"github.com/lanseg/golang-commons/collections"
 	cm "github.com/lanseg/golang-commons/common"
-	"github.com/lanseg/golang-commons/tinyhtml"
 )
 
 const (
@@ -56,7 +56,7 @@ func (p *pikabuAdapter) MatchLink(link string) *rpb.Source {
 	return nil
 }
 
-func (p *pikabuAdapter) parseStory(node *tinyhtml.Node) (*rpb.Record, *rpb.UserMetadata) {
+func (p *pikabuAdapter) parseStory(node *almosthtml.Node) (*rpb.Record, *rpb.UserMetadata) {
 	author := &rpb.UserMetadata{}
 	result := &rpb.Record{
 		Source: &rpb.Source{
@@ -65,13 +65,13 @@ func (p *pikabuAdapter) parseStory(node *tinyhtml.Node) (*rpb.Record, *rpb.UserM
 	}
 	inContent := false
 	textContent := strings.Builder{}
-	collections.IterateTree(node, collections.DepthFirst, func(n *tinyhtml.Node) []*tinyhtml.Node {
+	collections.IterateTree(node, collections.DepthFirst, func(n *almosthtml.Node) []*almosthtml.Node {
 		class := n.Params["class"]
 		if n.Name == "div" && (class == "story__tags tags" || class == "story__footer") {
-			return []*tinyhtml.Node{}
+			return []*almosthtml.Node{}
 		}
 		return n.Children
-	}).ForEachRemaining(func(n *tinyhtml.Node) bool {
+	}).ForEachRemaining(func(n *almosthtml.Node) bool {
 		class := n.Params["class"]
 		dataName, hasDataName := n.Params["data-name"]
 		if class == "story__user-link user__nick" && hasDataName {
@@ -106,7 +106,6 @@ func (p *pikabuAdapter) parseStory(node *tinyhtml.Node) (*rpb.Record, *rpb.UserM
 			}
 			return false
 		}
-
 		if class == "story__content story__typography" {
 			inContent = true
 		}
@@ -119,9 +118,11 @@ func (p *pikabuAdapter) parseStory(node *tinyhtml.Node) (*rpb.Record, *rpb.UserM
 		if n.Name == "br" || n.Name == "p" {
 			textContent.WriteRune('\n')
 		}
-		text := strings.ReplaceAll(strings.TrimSpace(n.Value), "\n", "")
-		if text != "" {
-			textContent.WriteString(text)
+		if n.Name == "#text" {
+			text := strings.ReplaceAll(strings.TrimSpace(n.Raw), "\n", "")
+			if text != "" {
+				textContent.WriteString(text)
+			}
 		}
 		return false
 	})
@@ -129,17 +130,17 @@ func (p *pikabuAdapter) parseStory(node *tinyhtml.Node) (*rpb.Record, *rpb.UserM
 		SenderId: author.Id,
 		Type:     rpb.SourceType_PIKABU,
 	}
-	result.TextContent = textContent.String()
+	result.TextContent = strings.TrimSpace(textContent.String())
 	return result, author
 }
 
-func (p *pikabuAdapter) parseCommentContent(node *tinyhtml.Node) (string, []string, []string) {
+func (p *pikabuAdapter) parseCommentContent(node *almosthtml.Node) (string, []string, []string) {
 	result := strings.Builder{}
 	links := []string{}
 	files := []string{}
-	collections.IterateTree(node, collections.DepthFirst, func(n *tinyhtml.Node) []*tinyhtml.Node {
+	collections.IterateTree(node, collections.DepthFirst, func(n *almosthtml.Node) []*almosthtml.Node {
 		return n.Children
-	}).ForEachRemaining(func(n *tinyhtml.Node) bool {
+	}).ForEachRemaining(func(n *almosthtml.Node) bool {
 		if href, hasHref := n.Params["href"]; hasHref {
 			links = append(links, href)
 		}
@@ -155,17 +156,18 @@ func (p *pikabuAdapter) parseCommentContent(node *tinyhtml.Node) (string, []stri
 		if n.Name == "br" || n.Name == "p" {
 			result.WriteRune('\n')
 		}
-		text := strings.ReplaceAll(strings.TrimSpace(n.Value), "\n", "")
-		if text != "" {
-			result.WriteString(text)
+		if n.Name == "#text" {
+			text := strings.ReplaceAll(strings.TrimSpace(n.Raw), "\n", "")
+			if text != "" {
+				result.WriteString(text)
+			}
 		}
 		return false
 	})
-
-	return result.String(), links, files
+	return strings.TrimSpace(result.String()), links, files
 }
 
-func (p *pikabuAdapter) parseComment(n *tinyhtml.Node) (*rpb.Record, *rpb.UserMetadata) {
+func (p *pikabuAdapter) parseComment(n *almosthtml.Node) (*rpb.Record, *rpb.UserMetadata) {
 	meta := map[string]string{}
 	for _, m := range strings.Split(n.Params["data-meta"], ";") {
 		params := strings.Split(m, "=")
@@ -176,7 +178,7 @@ func (p *pikabuAdapter) parseComment(n *tinyhtml.Node) (*rpb.Record, *rpb.UserMe
 		Source: &rpb.Source{
 			SenderId:  meta["aid"],
 			ChannelId: meta["sid"],
-			MessageId: meta["pid"],
+			MessageId: n.Params["data-id"],
 		},
 	}
 
@@ -234,7 +236,8 @@ func (p *pikabuAdapter) GetResponse(rq *rpb.Request) []*rpb.Response {
 	resultRecords := []*rpb.Record{}
 	userById := map[string]*rpb.UserMetadata{}
 	commentById := map[string]*rpb.Source{}
-	root, _ := tinyhtml.ParseHtml(content)
+	fmt.Println("CONTENT " + content)
+	root, _ := almosthtml.ParseHTML(content)
 	for _, n := range root.GetElementsByTagAndClass("div") {
 		if n.Params["class"] == "story__main" {
 			story, author := p.parseStory(n)

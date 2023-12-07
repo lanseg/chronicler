@@ -10,9 +10,9 @@ import (
 	rpb "chronicler/records/proto"
 	"chronicler/webdriver"
 
+	"github.com/lanseg/golang-commons/almosthtml"
 	"github.com/lanseg/golang-commons/collections"
 	cm "github.com/lanseg/golang-commons/common"
-	"github.com/lanseg/golang-commons/tinyhtml"
 )
 
 const (
@@ -135,12 +135,12 @@ func (w *webAdapter) GetResponse(request *rpb.Request) []*rpb.Response {
 			Type:      rpb.SourceType_WEB,
 		},
 		Time:        w.timeSource().Unix(),
-		TextContent: tinyhtml.StripTags(string(body)),
+		TextContent: almosthtml.StripTags(string(body)),
 		RawContent:  body,
 	}
 
 	w.logger.Debugf("Parsing html content")
-	root, _ := tinyhtml.ParseHtml(string(body))
+	root, _ := almosthtml.ParseHTML(string(body))
 	knownLinks := collections.NewSet([]string{})
 	linkNodes := root.GetElementsByTags("a", "img", "script", "link", "source", "srcset")
 
