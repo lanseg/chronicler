@@ -98,15 +98,6 @@ func (w *webAdapter) MatchLink(link string) *rpb.Source {
 	}
 }
 
-func (w *webAdapter) Get(link string) (*http.Response, error) {
-	req, err := http.NewRequest("GET", fixLink("https", "", link), nil)
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("User-Agent", userAgent)
-	return w.client.Do(req)
-}
-
 func (w *webAdapter) SendMessage(*rpb.Message) {
 	w.logger.Infof("Web adapter cannot send messages")
 }

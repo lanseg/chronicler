@@ -15,6 +15,10 @@ type scenarioWebdriver struct {
 	scenarios  ScenarioLibrary
 }
 
+func isNotEmpty(s string) bool {
+	return s != ""
+}
+
 func (wd *scenarioWebdriver) getScenario() optional.Optional[Scenario] {
 	scenario := wd.scenarios.Matches(wd.url)
 	if scenario == nil {
@@ -39,7 +43,9 @@ func (wd *scenarioWebdriver) Navigate(url string) {
 
 	optional.MapErr(wd.getScenario(), func(s Scenario) (string, error) {
 		return s.BeforeAll()
-	}).IfPresent(wd.runScenario)
+	}).
+		Filter(isNotEmpty).
+		IfPresent(wd.runScenario)
 }
 
 func (wd *scenarioWebdriver) GetPageSource() optional.Optional[string] {
@@ -57,7 +63,9 @@ func (wd *scenarioWebdriver) GetCurrentURL() optional.Optional[string] {
 func (wd *scenarioWebdriver) Print() optional.Optional[string] {
 	optional.MapErr(wd.getScenario(), func(s Scenario) (string, error) {
 		return s.BeforePrint()
-	}).IfPresent(wd.runScenario)
+	}).
+		Filter(isNotEmpty).
+		IfPresent(wd.runScenario)
 	return wd.baseDriver.Print()
 }
 

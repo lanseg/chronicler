@@ -3,13 +3,15 @@ package storage
 import (
 	"io"
 	"net/http"
+	"net/http/cookiejar"
 	"net/url"
 
 	cm "github.com/lanseg/golang-commons/common"
 )
 
 const (
-	userAgent = "curl/7.54"
+	userAgentCurl    = "curl/7.54"
+	userAgentFirefox = "Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/115.0"
 )
 
 type HttpDownloader struct {
@@ -23,7 +25,7 @@ func (d *HttpDownloader) get(link string) (*http.Response, error) {
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("User-Agent", userAgent)
+	req.Header.Set("User-Agent", userAgentFirefox)
 	return d.httpClient.Do(req)
 }
 
@@ -47,7 +49,15 @@ func NewHttpDownloader(client *http.Client) *HttpDownloader {
 	logger := cm.NewLogger("storage")
 	if client == nil {
 		logger.Debugf("No http client provided for Downloader. Using custom one.")
-		client = &http.Client{}
+		jar, err := cookiejar.New(nil)
+		if err != nil {
+			logger.Debugf("Using http client without cookie jar because of error: %s", err)
+			client = &http.Client{}
+		} else {
+			client = &http.Client{
+				Jar: jar,
+			}
+		}
 	}
 	return &HttpDownloader{
 		httpClient: client,
