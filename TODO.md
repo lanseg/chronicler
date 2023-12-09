@@ -11,10 +11,11 @@
 7. Simple search / filtering
 8. Add geodata section and parameter
 9. Add automatic wrapper adapter
+10. Download manager
 
 ## More adapters
 
 1. Habr
-2. Pikabu
+2. ~Pikabu~
 3. Youtube
 4. Telegram userbot
