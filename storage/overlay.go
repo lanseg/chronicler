@@ -140,6 +140,14 @@ func (o *Overlay) readMapping() {
 	o.logger.Infof("Read %d record(s) from %s", len(a.Entities), path)
 }
 
+func (o *Overlay) ResolvePath(e *Entity) string {
+	return filepath.Join(o.root, e.Name)
+}
+
+func (o *Overlay) Create(originalName string) optional.Optional[*Entity] {
+	return o.Write(originalName, []byte{})
+}
+
 func (o *Overlay) Write(originalName string, bytes []byte) optional.Optional[*Entity] {
 	name := safeName(originalName)
 	return optional.Map(

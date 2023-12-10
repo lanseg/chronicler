@@ -236,7 +236,6 @@ func (p *pikabuAdapter) GetResponse(rq *rpb.Request) []*rpb.Response {
 	resultRecords := []*rpb.Record{}
 	userById := map[string]*rpb.UserMetadata{}
 	commentById := map[string]*rpb.Source{}
-	fmt.Println("CONTENT " + content)
 	root, _ := almosthtml.ParseHTML(content)
 	for _, n := range root.GetElementsByTagAndClass("div") {
 		if n.Params["class"] == "story__main" {

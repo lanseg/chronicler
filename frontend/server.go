@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"sort"
 
+	"chronicler/downloader"
 	"chronicler/records"
 	rpb "chronicler/records/proto"
 	"chronicler/storage"
@@ -95,7 +96,7 @@ func (ws *WebServer) handleRecord(p PathParams, w http.ResponseWriter, r *http.R
 func NewServer(port int, storageRoot string, staticFiles string) *http.Server {
 	server := &WebServer{
 		logger:  cm.NewLogger("frontend"),
-		storage: storage.NewStorage(storageRoot, &webdriver.ExclusiveWebDriver{}),
+		storage: storage.NewStorage(storageRoot, &webdriver.ExclusiveWebDriver{}, downloader.NewNoopDownloader()),
 	}
 
 	handler := &PathParamHandler{

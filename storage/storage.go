@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"chronicler/downloader"
 	"chronicler/records"
 	rpb "chronicler/records/proto"
 	"chronicler/util"
@@ -37,7 +38,7 @@ type LocalStorage struct {
 	Storage
 
 	driver     *webdriver.ExclusiveWebDriver
-	downloader *HttpDownloader
+	downloader downloader.Downloader
 	overlay    *Overlay
 	runner     *util.Runner
 
@@ -102,13 +103,15 @@ func (s *LocalStorage) savePageView(id string, url string) {
 
 func (s *LocalStorage) downloadFile(id string, link string) error {
 	o := s.getOverlay(id)
-	data, err := s.downloader.Download(link)
+	path, err := optional.Map(o.Create(link), o.ResolvePath).Get()
 	if err != nil {
+		return err
+	}
+	if err = s.downloader.ScheduleDownload(link, path); err != nil {
 		s.logger.Warningf("Failed to download file %s: %s", link, err)
 		return err
 	}
-	_, err = o.Write(link, data).Get()
-	return err
+	return nil
 }
 
 func (s *LocalStorage) SaveRecords(r *rpb.RecordSet) error {
@@ -235,7 +238,7 @@ func (s *LocalStorage) refreshCache() {
 
 }
 
-func NewStorage(root string, driver *webdriver.ExclusiveWebDriver) Storage {
+func NewStorage(root string, driver *webdriver.ExclusiveWebDriver, downloader downloader.Downloader) Storage {
 	log := cm.NewLogger("storage")
 	log.Infof("Storage root set to \"%s\"", root)
 
@@ -244,7 +247,7 @@ func NewStorage(root string, driver *webdriver.ExclusiveWebDriver) Storage {
 		logger:     log,
 		runner:     util.NewRunner(),
 		driver:     driver,
-		downloader: NewHttpDownloader(nil),
+		downloader: downloader,
 	}
 	ls.refreshCache()
 	return ls

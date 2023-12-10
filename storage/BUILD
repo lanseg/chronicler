@@ -5,7 +5,6 @@ package(default_visibility = ["//visibility:public"])
 go_library(
     name = "storage",
     srcs = [
-        "http_downloader.go",
         "overlay.go",
         "storage.go",
     ],
@@ -15,6 +14,7 @@ go_library(
         "//records",
         "//records:records_go_proto",
         "//util",
+        "//downloader",
         "@commons//collections",
         "@commons//common",
         "@commons//optional",

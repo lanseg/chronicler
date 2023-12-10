@@ -4,9 +4,18 @@ import (
 	"fmt"
 	"testing"
 
+	"chronicler/downloader"
 	rpb "chronicler/records/proto"
 	"chronicler/webdriver"
 )
+
+type fakeDownloader struct {
+	downloader.Downloader
+}
+
+func (fd *fakeDownloader) ScheduleDownload(string, string) error {
+	return nil
+}
 
 type FakeDriver struct {
 	webdriver.WebDriver
@@ -61,7 +70,7 @@ func TestStorage(t *testing.T) {
 		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			s := NewStorage(t.TempDir(), &webdriver.ExclusiveWebDriver{})
+			s := NewStorage(t.TempDir(), &webdriver.ExclusiveWebDriver{}, &fakeDownloader{})
 			for _, rec := range tc.records {
 				if saveError := s.SaveRecords(rec); saveError != nil {
 					t.Errorf("Error while saving a request: %s", saveError)

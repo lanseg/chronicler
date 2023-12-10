@@ -2,16 +2,20 @@ package main
 
 import (
 	"fmt"
+	"net/http"
+	"net/http/cookiejar"
 	"os"
 	"sync"
 
 	"chronicler/adapter"
+	"chronicler/downloader"
 	"chronicler/storage"
 	"chronicler/telegram"
 	"chronicler/twitter"
 	"chronicler/webdriver"
 
 	rpb "chronicler/records/proto"
+
 	cm "github.com/lanseg/golang-commons/common"
 	"github.com/lanseg/golang-commons/optional"
 )
@@ -26,6 +30,13 @@ type Config struct {
 	TelegramBotKey  *string `json:"telegramBotKey"`
 	StorageRoot     *string `json:"storageRoot"`
 	ScenarioLibrary *string `json:"scenarioLibrary"`
+}
+
+func initHttpClient() *http.Client {
+	jar, _ := cookiejar.New(nil)
+	return &http.Client{
+		Jar: jar,
+	}
 }
 
 func initWebdriver(scenarios string) *webdriver.ExclusiveWebDriver {
@@ -73,8 +84,9 @@ func main() {
 	logger.Infof("TwitterApiKey: %d", len(*cfg.TwitterApiKey))
 	logger.Infof("TelegramBotKey: %d", len(*cfg.TelegramBotKey))
 
+	downloader := downloader.NewDownloader(initHttpClient())
 	webDriver := initWebdriver(*cfg.ScenarioLibrary)
-	storage := storage.NewStorage(*cfg.StorageRoot, webDriver)
+	storage := storage.NewStorage(*cfg.StorageRoot, webDriver, downloader)
 
 	tgBot := telegram.NewBot(*cfg.TelegramBotKey)
 	twClient := twitter.NewClient(*cfg.TwitterApiKey)
@@ -91,9 +103,9 @@ func main() {
 		adapters[rpb.SourceType_WEB],
 	}
 
-	requests := make(chan *rpb.Request)
-	response := make(chan *rpb.Response)
-	messages := make(chan *rpb.Message)
+	requests := make(chan *rpb.Request, 10)
+	response := make(chan *rpb.Response, 10)
+	messages := make(chan *rpb.Message, 10)
 
 	go (func() {
 		logger := cm.NewLogger("Chronicler")
