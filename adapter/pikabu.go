@@ -272,7 +272,7 @@ func (p *pikabuAdapter) GetResponse(rq *rpb.Request) []*rpb.Response {
 		Request: rq,
 		Result: []*rpb.RecordSet{
 			{
-				Id:           cm.UUID4(),
+				Id:           rq.Id,
 				Records:      resultRecords,
 				UserMetadata: collections.Values(userById),
 			},
