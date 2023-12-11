@@ -17,6 +17,11 @@ enum FetchStatus {
   SUCCESS        = 3;
 }
 
+message FileMetadata {
+    string mimetype = 1;
+    uint64 size = 2;
+}
+
 message File {
   string file_id = 1;
   string file_url = 2;

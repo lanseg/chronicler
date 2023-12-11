@@ -232,7 +232,7 @@ func (p *pikabuAdapter) GetResponse(rq *rpb.Request) []*rpb.Response {
 		})
 	})
 
-	p.logger.Infof("Loaded page content, got string of %d", len(content))
+	p.logger.Infof("Loaded page content, got string of %d: %s", len(content), cm.Ellipsis(content, 100, true))
 	resultRecords := []*rpb.Record{}
 	userById := map[string]*rpb.UserMetadata{}
 	commentById := map[string]*rpb.Source{}

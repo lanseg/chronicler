@@ -198,37 +198,48 @@ export function createRecord(rsId, record, metadata) {
             <span class="username">${recordName}</span>
             <span class="username">→ <a href="#${parentMsg}">${parentName}</a></span>
         </div>
-        <div class='content'>${record.textContent.replaceAll("\n", "<br/>")}</div>`;
+        <diiv class='content'>${record.textContent.replaceAll("\n", "<br/>")}</div>`;
+    recordEl.appendChild(renderFileList(rsId, record.files));
+    return recordEl;
+}
 
+function renderFileList(rsId, files) {
+    const result = document.createDocumentFragment();
     /* --- */
-    record.files.sort((a, b) => {
+    files.sort((a, b) => {
         return a.name.localeCompare(b.name);
     });
-    recordEl.appendChild(
+    result.appendChild(
         createGallery(
             rsId,
-            record.files.filter((f) => f.isImage),
+            files.filter((f) => f.isImage),
         ),
     );
-    recordEl.appendChild(
+    result.appendChild(
         createAudioPlaylist(
             rsId,
-            record.files.filter((f) => f.isAudio),
+            files.filter((f) => f.isAudio),
         ),
     );
-    recordEl.appendChild(
+    result.appendChild(
         createVideoPlaylist(
             rsId,
-            record.files.filter((f) => f.isVideo),
+            files.filter((f) => f.isVideo),
         ),
     );
-    recordEl.appendChild(
+    result.appendChild(
         createFileList(
             rsId,
             "Documents",
-            record.files.filter((f) => f.isDocument),
+            files.filter((f) => f.isDocument),
         ),
     );
-    recordEl.appendChild(createFileList(rsId, "All files", record.files));
-    return recordEl;
+    result.appendChild(createFileList(rsId, "All files", files));
+    return result;
+}
+
+export function createRecordSetSummary(rs) {
+    const el = createElement("div", { "class": "summary record" });
+    el.appendChild(renderFileList(rs.id, rs.allFiles));
+    return el;
 }

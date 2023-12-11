@@ -21,7 +21,12 @@ const (
 
 var (
 	webpageFileTypes = collections.NewSet([]string{
-		"jpg", "png", "js", "css", "json", "ico", "webp", "gif",
+		// images
+		"jpg", "png", "ico", "webp", "gif",
+		// page content
+		"js", "css", "json",
+		// video
+		"mp4", "webm",
 	})
 )
 

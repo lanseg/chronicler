@@ -176,6 +176,7 @@ export class RecordSet {
     constructor(recordSetObj) {
         this._recordSetObj = recordSetObj;
         this._recordById = new Map();
+        this.allFiles = [];
         this.sourceMetadata = new Map();
         this.records = [];
 
@@ -193,6 +194,7 @@ export class RecordSet {
             const parent = record["parent"] ? new Source(record["parent"]) : null;
             const newRecord = new Record(record, source, parent);
             this.records.push(newRecord);
+            this.allFiles.push(...newRecord.files);
             this._recordById.set(source.id, newRecord);
         }
 
@@ -208,6 +210,7 @@ export class RecordSet {
     get id() {
         return this._recordSetObj["id"];
     }
+
 }
 
 /** **/
