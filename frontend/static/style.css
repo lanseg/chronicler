@@ -127,6 +127,16 @@
     font-size: 1rem;
     text-overflow: hidden;
     overflow: hidden;
+    display: block;
+}
+
+.record .content p {
+    display:inline-block;
+    text-indent: 8px;
+}
+
+.record .content p::first-letter {
+  text-transform: capitalize;
 }
 
 .record .content.error {
@@ -266,4 +276,9 @@
 .icon.telegram {
     background-image: url("/icons.svg");
     background-position: 0px 16px;
+}
+
+.icon.pikabu {
+    background-image: url("/icons.svg");
+    background-position: 16px 16px;
 }

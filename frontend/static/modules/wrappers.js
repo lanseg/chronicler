@@ -30,7 +30,7 @@ export class SourceType {
     static TELEGRAM = new SourceType(1, "telegram");
     static TWITTER = new SourceType(2, "twitter");
     static WEB = new SourceType(3, "web");
-    static YOUTUBE = new SourceType(4, "youtube");
+    static PIKABU = new SourceType(4, "pikabu");
 }
 
 /** **/
@@ -210,7 +210,6 @@ export class RecordSet {
     get id() {
         return this._recordSetObj["id"];
     }
-
 }
 
 /** **/

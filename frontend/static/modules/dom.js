@@ -191,6 +191,7 @@ export function createRecord(rsId, record, metadata) {
         class: "record",
     });
 
+    const text = record.textContent.split("\n").map((s) => s.trim()).join("</p><p>");
     recordEl.innerHTML = `<div class='header'>
         <span class="icon ${src.sourceType.name}">&nbsp;</span>
         <span class="datetime">${formatDateTime(record.time)}</span>
@@ -198,7 +199,7 @@ export function createRecord(rsId, record, metadata) {
             <span class="username">${recordName}</span>
             <span class="username">→ <a href="#${parentMsg}">${parentName}</a></span>
         </div>
-        <diiv class='content'>${record.textContent.replaceAll("\n", "<br/>")}</div>`;
+        <div class='content'><p>${text}</p></div>`;
     recordEl.appendChild(renderFileList(rsId, record.files));
     return recordEl;
 }
@@ -239,7 +240,7 @@ function renderFileList(rsId, files) {
 }
 
 export function createRecordSetSummary(rs) {
-    const el = createElement("div", { "class": "summary record" });
+    const el = createElement("div", { class: "summary record" });
     el.appendChild(renderFileList(rs.id, rs.allFiles));
     return el;
 }

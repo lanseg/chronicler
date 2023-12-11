@@ -32,7 +32,7 @@
             function renderRecord(cdata) {
                 const fragment = document.createDocumentFragment();
                 const records = document.querySelector(".records");
-                fragment.appendChild(createRecordSetSummary(cdata))
+                fragment.appendChild(createRecordSetSummary(cdata));
                 for (const record of cdata.records) {
                     fragment.appendChild(createRecord(rcid, record, cdata.sourceMetadata));
                 }
