@@ -158,7 +158,7 @@ func (w *webAdapter) GetResponse(request *rpb.Request) []*rpb.Response {
 	w.logger.Debugf("Done loading page: %d byte(s), %d file link(s), %d other link(s)",
 		len(body), len(record.Files), len(record.Links))
 	rs := &rpb.RecordSet{
-		Id:           request.Id,
+		Id:           cm.UUID4(),
 		Records:      []*rpb.Record{record},
 		UserMetadata: []*rpb.UserMetadata{},
 	}

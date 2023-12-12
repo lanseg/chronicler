@@ -179,6 +179,7 @@ func (p *pikabuAdapter) parseComment(n *almosthtml.Node) (*rpb.Record, *rpb.User
 			SenderId:  meta["aid"],
 			ChannelId: meta["sid"],
 			MessageId: n.Params["data-id"],
+			Type:      rpb.SourceType_PIKABU,
 		},
 	}
 
@@ -186,6 +187,7 @@ func (p *pikabuAdapter) parseComment(n *almosthtml.Node) (*rpb.Record, *rpb.User
 		result.Parent = &rpb.Source{
 			MessageId: meta["pid"],
 			ChannelId: meta["sid"],
+			Type:      rpb.SourceType_PIKABU,
 		}
 	}
 
@@ -272,7 +274,7 @@ func (p *pikabuAdapter) GetResponse(rq *rpb.Request) []*rpb.Response {
 		Request: rq,
 		Result: []*rpb.RecordSet{
 			{
-				Id:           rq.Id,
+				Id:           cm.UUID4(),
 				Records:      resultRecords,
 				UserMetadata: collections.Values(userById),
 			},

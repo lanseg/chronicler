@@ -65,11 +65,13 @@ func TestWebRequestResponse(t *testing.T) {
 				Id:     webRequestUuid,
 				Target: &rpb.Source{Url: "google.com"},
 			})[0].Result[0]
-
+            
 			want := &rpb.RecordSet{}
 			if err := readJson(tc.resultFile, want); err != nil {
 				t.Errorf("Cannot load json with an expected result \"%s\": %s", tc.resultFile, err)
 			}
+
+            ups.Id = want.Id
 			if fmt.Sprintf("%+v", want) != fmt.Sprintf("%+v", ups) {
 				t.Errorf("Expected result to be:\n%+v\nBut got:\n%+v", want, ups)
 			}

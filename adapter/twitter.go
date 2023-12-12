@@ -129,6 +129,7 @@ func (t *twitterAdapter) tweetToRecord(response *twitter.Response[twitter.Tweet]
 		return rs[i].Time < rs[j].Time
 	})
 	return &rpb.RecordSet{
+		Id:           cm.UUID4(),
 		Records:      rs,
 		UserMetadata: um,
 	}

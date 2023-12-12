@@ -191,7 +191,10 @@ export function createRecord(rsId, record, metadata) {
         class: "record",
     });
 
-    const text = record.textContent.split("\n").map((s) => s.trim()).join("</p><p>");
+    const text = record.textContent
+        .split("\n")
+        .map((s) => s.trim())
+        .join("</p><p>");
     recordEl.innerHTML = `<div class='header'>
         <span class="icon ${src.sourceType.name}">&nbsp;</span>
         <span class="datetime">${formatDateTime(record.time)}</span>
