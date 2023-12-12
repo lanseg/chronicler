@@ -75,6 +75,9 @@ func TestRequestResponse(t *testing.T) {
 			tg := NewTelegramAdapter(bot)
 			ups := tg.GetResponse(&rpb.Request{Id: testingUuid})[0].Result[0]
 			ups.Id = testingUuid
+			for _, r := range ups.Records {
+				r.FetchTime = 0
+			}
 
 			want := &rpb.RecordSet{}
 			if err = readJson(tc.resultFile, want); err != nil {

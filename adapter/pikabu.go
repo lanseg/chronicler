@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"chronicler/records"
 	rpb "chronicler/records/proto"
 	"chronicler/webdriver"
 
@@ -58,11 +59,11 @@ func (p *pikabuAdapter) MatchLink(link string) *rpb.Source {
 
 func (p *pikabuAdapter) parseStory(node *almosthtml.Node) (*rpb.Record, *rpb.UserMetadata) {
 	author := &rpb.UserMetadata{}
-	result := &rpb.Record{
+	result := records.NewRecord(&rpb.Record{
 		Source: &rpb.Source{
 			Type: rpb.SourceType_PIKABU,
 		},
-	}
+	})
 	inContent := false
 	textContent := strings.Builder{}
 	collections.IterateTree(node, collections.DepthFirst, func(n *almosthtml.Node) []*almosthtml.Node {
@@ -174,14 +175,14 @@ func (p *pikabuAdapter) parseComment(n *almosthtml.Node) (*rpb.Record, *rpb.User
 		meta[params[0]] = params[1]
 	}
 
-	result := &rpb.Record{
+	result := records.NewRecord(&rpb.Record{
 		Source: &rpb.Source{
 			SenderId:  meta["aid"],
 			ChannelId: meta["sid"],
 			MessageId: n.Params["data-id"],
 			Type:      rpb.SourceType_PIKABU,
 		},
-	}
+	})
 
 	if meta["pid"] != "0" {
 		result.Parent = &rpb.Source{

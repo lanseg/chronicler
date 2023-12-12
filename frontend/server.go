@@ -70,7 +70,7 @@ func (ws *WebServer) responseFile(w http.ResponseWriter, id string, filename str
 		return
 	}
 	if filename == "record.json" {
-		rs := &rpb.RecordSet{}
+		rs := records.NewRecordSet(&rpb.RecordSet{})
 		err = json.Unmarshal(f, rs)
 		if err != nil {
 			ws.Error(w, err.Error(), 500)

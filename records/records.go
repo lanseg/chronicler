@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"hash/fnv"
 	"sort"
+	"time"
 
 	rpb "chronicler/records/proto"
 
@@ -16,6 +17,15 @@ import (
 const (
 	textSampleSize = 512
 )
+
+func NewRecord(data *rpb.Record) *rpb.Record {
+	data.FetchTime = time.Now().Unix()
+	return data
+}
+
+func NewRecordSet(data *rpb.RecordSet) *rpb.RecordSet {
+	return data
+}
 
 func hashSource(src *rpb.Source) string {
 	if src == nil {
@@ -32,21 +42,6 @@ func hashSource(src *rpb.Source) string {
 
 func getRecordId(r *rpb.Record) string {
 	return hashSource(r.Source) + hashSource(r.Parent)
-}
-
-func NewRecordSet(rs []*rpb.Record, umd []*rpb.UserMetadata) *rpb.RecordSet {
-	checksum := []byte{}
-	for _, r := range rs {
-		checksum = append(checksum, []byte(fmt.Sprintf("%s", r))...)
-	}
-	for _, u := range umd {
-		checksum = append(checksum, []byte(fmt.Sprintf("%s", u))...)
-	}
-	return &rpb.RecordSet{
-		Id:           fmt.Sprintf("%x", sha512.Sum512(checksum)),
-		Records:      rs,
-		UserMetadata: umd,
-	}
 }
 
 func fnv32(s string) uint32 {

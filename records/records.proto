@@ -36,12 +36,14 @@ message Source {
   SourceType type = 5;
 }
 
+// Next id: 11
 message Record {
   Source source = 3;
   Source parent = 4;
   string text_content = 5;
   bytes raw_content = 9;
   int64 time = 6;
+  int64 fetch_time = 10;
   repeated File files = 7;
   repeated string links = 8;
 }
