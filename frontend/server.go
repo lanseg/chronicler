@@ -36,7 +36,7 @@ func (ws *WebServer) writeJson(w http.ResponseWriter, data any) {
 }
 
 func (ws *WebServer) handleRecordSetList(p PathParams, w http.ResponseWriter, r *http.Request) {
-	rs, _ := ws.storage.ListRecords().Get()
+	rs, _ := ws.storage.ListRecordSets().Get()
 	rs = records.SortRecordSets(rs)
 
 	userById := map[string]*rpb.UserMetadata{}

@@ -131,6 +131,7 @@ func MergeRecords(a []*rpb.Record, b []*rpb.Record) []*rpb.Record {
 		result.TextContent = target.TextContent
 		result.RawContent = target.RawContent
 		result.Time = target.Time
+		result.FetchTime = target.FetchTime
 		return result
 	})
 	SortRecords(result)
@@ -166,6 +167,9 @@ func SortRecords(r []*rpb.Record) []*rpb.Record {
 			if hashSource(r[i].Source) == hashSource(r[j].Parent) {
 				return false
 			}
+		}
+		if r[i].FetchTime != r[j].FetchTime {
+			return r[i].FetchTime != r[j].FetchTime
 		}
 		if r[i].Time == r[j].Time {
 			return getRecordId(r[i]) < getRecordId(r[j])

@@ -29,8 +29,8 @@ const (
 )
 
 type Storage interface {
-	SaveRecords(r *rpb.RecordSet) error
-	ListRecords() optional.Optional[[]*rpb.RecordSet]
+	SaveRecordSet(r *rpb.RecordSet) error
+	ListRecordSets() optional.Optional[[]*rpb.RecordSet]
 	GetFile(id string, filename string) optional.Optional[[]byte]
 }
 
@@ -114,7 +114,7 @@ func (s *LocalStorage) downloadFile(id string, link string) error {
 	return nil
 }
 
-func (s *LocalStorage) SaveRecords(r *rpb.RecordSet) error {
+func (s *LocalStorage) SaveRecordSet(r *rpb.RecordSet) error {
 	if r.Id == "" {
 		return fmt.Errorf("Record without an id")
 	}
@@ -180,7 +180,7 @@ func (s *LocalStorage) GetFile(id string, filename string) optional.Optional[[]b
 	return s.getOverlay(id).Read(filename)
 }
 
-func (s *LocalStorage) ListRecords() optional.Optional[[]*rpb.RecordSet] {
+func (s *LocalStorage) ListRecordSets() optional.Optional[[]*rpb.RecordSet] {
 	if s.isDirty() {
 		s.refreshCache()
 		s.modTime = time.Now()

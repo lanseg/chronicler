@@ -131,7 +131,7 @@ func main() {
 			logger.Infof("Got new response for request %s (%s) of size %d", result.Request, result.Request.Origin, len(result.Result))
 			for _, records := range result.Result {
 				msg := fmt.Sprintf("Saved as %s", records.Id)
-				if err := storage.SaveRecords(records); err != nil {
+				if err := storage.SaveRecordSet(records); err != nil {
 					msg = fmt.Sprintf("Error while saving %q", records.Id)
 					logger.Warningf("Error while saving %q: %s", records.Id, err)
 				} else {

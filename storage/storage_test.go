@@ -72,11 +72,11 @@ func TestStorage(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			s := NewStorage(t.TempDir(), &webdriver.ExclusiveWebDriver{}, &fakeDownloader{})
 			for _, rec := range tc.records {
-				if saveError := s.SaveRecords(rec); saveError != nil {
+				if saveError := s.SaveRecordSet(rec); saveError != nil {
 					t.Errorf("Error while saving a request: %s", saveError)
 				}
 			}
-			fromStorage, readError := s.ListRecords().Get()
+			fromStorage, readError := s.ListRecordSets().Get()
 			if readError != nil {
 				t.Errorf("Error while reading a request: %s", readError)
 				return
