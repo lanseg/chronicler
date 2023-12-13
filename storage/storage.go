@@ -49,15 +49,6 @@ type LocalStorage struct {
 	recordCache map[string]*rpb.RecordSet
 }
 
-func fromJson[T any](bytes []byte) (*T, error) {
-	result := new(T)
-	err := json.Unmarshal(bytes, result)
-	if err != nil {
-		return nil, err
-	}
-	return result, err
-}
-
 func (s *LocalStorage) getOverlay(id string) *Overlay {
 	overlayRoot := filepath.Join(s.root, id)
 	if s.overlay == nil || s.overlay.root != overlayRoot {
@@ -86,7 +77,7 @@ func (s *LocalStorage) getRecord(id string) optional.Optional[*rpb.RecordSet] {
 	return optional.MapErr(
 		s.getOverlay(id).Read(recordsetFileName),
 		func(bytes []byte) (*rpb.RecordSet, error) {
-			return fromJson[rpb.RecordSet](bytes)
+			return cm.FromJson[rpb.RecordSet](bytes)
 		})
 }
 

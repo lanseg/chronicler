@@ -43,11 +43,11 @@ func (b *FakeBot) GetUrl(file *telegram.File) string {
 }
 
 func NewFakeBot(datafile string) (telegram.Bot, error) {
-	updates := []*telegram.Update{}
-	if err := readJson(datafile, &updates); err != nil {
+	updates, err := readJson[[]*telegram.Update](datafile)
+	if err != nil {
 		return nil, err
 	}
-	return &FakeBot{response: updates}, nil
+	return &FakeBot{response: *updates}, nil
 }
 
 func TestRequestResponse(t *testing.T) {
@@ -79,8 +79,8 @@ func TestRequestResponse(t *testing.T) {
 				r.FetchTime = 0
 			}
 
-			want := &rpb.RecordSet{}
-			if err = readJson(tc.resultFile, want); err != nil {
+			want, err := readJson[rpb.RecordSet](tc.resultFile)
+			if err != nil {
 				t.Errorf("Cannot load json with an expected result \"%s\": %s", tc.resultFile, err)
 			}
 			if fmt.Sprintf("%+v", want) != fmt.Sprintf("%+v", ups) {

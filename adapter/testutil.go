@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
+	cm "github.com/lanseg/golang-commons/common"
 	"github.com/lanseg/golang-commons/optional"
 )
 
@@ -15,17 +16,12 @@ func writeJson(data interface{}) string {
 	return string(bytes)
 }
 
-func readJson(file string, obj interface{}) error {
+func readJson[T any](file string) (*T, error) {
 	bytes, err := os.ReadFile(filepath.Join("testdata", file))
 	if err != nil {
-		return err
+		return nil, err
 	}
-
-	err = json.Unmarshal(bytes, &obj)
-	if err != nil {
-		return err
-	}
-	return nil
+	return cm.FromJson[T](bytes)
 }
 
 type fakeWebDriver struct {

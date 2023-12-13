@@ -90,29 +90,17 @@ func exists(path string) bool {
 	return os.IsNotExist(err)
 }
 
-func read(path string) optional.Optional[[]byte] {
-	return optional.OfError(os.ReadFile(path))
-}
-
 func write(path string, data []byte) optional.Optional[int] {
 	return optional.OfError(len(data),
 		os.WriteFile(path, data, os.ModePerm))
 }
 
-func readObject[T any](target string) optional.Optional[*T] {
-	return optional.MapErr(read(target), func(data []byte) (*T, error) {
-		result := new(T)
-		err := json.Unmarshal(data, result)
-		return result, err
-	})
-}
-
 func writeObject(target string, object interface{}) optional.Optional[int] {
-	bytes, err := json.Marshal(object)
-	if err != nil {
-		return optional.OfError(0, err)
-	}
-	return write(target, bytes)
+	return optional.MapErr(
+		optional.OfError(json.Marshal(object)),
+		func(json []byte) (int, error) {
+			return len(json), os.WriteFile(target, json, os.ModePerm)
+		})
 }
 
 func (o *Overlay) getMappingPath() string {
@@ -130,7 +118,7 @@ func (o *Overlay) saveMapping() {
 func (o *Overlay) readMapping() {
 	path := o.getMappingPath()
 	o.logger.Infof("Reading mapping from %s", path)
-	a, err := readObject[Mapping](filepath.Join(o.root, mappingFile)).Get()
+	a, err := cm.FromJsonFile[Mapping](filepath.Join(o.root, mappingFile))
 	if err != nil {
 		o.logger.Warningf("Could not open mapping from %s: %s", path, err)
 		return
@@ -166,5 +154,5 @@ func (o *Overlay) Read(originalName string) optional.Optional[[]byte] {
 	if e == nil {
 		return optional.OfError([]byte{}, fmt.Errorf("No entity with name %s", originalName))
 	}
-	return read(filepath.Join(o.root, e.Name))
+	return optional.OfError(os.ReadFile(filepath.Join(o.root, e.Name)))
 }

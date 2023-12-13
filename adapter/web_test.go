@@ -66,8 +66,8 @@ func TestWebRequestResponse(t *testing.T) {
 				Target: &rpb.Source{Url: "google.com"},
 			})[0].Result[0]
 
-			want := &rpb.RecordSet{}
-			if err := readJson(tc.resultFile, want); err != nil {
+			want, err := readJson[rpb.RecordSet](tc.resultFile)
+			if err != nil {
 				t.Errorf("Cannot load json with an expected result \"%s\": %s", tc.resultFile, err)
 			}
 
