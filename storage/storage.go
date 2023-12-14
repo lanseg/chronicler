@@ -53,26 +53,22 @@ func (s *LocalStorage) getOverlay(id string) *Overlay {
 
 func (s *LocalStorage) saveBase64(id string, fname string) func(string) {
 	return func(content string) {
-		sDec, err := base64.StdEncoding.DecodeString(content)
-		if err != nil {
-			s.logger.Warningf("Could not decode base64: %s", err)
-			return
+		e, err := optional.MapErr(
+			optional.OfError(base64.StdEncoding.DecodeString(content)),
+			func(sDec []byte) (*Entity, error) {
+				return s.getOverlay(id).Write(fname, sDec).Get()
+			}).Get()
+		if err == nil {
+			s.logger.Debugf("Written %v to file %v", e.OriginalName, e.Name)
+		} else {
+			s.logger.Warningf("Could not save base64 data to %q: %v", fname, err)
 		}
-		written, err := s.getOverlay(id).Write(fname, sDec).Get()
-		if err != nil {
-			s.logger.Warningf("Could not write decoded base64: %s", err)
-			return
-		}
-		s.logger.Debugf("Written %d byte(s) to file %v", written, fname)
 	}
 }
 
 func (s *LocalStorage) getRecord(id string) optional.Optional[*rpb.RecordSet] {
 	return optional.MapErr(
-		s.getOverlay(id).Read(recordsetFileName),
-		func(bytes []byte) (*rpb.RecordSet, error) {
-			return cm.FromJson[rpb.RecordSet](bytes)
-		})
+		s.getOverlay(id).Read(recordsetFileName), cm.FromJson[rpb.RecordSet])
 }
 
 func (s *LocalStorage) savePageView(id string, url string) {
@@ -129,18 +125,17 @@ func (s *LocalStorage) writeRecordSet(rs *rpb.RecordSet) error {
 
 		for _, file := range r.GetFiles() {
 			if err := s.downloadFile(rs.Id, file.FileUrl); err != nil {
-				continue
+				s.logger.Warningf("Could not download file %q: %s", file.FileUrl, err)
 			}
 		}
-
 	}
-	o := s.getOverlay(rs.Id)
+
 	bytes, err := json.Marshal(rs)
 	if err != nil {
 		return err
 	}
 
-	_, err = o.Write(recordsetFileName, bytes).Get()
+	_, err = s.getOverlay(rs.Id).Write(recordsetFileName, bytes).Get()
 	if err != nil {
 		return err
 	}
@@ -174,7 +169,7 @@ func (s *LocalStorage) getAllRecords() optional.Optional[[]*rpb.RecordSet] {
 			result = append(result, r)
 		})
 	}
-    return optional.Of(records.SortRecordSets(result))
+	return optional.Of(records.SortRecordSets(result))
 }
 
 func (s *LocalStorage) touch() {
@@ -214,3 +209,4 @@ func NewStorage(root string, browser webdriver.Browser, downloader downloader.Do
 	ls.refreshCache()
 	return ls
 }
+
