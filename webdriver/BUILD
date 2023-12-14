@@ -7,6 +7,7 @@ go_library(
     srcs = [
         "firefox.go",
         "marionette.go",
+        "service.go",
         "scenarios.go",
         "scenario_webdriver.go",
         "webdriver.go",

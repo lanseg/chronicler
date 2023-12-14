@@ -37,10 +37,9 @@ type Storage interface {
 type LocalStorage struct {
 	Storage
 
-	driver     *webdriver.ExclusiveWebDriver
+	browser    webdriver.WebdriverService
 	downloader downloader.Downloader
 	overlay    *Overlay
-	runner     *util.Runner
 
 	logger  *cm.Logger
 	modTime time.Time
@@ -82,7 +81,7 @@ func (s *LocalStorage) getRecord(id string) optional.Optional[*rpb.RecordSet] {
 }
 
 func (s *LocalStorage) savePageView(id string, url string) {
-	s.driver.Batch(func(d webdriver.WebDriver) {
+	s.browser.RunSession(func(d webdriver.WebDriver) {
 		d.Navigate(url)
 		d.TakeScreenshot().IfPresent(s.saveBase64(id, "pageview_page.png"))
 		d.Print().IfPresent(s.saveBase64(id, "pageview_page.pdf"))
@@ -229,15 +228,14 @@ func (s *LocalStorage) refreshCache() {
 
 }
 
-func NewStorage(root string, driver *webdriver.ExclusiveWebDriver, downloader downloader.Downloader) Storage {
+func NewStorage(root string, browser webdriver.WebdriverService, downloader downloader.Downloader) Storage {
 	log := cm.NewLogger("storage")
 	log.Infof("Storage root set to \"%s\"", root)
 
 	ls := &LocalStorage{
 		root:       root,
 		logger:     log,
-		runner:     util.NewRunner(),
-		driver:     driver,
+		browser:    browser,
 		downloader: downloader,
 	}
 	ls.refreshCache()

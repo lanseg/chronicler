@@ -61,14 +61,14 @@ type webAdapter struct {
 	timeSource func() time.Time
 	logger     *cm.Logger
 	client     HttpClient
-	driver     *webdriver.ExclusiveWebDriver
+	browser    webdriver.WebdriverService
 }
 
-func NewWebAdapter(httpClient HttpClient, driver *webdriver.ExclusiveWebDriver) Adapter {
-	return createWebAdapter(httpClient, driver, time.Now)
+func NewWebAdapter(httpClient HttpClient, browser webdriver.WebdriverService) Adapter {
+	return createWebAdapter(httpClient, browser, time.Now)
 }
 
-func createWebAdapter(httpClient HttpClient, driver *webdriver.ExclusiveWebDriver, timeSource func() time.Time) Adapter {
+func createWebAdapter(httpClient HttpClient, browser webdriver.WebdriverService, timeSource func() time.Time) Adapter {
 	logger := cm.NewLogger("WebAdapter")
 	if httpClient == nil {
 		logger.Infof("No http client provided, using an own new one")
@@ -86,7 +86,7 @@ func createWebAdapter(httpClient HttpClient, driver *webdriver.ExclusiveWebDrive
 		logger:     logger,
 		client:     httpClient,
 		timeSource: timeSource,
-		driver:     driver,
+		browser:    browser,
 	}
 }
 
@@ -113,7 +113,7 @@ func (w *webAdapter) GetResponse(request *rpb.Request) []*rpb.Response {
 
 	body := []byte{}
 	actualUrl := request.Target.Url
-	w.driver.Batch(func(d webdriver.WebDriver) {
+	w.browser.RunSession(func(d webdriver.WebDriver) {
 		d.Navigate(request.Target.Url)
 		d.GetCurrentURL().IfPresent(func(url string) {
 			actualUrl = url

@@ -17,7 +17,6 @@ import (
 	rpb "chronicler/records/proto"
 
 	cm "github.com/lanseg/golang-commons/common"
-	"github.com/lanseg/golang-commons/optional"
 )
 
 var (
@@ -37,21 +36,6 @@ func initHttpClient() *http.Client {
 	return &http.Client{
 		Jar: jar,
 	}
-}
-
-func initWebdriver(scenarios string) *webdriver.ExclusiveWebDriver {
-	ww, _ := optional.MapErr(webdriver.Connect(),
-		func(wd webdriver.WebDriver) (webdriver.WebDriver, error) {
-			wd.NewSession()
-			sc, err := webdriver.LoadScenarios(scenarios)
-			if err != nil {
-				logger.Warningf("Cannot load webdriver scenarios from %s: %s", scenarios, err)
-				return nil, err
-			}
-			logger.Infof("Loaded scenarios from %s", scenarios)
-			return webdriver.NewScenarioWebdriver(wd, sc), nil
-		}).Get()
-	return webdriver.WrapExclusive(ww)
 }
 
 func extractRequests(adapters []adapter.Adapter, rs *rpb.RecordSet) []*rpb.Request {
@@ -85,7 +69,7 @@ func main() {
 	logger.Infof("TelegramBotKey: %d", len(*cfg.TelegramBotKey))
 
 	downloader := downloader.NewDownloader(initHttpClient())
-	webDriver := initWebdriver(*cfg.ScenarioLibrary)
+	webDriver := webdriver.NewWebdriverService(*cfg.ScenarioLibrary)
 	storage := storage.NewStorage(*cfg.StorageRoot, webDriver, downloader)
 
 	tgBot := telegram.NewBot(*cfg.TelegramBotKey)

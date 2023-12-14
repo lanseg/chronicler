@@ -25,14 +25,14 @@ type pikabuAdapter struct {
 
 	linkMatcher *regexp.Regexp
 	logger      *cm.Logger
-	driver      *webdriver.ExclusiveWebDriver
+	browser     webdriver.WebdriverService
 }
 
-func NewPikabuAdapter(driver *webdriver.ExclusiveWebDriver) Adapter {
+func NewPikabuAdapter(browser webdriver.WebdriverService) Adapter {
 	return &pikabuAdapter{
 		linkMatcher: regexp.MustCompile(pikabuStoryRe),
 		logger:      cm.NewLogger("PikabuAdapter"),
-		driver:      driver,
+		browser:     browser,
 	}
 }
 
@@ -228,7 +228,7 @@ func (p *pikabuAdapter) GetResponse(rq *rpb.Request) []*rpb.Response {
 	p.logger.Infof("Got new request: %s", rq)
 
 	content := ""
-	p.driver.Batch(func(w webdriver.WebDriver) {
+	p.browser.RunSession(func(w webdriver.WebDriver) {
 		w.Navigate(fmt.Sprintf("https://pikabu.ru/story/_%s", rq.Target.ChannelId))
 		w.GetPageSource().IfPresent(func(s string) {
 			content = s

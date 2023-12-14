@@ -116,6 +116,7 @@ func (m *Marionette) onDataRead(data []byte) {
 	var result []interface{}
 	json.Unmarshal(data, &result)
 
+	fmt.Printf("HERE: %s\n", string(data))
 	if m.sessionParams == nil {
 		m.sessionParams = &SessionParams{
 			Capabilities: map[string]string{},
