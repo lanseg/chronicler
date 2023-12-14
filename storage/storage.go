@@ -8,13 +8,11 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
-	"strings"
 	"time"
 
 	"chronicler/downloader"
 	"chronicler/records"
 	rpb "chronicler/records/proto"
-	"chronicler/util"
 	"chronicler/webdriver"
 
 	"github.com/lanseg/golang-commons/collections"
@@ -24,8 +22,6 @@ import (
 
 const (
 	recordsetFileName = "record.json"
-	webdriverPort     = 2828
-	firefoxProfile    = "/tmp/tmp.QTFqrzeJX4/"
 )
 
 type Storage interface {
@@ -130,16 +126,6 @@ func (s *LocalStorage) writeRecordSet(rs *rpb.RecordSet) error {
 				FileId:   "page_view_html",
 				LocalUrl: "pageview_page.html",
 			})
-		}
-
-		for _, link := range r.Links {
-			if util.IsYoutubeLink(link) && strings.Contains(link, "v=") {
-				s.logger.Debugf("Found youtube link: %s", link)
-				if err := util.DownloadYoutube(link, s.root); err != nil {
-					s.logger.Warningf("Failed to download youtube video: %s", err)
-				}
-			}
-
 		}
 
 		for _, file := range r.GetFiles() {
