@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"sort"
 	"time"
 
 	"chronicler/downloader"
@@ -161,16 +160,7 @@ func (s *LocalStorage) ListRecordSets() optional.Optional[[]*rpb.RecordSet] {
 		s.refreshCache()
 		s.modTime = time.Now()
 	}
-	values := collections.Values(s.recordCache)
-	sort.Slice(values, func(i int, j int) bool {
-		rsa := values[i]
-		rsb := values[j]
-		if len(rsa.Records) == 0 || len(rsb.Records) == 0 {
-			return rsa.Id < rsb.Id
-		}
-		return values[i].Records[0].Time < values[j].Records[0].Time
-	})
-	return optional.Of(values)
+	return optional.Of(records.SortRecordSets(collections.Values(s.recordCache)))
 }
 
 func (s *LocalStorage) getAllRecords() optional.Optional[[]*rpb.RecordSet] {
@@ -184,10 +174,7 @@ func (s *LocalStorage) getAllRecords() optional.Optional[[]*rpb.RecordSet] {
 			result = append(result, r)
 		})
 	}
-	sort.Slice(result, func(i int, j int) bool {
-		return result[i].Id < result[j].Id
-	})
-	return optional.Of(result)
+    return optional.Of(records.SortRecordSets(result))
 }
 
 func (s *LocalStorage) touch() {
