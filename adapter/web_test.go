@@ -58,7 +58,7 @@ func TestWebRequestResponse(t *testing.T) {
 		t.Run(tc.desc, func(t *testing.T) {
 			web := createWebAdapter(
 				newFakeHttp(tc.responseFile),
-				webdriver.NewFakeWebdriverService(newFakeWebdriver(tc.responseFile)),
+				webdriver.NewFakeBrowser(newFakeWebdriver(tc.responseFile)),
 				func() time.Time { return fakeTime })
 
 			ups := web.GetResponse(&rpb.Request{
@@ -112,7 +112,7 @@ func TestWebLinkMatcher(t *testing.T) {
 		},
 	} {
 		t.Run(tc.desc, func(t *testing.T) {
-			tg := NewWebAdapter(nil, webdriver.NewFakeWebdriverService(&webdriver.NoopWebdriver{}))
+			tg := NewWebAdapter(nil, webdriver.NewFakeBrowser(&webdriver.NoopWebdriver{}))
 
 			result := tg.MatchLink(tc.link)
 			if fmt.Sprintf("%+v", tc.want) != fmt.Sprintf("%+v", result) {

@@ -37,7 +37,7 @@ type Storage interface {
 type LocalStorage struct {
 	Storage
 
-	browser    webdriver.WebdriverService
+	browser    webdriver.Browser
 	downloader downloader.Downloader
 	overlay    *Overlay
 
@@ -228,7 +228,7 @@ func (s *LocalStorage) refreshCache() {
 
 }
 
-func NewStorage(root string, browser webdriver.WebdriverService, downloader downloader.Downloader) Storage {
+func NewStorage(root string, browser webdriver.Browser, downloader downloader.Downloader) Storage {
 	log := cm.NewLogger("storage")
 	log.Infof("Storage root set to \"%s\"", root)
 

@@ -25,10 +25,10 @@ type pikabuAdapter struct {
 
 	linkMatcher *regexp.Regexp
 	logger      *cm.Logger
-	browser     webdriver.WebdriverService
+	browser     webdriver.Browser
 }
 
-func NewPikabuAdapter(browser webdriver.WebdriverService) Adapter {
+func NewPikabuAdapter(browser webdriver.Browser) Adapter {
 	return &pikabuAdapter{
 		linkMatcher: regexp.MustCompile(pikabuStoryRe),
 		logger:      cm.NewLogger("PikabuAdapter"),

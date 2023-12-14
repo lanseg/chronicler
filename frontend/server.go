@@ -96,7 +96,7 @@ func (ws *WebServer) handleRecord(p PathParams, w http.ResponseWriter, r *http.R
 func NewServer(port int, storageRoot string, staticFiles string) *http.Server {
 	server := &WebServer{
 		logger:  cm.NewLogger("frontend"),
-		storage: storage.NewStorage(storageRoot, webdriver.NewFakeWebdriverService(nil), downloader.NewNoopDownloader()),
+		storage: storage.NewStorage(storageRoot, webdriver.NewFakeBrowser(nil), downloader.NewNoopDownloader()),
 	}
 
 	handler := &PathParamHandler{

@@ -9,11 +9,11 @@ import (
 	"chronicler/webdriver"
 )
 
-type fakeWebdriverService struct {
-	webdriver.WebdriverService
+type fakeBrowser struct {
+	webdriver.Browser
 }
 
-func (fws *fakeWebdriverService) RunSession(func(webdriver.WebDriver)) error {
+func (fws *fakeBrowser) RunSession(func(webdriver.WebDriver)) error {
 	return nil
 }
 
@@ -78,7 +78,7 @@ func TestStorage(t *testing.T) {
 		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			s := NewStorage(t.TempDir(), &fakeWebdriverService{}, &fakeDownloader{})
+			s := NewStorage(t.TempDir(), &fakeBrowser{}, &fakeDownloader{})
 			for _, rec := range tc.records {
 				if saveError := s.SaveRecordSet(rec); saveError != nil {
 					t.Errorf("Error while saving a request: %s", saveError)

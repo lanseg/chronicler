@@ -7,7 +7,7 @@ go_library(
     srcs = [
         "firefox.go",
         "marionette.go",
-        "service.go",
+        "browser.go",
         "scenarios.go",
         "scenario_webdriver.go",
         "webdriver.go",
@@ -26,7 +26,8 @@ go_test(
     name = "webdriver_test",
     size = "small",
     srcs = [
-        "scenarios_test.go"
+        "scenarios_test.go",
+        "browser_test.go"
     ],
     data = glob(["testdata/*"]),
     embed = [

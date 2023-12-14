@@ -69,7 +69,7 @@ func main() {
 	logger.Infof("TelegramBotKey: %d", len(*cfg.TelegramBotKey))
 
 	downloader := downloader.NewDownloader(initHttpClient())
-	webDriver := webdriver.NewWebdriverService(*cfg.ScenarioLibrary)
+	webDriver := webdriver.NewBrowser(*cfg.ScenarioLibrary)
 	storage := storage.NewStorage(*cfg.StorageRoot, webDriver, downloader)
 
 	tgBot := telegram.NewBot(*cfg.TelegramBotKey)

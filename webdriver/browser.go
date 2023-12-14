@@ -14,23 +14,23 @@ const (
 	webdriverAddress     = "127.0.0.1"
 )
 
-type WebdriverService interface {
+type Browser interface {
 	RunSession(func(driver WebDriver)) error
 }
 
-type fakeWebdriverService struct {
-	WebdriverService
+type fakeBrowser struct {
+	Browser
 
 	driver WebDriver
 }
 
-func (fwd *fakeWebdriverService) RunSession(do func(driver WebDriver)) error {
+func (fwd *fakeBrowser) RunSession(do func(driver WebDriver)) error {
 	do(fwd.driver)
 	return nil
 }
 
-type webdriverServiceImpl struct {
-	WebdriverService
+type browserImpl struct {
+	Browser
 
 	logger    *cm.Logger
 	scenarios ScenarioLibrary
@@ -38,7 +38,7 @@ type webdriverServiceImpl struct {
 	lock      sync.Mutex
 }
 
-func (wd *webdriverServiceImpl) initIfNeeded() error {
+func (wd *browserImpl) initIfNeeded() error {
 	if wd.driver != nil {
 		return nil
 	}
@@ -64,7 +64,7 @@ func (wd *webdriverServiceImpl) initIfNeeded() error {
 	return nil
 }
 
-func (wd *webdriverServiceImpl) RunSession(session func(driver WebDriver)) error {
+func (wd *browserImpl) RunSession(session func(driver WebDriver)) error {
 	wd.lock.Lock()
 	defer wd.lock.Unlock()
 
@@ -76,21 +76,21 @@ func (wd *webdriverServiceImpl) RunSession(session func(driver WebDriver)) error
 	return nil
 }
 
-func NewFakeWebdriverService(driver WebDriver) WebdriverService {
-	return &fakeWebdriverService{
+func NewFakeBrowser(driver WebDriver) Browser {
+	return &fakeBrowser{
 		driver: driver,
 	}
 }
 
-func NewWebdriverService(scenarios string) WebdriverService {
-	logger := cm.NewLogger("WebdriverService")
+func NewBrowser(scenarios string) Browser {
+	logger := cm.NewLogger("Browser")
 	sc, err := LoadScenarios(scenarios)
 	if err != nil {
 		logger.Warningf("Unable to load scenarios defined in %q", scenarios)
 	}
 
-	return &webdriverServiceImpl{
+	return &browserImpl{
 		scenarios: sc,
-		logger:    cm.NewLogger("WebdriverService"),
+		logger:    cm.NewLogger("Browser"),
 	}
 }

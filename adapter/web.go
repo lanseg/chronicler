@@ -61,14 +61,14 @@ type webAdapter struct {
 	timeSource func() time.Time
 	logger     *cm.Logger
 	client     HttpClient
-	browser    webdriver.WebdriverService
+	browser    webdriver.Browser
 }
 
-func NewWebAdapter(httpClient HttpClient, browser webdriver.WebdriverService) Adapter {
+func NewWebAdapter(httpClient HttpClient, browser webdriver.Browser) Adapter {
 	return createWebAdapter(httpClient, browser, time.Now)
 }
 
-func createWebAdapter(httpClient HttpClient, browser webdriver.WebdriverService, timeSource func() time.Time) Adapter {
+func createWebAdapter(httpClient HttpClient, browser webdriver.Browser, timeSource func() time.Time) Adapter {
 	logger := cm.NewLogger("WebAdapter")
 	if httpClient == nil {
 		logger.Infof("No http client provided, using an own new one")
