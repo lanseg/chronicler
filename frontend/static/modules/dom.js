@@ -175,15 +175,17 @@ export function createRecordSet(rs, metadata) {
         origin.innerHTML = `<span class="source">${srcName}</span> ${senderName}`;
     }
 
-    const wrap = createElement("label", { 
-      "class": "record_wrapper", 
-      "for": `${rs["id"]}_checkbox`
-    })
-    wrap.appendChild(createElement("input", {
-      "id": `${rs["id"]}_checkbox`,
-      "class": "selection_marker",
-      "type": "checkbox"
-    }))
+    const wrap = createElement("label", {
+        class: "record_wrapper",
+        for: `${rs["id"]}_checkbox`,
+    });
+    wrap.appendChild(
+        createElement("input", {
+            id: `${rs["id"]}_checkbox`,
+            class: "selection_marker",
+            type: "checkbox",
+        }),
+    );
     wrap.appendChild(recordEl);
     return wrap;
 }

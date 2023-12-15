@@ -125,7 +125,6 @@
     padding: 4px;
 }
 
-
 /* Records */
 .records {
     padding: 8px;
@@ -183,11 +182,11 @@
 
 /* --- Record selection --- */
 .record_wrapper input.selection_marker {
-  display: none;
+    display: none;
 }
 
 .record_wrapper input.selection_marker:checked ~ .record {
-  background-color: lightgray;
+    background-color: lightgray;
 }
 
 /* --- Section --- */

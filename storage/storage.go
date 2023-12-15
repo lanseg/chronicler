@@ -26,6 +26,7 @@ const (
 type Storage interface {
 	SaveRecordSet(r *rpb.RecordSet) error
 	ListRecordSets() optional.Optional[[]*rpb.RecordSet]
+	DeleteRecordSet(id string) error
 	GetFile(id string, filename string) optional.Optional[[]byte]
 }
 
@@ -170,6 +171,17 @@ func (s *LocalStorage) getAllRecords() optional.Optional[[]*rpb.RecordSet] {
 		})
 	}
 	return optional.Of(records.SortRecordSets(result))
+}
+
+func (s *LocalStorage) DeleteRecordSet(id string) error {
+	if len(id) != 36 {
+		return fmt.Errorf("Looks like uuid is incorrect: %q", id)
+	}
+	if err := os.RemoveAll(filepath.Join(s.root, id)); err != nil {
+		return err
+	}
+	s.refreshCache()
+    return nil
 }
 
 func (s *LocalStorage) touch() {

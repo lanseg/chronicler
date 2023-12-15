@@ -7,6 +7,8 @@ import (
 	"chronicler/downloader"
 	rpb "chronicler/records/proto"
 	"chronicler/webdriver"
+
+	cm "github.com/lanseg/golang-commons/common"
 )
 
 type fakeBrowser struct {
@@ -47,6 +49,34 @@ func newRecordSetFull(id int, name string, nrecords int) *rpb.RecordSet {
 		})
 	}
 	return set
+}
+
+func TestDeleteRecord(t *testing.T) {
+	t.Run("Create delete record", func(t *testing.T) {
+		s := NewStorage(t.TempDir(), &fakeBrowser{}, &fakeDownloader{})
+
+		recordSets := []*rpb.RecordSet{}
+		for i := 1; i < 10; i++ {
+			rs := newRecordSetFull(i, "what", 10)
+			rs.Id = cm.UUID4()
+			if saveError := s.SaveRecordSet(rs); saveError != nil {
+				t.Errorf("Error while saving a record set: %s", saveError)
+			}
+			recordSets = append(recordSets, rs)
+		}
+
+		fromStorageBefore, _ := s.ListRecordSets().Get()
+		if removeErr := s.DeleteRecordSet(recordSets[2].Id); removeErr != nil {
+			t.Errorf("Error while removing a record set: %s", removeErr)
+		}
+
+		fromStorageAfter, _ := s.ListRecordSets().Get()
+		if len(fromStorageAfter) != len(fromStorageBefore)-1 {
+			t.Errorf("Record was not removed. Before: %d, After: %d",
+				len(fromStorageBefore), len(fromStorageAfter))
+		}
+	})
+
 }
 
 func TestStorage(t *testing.T) {
