@@ -209,4 +209,3 @@ func NewStorage(root string, browser webdriver.Browser, downloader downloader.Do
 	ls.refreshCache()
 	return ls
 }
-

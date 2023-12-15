@@ -2,13 +2,25 @@
     margin: 0px;
 }
 
+/* Bar commons */
+.bar_button {
+    padding: 10px;
+    min-height: 26px;
+    min-width: 32px;
+}
+
+.bar_button:active {
+    background-color: #2f2f2f;
+}
+
+/* Header */
 .topheader {
     overflow: hidden;
     position: fixed;
     width: 100%;
 }
 
-.topheader .menubar {
+.menubar {
     background-color: black;
     width: 100%;
     display: flex;
@@ -17,7 +29,7 @@
     justify-content: center;
 }
 
-.topheader .menubar .title {
+.menubar .title {
     flex-grow: 2;
     font-size: 25px;
     padding: 4px;
@@ -31,10 +43,7 @@
 }
 
 .topheader .menubar .menu .hamburger-lines {
-    padding: 10px;
     display: block;
-    height: 26px;
-    width: 32px;
     top: 17px;
     left: 20px;
     z-index: 2;
@@ -84,13 +93,6 @@
     background-color: #4f4f4f;
 }
 
-.records {
-    display: grid;
-    grid-template-columns: 100%;
-    row-gap: 6px;
-    margin: 0px;
-}
-
 .controls {
     padding: 8px;
     padding-top: 8px;
@@ -110,9 +112,28 @@
     flex-grow: 2;
 }
 
+/* Footer */
+
+.footer {
+    overflow: hidden;
+    position: fixed;
+    bottom: 0px;
+    background-color: black;
+    width: 100%;
+    color: white;
+    font-size: 25px;
+    padding: 4px;
+}
+
+
+/* Records */
 .records {
     padding: 8px;
     padding-top: 60px;
+    display: grid;
+    grid-template-columns: 100%;
+    row-gap: 6px;
+    margin: 0px;
 }
 
 .record {
@@ -158,6 +179,15 @@
 
 .record .source {
     font-weight: bold;
+}
+
+/* --- Record selection --- */
+.record_wrapper input.selection_marker {
+  display: none;
+}
+
+.record_wrapper input.selection_marker:checked ~ .record {
+  background-color: lightgray;
 }
 
 /* --- Section --- */

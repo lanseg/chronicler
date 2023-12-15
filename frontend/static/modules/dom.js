@@ -158,7 +158,6 @@ export function createRecordSet(rs, metadata) {
     }
     const senderName = getSourceName(metadata, rs.rootRecord.source, rs.rootRecord.parent);
     const srcName = rs.rootRecord.parent ? `${getSourceName(metadata, rs.rootRecord.parent)}` : "";
-
     const timeLabel = formatDateTime(rs.rootRecord.time);
     recordEl.innerHTML = `<div class='header'>
         <span class="icon ${rs.rootRecord.source.sourceType.name}">&nbsp;</span>
@@ -175,7 +174,18 @@ export function createRecordSet(rs, metadata) {
     } else {
         origin.innerHTML = `<span class="source">${srcName}</span> ${senderName}`;
     }
-    return recordEl;
+
+    const wrap = createElement("label", { 
+      "class": "record_wrapper", 
+      "for": `${rs["id"]}_checkbox`
+    })
+    wrap.appendChild(createElement("input", {
+      "id": `${rs["id"]}_checkbox`,
+      "class": "selection_marker",
+      "type": "checkbox"
+    }))
+    wrap.appendChild(recordEl);
+    return wrap;
 }
 
 export function createRecord(rsId, record, metadata) {
