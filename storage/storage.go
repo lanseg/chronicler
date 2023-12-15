@@ -181,7 +181,7 @@ func (s *LocalStorage) DeleteRecordSet(id string) error {
 		return err
 	}
 	s.refreshCache()
-    return nil
+	return nil
 }
 
 func (s *LocalStorage) touch() {

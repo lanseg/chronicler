@@ -83,6 +83,14 @@ func (ws *WebServer) responseFile(w http.ResponseWriter, id string, filename str
 	w.Write(f)
 }
 
+func (ws *WebServer) handleDeleteRecord(p PathParams, w http.ResponseWriter, r *http.Request) {
+	ws.logger.Infof("Request [delete]: %s", p)
+	if err := ws.storage.DeleteRecordSet(p["recordId"]); err != nil {
+		ws.Error(w, fmt.Sprintf("Could not delete record: %s", err), 500)
+	}
+	ws.writeJson(w, struct{ Status string }{Status: "ok"})
+}
+
 func (ws *WebServer) handleRecord(p PathParams, w http.ResponseWriter, r *http.Request) {
 	ws.logger.Infof("Request [api]: %s", p)
 	queryParams := r.URL.Query()
@@ -102,6 +110,8 @@ func NewServer(port int, storageRoot string, staticFiles string) *http.Server {
 	handler := &PathParamHandler{
 		elseHandler: http.FileServer(http.Dir(staticFiles)),
 	}
+
+	handler.Handle("/chronicler/records/{recordId}/delete", server.handleDeleteRecord)
 	handler.Handle("/chronicler/records/{recordId}", server.handleRecord)
 	handler.Handle("/chronicler/records", server.handleRecordSetList)
 

@@ -13,7 +13,7 @@
             }
         </script>
         <script type="module">
-            import { getRecordSets, getRecord } from "api";
+            import { getRecordSets, getRecord, deleteRecordSets } from "api";
             import { createRecord, createRecordSet, createRecordSetSummary } from "dom";
             import { RecordListResponse, RecordSet } from "wrappers";
 
@@ -67,6 +67,16 @@
                             document.querySelector(".loader").style.display = "none";
                         });
                 }
+
+                document.querySelector(".do_delete").addEventListener("click", () => {
+                    const toDelete = [
+                        ...document.querySelectorAll(".selection_marker:checked"),
+                    ].map((c) => c.id.replaceAll("_checkbox", ""));
+                    deleteRecordSets(toDelete).then((r) => {
+                        console.log(r);
+                        window.location.reload();
+                    });
+                });
             };
         </script>
     </head>
@@ -102,7 +112,7 @@
         </nav>
         <div class="records"></div>
         <div class="footer">
-            <div class="bar_button" onclick>Delete</div>
+            <div class="bar_button do_delete">Delete</div>
         </div>
     </body>
 </html>
