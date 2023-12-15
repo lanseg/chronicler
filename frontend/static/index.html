@@ -39,6 +39,14 @@
                 records.append(fragment);
             }
 
+            function showLoading() {
+                document.querySelector(".loader").style.display = "inline-block";
+            }
+
+            function hideLoading() {
+                document.querySelector(".loader").style.display = "none";
+            }
+
             window.onload = () => {
                 document.querySelector("#recordId .search-input").value = rcid;
                 document.querySelector("#recordId button").addEventListener("click", () => {
@@ -47,34 +55,39 @@
                 });
 
                 if (params.get("record_id")) {
-                    document.querySelector(".loader").style.display = "inline-block";
+                    showLoading();
                     getRecord(params.get("record_id"))
                         .then((data) => new RecordSet(data))
                         .then((data) => {
                             renderRecord(data);
                         })
                         .then(() => {
-                            document.querySelector(".loader").style.display = "none";
+                            hideLoading();
                         });
                 } else {
-                    document.querySelector(".loader").style.display = "inline-block";
+                    showLoading();
                     getRecordSets()
                         .then((rsObj) => new RecordListResponse(rsObj))
                         .then((data) => {
                             renderRecordSets(data);
                         })
                         .then(() => {
-                            document.querySelector(".loader").style.display = "none";
+                          hideLoading();
                         });
                 }
 
                 document.querySelector(".do_delete").addEventListener("click", () => {
+                    showLoading();
                     const toDelete = [
                         ...document.querySelectorAll(".selection_marker:checked"),
-                    ].map((c) => c.id.replaceAll("_checkbox", ""));
-                    deleteRecordSets(toDelete).then((r) => {
-                        console.log(r);
-                        window.location.reload();
+                    ].map((c) => c.dataset["record"]);
+                    deleteRecordSets(toDelete).then((records) => {
+                        for (const r of records) {
+                            if (r.Deleted == true) {
+                                document.getElementById(r.Id).remove();
+                            }
+                        }
+                        hideLoading();
                     });
                 });
             };

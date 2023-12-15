@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"sort"
+    "strings"
 
 	"chronicler/downloader"
 	"chronicler/records"
@@ -15,6 +16,12 @@ import (
 	"github.com/lanseg/golang-commons/collections"
 	cm "github.com/lanseg/golang-commons/common"
 )
+
+type DeleteRecordResponse struct {
+	Id      string
+	Deleted bool
+	Error   error
+}
 
 type WebServer struct {
 	storage storage.Storage
@@ -84,11 +91,22 @@ func (ws *WebServer) responseFile(w http.ResponseWriter, id string, filename str
 }
 
 func (ws *WebServer) handleDeleteRecord(p PathParams, w http.ResponseWriter, r *http.Request) {
-	ws.logger.Infof("Request [delete]: %s", p)
-	if err := ws.storage.DeleteRecordSet(p["recordId"]); err != nil {
-		ws.Error(w, fmt.Sprintf("Could not delete record: %s", err), 500)
+	queryParams := r.URL.Query()
+	ws.logger.Infof("Request [delete]: %s", queryParams)
+
+	result := []*DeleteRecordResponse{}
+	for _, r := range strings.Split(queryParams.Get("ids"), ",") {
+		err := ws.storage.DeleteRecordSet(r)
+        if err != nil {
+          ws.logger.Warningf("Could not delete record %q: %s", r, err)
+        }
+		result = append(result, &DeleteRecordResponse{
+			Id:      r,
+			Deleted: err == nil,
+			Error:   err,
+		})
 	}
-	ws.writeJson(w, struct{ Status string }{Status: "ok"})
+	ws.writeJson(w, result)
 }
 
 func (ws *WebServer) handleRecord(p PathParams, w http.ResponseWriter, r *http.Request) {
@@ -111,7 +129,7 @@ func NewServer(port int, storageRoot string, staticFiles string) *http.Server {
 		elseHandler: http.FileServer(http.Dir(staticFiles)),
 	}
 
-	handler.Handle("/chronicler/records/{recordId}/delete", server.handleDeleteRecord)
+	handler.Handle("/chronicler/records/delete", server.handleDeleteRecord)
 	handler.Handle("/chronicler/records/{recordId}", server.handleRecord)
 	handler.Handle("/chronicler/records", server.handleRecordSetList)
 

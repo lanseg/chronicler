@@ -13,12 +13,7 @@ export async function getRecord(id) {
 }
 
 export async function deleteRecordSets(ids) {
-    const result = [];
-    for (const id of ids) {
-       const r = await fetch(`chronicler/records/${id}/delete`)
-               .then((response) => response.text())
-               .then((text) => JSON.parse(text));
-       result.push(r);
-    }
-    return result;
+     return fetch(`chronicler/records/delete?ids=${ids.join(",")}`)
+      .then((response) => response.text())
+      .then((text) => JSON.parse(text));
 }

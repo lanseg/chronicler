@@ -181,9 +181,10 @@ export function createRecordSet(rs, metadata) {
     });
     wrap.appendChild(
         createElement("input", {
-            id: `${rs["id"]}_checkbox`,
-            class: "selection_marker",
-            type: "checkbox",
+            "id": `${rs["id"]}_checkbox`,
+            "class": "selection_marker",
+            "data-record": rs["id"],
+            "type": "checkbox",
         }),
     );
     wrap.appendChild(recordEl);
