@@ -196,12 +196,12 @@ func SortRecordSets(rs []*rpb.RecordSet) []*rpb.RecordSet {
 		if len(rs[i].Records) != 0 && len(rs[j].Records) == 0 {
 			return false
 		}
-        rsi := rs[i].Records[0]
-        rsj := rs[j].Records[0]
+		rsi := rs[i].Records[0]
+		rsj := rs[j].Records[0]
 
-        if rsi.FetchTime != rsj.FetchTime {
-          return rsi.FetchTime > rsj.FetchTime
-        }
+		if rsi.FetchTime != rsj.FetchTime {
+			return rsi.FetchTime > rsj.FetchTime
+		}
 
 		if rsi.Time != rsj.Time {
 			return rsi.Time > rsj.Time

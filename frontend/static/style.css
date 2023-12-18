@@ -79,6 +79,11 @@
     width: 100%;
     font-size: 20px;
     border-bottom: solid 1px #4f4f4f;
+    color: white;
+}
+
+.topheader .menuitem.notifications {
+    padding: 8px;
 }
 
 .topheader .menuitem a {
@@ -271,6 +276,14 @@
 
 .status .error {
     border: 10px solid red;
+    border-radius: 50%;
+    width: 10px;
+    height: 10px;
+    display: none;
+}
+
+.status .info {
+    border: 10px solid lightgreen;
     border-radius: 50%;
     width: 10px;
     height: 10px;
