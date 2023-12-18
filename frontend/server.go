@@ -4,8 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"sort"
-    "strings"
+	"strings"
 
 	"chronicler/downloader"
 	"chronicler/records"
@@ -54,18 +53,6 @@ func (ws *WebServer) handleRecordSetList(p PathParams, w http.ResponseWriter, r 
 			userById[data.Id] = data
 		}
 	}
-	sort.Slice(result.RecordSets, func(i int, j int) bool {
-		left := result.RecordSets[i].RootRecord
-		right := result.RecordSets[j].RootRecord
-		if left == nil {
-			return false
-		}
-		if right == nil {
-			return true
-		}
-		return left.Time > right.Time
-	})
-
 	result.UserMetadata = collections.Values(userById)
 	ws.writeJson(w, result)
 }
@@ -97,9 +84,9 @@ func (ws *WebServer) handleDeleteRecord(p PathParams, w http.ResponseWriter, r *
 	result := []*DeleteRecordResponse{}
 	for _, r := range strings.Split(queryParams.Get("ids"), ",") {
 		err := ws.storage.DeleteRecordSet(r)
-        if err != nil {
-          ws.logger.Warningf("Could not delete record %q: %s", r, err)
-        }
+		if err != nil {
+			ws.logger.Warningf("Could not delete record %q: %s", r, err)
+		}
 		result = append(result, &DeleteRecordResponse{
 			Id:      r,
 			Deleted: err == nil,

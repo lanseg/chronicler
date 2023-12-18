@@ -13,84 +13,102 @@
             }
         </script>
         <script type="module">
-            import { getRecordSets, getRecord, deleteRecordSets } from "api";
-            import { createRecord, createRecordSet, createRecordSetSummary } from "dom";
-            import { RecordListResponse, RecordSet } from "wrappers";
+                        import { getRecordSets, getRecord, deleteRecordSets } from "api";
+                        import { createRecord, createRecordSet, createRecordSetSummary } from "dom";
+                        import { RecordListResponse, RecordSet } from "wrappers";
 
-            const params = new URLSearchParams(document.location.search);
-            const rcid = params.get("record_id");
+                        const params = new URLSearchParams(document.location.search);
+                        const rcid = params.get("record_id");
 
-            function renderRecordSets(data) {
-                const fragment = document.createDocumentFragment();
-                const records = document.querySelector(".records");
-                for (const rs of data.recordSets) {
-                    fragment.appendChild(createRecordSet(rs, data.sourceMetadata));
-                }
-                records.append(fragment);
-            }
-
-            function renderRecord(cdata) {
-                const fragment = document.createDocumentFragment();
-                const records = document.querySelector(".records");
-                fragment.appendChild(createRecordSetSummary(cdata));
-                for (const record of cdata.records) {
-                    fragment.appendChild(createRecord(rcid, record, cdata.sourceMetadata));
-                }
-                records.append(fragment);
-            }
-
-            function showLoading() {
-                document.querySelector(".loader").style.display = "inline-block";
-            }
-
-            function hideLoading() {
-                document.querySelector(".loader").style.display = "none";
-            }
-
-            window.onload = () => {
-                document.querySelector("#recordId .search-input").value = rcid;
-                document.querySelector("#recordId button").addEventListener("click", () => {
-                    const rid = document.querySelector("#recordId .search-input").value;
-                    window.location.href = "?record_id=" + rid;
-                });
-
-                if (params.get("record_id")) {
-                    showLoading();
-                    getRecord(params.get("record_id"))
-                        .then((data) => new RecordSet(data))
-                        .then((data) => {
-                            renderRecord(data);
-                        })
-                        .then(() => {
-                            hideLoading();
-                        });
-                } else {
-                    showLoading();
-                    getRecordSets()
-                        .then((rsObj) => new RecordListResponse(rsObj))
-                        .then((data) => {
-                            renderRecordSets(data);
-                        })
-                        .then(() => {
-                          hideLoading();
-                        });
-                }
-
-                document.querySelector(".do_delete").addEventListener("click", () => {
-                    showLoading();
-                    const toDelete = [
-                        ...document.querySelectorAll(".selection_marker:checked"),
-                    ].map((c) => c.dataset["record"]);
-                    deleteRecordSets(toDelete).then((records) => {
-                        for (const r of records) {
-                            if (r.Deleted == true) {
-                                document.getElementById(r.Id).remove();
+                        function renderRecordSets(data) {
+                            const fragment = document.createDocumentFragment();
+                            const records = document.querySelector(".records");
+                            for (const rs of data.recordSets) {
+                                fragment.appendChild(createRecordSet(rs, data.sourceMetadata));
                             }
+                            records.append(fragment);
                         }
-                        hideLoading();
-                    });
-                });
-            };
+
+                        function renderRecord(cdata) {
+                            const fragment = document.createDocumentFragment();
+                            const records = document.querySelector(".records");
+                            fragment.appendChild(createRecordSetSummary(cdata));
+                            for (const record of cdata.records) {
+                                fragment.appendChild(createRecord(rcid, record, cdata.sourceMetadata));
+                            }
+                            records.append(fragment);
+                        }
+
+                        function showLoading() {
+                            document.querySelector(".loader").style.display = "inline-block";
+                        }
+
+                        function hideLoading() {
+                            document.querySelector(".loader").style.display = "none";
+                        }
+
+                        function showError() {
+                            document.querySelector(".error").style.display = "inline-block";
+                        }
+
+                        function hideEror() {
+                            document.querySelector(".error").style.display = "none";
+                        }
+
+                        function handleError(err) {
+                            hideLoading();
+                        }
+
+                        window.onerror = function (msg, url, line) {
+                            console.log(`ERROR: ${msg} ${url} ${line}`);
+                        };
+
+                        window.onload = () => {
+                            document.querySelector("#recordId .search-input").value = rcid;
+                            document.querySelector("#recordId button").addEventListener("click", () => {
+                                const rid = document.querySelector("#recordId .search-input").value;
+                                window.location.href = "?record_id=" + rid;
+                            });
+
+                            if (params.get("record_id")) {
+                                showLoading();
+                                getRecord(params.get("record_id"))
+                                    .then((data) => new RecordSet(data))
+                                    .then((data) => {
+                                        renderRecord(data);
+                                    })
+                                    .then(() => {
+                                        hideLoading();
+                                    });
+                            } else {
+                                showLoading();
+                                getRecordSets()
+                                    .then((rsObj) => new RecordListResponse(rsObj))
+                                    .then((data) => {
+                                        renderRecordSets(data);
+                                    })
+                                    .then(() => {
+                                        hideLoading();
+                                    })
+                                    .catch(handleError);
+                            }
+                            document.querySelector(".do_delete").addEventListener("click", () => {
+                                showLoading();
+                                const toDelete = [
+                                    ...document.querySelectorAll(".selection_marker:checked"),
+                                ].map((c) => c.dataset["record"]);
+                                deleteRecordSets(toDelete)
+                                    .then((records) => {
+                                        for (const r of records) {
+                                            if (r.Deleted == true) {
+                                                document.getElementById(r.Id).parentElement.remove();
+                                            }
+                                        }
+                                        hideLoading();
+                                    })
+                                    .catch(handleError);
+                            });
+                        };
         </script>
     </head>
 
@@ -100,9 +118,12 @@
                 <div class="title">
                     <a href="/">Chronicler</a>
                 </div>
-                <div class="status">
-                    <div class="loader"></div>
-                </div>
+                <label for="statusbar_check">
+                    <div class="status">
+                        <div class="loader"></div>
+                        <div class="error"></div>
+                    </div>
+                </label>
                 <div class="menu">
                     <label for="menuitems_check">
                         <div class="hamburger-lines bar_button">
@@ -113,7 +134,8 @@
                     </label>
                 </div>
             </div>
-            <input type="checkbox" id="menuitems_check" />
+
+            <input type="checkbox" id="menuitems_check" class="toggler_check" />
             <div class="menuitems">
                 <div class="menuitem">
                     <div id="recordId" class="controls">
@@ -122,7 +144,14 @@
                     </div>
                 </div>
             </div>
-        </nav>
+
+            <input type="checkbox" id="statusbar_check" class="toggler_check" />
+            <div class="menuitems">
+                <div class="menuitem">
+                   Hello there
+                </div>
+            </div>
+        </nav> 
         <div class="records"></div>
         <div class="footer">
             <div class="bar_button do_delete">Delete</div>

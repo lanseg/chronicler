@@ -177,11 +177,11 @@ func (s *LocalStorage) DeleteRecordSet(id string) error {
 	if len(id) != 36 {
 		return fmt.Errorf("Looks like uuid is incorrect: %q", id)
 	}
-    path := filepath.Join(s.root, id)
+	path := filepath.Join(s.root, id)
 	if err := os.RemoveAll(filepath.Join(s.root, id)); err != nil {
 		return err
 	}
-    s.logger.Debugf("Deleted recordset at %s", path)
+	s.logger.Debugf("Deleted recordset at %s", path)
 	s.refreshCache()
 	return nil
 }

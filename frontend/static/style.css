@@ -60,11 +60,11 @@
     background: white;
 }
 
-#menuitems_check {
+.toggler_check {
     display: none;
 }
 
-#menuitems_check:checked ~ .menuitems {
+.toggler_check:checked + .menuitems {
     display: block;
 }
 
@@ -113,7 +113,6 @@
 }
 
 /* Footer */
-
 .footer {
     overflow: hidden;
     position: fixed;
@@ -123,6 +122,9 @@
     color: white;
     font-size: 25px;
     padding: 4px;
+}
+
+.footer .do_delete {
 }
 
 /* Records */
@@ -265,6 +267,14 @@
 
 .status {
     margin-right: 4px;
+}
+
+.status .error {
+    border: 10px solid red;
+    border-radius: 50%;
+    width: 10px;
+    height: 10px;
+    display: inline-block;
 }
 
 .loader {
