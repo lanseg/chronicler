@@ -5,13 +5,15 @@
 1. ~Fix detecting twitter adapter~
 2. ~Fix truncating in the middle of the unicode byte~
 3. ~Convert text data to utf-8 whenever possible~
-4. Add deleting/hiding records
+4. ~Add deleting/hiding records~
 5. ~Add section for docs~
 6. ~View number of photos/docs/audios/videos~
 7. Simple search / filtering
 8. Add geodata section and parameter
 9. Add automatic wrapper adapter
-10. Download manager
+10. ~Download manager~
+11. Status and telemetry reporting
+12. Versioning: equal source -> equal ids, multiple versions of the same record
 
 ## More adapters
 
@@ -19,3 +21,4 @@
 2. ~Pikabu~
 3. Youtube
 4. Telegram userbot
+5. Reddit
