@@ -130,6 +130,7 @@
 }
 
 .footer .do_delete {
+    display: none;
 }
 
 /* Records */

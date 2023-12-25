@@ -8,7 +8,8 @@
                 "imports": {
                     "api": "./modules/api.js",
                     "wrappers": "./modules/wrappers.js",
-                    "dom": "./modules/dom.js"
+                    "dom": "./modules/dom.js",
+                    "bus": "./modules/bus.js"
                 }
             }
         </script>
@@ -16,15 +17,22 @@
             import { getRecordSets, getRecord, deleteRecordSets } from "api";
             import { createRecord, createRecordSet, createRecordSetSummary } from "dom";
             import { RecordListResponse, RecordSet } from "wrappers";
+            import { getBus } from "bus";
 
             const params = new URLSearchParams(document.location.search);
             const rcid = params.get("record_id");
+            const selectedRecordSets = new Set();
 
             function renderRecordSets(data) {
                 const fragment = document.createDocumentFragment();
                 const records = document.querySelector(".records");
                 for (const rs of data.recordSets) {
-                    fragment.appendChild(createRecordSet(rs, data.sourceMetadata));
+                    const el = createRecordSet(rs, data.sourceMetadata);
+                    const checker = el.querySelector("input");
+                    checker.addEventListener("change", (e) => {
+                        bus.publish("RecordSetSelected", { id: rs.id, selected: checker.checked });
+                    });
+                    fragment.appendChild(el);
                 }
                 records.append(fragment);
             }
@@ -58,54 +66,102 @@
             function handleError(err) {
                 hideLoading();
                 showError();
-                
+
                 const root = document.querySelector(".notifications");
                 root.innerHTML += `<div class="error">${err}</div>`;
             }
 
+            // Bus events
+            function recordSetsLoaded(rs) {}
+
+            function recordsLoaded(rs) {}
+
+            function onRecordsDeleted(records) {
+                for (const r of records) {
+                    document.getElementById(r).parentElement.remove();
+                    selectedRecordSets.delete(r);
+                }
+                updateDeleteBtn();
+            }
+
+            function onRecordSetSelected(rs) {
+                if (!rs.selected) {
+                    selectedRecordSets.delete(rs.id);
+                } else {
+                    selectedRecordSets.add(rs.id);
+                }
+                updateDeleteBtn();
+            }
+
+            function updateDeleteBtn() {
+                const deleteBtn = document.querySelector(".do_delete");
+                if (selectedRecordSets.size > 0) {
+                    deleteBtn.style.display = "inline-block";
+                } else {
+                    deleteBtn.style.display = "none";
+                }
+            }
+
+            function onWorkStarted(work) {
+                showLoading();
+            }
+
+            function onWorkEnded(work) {
+                hideLoading();
+            }
+
+            function onError(err) {
+                hideLoading();
+                handleError(err);
+            }
+
+            function onProgress(change) {}
+
             window.onload = () => {
+                window.bus = getBus();
+
+                // Record events
+                bus.subscribe("RecordSetsLoaded", recordSetsLoaded);
+                bus.subscribe("RecordSetSelected", onRecordSetSelected);
+                bus.subscribe("RecordsLoaded", recordsLoaded);
+                bus.subscribe("RecordsDeleted", onRecordsDeleted);
+
+                bus.subscribe("WorikStarted", onWorkStarted);
+                bus.subscribe("WorkEnded", onWorkEnded);
+                bus.subscribe("Error", onError);
+                bus.subscribe("Progress", onProgress);
+
                 document.querySelector("#recordId .search-input").value = rcid;
                 document.querySelector("#recordId button").addEventListener("click", () => {
                     const rid = document.querySelector("#recordId .search-input").value;
                     window.location.href = "?record_id=" + rid;
                 });
 
+                bus.publish("WorkStarted");
                 if (params.get("record_id")) {
-                    showLoading();
                     getRecord(params.get("record_id"))
                         .then((data) => new RecordSet(data))
-                        .then((data) => {
-                            renderRecord(data);
-                        })
-                        .then(() => {
-                            hideLoading();
-                        });
+                        .then(renderRecord)
+                        .then(() => bus.publish("WorkEnded"));
                 } else {
-                    showLoading();
                     getRecordSets()
                         .then((rsObj) => new RecordListResponse(rsObj))
-                        .then((data) => {
-                            renderRecordSets(data);
-                        })
-                        .then(() => {
-                            hideLoading();
-                        })
-                        .catch(handleError);
+                        .then(renderRecordSets)
+                        .then(() => bus.publish("WorkEnded"))
+                        .catch((err) => bus.publish("Error", err));
                 }
+
                 document.querySelector(".do_delete").addEventListener("click", () => {
-                    showLoading();
+                    bus.publish("WorkStarted");
+
                     const toDelete = [
                         ...document.querySelectorAll(".selection_marker:checked"),
                     ].map((c) => c.dataset["record"]);
+
                     deleteRecordSets(toDelete)
-                        .then((records) => {
-                            for (const r of records) {
-                                if (r.Deleted == true) {
-                                    document.getElementById(r.Id).parentElement.remove();
-                                }
-                            }
-                            hideLoading();
-                        })
+                        .then((records) => records.filter((r) => r.Deleted).map((r) => r.Id))
+                        .then((ids) => bus.publish("RecordsDeleted", ids))
+                        .then(() => bus.publish("WorkEnded"))
                         .catch(handleError);
                 });
             };
@@ -148,9 +204,7 @@
 
             <input type="checkbox" id="statusbar_check" class="toggler_check" />
             <div class="menuitems">
-                <div class="menuitem notifications">
-                
-                </div>
+                <div class="menuitem notifications"></div>
             </div>
         </nav>
         <div class="records"></div>
