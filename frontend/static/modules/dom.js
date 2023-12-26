@@ -14,7 +14,7 @@ function formatDateTime(date) {
 
 function getSourceName(metadata, parentSrc, source) {
     if (!parentSrc && !source) {
-      return "";
+        return "";
     }
     const nameOrId = formatSource(parentSrc ?? source);
     if (metadata != undefined && metadata.get(nameOrId)) {
@@ -153,21 +153,24 @@ function createFileList(recordId, title, files) {
     return sectionEl;
 }
 
-
 export function createRecordSet(rs, metadata) {
     const recordEl = createElement("div", { id: rs["id"], class: "record" });
     if (!rs.rootRecord) {
         recordEl.innerHTML = `<div class='content error'>No record for id ${rs["id"]}</div>`;
         return recordEl;
     }
-    const wrapper = createElement("label", {"class": "record_wrapper", "for": `${rs.id}_checkbox`});
+    const wrapper = createElement("label", { class: "record_wrapper", for: `${rs.id}_checkbox` });
     wrapper.innerHTML = `
     <div class="record" id="${rs.id}">
       <div class='header'>
         <span class="icon ${rs.rootRecord.source.sourceType.name}">&nbsp;</span>
         <div class="origin">
           <span class="source">${getSourceName(metadata, rs.rootRecord.parent)}</span>
-          <span class="sender">${getSourceName(metadata, rs.rootRecord.source, rs.rootRecord.parent)}</span>
+          <span class="sender">${getSourceName(
+              metadata,
+              rs.rootRecord.source,
+              rs.rootRecord.parent,
+          )}</span>
         </div>
         <span class="datetime">${formatDateTime(rs.rootRecord.time)}</span>
         <a href="?record_id=${rs.id}">${rs.recordCount}</a>
