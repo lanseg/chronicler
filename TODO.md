@@ -14,6 +14,7 @@
 10. ~Download manager~
 11. Status and telemetry reporting
 12. Versioning: equal source -> equal ids, multiple versions of the same record
+13. Storage as an independent process, to be used by chronicler and frontend
 
 ## More adapters
 
