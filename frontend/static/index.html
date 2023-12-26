@@ -69,6 +69,8 @@
 
                 const root = document.querySelector(".notifications");
                 root.innerHTML += `<div class="error">${err}</div>`;
+
+                console.log(err);
             }
 
             // Bus events
@@ -126,10 +128,13 @@
                 bus.subscribe("RecordsLoaded", recordsLoaded);
                 bus.subscribe("RecordsDeleted", onRecordsDeleted);
 
-                bus.subscribe("WorikStarted", onWorkStarted);
+                // Background work
+                bus.subscribe("WorkStarted", onWorkStarted);
                 bus.subscribe("WorkEnded", onWorkEnded);
-                bus.subscribe("Error", onError);
                 bus.subscribe("Progress", onProgress);
+
+                // Error events
+                bus.subscribe("Error", onError);
 
                 document.querySelector("#recordId .search-input").value = rcid;
                 document.querySelector("#recordId button").addEventListener("click", () => {
