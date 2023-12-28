@@ -5,11 +5,9 @@ import (
 )
 
 type JobState struct {
-
 }
 
 type Job interface {
-
 	Start() error
 	Progress() error
 	GetState() *JobState
@@ -54,21 +52,21 @@ type Status interface {
 }
 
 type NoopStatus struct {
-  Status
+	Status
 
-  logger *cm.Logger
+	logger *cm.Logger
 }
 
 func (ns *NoopStatus) NewJob(name string) Job {
-  return NewNoopJob(name)
+	return NewNoopJob(name)
 }
 
 func (ns *NoopStatus) GetJobs() []Job {
-  return []Job{}
+	return []Job{}
 }
 
 func NewNoopStatus() Status {
-  return &NoopStatus {
-     logger: cm.NewLogger("NoopStatus"), 
-  }
+	return &NoopStatus{
+		logger: cm.NewLogger("NoopStatus"),
+	}
 }

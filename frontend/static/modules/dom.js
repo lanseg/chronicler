@@ -161,6 +161,7 @@ export function createRecordSet(rs, metadata) {
     }
     const wrapper = createElement("label", { class: "record_wrapper", for: `${rs.id}_checkbox` });
     wrapper.innerHTML = `
+    <input type="checkbox" class="selection_marker" data-record="${rs.id}" id="${rs.id}_checkbox" />
     <div class="record" id="${rs.id}">
       <div class='header'>
         <span class="icon ${rs.rootRecord.source.sourceType.name}">&nbsp;</span>
@@ -178,7 +179,6 @@ export function createRecordSet(rs, metadata) {
       </div>
       <div class="content">${rs.description}</div>
     </div>
-    <input type="checkbox" class="selection_marker" data-record="${rs.id}" id="${rs.id}_checkbox" />
     `;
     return wrapper;
 }
