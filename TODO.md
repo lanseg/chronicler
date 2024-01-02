@@ -19,7 +19,7 @@
 ## More adapters and fratures
 
 1. Twitter
- 1. Parent thread from retweet
+   1. Parent thread from retweet
 2. Habr
 3. ~Pikabu~
 4. Youtube
