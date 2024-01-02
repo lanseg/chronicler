@@ -16,10 +16,14 @@
 12. Versioning: equal source -> equal ids, multiple versions of the same record
 13. Storage as an independent process, to be used by chronicler and frontend
 
-## More adapters
+## More adapters and fratures
 
-1. Habr
-2. ~Pikabu~
-3. Youtube
-4. Telegram userbot
-5. Reddit
+1. Twitter
+  1. Parent thread from retweet
+2. Habr
+3. ~Pikabu~
+4. Youtube
+5. Telegram
+  1. Userbot
+  2. Better code generator
+6. Reddit
