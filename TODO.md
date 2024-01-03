@@ -21,9 +21,12 @@
 1. Twitter
    1. Parent thread from retweet
 2. Habr
-3. ~Pikabu~
+3. Pikabu
+   1. ~Post parser (including comments)~
+   2. Extracting links from the page
 4. Youtube
 5. Telegram
-  1. Userbot
-  2. Better code generator
+   1. Resolve original post from repost
+   2. Better code generator
+   3. Userbot
 6. Reddit
