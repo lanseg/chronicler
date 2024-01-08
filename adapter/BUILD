@@ -20,6 +20,7 @@ go_library(
         "//telegram",
         "//twitter",
         "//util",
+        "@tgbot//:telegram_bot",
         "@commons//almosthtml",
         "@commons//collections",
         "@commons//optional",

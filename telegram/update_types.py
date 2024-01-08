@@ -28,6 +28,8 @@ EXCLUDE_HEADERS = [
     'Inline mode objects',
     'Formatting options', 
     'Inline mode methods',
+    'Accent colors',
+    'Profile accent colors',
 ]
 
 TG_GO_TYPES = {

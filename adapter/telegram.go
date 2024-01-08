@@ -13,6 +13,7 @@ import (
 	"github.com/lanseg/golang-commons/collections"
 	cm "github.com/lanseg/golang-commons/common"
 	"github.com/lanseg/golang-commons/optional"
+	tgbot "github.com/lanseg/tgbot"
 
 	rpb "chronicler/records/proto"
 )
@@ -47,17 +48,17 @@ func (ts *telegramAdapter) resolveFileUrls(rs *rpb.RecordSet) {
 	}
 }
 
-func (ts *telegramAdapter) waitForUpdate() []*telegram.Update {
+func (ts *telegramAdapter) waitForUpdate() []*tgbot.Update {
 	return collections.IterateSlice(
 		optional.
 			OfError(ts.bot.GetUpdates(int64(0), ts.cursor, 100, 100, []string{})).
-			OrElse([]*telegram.Update{})).
-		Peek(func(u *telegram.Update) {
+			OrElse([]*tgbot.Update{})).
+		Peek(func(u *tgbot.Update) {
 			if ts.cursor <= u.UpdateID {
 				ts.cursor = u.UpdateID + 1
 			}
 		}).
-		Filter(func(u *telegram.Update) bool {
+		Filter(func(u *tgbot.Update) bool {
 			return u.Message != nil
 		}).Collect()
 }
@@ -101,8 +102,8 @@ func (ts *telegramAdapter) SendMessage(message *rpb.Message) {
 
 // ----------
 
-func groupRecords(updates []*telegram.Update) []*rpb.RecordSet {
-	grouped := collections.GroupBy(updates, func(u *telegram.Update) string {
+func groupRecords(updates []*tgbot.Update) []*rpb.RecordSet {
+	grouped := collections.GroupBy(updates, func(u *tgbot.Update) string {
 		if u.Message == nil {
 			return ""
 		}
@@ -121,7 +122,7 @@ func groupRecords(updates []*telegram.Update) []*rpb.RecordSet {
 	return result
 }
 
-func chatToMetadata(c *telegram.Chat) *rpb.UserMetadata {
+func chatToMetadata(c *tgbot.Chat) *rpb.UserMetadata {
 	quotes := []string{}
 	if c.Title != "" {
 		quotes = append(quotes, c.Title)
@@ -133,7 +134,7 @@ func chatToMetadata(c *telegram.Chat) *rpb.UserMetadata {
 	}
 }
 
-func userToMetadata(u *telegram.User) *rpb.UserMetadata {
+func userToMetadata(u *tgbot.User) *rpb.UserMetadata {
 	quotes := []string{}
 	if u.FirstName != "" || u.LastName != "" {
 		quotes = append(quotes, strings.TrimSpace(fmt.Sprintf("%s %s", u.FirstName, u.LastName)))
@@ -145,32 +146,32 @@ func userToMetadata(u *telegram.User) *rpb.UserMetadata {
 	}
 }
 
-func videoToFile(v *telegram.Video) *rpb.File {
+func videoToFile(v *tgbot.Video) *rpb.File {
 	return &rpb.File{
 		FileId: v.FileID,
 	}
 }
 
-func photoToFile(photos []*telegram.PhotoSize) *rpb.File {
+func photoToFile(photos []*tgbot.PhotoSize) *rpb.File {
 	largestPhoto := telegram.GetLargestImage(photos)
 	return &rpb.File{
 		FileId: largestPhoto.FileID,
 	}
 }
 
-func audioToFile(audio *telegram.Audio) *rpb.File {
+func audioToFile(audio *tgbot.Audio) *rpb.File {
 	return &rpb.File{
 		FileId: audio.FileID,
 	}
 }
 
-func voiceToFile(voice *telegram.Voice) *rpb.File {
+func voiceToFile(voice *tgbot.Voice) *rpb.File {
 	return &rpb.File{
 		FileId: voice.FileID,
 	}
 }
 
-func entitiesToLinks(ets []*telegram.MessageEntity) []string {
+func entitiesToLinks(ets []*tgbot.MessageEntity) []string {
 	result := []string{}
 	for _, e := range ets {
 		if (e.Type == "text_link" || e.Type == "url") && e.URL != "" {
@@ -196,7 +197,7 @@ func toSource(msg int64, chat int64, user int64) *rpb.Source {
 	return src
 }
 
-func updateToRecords(upds []*telegram.Update) (*rpb.Record, []*rpb.UserMetadata) {
+func updateToRecords(upds []*tgbot.Update) (*rpb.Record, []*rpb.UserMetadata) {
 	result := records.NewRecord(&rpb.Record{})
 	users := map[string]*rpb.UserMetadata{}
 
@@ -209,14 +210,24 @@ func updateToRecords(upds []*telegram.Update) (*rpb.Record, []*rpb.UserMetadata)
 			result.Time = msg.Date
 		}
 
-		if msg.ForwardFromChat != nil {
-			ffId := int64(0)
-			ffChat := msg.ForwardFromChat
-			if msg.ForwardFrom != nil {
-				ffId = msg.ForwardFrom.ID
+		if fwd := msg.ForwardOrigin; fwd != nil {
+            msgId := int64(0)
+			chatId := int64(0)
+			userId := int64(0)
+			if fwdUser := fwd.SenderUser; fwdUser != nil {
+				users[fmt.Sprintf("%d", fwdUser.ID)] = userToMetadata(fwdUser)
+				userId = fwdUser.ID
 			}
-			users[fmt.Sprintf("%d", ffChat)] = chatToMetadata(ffChat)
-			result.Parent = toSource(msg.ForwardFromMessageID, msg.ForwardFromChat.ID, ffId)
+			if fwdChat := fwd.SenderChat; fwdChat != nil {
+				users[fmt.Sprintf("%d", fwdChat.ID)] = chatToMetadata(fwdChat)
+				chatId = fwdChat.ID
+			}
+			if fwdChannel := fwd.Chat; fwdChannel != nil {
+				users[fmt.Sprintf("%d", fwdChannel.ID)] = chatToMetadata(fwdChannel)
+				chatId = fwdChannel.ID
+				msgId = fwd.MessageID
+			}
+			result.Parent = toSource(msgId, chatId, userId)
 		}
 
 		if msg.Video != nil {

@@ -10,6 +10,7 @@ import (
 	"net/url"
 
 	cm "github.com/lanseg/golang-commons/common"
+	tgbot "github.com/lanseg/tgbot"
 )
 
 type Response[T any] struct {
@@ -21,10 +22,10 @@ type Response[T any] struct {
 }
 
 type Bot interface {
-	GetUpdates(chatID int64, offset int64, limit int64, timeout int64, allowedUpdates []string) ([]*Update, error)
-	SendMessage(chatID int64, replyId int64, text string) (*Message, error)
-	GetFile(fileID string) (*File, error)
-	GetUrl(file *File) string
+	GetUpdates(chatID int64, offset int64, limit int64, timeout int64, allowedUpdates []string) ([]*tgbot.Update, error)
+	SendMessage(chatID int64, replyId int64, text string) (*tgbot.Message, error)
+	GetFile(fileID string) (*tgbot.File, error)
+	GetUrl(file *tgbot.File) string
 }
 
 type BotImpl struct {
@@ -76,7 +77,7 @@ func queryAndUnmarshal[T any](b *BotImpl, apiMethod string, params url.Values) (
 	return response.Result, nil
 }
 
-func (b *BotImpl) GetUpdates(chatID int64, offset int64, limit int64, timeout int64, allowedUpdates []string) ([]*Update, error) {
+func (b *BotImpl) GetUpdates(chatID int64, offset int64, limit int64, timeout int64, allowedUpdates []string) ([]*tgbot.Update, error) {
 	params := url.Values{}
 	params.Set("chat_id", fmt.Sprintf("%d", chatID))
 	params.Set("offset", fmt.Sprintf("%d", offset))
@@ -86,14 +87,14 @@ func (b *BotImpl) GetUpdates(chatID int64, offset int64, limit int64, timeout in
 		params.Add("allowed_updates", upd)
 	}
 
-	result, err := queryAndUnmarshal[[]*Update](b, "getUpdates", params)
+	result, err := queryAndUnmarshal[[]*tgbot.Update](b, "getUpdates", params)
 	if err != nil {
 		return nil, err
 	}
 	return result, nil
 }
 
-func (b *BotImpl) SendMessage(chatID int64, replyId int64, text string) (*Message, error) {
+func (b *BotImpl) SendMessage(chatID int64, replyId int64, text string) (*tgbot.Message, error) {
 	params := url.Values{}
 	params.Set("chat_id", fmt.Sprintf("%d", chatID))
 	params.Set("text", text)
@@ -101,7 +102,7 @@ func (b *BotImpl) SendMessage(chatID int64, replyId int64, text string) (*Messag
 		params.Set("reply_to_message_id", fmt.Sprintf("%d", replyId))
 	}
 
-	result, err := queryAndUnmarshal[*Message](b, "sendMessage", params)
+	result, err := queryAndUnmarshal[*tgbot.Message](b, "sendMessage", params)
 	if err != nil {
 		return nil, err
 	}
@@ -109,11 +110,11 @@ func (b *BotImpl) SendMessage(chatID int64, replyId int64, text string) (*Messag
 	return result, nil
 }
 
-func (b *BotImpl) GetFile(fileID string) (*File, error) {
+func (b *BotImpl) GetFile(fileID string) (*tgbot.File, error) {
 	params := url.Values{}
 	params.Set("file_id", fileID)
 
-	result, err := queryAndUnmarshal[*File](b, "getFile", params)
+	result, err := queryAndUnmarshal[*tgbot.File](b, "getFile", params)
 	if err != nil {
 		return nil, err
 	}
@@ -121,7 +122,7 @@ func (b *BotImpl) GetFile(fileID string) (*File, error) {
 	return result, nil
 }
 
-func (b *BotImpl) GetUrl(file *File) string {
+func (b *BotImpl) GetUrl(file *tgbot.File) string {
 	return fmt.Sprintf("https://api.telegram.org/file/bot%s/%s",
 		b.token, file.FilePath)
 }

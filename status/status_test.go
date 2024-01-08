@@ -9,6 +9,6 @@ func TestNoopStatus(t *testing.T) {
 	nj := nos.NewJob("Hello job")
 	nj.Start()
 	nj.Stop()
-	nj.Progress()
+	nj.UpdateProgress(&ProgressUpdate{})
 	nj.GetState()
 }

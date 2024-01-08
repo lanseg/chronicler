@@ -1,13 +1,5 @@
 {
     "id": "1a468cef-1368-408a-a20b-86b32d94a460",
-    "request": {
-        "origin": {
-            "sender_id": "348274414",
-            "channel_id": "348274414",
-            "message_id": "1543",
-            "type": 1
-        }
-    },
     "records": [
         {
             "source": {
@@ -16,29 +8,24 @@
                 "message_id": "1543",
                 "type": 1
             },
-            "parent": {
-                "channel_id": "-1001055562978",
-                "message_id": "67286",
-                "type": 1
-            },
             "text_content": "🤡Путин: сегодня открывают двери для учеников 160 новых школ\n\nТем временем «новые школы», два примера из разных концов страны: школа на Сахалине (на видео) и школа в Подмосковье (на фото)",
             "time": 1693574781,
             "files": [
                 {
                     "file_id": "BAACAgQAAxkBAAIGBGTx5n0d0eDdMvwhZeSpLwf8auXlAAKpEQAC6zyIU1Ola8UK6vmVMAQ",
-                    "file_url": "https://telegram/url/&{ %!s(int64=0)  BAACAgQAAxkBAAIGBGTx5n0d0eDdMvwhZeSpLwf8auXlAAKpEQAC6zyIU1Ola8UK6vmVMAQ}"
+                    "file_url": "https://telegram/url/&{BAACAgQAAxkBAAIGBGTx5n0d0eDdMvwhZeSpLwf8auXlAAKpEQAC6zyIU1Ola8UK6vmVMAQ  %!s(int64=0) }"
                 },
                 {
                     "file_id": "BAACAgQAAxkBAAIGBWTx5n3MMwR7IUT9owG_HjjNeckaAAKqEQAC6zyIUw9LnudCdJ-3MAQ",
-                    "file_url": "https://telegram/url/&{ %!s(int64=0)  BAACAgQAAxkBAAIGBWTx5n3MMwR7IUT9owG_HjjNeckaAAKqEQAC6zyIUw9LnudCdJ-3MAQ}"
+                    "file_url": "https://telegram/url/&{BAACAgQAAxkBAAIGBWTx5n3MMwR7IUT9owG_HjjNeckaAAKqEQAC6zyIUw9LnudCdJ-3MAQ  %!s(int64=0) }"
                 },
                 {
                     "file_id": "AgACAgQAAxkBAAIGBmTx5n1n_WlC2MiIRPin4tenHnYjAAJavjEb6zyIUwjzi3BuGuRzAQADAgADeQADMAQ",
-                    "file_url": "https://telegram/url/&{ %!s(int64=0)  AgACAgQAAxkBAAIGBmTx5n1n_WlC2MiIRPin4tenHnYjAAJavjEb6zyIUwjzi3BuGuRzAQADAgADeQADMAQ}"
+                    "file_url": "https://telegram/url/&{AgACAgQAAxkBAAIGBmTx5n1n_WlC2MiIRPin4tenHnYjAAJavjEb6zyIUwjzi3BuGuRzAQADAgADeQADMAQ  %!s(int64=0) }"
                 },
                 {
                     "file_id": "AgACAgQAAxkBAAIGB2Tx5n1CEu95iE4_7h2dwWIAAfznkgACW74xG-s8iFP-1vHW2Qps1AEAAwIAA3kAAzAE",
-                    "file_url": "https://telegram/url/&{ %!s(int64=0)  AgACAgQAAxkBAAIGB2Tx5n1CEu95iE4_7h2dwWIAAfznkgACW74xG-s8iFP-1vHW2Qps1AEAAwIAA3kAAzAE}"
+                    "file_url": "https://telegram/url/&{AgACAgQAAxkBAAIGB2Tx5n1CEu95iE4_7h2dwWIAAfznkgACW74xG-s8iFP-1vHW2Qps1AEAAwIAA3kAAzAE  %!s(int64=0) }"
                 }
             ]
         }
@@ -47,13 +34,6 @@
         {
             "id": "348274414",
             "username": "lanseg"
-        },
-        {
-            "id": "-1001055562978",
-            "username": "chtddd",
-            "quotes": [
-                "ЧТД"
-            ]
         }
     ]
 }

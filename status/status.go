@@ -7,9 +7,12 @@ import (
 type JobState struct {
 }
 
+type ProgressUpdate struct {
+}
+
 type Job interface {
 	Start() error
-	Progress() error
+	UpdateProgress(u *ProgressUpdate) error
 	GetState() *JobState
 	Stop() error
 }
@@ -25,7 +28,7 @@ func (j *NoopJob) Start() error {
 	return nil
 }
 
-func (j *NoopJob) Progress() error {
+func (j *NoopJob) UpdateProgress(p *ProgressUpdate) error {
 	j.logger.Debugf("Job progress requested")
 	return nil
 }
