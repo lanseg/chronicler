@@ -1,6 +1,6 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
-
 package(default_visibility = ["//visibility:public"])
+
+load("@rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
     name = "webdriver",
@@ -15,10 +15,10 @@ go_library(
     importpath = "chronicler/webdriver",
     deps = [
         "//util",
-        "@commons//collections",
-        "@commons//optional",
-        "@commons//common",
-        "@commons//concurrent",
+        "@golang-commons//collections",
+        "@golang-commons//optional",
+        "@golang-commons//common",
+        "@golang-commons//concurrent",
     ],
 )
 

@@ -1,14 +1,18 @@
-# chronist
+# Chronicler
 
-A telegram bot that helps you to save all valuable data you've found.
+A extensible framework and a telegram bot that helps you to expand the long posts and save all valuable data you've found.
 
-This bot extracts data from the message (text, media, web and social network links, etc) and saves it on your local drive.
-If the link is a link to some social network post, then the bot will save content of this post too.
+Telegram bot receives a message, provides it to the tool which saves and tries to find all supported links or social network
+references. 
 
-Supported sources and social networks:
+Currently supports:
+* Telegram
+* Twitter
+* Pikabu
+* Web pages
 
-* Telegram - message content and attachments (testing)
-* Twitter - bot will download text, video, images if there was a twitter link in the message
-* Youtube - will download a youtube video or playlist if it is publicly available
+## How it works
 
-Not even a beta.
+## Internal file format
+
+## Future plans

@@ -7,13 +7,12 @@ import (
 	"strings"
 
 	"chronicler/records"
-	"chronicler/telegram"
 	"chronicler/util"
 
 	"github.com/lanseg/golang-commons/collections"
 	cm "github.com/lanseg/golang-commons/common"
 	"github.com/lanseg/golang-commons/optional"
-	tgbot "github.com/lanseg/tgbot"
+	"github.com/lanseg/tgbot"
 
 	rpb "chronicler/records/proto"
 )
@@ -22,14 +21,16 @@ type telegramAdapter struct {
 	Adapter
 
 	logger *cm.Logger
-	bot    telegram.Bot
+	bot    tgbot.TelegramBot
+	api    *tgbot.TelegramApi
 	cursor int64
 }
 
-func NewTelegramAdapter(bot telegram.Bot) Adapter {
+func NewTelegramAdapter(bot tgbot.TelegramBot) Adapter {
 	return &telegramAdapter{
 		logger: cm.NewLogger("TelegramAdapter"),
 		bot:    bot,
+		api:    tgbot.NewTelegramApi(bot),
 		cursor: 0,
 	}
 }
@@ -38,21 +39,33 @@ func (ts *telegramAdapter) resolveFileUrls(rs *rpb.RecordSet) {
 	for _, record := range rs.Records {
 		for _, file := range record.Files {
 			ts.logger.Debugf("Resolving file url for %s", file)
-			fileURL, err := ts.bot.GetFile(file.FileId)
+			fileURL, err := ts.api.GetFile(&tgbot.GetFileRequest{
+				FileID: file.FileId,
+			})
 			if err != nil {
 				ts.logger.Errorf("Cannot get actual file url for %s: %s", file.FileId, err)
 				continue
 			}
-			file.FileUrl = ts.bot.GetUrl(fileURL)
+			file.FileUrl = ts.bot.ResolveUrl(fileURL.Result.FilePath)
 		}
 	}
 }
 
+func (ts *telegramAdapter) getUpdates() []*tgbot.Update {
+	return optional.OfError(
+		ts.api.GetUpdates(
+			&tgbot.GetUpdatesRequest{
+				Limit:          100,
+				Offset:         ts.cursor,
+				Timeout:        100,
+				AllowedUpdates: []string{},
+			})).
+		OrElse(&tgbot.GetUpdatesResponse{Result: []*tgbot.Update{}}).
+		Result
+}
+
 func (ts *telegramAdapter) waitForUpdate() []*tgbot.Update {
-	return collections.IterateSlice(
-		optional.
-			OfError(ts.bot.GetUpdates(int64(0), ts.cursor, 100, 100, []string{})).
-			OrElse([]*tgbot.Update{})).
+	return collections.IterateSlice(ts.getUpdates()).
 		Peek(func(u *tgbot.Update) {
 			if ts.cursor <= u.UpdateID {
 				ts.cursor = u.UpdateID + 1
@@ -89,14 +102,20 @@ func (ts *telegramAdapter) GetResponse(request *rpb.Request) []*rpb.Response {
 }
 
 func (ts *telegramAdapter) SendMessage(message *rpb.Message) {
-	channel, _ := strconv.Atoi(message.Target.ChannelId)
+	channel := message.Target.ChannelId
 	msgid, _ := strconv.Atoi(message.Target.MessageId)
 	content := string(message.Content)
-	_, err := ts.bot.SendMessage(int64(channel), int64(msgid), content)
+	_, err := ts.api.SendMessage(&tgbot.SendMessageRequest{
+		ReplyParameters: &tgbot.ReplyParameters{
+			MessageID: int64(msgid),
+			ChatID:    channel,
+		},
+		Text: content,
+	})
 	if err == nil {
-		ts.logger.Infof("Responded to channel(%d)/user(%d): %s", channel, msgid, content)
+		ts.logger.Infof("Responded to channel(%s)/user(%d): %s", channel, msgid, content)
 	} else {
-		ts.logger.Infof("Failed to respond to channel(%d)/user(%d): %s", channel, msgid, err)
+		ts.logger.Infof("Failed to respond to channel(%s)/user(%d): %s", channel, msgid, err)
 	}
 }
 
@@ -153,7 +172,7 @@ func videoToFile(v *tgbot.Video) *rpb.File {
 }
 
 func photoToFile(photos []*tgbot.PhotoSize) *rpb.File {
-	largestPhoto := telegram.GetLargestImage(photos)
+	largestPhoto := getLargestImage(photos)
 	return &rpb.File{
 		FileId: largestPhoto.FileID,
 	}
@@ -211,7 +230,7 @@ func updateToRecords(upds []*tgbot.Update) (*rpb.Record, []*rpb.UserMetadata) {
 		}
 
 		if fwd := msg.ForwardOrigin; fwd != nil {
-            msgId := int64(0)
+			msgId := int64(0)
 			chatId := int64(0)
 			userId := int64(0)
 			if fwdUser := fwd.SenderUser; fwdUser != nil {
@@ -270,4 +289,22 @@ func updateToRecords(upds []*tgbot.Update) (*rpb.Record, []*rpb.UserMetadata) {
 		return userData[j].Id < userData[i].Id
 	})
 	return result, userData
+}
+
+// UTILS
+func getLargestImage(sizes []*tgbot.PhotoSize) *tgbot.PhotoSize {
+	if len(sizes) == 0 {
+		return nil
+	}
+
+	var result *tgbot.PhotoSize = sizes[0]
+	resultSize := int64(0)
+	for _, photo := range sizes {
+		size := photo.Width * photo.Height
+		if size > resultSize {
+			result = photo
+			resultSize = size
+		}
+	}
+	return result
 }

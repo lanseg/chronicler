@@ -1,6 +1,6 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
-
 package(default_visibility = ["//visibility:public"])
+
+load("@rules_go//go:def.bzl", "go_library", "go_test") 
 
 go_library(
     name = "storage",
@@ -15,9 +15,9 @@ go_library(
         "//records:records_go_proto",
         "//util",
         "//downloader",
-        "@commons//collections",
-        "@commons//common",
-        "@commons//optional",
+        "@golang-commons//collections",
+        "@golang-commons//common",
+        "@golang-commons//optional",
     ],
 )
 
@@ -32,3 +32,5 @@ go_test(
         ":storage",
     ],
 )
+
+

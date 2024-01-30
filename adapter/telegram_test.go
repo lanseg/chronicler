@@ -1,55 +1,45 @@
 package adapter
 
 import (
-    "os"
 	"fmt"
+	"os"
+	"path/filepath"
 	"testing"
 
-	"chronicler/telegram"
-
 	rpb "chronicler/records/proto"
-	tgbot "github.com/lanseg/tgbot"
+
+	"github.com/lanseg/tgbot"
 )
 
 const (
 	testingUuid = "1a468cef-1368-408a-a20b-86b32d94a460"
 )
 
-type FakeBot struct {
-	telegram.Bot
+type fakeBot struct {
+	tgbot.TelegramBot
 
 	responded bool
-	response  []*tgbot.Update
+	updates   string
 }
 
-func (b *FakeBot) GetUpdates(chatID int64, offset int64, limit int64, timeout int64, allowedUpdates []string) ([]*tgbot.Update, error) {
-	if b.responded {
-		return []*tgbot.Update{}, nil
+func (b *fakeBot) Query(methodName string, body interface{}) ([]byte, error) {
+	switch methodName {
+	case "GetUpdates":
+		return os.ReadFile(filepath.Join("testdata", b.updates))
+	case "SendMessage":
+		return []byte("{\"ok\": true}"), nil
+	case "GetFile":
+		return []byte("{\"ok\": true, \"result\": { \"file_id\": \"file_id_here\", \"file_unique_id\": \"file_unique_id_here\", \"file_path\": \"file_path_here\" }}"), nil
 	}
-	b.responded = true
-	return b.response, nil
+	return []byte("{\"ok\": true}"), nil
 }
 
-func (b *FakeBot) SendMessage(chatID int64, replyId int64, text string) (*tgbot.Message, error) {
-	return &tgbot.Message{}, nil
+func (b *fakeBot) ResolveUrl(path string) string {
+	return fmt.Sprintf("https://telegram/url/%s", path)
 }
 
-func (b *FakeBot) GetFile(fileID string) (*tgbot.File, error) {
-	return &tgbot.File{
-		FileID: fileID,
-	}, nil
-}
-
-func (b *FakeBot) GetUrl(file *tgbot.File) string {
-	return fmt.Sprintf("https://telegram/url/%s", file)
-}
-
-func NewFakeBot(datafile string) (telegram.Bot, error) {
-	updates, err := readJson[[]*tgbot.Update](datafile)
-	if err != nil {
-		return nil, err
-	}
-	return &FakeBot{response: *updates}, nil
+func NewFakeBot(datafile string) tgbot.TelegramBot {
+	return &fakeBot{updates: datafile}
 }
 
 func TestRequestResponse(t *testing.T) {
@@ -70,18 +60,14 @@ func TestRequestResponse(t *testing.T) {
 		},
 	} {
 		t.Run(tc.desc, func(t *testing.T) {
-			bot, err := NewFakeBot(tc.responseFile)
-			if err != nil {
-				t.Errorf("Cannot create new fake bot for file \"%s\": %s", tc.responseFile, err)
-			}
-			tg := NewTelegramAdapter(bot)
+			tg := NewTelegramAdapter(NewFakeBot(tc.responseFile))
 			ups := tg.GetResponse(&rpb.Request{Id: testingUuid})[0].Result[0]
 			ups.Id = testingUuid
 			for _, r := range ups.Records {
 				r.FetchTime = 0
 			}
-      
-             os.WriteFile("/tmp/" + tc.resultFile + "_result", []byte(writeJson(ups)), 0644)
+
+			os.WriteFile("/tmp/"+tc.resultFile+"_result", []byte(writeJson(ups)), 0644)
 			want, err := readJson[rpb.RecordSet](tc.resultFile)
 			if err != nil {
 				t.Errorf("Cannot load json with an expected result \"%s\": %s", tc.resultFile, err)

@@ -10,13 +10,13 @@ import (
 	"chronicler/adapter"
 	"chronicler/downloader"
 	"chronicler/storage"
-	"chronicler/telegram"
 	"chronicler/twitter"
 	"chronicler/webdriver"
 
 	rpb "chronicler/records/proto"
 
 	cm "github.com/lanseg/golang-commons/common"
+	tgbot "github.com/lanseg/tgbot"
 )
 
 var (
@@ -72,7 +72,7 @@ func main() {
 	webDriver := webdriver.NewBrowser(*cfg.ScenarioLibrary)
 	storage := storage.NewStorage(*cfg.StorageRoot, webDriver, downloader)
 
-	tgBot := telegram.NewBot(*cfg.TelegramBotKey)
+	tgBot := tgbot.NewBot(*cfg.TelegramBotKey)
 	twClient := twitter.NewClient(*cfg.TwitterApiKey)
 
 	adapters := map[rpb.SourceType]adapter.Adapter{

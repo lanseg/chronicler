@@ -1,6 +1,6 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library", "go_test")
-
 package(default_visibility = ["//visibility:public"])
+
+load("@rules_go//go:def.bzl", "go_library", "go_test", "go_binary")
 
 go_library(
     name = "server",
@@ -16,9 +16,9 @@ go_library(
         "//records:records_go_proto",
         "//storage",
         "//util",
-        "@commons//almosthtml",
-        "@commons//collections",
-        "@commons//common",
+        "@golang-commons//almosthtml",
+        "@golang-commons//collections",
+        "@golang-commons//common",
     ],
 )
 
@@ -33,7 +33,7 @@ go_binary(
         ":server",
         "//records:records_go_proto",
         "//util",
-        "@commons//common",
+        "@golang-commons//common",
     ],
 )
 

@@ -1,6 +1,5 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
-
 package(default_visibility = ["//visibility:public"])
+load("@rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
     name = "downloader",
@@ -9,10 +8,10 @@ go_library(
     ],
     importpath = "chronicler/downloader",
     deps = [
-        "@commons//collections",
-        "@commons//optional",
-        "@commons//common",
-        "@commons//concurrent",
+        "@golang-commons//collections",
+        "@golang-commons//optional",
+        "@golang-commons//common",
+        "@golang-commons//concurrent",
     ],
 )
 

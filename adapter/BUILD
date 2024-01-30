@@ -1,6 +1,6 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
-
 package(default_visibility = ["//visibility:public"])
+
+load("@rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
     name = "adapter",
@@ -17,14 +17,13 @@ go_library(
         "//records",
         "//records:records_go_proto",
         "//storage",
-        "//telegram",
         "//twitter",
         "//util",
         "@tgbot//:telegram_bot",
-        "@commons//almosthtml",
-        "@commons//collections",
-        "@commons//optional",
-        "@commons//common",
+        "@golang-commons//almosthtml",
+        "@golang-commons//collections",
+        "@golang-commons//optional",
+        "@golang-commons//common",
     ],
 )
 

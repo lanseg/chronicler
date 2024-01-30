@@ -13,19 +13,19 @@
             "files": [
                 {
                     "file_id": "BAACAgQAAxkBAAIGBGTx5n0d0eDdMvwhZeSpLwf8auXlAAKpEQAC6zyIU1Ola8UK6vmVMAQ",
-                    "file_url": "https://telegram/url/&{BAACAgQAAxkBAAIGBGTx5n0d0eDdMvwhZeSpLwf8auXlAAKpEQAC6zyIU1Ola8UK6vmVMAQ  %!s(int64=0) }"
+                    "file_url": "https://telegram/url/file_path_here"
                 },
                 {
                     "file_id": "BAACAgQAAxkBAAIGBWTx5n3MMwR7IUT9owG_HjjNeckaAAKqEQAC6zyIUw9LnudCdJ-3MAQ",
-                    "file_url": "https://telegram/url/&{BAACAgQAAxkBAAIGBWTx5n3MMwR7IUT9owG_HjjNeckaAAKqEQAC6zyIUw9LnudCdJ-3MAQ  %!s(int64=0) }"
+                    "file_url": "https://telegram/url/file_path_here"
                 },
                 {
                     "file_id": "AgACAgQAAxkBAAIGBmTx5n1n_WlC2MiIRPin4tenHnYjAAJavjEb6zyIUwjzi3BuGuRzAQADAgADeQADMAQ",
-                    "file_url": "https://telegram/url/&{AgACAgQAAxkBAAIGBmTx5n1n_WlC2MiIRPin4tenHnYjAAJavjEb6zyIUwjzi3BuGuRzAQADAgADeQADMAQ  %!s(int64=0) }"
+                    "file_url": "https://telegram/url/file_path_here"
                 },
                 {
                     "file_id": "AgACAgQAAxkBAAIGB2Tx5n1CEu95iE4_7h2dwWIAAfznkgACW74xG-s8iFP-1vHW2Qps1AEAAwIAA3kAAzAE",
-                    "file_url": "https://telegram/url/&{AgACAgQAAxkBAAIGB2Tx5n1CEu95iE4_7h2dwWIAAfznkgACW74xG-s8iFP-1vHW2Qps1AEAAwIAA3kAAzAE  %!s(int64=0) }"
+                    "file_url": "https://telegram/url/file_path_here"
                 }
             ]
         }

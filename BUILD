@@ -1,4 +1,4 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_binary")
+load("@rules_go//go:def.bzl", "go_binary")
 
 go_binary(
     name = "main",
@@ -10,12 +10,12 @@ go_binary(
         "//downloader",
         "//records:records_go_proto",
         "//storage",
-        "//telegram",
         "//twitter",
         "//util",
         "//webdriver",
-        "@commons//collections",
-        "@commons//common",
-        "@commons//optional",
+        "@golang-commons//collections",
+        "@golang-commons//common",
+        "@golang-commons//optional",
+        "@tgbot//:telegram_bot",
     ],
 )
