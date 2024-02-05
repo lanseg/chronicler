@@ -10,8 +10,8 @@ go_library(
     ],
     importpath = "chronicler/util",
     deps = [
-      "@golang-commons//common",
-      "@golang-commons//optional",
+        "@golang-commons//common",
+        "@golang-commons//optional",
     ],
 )
 

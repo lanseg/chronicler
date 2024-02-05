@@ -11,8 +11,8 @@ go_library(
     deps = [
         "//util",
         "@golang-commons//collections",
-        "@golang-commons//optional",
         "@golang-commons//common",
+        "@golang-commons//optional",
     ],
 )
 

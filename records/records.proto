@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package chronist.records;
+package chronicler.records;
 
 enum SourceType {
   UNKNOWN_TYPE  = 0;

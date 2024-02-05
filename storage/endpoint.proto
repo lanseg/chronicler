@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+option go_package = "chronicler/storage/endpoint";
+
+package chronicler.storage;
+
+message SaveRequest {
+}
+
+message SaveResponse {
+}
+
+message ListRequest {
+}
+
+message ListResponse {
+}
+
+message DeleteRequest {
+}
+
+message DeleteResponse {
+}
+
+message GetRequest {
+}
+
+message GetResponse {
+}
+
+service Storage {
+  rpc save(SaveRequest) returns (SaveResponse);
+  rpc list(ListRequest) returns (ListResponse);
+  rpc delete(DeleteRequest) returns (DeleteResponse);
+  rpc get(GetRequest) returns (GetResponse);
+}
