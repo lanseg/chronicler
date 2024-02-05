@@ -12,8 +12,8 @@ proto_library(
 
 go_proto_library(
     name = "storage_endpoint_go_proto",
-    importpath = "chronicler/storage/endpoint",
     compilers = ["@rules_go//proto:go_grpc"],
+    importpath = "chronicler/storage/endpoint",
     protos = [":endpoint_proto"],
 )
 
