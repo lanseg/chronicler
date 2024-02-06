@@ -13,18 +13,38 @@ proto_library(
 go_proto_library(
     name = "storage_endpoint_go_proto",
     compilers = ["@rules_go//proto:go_grpc"],
-    importpath = "chronicler/storage/endpoint",
+    importpath = "chronicler/storage/endpoint_go_proto",
     protos = [":endpoint_proto"],
 )
 
 go_binary(
-    name = "server",
-    srcs = ["main.go"],
+    name = "main",
+    srcs = [
+        "main.go",
+    ],
+    deps = [
+        ":endpoint",
+        ":storage",
+        ":storage_endpoint_go_proto",
+        "//records:records_go_proto",
+        "@golang-commons//common",
+        "@org_golang_google_grpc//:grpc",
+    ],
+)
+
+go_library(
+    name = "endpoint",
+    srcs = [
+        "client.go",
+        "server.go",
+    ],
+    importpath = "chronicler/storage/endpoint",
     deps = [
         ":storage_endpoint_go_proto",
         "//records:records_go_proto",
         "@golang-commons//common",
         "@org_golang_google_grpc//:grpc",
+        "@org_golang_google_grpc//credentials/insecure",
     ],
 )
 

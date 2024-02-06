@@ -10,6 +10,8 @@ go_binary(
         "//downloader",
         "//records:records_go_proto",
         "//storage",
+        "//storage:endpoint",
+        "//storage:storage_endpoint_go_proto",
         "//twitter",
         "//util",
         "//webdriver",

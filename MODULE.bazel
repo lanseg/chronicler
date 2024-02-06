@@ -26,4 +26,7 @@ go_deps.module(
   sum = "h1:TOvOcuXn30kRao+gfcvsebNEa5iZIiLkisYEkf7R7o0=",
 )
 
-use_repo(go_deps, "org_golang_google_grpc")
+use_repo(
+  go_deps,
+  "org_golang_google_grpc",
+)
