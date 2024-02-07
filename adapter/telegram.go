@@ -106,6 +106,7 @@ func (ts *telegramAdapter) SendMessage(message *rpb.Message) {
 	msgid, _ := strconv.Atoi(message.Target.MessageId)
 	content := string(message.Content)
 	_, err := ts.api.SendMessage(&tgbot.SendMessageRequest{
+		ChatID: channel,
 		ReplyParameters: &tgbot.ReplyParameters{
 			MessageID: int64(msgid),
 			ChatID:    channel,
