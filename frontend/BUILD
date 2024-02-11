@@ -14,6 +14,7 @@ go_library(
         "//records",
         "//records:records_go_proto",
         "//storage",
+        "//storage/endpoint:storage_endpoint_go_proto",
         "//util",
         "//webdriver",
         "@golang-commons//almosthtml",

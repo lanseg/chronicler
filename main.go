@@ -25,10 +25,11 @@ var (
 )
 
 type Config struct {
-	TwitterApiKey   *string `json:"twitterApiKey"`
-	TelegramBotKey  *string `json:"telegramBotKey"`
-	StorageRoot     *string `json:"storageRoot"`
-	ScenarioLibrary *string `json:"scenarioLibrary"`
+	TwitterApiKey     *string `json:"twitterApiKey"`
+	TelegramBotKey    *string `json:"telegramBotKey"`
+	StorageRoot       *string `json:"storageRoot"`
+	ScenarioLibrary   *string `json:"scenarioLibrary"`
+	StorageServerPort *int    `json:"storageServerPort"`
 }
 
 func initHttpClient() *http.Client {
@@ -64,9 +65,10 @@ func main() {
 		os.Exit(-1)
 	}
 	logger.Infof("Config.StorageRoot: %s", *cfg.StorageRoot)
+	logger.Infof("Config.StorageServerPort: %d", *cfg.StorageServerPort)
 	logger.Infof("Config.ScenarioLibry: %s", *cfg.ScenarioLibrary)
-	logger.Infof("TwitterApiKey: %d", len(*cfg.TwitterApiKey))
-	logger.Infof("TelegramBotKey: %d", len(*cfg.TelegramBotKey))
+	logger.Infof("Config.TwitterApiKey: %d", len(*cfg.TwitterApiKey))
+	logger.Infof("Config.TelegramBotKey: %d", len(*cfg.TelegramBotKey))
 
 	downloader := downloader.NewDownloader(initHttpClient())
 	webDriver := webdriver.NewBrowser(*cfg.ScenarioLibrary)

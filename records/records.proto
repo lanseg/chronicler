@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+option go_package = "chronicler/records/proto";
+
 package chronicler.records;
 
 enum SourceType {
