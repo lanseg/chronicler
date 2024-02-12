@@ -3,24 +3,29 @@ package(default_visibility = ["//visibility:public"])
 load("@rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
-    name = "adapter",
+    name = "twitter",
     srcs = [
-        "adapter.go",
+        "twitter.go",
     ],
-    importpath = "chronicler/adapter",
+    importpath = "chronicler/adapter/twitter",
     deps = [
+        "//adapter",
         "//records:records_go_proto",
+        "//twitter",
+        "@golang-commons//collections",
+        "@golang-commons//common",
     ],
 )
 
 go_test(
-    name = "adapter_test",
+    name = "twitter_test",
     size = "small",
     srcs = [
-        "adapter_test.go",
+        "twitter_test.go",
     ],
+    data = glob(["testdata/*"]),
     embed = [
-        ":adapter",
+        ":twitter",
     ],
     deps = [
         "//records:records_go_proto",

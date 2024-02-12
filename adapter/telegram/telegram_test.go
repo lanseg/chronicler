@@ -1,6 +1,7 @@
-package adapter
+package telegram
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -8,12 +9,27 @@ import (
 
 	rpb "chronicler/records/proto"
 
+	cm "github.com/lanseg/golang-commons/common"
+
 	"github.com/lanseg/tgbot"
 )
 
 const (
 	testingUuid = "1a468cef-1368-408a-a20b-86b32d94a460"
 )
+
+func writeJson(data interface{}) string {
+	bytes, _ := json.Marshal(data)
+	return string(bytes)
+}
+
+func readJson[T any](file string) (*T, error) {
+	bytes, err := os.ReadFile(filepath.Join("testdata", file))
+	if err != nil {
+		return nil, err
+	}
+	return cm.FromJson[T](bytes)
+}
 
 type fakeBot struct {
 	tgbot.TelegramBot

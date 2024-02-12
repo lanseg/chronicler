@@ -8,6 +8,10 @@ import (
 	"sync"
 
 	"chronicler/adapter"
+	pkb_adapter "chronicler/adapter/pikabu"
+	tlg_adapter "chronicler/adapter/telegram"
+	twi_adapter "chronicler/adapter/twitter"
+	web_adapter "chronicler/adapter/web"
 	"chronicler/downloader"
 	"chronicler/storage"
 	"chronicler/twitter"
@@ -78,10 +82,10 @@ func main() {
 	twClient := twitter.NewClient(*cfg.TwitterApiKey)
 
 	adapters := map[rpb.SourceType]adapter.Adapter{
-		rpb.SourceType_TELEGRAM: adapter.NewTelegramAdapter(tgBot),
-		rpb.SourceType_TWITTER:  adapter.NewTwitterAdapter(twClient),
-		rpb.SourceType_PIKABU:   adapter.NewPikabuAdapter(webDriver),
-		rpb.SourceType_WEB:      adapter.NewWebAdapter(nil, webDriver),
+		rpb.SourceType_TELEGRAM: tlg_adapter.NewTelegramAdapter(tgBot),
+		rpb.SourceType_TWITTER:  twi_adapter.NewTwitterAdapter(twClient),
+		rpb.SourceType_PIKABU:   pkb_adapter.NewPikabuAdapter(webDriver),
+		rpb.SourceType_WEB:      web_adapter.NewWebAdapter(nil, webDriver),
 	}
 	linkMatchers := []adapter.Adapter{
 		adapters[rpb.SourceType_TWITTER],

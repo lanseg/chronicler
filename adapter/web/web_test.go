@@ -1,4 +1,4 @@
-package adapter
+package web
 
 import (
 	"bytes"
@@ -12,6 +12,9 @@ import (
 
 	rpb "chronicler/records/proto"
 	"chronicler/webdriver"
+
+	cm "github.com/lanseg/golang-commons/common"
+	"github.com/lanseg/golang-commons/optional"
 )
 
 const (
@@ -21,6 +24,43 @@ const (
 var (
 	fakeTime = time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC)
 )
+
+func readJson[T any](file string) (*T, error) {
+	bytes, err := os.ReadFile(filepath.Join("testdata", file))
+	if err != nil {
+		return nil, err
+	}
+	return cm.FromJson[T](bytes)
+}
+
+type fakeWebDriver struct {
+	webdriver.NoopWebdriver
+
+	file string
+	url  string
+}
+
+func (fd *fakeWebDriver) Navigate(url string) {
+	fd.url = url
+}
+
+func (fd *fakeWebDriver) GetPageSource() optional.Optional[string] {
+	return optional.Map(
+		optional.OfError(os.ReadFile(filepath.Join("testdata", fd.file))),
+		func(b []byte) string {
+			return string(b)
+		})
+}
+
+func (fd *fakeWebDriver) GetCurrentURL() optional.Optional[string] {
+	return optional.Of(fd.url)
+}
+
+func newFakeWebdriver(file string) webdriver.WebDriver {
+	return &fakeWebDriver{
+		file: file,
+	}
+}
 
 type FakeHttpClient struct {
 	HttpClient

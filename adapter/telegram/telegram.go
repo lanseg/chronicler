@@ -1,4 +1,4 @@
-package adapter
+package telegram
 
 import (
 	"fmt"
@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 
+	"chronicler/adapter"
 	"chronicler/records"
 	"chronicler/util"
 
@@ -18,7 +19,7 @@ import (
 )
 
 type telegramAdapter struct {
-	Adapter
+	adapter.Adapter
 
 	logger *cm.Logger
 	bot    tgbot.TelegramBot
@@ -26,9 +27,9 @@ type telegramAdapter struct {
 	cursor int64
 }
 
-func NewTelegramAdapter(bot tgbot.TelegramBot) Adapter {
+func NewTelegramAdapter(bot tgbot.TelegramBot) adapter.Adapter {
 	return &telegramAdapter{
-		logger: cm.NewLogger("TelegramAdapter"),
+		logger: cm.NewLogger("Telegramadapter.Adapter"),
 		bot:    bot,
 		api:    tgbot.NewTelegramApi(bot),
 		cursor: 0,

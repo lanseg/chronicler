@@ -1,10 +1,11 @@
-package adapter
+package twitter
 
 import (
 	"regexp"
 	"sort"
 	"time"
 
+	"chronicler/adapter"
 	rpb "chronicler/records/proto"
 	"chronicler/twitter"
 
@@ -17,14 +18,14 @@ const (
 )
 
 type twitterAdapter struct {
-	Adapter
+	adapter.Adapter
 
 	linkMatcher *regexp.Regexp
 	logger      *cm.Logger
 	client      twitter.Client
 }
 
-func NewTwitterAdapter(client twitter.Client) Adapter {
+func NewTwitterAdapter(client twitter.Client) adapter.Adapter {
 	return &twitterAdapter{
 		linkMatcher: regexp.MustCompile(twitterRe),
 		logger:      cm.NewLogger("TwitterAdapter"),

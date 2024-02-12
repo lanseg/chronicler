@@ -7,6 +7,10 @@ go_binary(
     ],
     deps = [
         "//adapter",
+        "//adapter/pikabu",
+        "//adapter/telegram",
+        "//adapter/twitter",
+        "//adapter/web",
         "//downloader",
         "//records:records_go_proto",
         "//storage",

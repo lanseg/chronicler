@@ -1,4 +1,4 @@
-package adapter
+package pikabu
 
 import (
 	"fmt"
@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"chronicler/adapter"
 	"chronicler/records"
 	rpb "chronicler/records/proto"
 	"chronicler/webdriver"
@@ -21,14 +22,14 @@ const (
 )
 
 type pikabuAdapter struct {
-	Adapter
+	adapter.Adapter
 
 	linkMatcher *regexp.Regexp
 	logger      *cm.Logger
 	browser     webdriver.Browser
 }
 
-func NewPikabuAdapter(browser webdriver.Browser) Adapter {
+func NewPikabuAdapter(browser webdriver.Browser) adapter.Adapter {
 	return &pikabuAdapter{
 		linkMatcher: regexp.MustCompile(pikabuStoryRe),
 		logger:      cm.NewLogger("PikabuAdapter"),
