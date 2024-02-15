@@ -53,6 +53,19 @@ func (s *storageServer) Get(ctx context.Context, in *ep.GetRequest) (*ep.GetResp
 	}, nil
 }
 
+func (s *storageServer) GetFile(in *ep.GetFileRequest, out ep.Storage_GetFileServer) error {
+	s.logger.Debugf("Get file request: %v", in)
+	f, err := s.baseStorage.GetFile(in.RecordSetId, in.Filename).Get()
+	if err != nil {
+		return err
+	}
+	return out.Send(&ep.GetFileResponse{
+		Chunk: 0,
+		Size:  int32(len(f)),
+		Data:  f,
+	})
+}
+
 func (s *storageServer) Start() error {
 	socket, err := net.Listen("tcp", s.address)
 	if err != nil {

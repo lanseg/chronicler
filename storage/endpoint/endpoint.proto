@@ -36,9 +36,21 @@ message GetResponse {
   repeated chronicler.records.RecordSet recordSets = 1;
 }
 
+message GetFileRequest {
+  string recordSetId = 1;
+  string filename = 2;
+}
+
+message GetFileResponse {
+  int32 chunk = 1;
+  int32 size  = 2;
+  bytes data  = 3;
+}
+
 service Storage {
-  rpc save(SaveRequest) returns (SaveResponse);
-  rpc list(ListRequest) returns (ListResponse);
-  rpc delete(DeleteRequest) returns (DeleteResponse);
-  rpc get(GetRequest) returns (GetResponse);
+  rpc save(SaveRequest) returns (SaveResponse) {};
+  rpc list(ListRequest) returns (ListResponse) {};
+  rpc delete(DeleteRequest) returns (DeleteResponse) {};
+  rpc get(GetRequest) returns (GetResponse) {};
+  rpc getFile(GetFileRequest) returns (stream GetFileResponse) {};
 }
