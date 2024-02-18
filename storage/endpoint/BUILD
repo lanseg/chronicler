@@ -66,5 +66,7 @@ go_test(
     deps = [
         "//downloader",
         "//webdriver",
+        "@golang-commons//concurrent",
+        "@golang-commons//optional",
     ],
 )
