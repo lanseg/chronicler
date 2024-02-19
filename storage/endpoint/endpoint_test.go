@@ -19,6 +19,8 @@ const (
 
 type FakeStorage struct {
 	storage.Storage
+
+	fileData []byte
 }
 
 func (fs *FakeStorage) SaveRecordSet(r *rpb.RecordSet) error {
@@ -34,17 +36,19 @@ func (fs *FakeStorage) DeleteRecordSet(id string) error {
 }
 
 func (fs *FakeStorage) GetFile(id string, filename string) optional.Optional[[]byte] {
-	return optional.Of([]byte{})
+	return optional.Of(fs.fileData)
 }
 
 type testBed struct {
+	storage  *FakeStorage
 	server   *storageServer
 	client   ep.StorageClient
 	tearDown func(tb testing.TB)
 }
 
 func setupServer(tb testing.TB) (*testBed, error) {
-	server := NewStorageServer(testAddr, &FakeStorage{})
+	storage := &FakeStorage{}
+	server := NewStorageServer(testAddr, storage)
 	if err := server.Start(); err != nil {
 		return nil, err
 	}
@@ -57,8 +61,9 @@ func setupServer(tb testing.TB) (*testBed, error) {
 	}
 
 	return &testBed{
-		client: client,
-		server: server,
+		client:  client,
+		server:  server,
+		storage: storage,
 		tearDown: func(tb testing.TB) {
 			server.Stop()
 		},
@@ -105,11 +110,23 @@ func TestStorage(t *testing.T) {
 	})
 
 	t.Run("GetFile", func(t *testing.T) {
-		result, err := tb.client.GetFile(context.Background(), &ep.GetFileRequest{})
+		tb.storage.fileData = []byte("Hello world")
+		recv, err := tb.client.GetFile(context.Background(), &ep.GetFileRequest{
+			RecordSetId: "123",
+			Filename:    "Somefile",
+		})
 		if err != nil {
 			t.Errorf("Failed to perform GetFile operation: %s", err)
 		}
-		fmt.Println(result)
+		result := []byte{}
+		for {
+			rs, err := recv.Recv()
+			if err != nil {
+				break
+			}
+			result = append(result, rs.Data...)
+		}
+		fmt.Printf("Get file result: %v\n", string(result))
 	})
 
 }

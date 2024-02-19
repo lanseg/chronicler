@@ -24,6 +24,7 @@ type storageServer struct {
 
 func (s *storageServer) Save(ctx context.Context, in *ep.SaveRequest) (*ep.SaveResponse, error) {
 	s.logger.Debugf("Save request: %v", in)
+	// TODO: Implement saving record sets
 	return &ep.SaveResponse{}, nil
 }
 
@@ -45,9 +46,7 @@ func (s *storageServer) Delete(ctx context.Context, in *ep.DeleteRequest) (*ep.D
 func (s *storageServer) Get(ctx context.Context, in *ep.GetRequest) (*ep.GetResponse, error) {
 	s.logger.Debugf("Get request: %v", in)
 	sets := []*rpb.RecordSet{}
-	for _, id := range in.RecordSetIds {
-		s.logger.Debugf("Result: %s", id)
-	}
+	// TODO: Implement getting record sets
 	return &ep.GetResponse{
 		RecordSets: sets,
 	}, nil
