@@ -9,6 +9,7 @@ import (
 
 	"chronicler/records"
 	rpb "chronicler/records/proto"
+	"chronicler/storage/endpoint"
 	ep "chronicler/storage/endpoint_go_proto"
 
 	"github.com/lanseg/golang-commons/collections"
@@ -41,7 +42,11 @@ func (ws *WebServer) writeJson(w http.ResponseWriter, data any) {
 }
 
 func (ws *WebServer) handleRecordSetList(p PathParams, w http.ResponseWriter, r *http.Request) {
-	rsResponse, _ := ws.storage.List(context.Background(), &ep.ListRequest{})
+	rsResponse, err := ws.storage.List(context.Background(), &ep.ListRequest{})
+	if err != nil {
+		ws.Error(w, fmt.Sprintf("Cannot get RecordSets: %s", err.Error()), 500)
+		return
+	}
 	rs := records.SortRecordSets(rsResponse.RecordSets)
 
 	userById := map[string]*rpb.UserMetadata{}
@@ -57,28 +62,23 @@ func (ws *WebServer) handleRecordSetList(p PathParams, w http.ResponseWriter, r 
 }
 
 func (ws *WebServer) responseFile(w http.ResponseWriter, id string, filename string) {
-	recv, err := ws.storage.GetFile(context.Background(), &ep.GetFileRequest{
+	files, err := endpoint.ReadAll(ws.storage.GetFile(context.Background(), &ep.GetFileRequest{
 		File: []*ep.GetFileRequest_FileDef{
 			{RecordSetId: id, Filename: filename},
 		},
-	})
+	}))
 	if err != nil {
 		ws.Error(w, err.Error(), 500)
 		return
 	}
-
-	data := []byte{}
-	for {
-		rs, err := recv.Recv()
-		if err != nil {
-			break
-		}
-		data = append(data, rs.Data...)
+	if files == nil || len(files) == 0 || files[0] == nil {
+		ws.Error(w, fmt.Sprintf("File %s/%s not found", id, filename), 404)
+		return
 	}
 
 	if filename == "record.json" {
 		rs := records.NewRecordSet(&rpb.RecordSet{})
-		err = json.Unmarshal(data, rs)
+		err = json.Unmarshal(files[0].Data, rs)
 		if err != nil {
 			ws.Error(w, err.Error(), 500)
 			return
@@ -87,7 +87,7 @@ func (ws *WebServer) responseFile(w http.ResponseWriter, id string, filename str
 		ws.writeJson(w, rs)
 		return
 	}
-	w.Write(data)
+	w.Write(files[0].Data)
 }
 
 func (ws *WebServer) handleDeleteRecord(p PathParams, w http.ResponseWriter, r *http.Request) {

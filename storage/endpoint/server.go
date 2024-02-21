@@ -13,6 +13,10 @@ import (
 	cm "github.com/lanseg/golang-commons/common"
 )
 
+const (
+	chunkSize = 8192
+)
+
 type storageServer struct {
 	ep.UnimplementedStorageServer
 
@@ -60,12 +64,11 @@ func (s *storageServer) GetFile(in *ep.GetFileRequest, out ep.Storage_GetFileSer
 			s.logger.Warningf("Could not read file #%d (%s): %s", i, f, err)
 			continue
 		}
-		out.Send(&ep.GetFileResponse{
-			File:  int32(i),
-			Chunk: 0,
-			Size:  int32(len(f)),
-			Data:  f,
-		})
+		if err = WriteAll(out, f, i, chunkSize); err != nil {
+			s.logger.Warningf("Could not send file %d/chunk %d: %s", i, 0, err)
+			continue
+		}
+		s.logger.Debugf("Written file #%d (%s/%s), size %d", i, file.RecordSetId, file.Filename, len(f))
 	}
 	return nil
 }

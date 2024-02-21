@@ -34,8 +34,8 @@ go_binary(
     deps = [
         ":server",
         "//records:records_go_proto",
-        "//util",
         "//storage/endpoint",
+        "//util",
         "@golang-commons//common",
     ],
 )

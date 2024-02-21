@@ -116,20 +116,12 @@ func TestStorage(t *testing.T) {
 			{RecordSetId: "456", Filename: "Somefile"},
 		}
 
-		recv, err := tb.client.GetFile(context.Background(), &ep.GetFileRequest{File: files})
+		result, err := ReadAll(tb.client.GetFile(context.Background(), &ep.GetFileRequest{File: files}))
 		if err != nil {
 			t.Errorf("Failed to perform GetFile operation: %s", err)
 		}
-		result := make([][]byte, len(files))
-		for {
-			rs, err := recv.Recv()
-			if err != nil {
-				break
-			}
-			result[rs.File] = append(result[rs.File], rs.Data...)
-		}
 		for _, rs := range result {
-			fmt.Printf("Get file result: %v\n", string(rs))
+			fmt.Printf("Get file result: %v\n", string(rs.Data))
 		}
 	})
 

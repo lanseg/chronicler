@@ -42,6 +42,7 @@ go_library(
     srcs = [
         "client.go",
         "server.go",
+        "util.go",
     ],
     importpath = "chronicler/storage/endpoint",
     deps = [
