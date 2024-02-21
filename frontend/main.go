@@ -1,17 +1,19 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	"chronicler/frontend"
+	sep "chronicler/storage/endpoint"
 
 	cm "github.com/lanseg/golang-commons/common"
 )
 
 type FrontendConfig struct {
-	StorageRoot  *string `json:storageRoot`
-	StaticRoot   *string `json:staticRoot`
-	FrontendPort *int    `json:frontendPort`
+	StaticRoot        *string `json:staticRoot`
+	FrontendPort      *int    `json:frontendPort`
+	StorageServerPort *int    `json:"storageServerPort"`
 }
 
 func main() {
@@ -22,11 +24,16 @@ func main() {
 		os.Exit(-1)
 	}
 
-	logger.Infof("Storage root: %s", *cfg.StorageRoot)
-	logger.Infof("Static files root: %s", *cfg.StaticRoot)
-	logger.Infof("Starting server on port %d", *cfg.FrontendPort)
+	logger.Infof("StaticRoot: %s", *cfg.StaticRoot)
+	logger.Infof("FrontendPort: %d", *cfg.FrontendPort)
+	logger.Infof("StorageServerPort: %d", *cfg.StorageServerPort)
 
-	server := frontend.NewServer(*cfg.FrontendPort, *cfg.StorageRoot, *cfg.StaticRoot)
+	storageClient, err := sep.NewEndpointClient(fmt.Sprintf("localhost:%d", *cfg.StorageServerPort))
+	if err != nil {
+		logger.Errorf("Could not connect to the storage: %v", err)
+		os.Exit(-1)
+	}
+	server := frontend.NewServer(*cfg.FrontendPort, *cfg.StaticRoot, storageClient)
 	if err := server.ListenAndServe(); err != nil {
 		logger.Errorf("Failed to start server: %s", err)
 	}

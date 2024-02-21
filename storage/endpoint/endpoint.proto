@@ -37,14 +37,18 @@ message GetResponse {
 }
 
 message GetFileRequest {
-  string recordSetId = 1;
-  string filename = 2;
+  message FileDef {
+      string recordSetId = 1;
+      string filename = 2;
+  }
+  repeated FileDef file = 1;
 }
 
 message GetFileResponse {
-  int32 chunk = 1;
-  int32 size  = 2;
-  bytes data  = 3;
+  int32 file = 1;
+  int32 chunk = 2;
+  int32 size  = 3;
+  bytes data  = 4;
 }
 
 service Storage {

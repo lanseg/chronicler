@@ -1,12 +1,10 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"net/http/cookiejar"
 	"os"
-	"strings"
 	"sync"
 
 	"chronicler/adapter"
@@ -17,7 +15,6 @@ import (
 	"chronicler/downloader"
 	"chronicler/storage"
 	ep "chronicler/storage/endpoint"
-	epp "chronicler/storage/endpoint_go_proto"
 	"chronicler/twitter"
 	"chronicler/webdriver"
 
@@ -78,49 +75,14 @@ func main() {
 	logger.Infof("Config.TwitterApiKey: %d", len(*cfg.TwitterApiKey))
 	logger.Infof("Config.TelegramBotKey: %d", len(*cfg.TelegramBotKey))
 
-	eps, err := ep.NewEndpointClient(fmt.Sprintf("localhost:%d", *cfg.StorageServerPort))
-	if err != nil {
-		logger.Errorf("Could not connectto the storage server: %v", err)
-		os.Exit(-1)
-	}
-	if eps != nil {
-		ctx := context.Background()
-		rs, err := eps.List(ctx, &epp.ListRequest{})
-		if err != nil {
-			logger.Errorf("Cannot list recordsets: %s", err)
-			return
-		}
-		for _, r := range rs.RecordSets {
-			fmt.Printf("HERE: %s\n", r.Id)
-			for _, rr := range r.Records {
-				for _, f := range rr.Files {
-					if strings.HasSuffix(f.FileUrl, "js") {
-						fmt.Printf("HERE:\t%s\n", f.FileUrl)
-						recv, err := eps.GetFile(ctx, &epp.GetFileRequest{
-							RecordSetId: r.Id,
-							Filename:    f.FileUrl,
-						})
-						if err != nil {
-							fmt.Printf("Cannot open file stream: %s\n", err)
-							continue
-						}
-						for {
-							rs, err := recv.Recv()
-							if err != nil {
-								break
-							}
-							fmt.Printf("HERE:\t\t:%d %d %d\n", rs.Chunk, rs.Size, len(rs.Data))
-						}
-					}
-				}
-			}
-		}
-		return
-	}
-
 	downloader := downloader.NewDownloader(initHttpClient())
 	webDriver := webdriver.NewBrowser(*cfg.ScenarioLibrary)
 	storage := storage.NewStorage(*cfg.StorageRoot, webDriver, downloader)
+	storageServer := ep.NewStorageServer(fmt.Sprintf("localhost:%d", *cfg.StorageServerPort), storage)
+	if err := storageServer.Start(); err != nil {
+		logger.Errorf("Could not start storage server endpoint: %s", err)
+		os.Exit(-1)
+	}
 
 	tgBot := tgbot.NewBot(*cfg.TelegramBotKey)
 	twClient := twitter.NewClient(*cfg.TwitterApiKey)

@@ -14,6 +14,7 @@ go_library(
         "//records",
         "//records:records_go_proto",
         "//storage",
+        "//storage/endpoint",
         "//storage/endpoint:storage_endpoint_go_proto",
         "//util",
         "//webdriver",
@@ -34,6 +35,7 @@ go_binary(
         ":server",
         "//records:records_go_proto",
         "//util",
+        "//storage/endpoint",
         "@golang-commons//common",
     ],
 )

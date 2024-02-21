@@ -54,15 +54,20 @@ func (s *storageServer) Get(ctx context.Context, in *ep.GetRequest) (*ep.GetResp
 
 func (s *storageServer) GetFile(in *ep.GetFileRequest, out ep.Storage_GetFileServer) error {
 	s.logger.Debugf("Get file request: %v", in)
-	f, err := s.baseStorage.GetFile(in.RecordSetId, in.Filename).Get()
-	if err != nil {
-		return err
+	for i, file := range in.File {
+		f, err := s.baseStorage.GetFile(file.RecordSetId, file.Filename).Get()
+		if err != nil {
+			s.logger.Warningf("Could not read file #%d (%s): %s", i, f, err)
+			continue
+		}
+		out.Send(&ep.GetFileResponse{
+			File:  int32(i),
+			Chunk: 0,
+			Size:  int32(len(f)),
+			Data:  f,
+		})
 	}
-	return out.Send(&ep.GetFileResponse{
-		Chunk: 0,
-		Size:  int32(len(f)),
-		Data:  f,
-	})
+	return nil
 }
 
 func (s *storageServer) Start() error {

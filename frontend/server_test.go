@@ -24,7 +24,7 @@ func get(url string) ([]byte, error) {
 
 func TestFrontend(t *testing.T) {
 
-	server := NewServer(testingPort, "storage_root", "static")
+	server := NewServer(testingPort, "static", nil)
 	go (func() {
 		if err := server.ListenAndServe(); err != nil {
 			t.Fatalf("Could not start a server: %s", err)

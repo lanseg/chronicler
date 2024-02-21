@@ -1,16 +1,15 @@
 package frontend
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
 
-	"chronicler/downloader"
 	"chronicler/records"
 	rpb "chronicler/records/proto"
-	"chronicler/storage"
-	"chronicler/webdriver"
+	ep "chronicler/storage/endpoint_go_proto"
 
 	"github.com/lanseg/golang-commons/collections"
 	cm "github.com/lanseg/golang-commons/common"
@@ -23,7 +22,7 @@ type DeleteRecordResponse struct {
 }
 
 type WebServer struct {
-	storage storage.Storage
+	storage ep.StorageClient
 	logger  *cm.Logger
 }
 
@@ -42,8 +41,8 @@ func (ws *WebServer) writeJson(w http.ResponseWriter, data any) {
 }
 
 func (ws *WebServer) handleRecordSetList(p PathParams, w http.ResponseWriter, r *http.Request) {
-	rs, _ := ws.storage.ListRecordSets().Get()
-	rs = records.SortRecordSets(rs)
+	rsResponse, _ := ws.storage.List(context.Background(), &ep.ListRequest{})
+	rs := records.SortRecordSets(rsResponse.RecordSets)
 
 	userById := map[string]*rpb.UserMetadata{}
 	result := &rpb.RecordListResponse{}
@@ -58,14 +57,28 @@ func (ws *WebServer) handleRecordSetList(p PathParams, w http.ResponseWriter, r 
 }
 
 func (ws *WebServer) responseFile(w http.ResponseWriter, id string, filename string) {
-	f, err := ws.storage.GetFile(id, filename).Get()
+	recv, err := ws.storage.GetFile(context.Background(), &ep.GetFileRequest{
+		File: []*ep.GetFileRequest_FileDef{
+			{RecordSetId: id, Filename: filename},
+		},
+	})
 	if err != nil {
 		ws.Error(w, err.Error(), 500)
 		return
 	}
+
+	data := []byte{}
+	for {
+		rs, err := recv.Recv()
+		if err != nil {
+			break
+		}
+		data = append(data, rs.Data...)
+	}
+
 	if filename == "record.json" {
 		rs := records.NewRecordSet(&rpb.RecordSet{})
-		err = json.Unmarshal(f, rs)
+		err = json.Unmarshal(data, rs)
 		if err != nil {
 			ws.Error(w, err.Error(), 500)
 			return
@@ -74,23 +87,28 @@ func (ws *WebServer) responseFile(w http.ResponseWriter, id string, filename str
 		ws.writeJson(w, rs)
 		return
 	}
-	w.Write(f)
+	w.Write(data)
 }
 
 func (ws *WebServer) handleDeleteRecord(p PathParams, w http.ResponseWriter, r *http.Request) {
 	queryParams := r.URL.Query()
 	ws.logger.Infof("Request [delete]: %s", queryParams)
 
+	idsToDelete := strings.Split(queryParams.Get("ids"), ",")
+	_, err := ws.storage.Delete(context.Background(), &ep.DeleteRequest{
+		RecordSetIds: idsToDelete,
+	})
+	if err != nil {
+		ws.Error(w, err.Error(), 500)
+		return
+	}
+
 	result := []*DeleteRecordResponse{}
-	for _, r := range strings.Split(queryParams.Get("ids"), ",") {
-		err := ws.storage.DeleteRecordSet(r)
-		if err != nil {
-			ws.logger.Warningf("Could not delete record %q: %s", r, err)
-		}
+	for _, r := range idsToDelete {
 		result = append(result, &DeleteRecordResponse{
 			Id:      r,
-			Deleted: err == nil,
-			Error:   err,
+			Deleted: true,
+			Error:   nil,
 		})
 	}
 	ws.writeJson(w, result)
@@ -106,10 +124,10 @@ func (ws *WebServer) handleRecord(p PathParams, w http.ResponseWriter, r *http.R
 	ws.responseFile(w, p["recordId"], filename)
 }
 
-func NewServer(port int, storageRoot string, staticFiles string) *http.Server {
+func NewServer(port int, staticFiles string, storageClient ep.StorageClient) *http.Server {
 	server := &WebServer{
 		logger:  cm.NewLogger("frontend"),
-		storage: storage.NewStorage(storageRoot, webdriver.NewFakeBrowser(nil), downloader.NewNoopDownloader()),
+		storage: storageClient,
 	}
 
 	handler := &PathParamHandler{
