@@ -62,6 +62,14 @@ func (s *storageServer) GetFile(in *ep.GetFileRequest, out ep.Storage_GetFileSer
 		f, err := s.baseStorage.GetFile(file.RecordSetId, file.Filename).Get()
 		if err != nil {
 			s.logger.Warningf("Could not read file #%d (%s): %s", i, f, err)
+			out.Send(&ep.GetFileResponse{
+				FileId: int32(i),
+				Data: &ep.GetFileResponse_Error_{
+					Error: &ep.GetFileResponse_Error{
+						Error: err.Error(),
+					},
+				},
+			})
 			continue
 		}
 		if err = WriteAll(out, f, i, chunkSize); err != nil {

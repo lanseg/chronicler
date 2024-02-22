@@ -3,6 +3,7 @@ package endpoint
 import (
 	"context"
 	"fmt"
+	"reflect"
 	"testing"
 
 	rpb "chronicler/records/proto"
@@ -17,10 +18,18 @@ const (
 	testAddr = "localhost:12345"
 )
 
+func genTestFile(length int) []byte {
+	result := make([]byte, length)
+	for i := 0; i < length; i++ {
+		result[i] = byte('a' + i%24)
+	}
+	return result
+}
+
 type FakeStorage struct {
 	storage.Storage
 
-	fileData []byte
+	fileData map[string][]byte
 }
 
 func (fs *FakeStorage) SaveRecordSet(r *rpb.RecordSet) error {
@@ -36,7 +45,10 @@ func (fs *FakeStorage) DeleteRecordSet(id string) error {
 }
 
 func (fs *FakeStorage) GetFile(id string, filename string) optional.Optional[[]byte] {
-	return optional.Of(fs.fileData)
+	if data, ok := fs.fileData[fmt.Sprintf("%s_%s", id, filename)]; ok {
+		return optional.Of(data)
+	}
+	return optional.OfError[[]byte](nil, fmt.Errorf("No file %s/%s", id, filename))
 }
 
 type testBed struct {
@@ -47,7 +59,9 @@ type testBed struct {
 }
 
 func setupServer(tb testing.TB) (*testBed, error) {
-	storage := &FakeStorage{}
+	storage := &FakeStorage{
+		fileData: map[string][]byte{},
+	}
 	server := NewStorageServer(testAddr, storage)
 	if err := server.Start(); err != nil {
 		return nil, err
@@ -108,21 +122,80 @@ func TestStorage(t *testing.T) {
 		}
 		fmt.Println(result)
 	})
+}
 
-	t.Run("GetFile", func(t *testing.T) {
-		tb.storage.fileData = []byte("Hello world")
-		files := []*ep.GetFileRequest_FileDef{
-			{RecordSetId: "123", Filename: "Somefile"},
-			{RecordSetId: "456", Filename: "Somefile"},
-		}
+func TestGetFile(t *testing.T) {
+	tb, err := setupServer(t)
+	if err != nil {
+		t.Fatalf("Failed to initialize client-server: %s", err)
+	}
+	defer tb.tearDown(t)
 
-		result, err := ReadAll(tb.client.GetFile(context.Background(), &ep.GetFileRequest{File: files}))
-		if err != nil {
-			t.Errorf("Failed to perform GetFile operation: %s", err)
-		}
-		for _, rs := range result {
-			fmt.Printf("Get file result: %v\n", string(rs.Data))
-		}
-	})
+	for _, tc := range []struct {
+		name        string
+		storageData map[string][]byte
+		request     *ep.GetFileRequest
+		want        []*FileData
+	}{
+		{
+			name: "One name different records gives different files",
+			storageData: map[string][]byte{
+				"123_SomeFile": []byte("Hello world"),
+				"456_SomeFile": []byte("Hello there"),
+			},
+			request: &ep.GetFileRequest{
+				File: []*ep.GetFileRequest_FileDef{
+					{RecordSetId: "123", Filename: "SomeFile"},
+					{RecordSetId: "456", Filename: "SomeFile"},
+				},
+			},
+			want: []*FileData{
+				{Data: []byte("Hello world")},
+				{Data: []byte("Hello there")},
+			},
+		},
+		{
+			name: "FileData for missing file is not an error",
+			storageData: map[string][]byte{
+				"123_SomeFile": []byte("Hello world"),
+			},
+			request: &ep.GetFileRequest{
+				File: []*ep.GetFileRequest_FileDef{
+					{RecordSetId: "123", Filename: "SomeFile"},
+					{RecordSetId: "456", Filename: "NonExistingFile"},
+				},
+			},
+			want: []*FileData{
+				{Data: []byte("Hello world")},
+				{Error: "No file 456/NonExistingFile"},
+			},
+		},
+		{
+			name: "File bigger than one chunk",
+			storageData: map[string][]byte{
+				"123_SomeFile": genTestFile(chunkSize + 10),
+			},
+			request: &ep.GetFileRequest{
+				File: []*ep.GetFileRequest_FileDef{
+					{RecordSetId: "123", Filename: "SomeFile"},
+				},
+			},
+			want: []*FileData{
+				{Data: genTestFile(chunkSize + 10)},
+			},
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			tb.storage.fileData = tc.storageData
+			result, err := ReadAll(tb.client.GetFile(context.Background(), tc.request))
+			if err != nil {
+				t.Errorf("Expected GetFile(%v) = %v, but got error %s", tc.request, tc.want, err)
+				return
+			}
 
+			if !reflect.DeepEqual(tc.want, result) {
+				t.Errorf("Expected GetFile(%v) = %v, but got %v", tc.request, tc.want, result)
+			}
+		})
+	}
 }

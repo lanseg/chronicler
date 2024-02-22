@@ -6,55 +6,52 @@ option go_package = "chronicler/storage/endpoint";
 
 package chronicler.storage;
 
+message SaveRequest {}
 
-message SaveRequest {
-    
-}
+message SaveResponse {}
 
-message SaveResponse {
-}
+message ListRequest {}
 
-message ListRequest {
-}
+message ListResponse { repeated chronicler.records.RecordSet recordSets = 1; }
 
-message ListResponse {
-  repeated chronicler.records.RecordSet recordSets = 1;
-}
+message DeleteRequest { repeated string recordSetIds = 1; }
 
-message DeleteRequest {
-  repeated string recordSetIds = 1;
-}
+message DeleteResponse {}
 
-message DeleteResponse {
-}
+message GetRequest { repeated string recordSetIds = 1; }
 
-message GetRequest {
-  repeated string recordSetIds = 1;
-}
-
-message GetResponse {
-  repeated chronicler.records.RecordSet recordSets = 1;
-}
+message GetResponse { repeated chronicler.records.RecordSet recordSets = 1; }
 
 message GetFileRequest {
   message FileDef {
-      string recordSetId = 1;
-      string filename = 2;
+    string recordSetId = 1;
+    string filename = 2;
   }
   repeated FileDef file = 1;
 }
 
 message GetFileResponse {
-  int32 file = 1;
-  int32 chunk = 2;
-  int32 size  = 3;
-  bytes data  = 4;
+
+  int32 fileId = 1;
+
+  oneof data {
+    Chunk chunk = 2;
+    Error error = 3;
+  }
+
+  message Chunk {
+    int32 chunkId = 2;
+    int32 size = 3;
+    bytes data = 4;
+  }
+
+  message Error { string error = 1; }
 }
 
 service Storage {
   rpc save(SaveRequest) returns (SaveResponse) {};
   rpc list(ListRequest) returns (ListResponse) {};
-  rpc delete(DeleteRequest) returns (DeleteResponse) {};
+  rpc delete (DeleteRequest) returns (DeleteResponse) {};
   rpc get(GetRequest) returns (GetResponse) {};
   rpc getFile(GetFileRequest) returns (stream GetFileResponse) {};
 }
