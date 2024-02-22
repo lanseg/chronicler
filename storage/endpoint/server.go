@@ -63,10 +63,12 @@ func (s *storageServer) GetFile(in *ep.GetFileRequest, out ep.Storage_GetFileSer
 		if err != nil {
 			s.logger.Warningf("Could not read file #%d (%s): %s", i, f, err)
 			out.Send(&ep.GetFileResponse{
-				FileId: int32(i),
-				Data: &ep.GetFileResponse_Error_{
-					Error: &ep.GetFileResponse_Error{
-						Error: err.Error(),
+				Part: &ep.FilePart{
+					FileId: int32(i),
+					Data: &ep.FilePart_Error_{
+						Error: &ep.FilePart_Error{
+							Error: err.Error(),
+						},
 					},
 				},
 			})

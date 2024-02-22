@@ -30,8 +30,7 @@ message GetFileRequest {
   repeated FileDef file = 1;
 }
 
-message GetFileResponse {
-
+message FilePart {
   int32 fileId = 1;
 
   oneof data {
@@ -48,10 +47,13 @@ message GetFileResponse {
   message Error { string error = 1; }
 }
 
+message GetFileResponse { FilePart part = 1; }
+
 service Storage {
   rpc save(SaveRequest) returns (SaveResponse) {};
   rpc list(ListRequest) returns (ListResponse) {};
   rpc delete (DeleteRequest) returns (DeleteResponse) {};
   rpc get(GetRequest) returns (GetResponse) {};
+
   rpc getFile(GetFileRequest) returns (stream GetFileResponse) {};
 }
