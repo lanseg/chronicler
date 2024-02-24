@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"strings"
 
@@ -42,12 +43,28 @@ func (ws *WebServer) writeJson(w http.ResponseWriter, data any) {
 }
 
 func (ws *WebServer) handleRecordSetList(p PathParams, w http.ResponseWriter, r *http.Request) {
-	rsResponse, err := ws.storage.List(context.Background(), &ep.ListRequest{})
+	recv, err := ws.storage.List(context.Background(), &ep.ListRequest{})
 	if err != nil {
 		ws.Error(w, fmt.Sprintf("Cannot get RecordSets: %s", err.Error()), 500)
 		return
 	}
-	rs := records.SortRecordSets(rsResponse.RecordSets)
+	sets := []*rpb.RecordSet{}
+	for {
+		rs, err := recv.Recv()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			ws.Error(w, fmt.Sprintf("Error while getting RecordSets: %s", err), 500)
+			return
+		}
+		if err == io.EOF {
+			break
+		}
+		sets = append(sets, rs.RecordSet)
+	}
+
+	rs := records.SortRecordSets(sets)
 
 	userById := map[string]*rpb.UserMetadata{}
 	result := &rpb.RecordListResponse{}

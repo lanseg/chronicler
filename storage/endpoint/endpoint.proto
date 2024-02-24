@@ -10,9 +10,15 @@ message SaveRequest {}
 
 message SaveResponse {}
 
-message ListRequest {}
+message ListRequest {
+    // TODO: add filtering and pagination
+}
 
-message ListResponse { repeated chronicler.records.RecordSet recordSets = 1; }
+message ListResponse { 
+
+  // To be used in streams as total number of record sets could be too big
+  chronicler.records.RecordSet recordSet = 1; 
+}
 
 message DeleteRequest { repeated string recordSetIds = 1; }
 
@@ -49,11 +55,17 @@ message FilePart {
 
 message GetFileResponse { FilePart part = 1; }
 
+message PutFileRequest { FilePart part = 1;}
+
+message PutFileResponse {
+};
+
 service Storage {
   rpc save(SaveRequest) returns (SaveResponse) {};
-  rpc list(ListRequest) returns (ListResponse) {};
+  rpc list(ListRequest) returns (stream ListResponse) {};
   rpc delete (DeleteRequest) returns (DeleteResponse) {};
   rpc get(GetRequest) returns (GetResponse) {};
 
   rpc getFile(GetFileRequest) returns (stream GetFileResponse) {};
+  rpc putFile(stream PutFileRequest) returns (PutFileResponse) {};
 }

@@ -52,6 +52,7 @@ go_library(
         "@golang-commons//common",
         "@org_golang_google_grpc//:grpc",
         "@org_golang_google_grpc//credentials/insecure",
+        "@org_golang_google_grpc//encoding/gzip",
     ],
 )
 

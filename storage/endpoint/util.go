@@ -1,8 +1,10 @@
 package endpoint
 
 import (
-	ep "chronicler/storage/endpoint_go_proto"
 	"fmt"
+	"io"
+
+	ep "chronicler/storage/endpoint_go_proto"
 )
 
 type FileData struct {
@@ -52,8 +54,11 @@ func ReadAll(client ep.Storage_GetFileClient, err error) ([]*FileData, error) {
 	maxId := 0
 	for {
 		part, err := client.Recv()
-		if err != nil {
+		if err == io.EOF {
 			break
+		}
+		if err != nil {
+			return nil, err
 		}
 		chunk := part.Part
 		fileId := int(chunk.FileId)

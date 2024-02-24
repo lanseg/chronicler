@@ -3,6 +3,7 @@ package endpoint
 import (
 	"context"
 	"fmt"
+	"io"
 	"reflect"
 	"testing"
 
@@ -29,7 +30,8 @@ func genTestFile(length int) []byte {
 type FakeStorage struct {
 	storage.Storage
 
-	fileData map[string][]byte
+	recordSets []*rpb.RecordSet
+	fileData   map[string][]byte
 }
 
 func (fs *FakeStorage) SaveRecordSet(r *rpb.RecordSet) error {
@@ -37,7 +39,7 @@ func (fs *FakeStorage) SaveRecordSet(r *rpb.RecordSet) error {
 }
 
 func (fs *FakeStorage) ListRecordSets() optional.Optional[[]*rpb.RecordSet] {
-	return optional.Of([]*rpb.RecordSet{})
+	return optional.Of(fs.recordSets)
 }
 
 func (fs *FakeStorage) DeleteRecordSet(id string) error {
@@ -99,14 +101,6 @@ func TestStorage(t *testing.T) {
 		fmt.Println(result)
 	})
 
-	t.Run("List", func(t *testing.T) {
-		result, err := tb.client.List(context.Background(), &ep.ListRequest{})
-		if err != nil {
-			t.Errorf("Failed to perform List operation: %s", err)
-		}
-		fmt.Println(result)
-	})
-
 	t.Run("Delete", func(t *testing.T) {
 		result, err := tb.client.Delete(context.Background(), &ep.DeleteRequest{})
 		if err != nil {
@@ -122,6 +116,66 @@ func TestStorage(t *testing.T) {
 		}
 		fmt.Println(result)
 	})
+}
+
+func TestListRequest(t *testing.T) {
+	tb, err := setupServer(t)
+	if err != nil {
+		t.Fatalf("Failed to initialize client-server: %s", err)
+	}
+	defer tb.tearDown(t)
+
+	for _, tc := range []struct {
+		name       string
+		recordSets []*rpb.RecordSet
+		request    *ep.ListRequest
+		want       []*rpb.RecordSet
+	}{
+		{
+			name: "Two record sets in response",
+			recordSets: []*rpb.RecordSet{
+				{Id: "RecordSet1"},
+				{Id: "RecordSet2"},
+			},
+			request: &ep.ListRequest{},
+			want: []*rpb.RecordSet{
+				{Id: "RecordSet1"},
+				{Id: "RecordSet2"},
+			},
+		},
+		{
+			name:       "Empty response",
+			recordSets: []*rpb.RecordSet{},
+			request:    &ep.ListRequest{},
+			want:       []*rpb.RecordSet{},
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			tb.storage.recordSets = tc.recordSets
+			recv, err := tb.client.List(context.Background(), tc.request)
+			if err != nil {
+				t.Errorf("Could not perform list request: %s", err)
+				return
+			}
+
+			result := []*rpb.RecordSet{}
+			for {
+				rs, err := recv.Recv()
+				if err != nil && err != io.EOF {
+					t.Errorf("Error while fetching recordset: %s", err)
+					return
+				}
+				if err == io.EOF {
+					break
+				}
+				result = append(result, rs.RecordSet)
+			}
+
+			if !reflect.DeepEqual(tc.want, result) {
+				t.Errorf("client.List(%s) expected to return %s, but got %s", tc.want, result)
+			}
+		})
+	}
 }
 
 func TestGetFile(t *testing.T) {

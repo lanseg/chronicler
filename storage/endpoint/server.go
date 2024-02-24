@@ -4,17 +4,19 @@ import (
 	"context"
 	"net"
 
-	"google.golang.org/grpc"
-
 	rpb "chronicler/records/proto"
 	"chronicler/storage"
 	ep "chronicler/storage/endpoint_go_proto"
+
+	"google.golang.org/grpc"
+	_ "google.golang.org/grpc/encoding/gzip" // Install the gzip compressor
 
 	cm "github.com/lanseg/golang-commons/common"
 )
 
 const (
-	chunkSize = 8192
+	chunkSize  = 8192
+	maxMsgSize = 16 * 1024 * 1024
 )
 
 type storageServer struct {
@@ -32,11 +34,19 @@ func (s *storageServer) Save(ctx context.Context, in *ep.SaveRequest) (*ep.SaveR
 	return &ep.SaveResponse{}, nil
 }
 
-func (s *storageServer) List(ctx context.Context, in *ep.ListRequest) (*ep.ListResponse, error) {
+func (s *storageServer) List(in *ep.ListRequest, out ep.Storage_ListServer) error {
 	s.logger.Debugf("List request: %v", in)
-	return &ep.ListResponse{
-		RecordSets: s.baseStorage.ListRecordSets().OrElse([]*rpb.RecordSet{}),
-	}, nil
+	// TODO: Return errors properly
+	s.baseStorage.ListRecordSets().IfPresent(func(rss []*rpb.RecordSet) {
+		for _, rs := range rss {
+			if err := out.Send(&ep.ListResponse{
+				RecordSet: rs,
+			}); err != nil {
+				break
+			}
+		}
+	})
+	return nil
 }
 
 func (s *storageServer) Delete(ctx context.Context, in *ep.DeleteRequest) (*ep.DeleteResponse, error) {
@@ -89,7 +99,9 @@ func (s *storageServer) Start() error {
 		return err
 	}
 
-	s.grpcServer = grpc.NewServer()
+	s.grpcServer = grpc.NewServer(
+		grpc.MaxSendMsgSize(maxMsgSize),
+		grpc.MaxRecvMsgSize(maxMsgSize))
 	ep.RegisterStorageServer(s.grpcServer, s)
 	s.logger.Infof("Storage server listening at %v", socket.Addr())
 
