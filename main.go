@@ -108,7 +108,7 @@ func main() {
 		logger.Infof("Starting chronicler thread")
 		for {
 			newRequest := <-requests
-			logger.Infof("Got new request: %s", newRequest)
+			logger.Infof("Got new request for %s: %s", newRequest.Target.Type, newRequest)
 			if a, ok := adapters[newRequest.Target.Type]; ok {
 				for _, resp := range a.GetResponse(newRequest) {
 					response <- resp

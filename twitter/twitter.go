@@ -315,6 +315,14 @@ func (c *ClientImpl) GetConversation(conversationId string) (*Response[Tweet], e
 				break
 			}
 		}
+		if result.Meta.ResultCount == 0 {
+			c.logger.Infof("Conversation with id %s not found", conversationId)
+			return &Response[Tweet]{
+				Meta: &Metadata{
+					ResultCount: 0,
+				},
+			}, nil
+		}
 		responses = append(responses, result)
 		token = result.Meta.NextToken
 		c.logger.Infof("Loaded pages: %d, next page: %s", len(responses), token)

@@ -55,6 +55,9 @@ func (t *twitterAdapter) GetResponse(request *rpb.Request) []*rpb.Response {
 		threadId = request.Target.MessageId
 	}
 	conv, _ := t.client.GetConversation(threadId)
+	if conv.Meta.ResultCount == 0 {
+		return []*rpb.Response{}
+	}
 	result := t.tweetToRecord(conv)
 	result.Id = request.Id
 	return []*rpb.Response{{
