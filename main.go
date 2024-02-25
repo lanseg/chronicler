@@ -15,7 +15,6 @@ import (
 	"chronicler/downloader"
 	"chronicler/storage"
 	ep "chronicler/storage/endpoint"
-	"chronicler/twitter"
 	"chronicler/webdriver"
 
 	rpb "chronicler/records/proto"
@@ -85,7 +84,7 @@ func main() {
 	}
 
 	tgBot := tgbot.NewBot(*cfg.TelegramBotKey)
-	twClient := twitter.NewClient(*cfg.TwitterApiKey)
+	twClient := twi_adapter.NewClient(*cfg.TwitterApiKey)
 
 	adapters := map[rpb.SourceType]adapter.Adapter{
 		rpb.SourceType_TELEGRAM: tlg_adapter.NewTelegramAdapter(tgBot),

@@ -16,7 +16,6 @@ go_binary(
         "//storage",
         "//storage/endpoint",
         "//storage/endpoint:storage_endpoint_go_proto",
-        "//twitter",
         "//util",
         "//webdriver",
         "@golang-commons//collections",

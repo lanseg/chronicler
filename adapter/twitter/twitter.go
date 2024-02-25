@@ -7,7 +7,6 @@ import (
 
 	"chronicler/adapter"
 	rpb "chronicler/records/proto"
-	"chronicler/twitter"
 
 	"github.com/lanseg/golang-commons/collections"
 	cm "github.com/lanseg/golang-commons/common"
@@ -22,10 +21,10 @@ type twitterAdapter struct {
 
 	linkMatcher *regexp.Regexp
 	logger      *cm.Logger
-	client      twitter.Client
+	client      Client
 }
 
-func NewTwitterAdapter(client twitter.Client) adapter.Adapter {
+func NewTwitterAdapter(client Client) adapter.Adapter {
 	return &twitterAdapter{
 		linkMatcher: regexp.MustCompile(twitterRe),
 		logger:      cm.NewLogger("TwitterAdapter"),
@@ -66,9 +65,9 @@ func (t *twitterAdapter) GetResponse(request *rpb.Request) []*rpb.Response {
 	}}
 }
 
-func (t *twitterAdapter) tweetToRecord(response *twitter.Response[twitter.Tweet]) *rpb.RecordSet {
+func (t *twitterAdapter) tweetToRecord(response *Response[Tweet]) *rpb.RecordSet {
 	seen := collections.NewSet[string]([]string{})
-	tweets := []twitter.Tweet{}
+	tweets := []Tweet{}
 	for _, twt := range append(response.Data, response.Includes.Tweets...) {
 		if seen.Contains(twt.Id) {
 			continue
@@ -77,9 +76,9 @@ func (t *twitterAdapter) tweetToRecord(response *twitter.Response[twitter.Tweet]
 		tweets = append(tweets, twt)
 	}
 
-	media := map[string]*twitter.TwitterMedia{}
+	media := map[string]*TwitterMedia{}
 	for _, m := range response.Includes.Media {
-		bestMedia := twitter.GetBestQualityMedia(m)
+		bestMedia := GetBestQualityMedia(m)
 		media[bestMedia.Id] = bestMedia
 	}
 
