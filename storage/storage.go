@@ -96,13 +96,48 @@ func (s *LocalStorage) downloadFile(id string, link string) error {
 	return nil
 }
 
+func (s *LocalStorage) GetFile(id string, filename string) optional.Optional[[]byte] {
+	s.logger.Infof("GetFile %s %s", id, filename)
+	return s.getOverlay(id).Read(filename)
+}
+
+func (s *LocalStorage) ListRecordSets() optional.Optional[[]*rpb.RecordSet] {
+	return optional.Of(records.SortRecordSets(collections.Values(s.recordCache)))
+}
+
+func (s *LocalStorage) DeleteRecordSet(id string) error {
+	if len(id) != 36 {
+		return fmt.Errorf("Looks like uuid is incorrect: %q", id)
+	}
+	path := filepath.Join(s.root, id)
+	if err := os.RemoveAll(filepath.Join(s.root, id)); err != nil {
+		return err
+	}
+	s.logger.Debugf("Deleted recordset at %s", path)
+	s.refreshCache()
+	return nil
+}
+
+
 func (s *LocalStorage) SaveRecordSet(r *rpb.RecordSet) error {
 	if r.Id == "" {
 		return fmt.Errorf("Record without an id")
 	}
-	mergedSet := records.MergeRecordSets(s.getRecord(r.Id).OrElse(&rpb.RecordSet{}), r)
-	s.touch()
-	return s.writeRecordSet(mergedSet)
+	return s.writeRecordSet(records.MergeRecordSets(s.getRecord(r.Id).OrElse(&rpb.RecordSet{}), r))
+}
+
+func (s *LocalStorage) getAllRecords() optional.Optional[[]*rpb.RecordSet] {
+	result := []*rpb.RecordSet{}
+	files, err := ioutil.ReadDir(s.root)
+	if err != nil {
+		return optional.OfError([]*rpb.RecordSet{}, err)
+	}
+	for _, f := range files {
+		s.getRecord(f.Name()).IfPresent(func(r *rpb.RecordSet) {
+			result = append(result, r)
+		})
+	}
+	return optional.Of(records.SortRecordSets(result))
 }
 
 func (s *LocalStorage) writeRecordSet(rs *rpb.RecordSet) error {
@@ -144,56 +179,6 @@ func (s *LocalStorage) writeRecordSet(rs *rpb.RecordSet) error {
 	s.recordCache[rs.Id] = rs
 	s.logger.Infof("Saved new record to %s", rs.Id)
 	return nil
-}
-
-func (s *LocalStorage) GetFile(id string, filename string) optional.Optional[[]byte] {
-	s.logger.Infof("GetFile %s %s", id, filename)
-	return s.getOverlay(id).Read(filename)
-}
-
-func (s *LocalStorage) ListRecordSets() optional.Optional[[]*rpb.RecordSet] {
-	if s.isDirty() {
-		s.refreshCache()
-		s.modTime = time.Now()
-	}
-	return optional.Of(records.SortRecordSets(collections.Values(s.recordCache)))
-}
-
-func (s *LocalStorage) getAllRecords() optional.Optional[[]*rpb.RecordSet] {
-	result := []*rpb.RecordSet{}
-	files, err := ioutil.ReadDir(s.root)
-	if err != nil {
-		return optional.OfError([]*rpb.RecordSet{}, err)
-	}
-	for _, f := range files {
-		s.getRecord(f.Name()).IfPresent(func(r *rpb.RecordSet) {
-			result = append(result, r)
-		})
-	}
-	return optional.Of(records.SortRecordSets(result))
-}
-
-func (s *LocalStorage) DeleteRecordSet(id string) error {
-	if len(id) != 36 {
-		return fmt.Errorf("Looks like uuid is incorrect: %q", id)
-	}
-	path := filepath.Join(s.root, id)
-	if err := os.RemoveAll(filepath.Join(s.root, id)); err != nil {
-		return err
-	}
-	s.logger.Debugf("Deleted recordset at %s", path)
-	s.refreshCache()
-	return nil
-}
-
-func (s *LocalStorage) touch() {
-	os.WriteFile(filepath.Join(".storage_dirty"), []byte{}, os.ModePerm)
-	s.modTime = time.Now()
-}
-
-func (s *LocalStorage) isDirty() bool {
-	stat, err := os.Stat(filepath.Join(".storage_dirty"))
-	return os.IsNotExist(err) || stat.ModTime().After(s.modTime)
 }
 
 func (s *LocalStorage) refreshCache() {
