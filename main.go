@@ -48,15 +48,12 @@ func extractRequests(adapters []adapter.Adapter, rs *rpb.RecordSet) []*rpb.Reque
 	if len(rs.Records) > 0 && (rs.Records[0].Source.Type == rpb.SourceType_WEB || rs.Records[0].Source.Type == rpb.SourceType_PIKABU) {
 		return result
 	}
-	for _, link := range rs.Records[0].Links {
-		for _, a := range adapters {
-			if target := a.MatchLink(link); target != nil {
-				result = append(result, &rpb.Request{
-					Id:     rs.Id,
-					Target: target,
-				})
-				break
-			}
+	for _, a := range adapters {
+		for _, target := range a.FindSources(rs.Records[0]) {
+			result = append(result, &rpb.Request{
+				Id:     rs.Id,
+				Target: target,
+			})
 		}
 	}
 	return result

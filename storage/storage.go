@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"time"
 
 	"chronicler/downloader"
 	"chronicler/records"
@@ -37,9 +36,8 @@ type LocalStorage struct {
 	downloader downloader.Downloader
 	overlay    *Overlay
 
-	logger  *cm.Logger
-	modTime time.Time
-	root    string
+	logger *cm.Logger
+	root   string
 
 	recordCache map[string]*rpb.RecordSet
 }
@@ -117,7 +115,6 @@ func (s *LocalStorage) DeleteRecordSet(id string) error {
 	s.refreshCache()
 	return nil
 }
-
 
 func (s *LocalStorage) SaveRecordSet(r *rpb.RecordSet) error {
 	if r.Id == "" {

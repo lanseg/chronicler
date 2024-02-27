@@ -93,7 +93,17 @@ func createWebAdapter(httpClient HttpClient, browser webdriver.Browser, timeSour
 	}
 }
 
-func (w *webAdapter) MatchLink(link string) *rpb.Source {
+func (w *webAdapter) FindSources(r *rpb.Record) []*rpb.Source {
+	result := []*rpb.Source{}
+	for _, link := range r.Links {
+		if src := w.matchLink(link); src != nil {
+			result = append(result, src)
+		}
+	}
+	return result
+}
+
+func (w *webAdapter) matchLink(link string) *rpb.Source {
 	if link == "" {
 		return nil
 	}

@@ -77,8 +77,8 @@ func (ts *telegramAdapter) waitForUpdate() []*tgbot.Update {
 		}).Collect()
 }
 
-func (ts *telegramAdapter) MatchLink(link string) *rpb.Source {
-	return nil
+func (ts *telegramAdapter) FindSources(_ *rpb.Record) []*rpb.Source {
+	return []*rpb.Source{}
 }
 
 func (ts *telegramAdapter) GetResponse(request *rpb.Request) []*rpb.Response {

@@ -37,7 +37,17 @@ func NewPikabuAdapter(browser webdriver.Browser) adapter.Adapter {
 	}
 }
 
-func (p *pikabuAdapter) MatchLink(link string) *rpb.Source {
+func (p *pikabuAdapter) FindSources(r *rpb.Record) []*rpb.Source {
+	result := []*rpb.Source{}
+	for _, link := range r.Links {
+		if src := p.matchLink(link); src != nil {
+			result = append(result, src)
+		}
+	}
+	return result
+}
+
+func (p *pikabuAdapter) matchLink(link string) *rpb.Source {
 	if link == "" {
 		return nil
 	}

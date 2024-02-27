@@ -32,7 +32,17 @@ func NewTwitterAdapter(client Client) adapter.Adapter {
 	}
 }
 
-func (t *twitterAdapter) MatchLink(link string) *rpb.Source {
+func (t *twitterAdapter) FindSources(r *rpb.Record) []*rpb.Source {
+	result := []*rpb.Source{}
+	for _, link := range r.Links {
+		if src := t.matchLink(link); src != nil {
+			result = append(result, src)
+		}
+	}
+	return result
+}
+
+func (t *twitterAdapter) matchLink(link string) *rpb.Source {
 	matches := collections.NewMap(t.linkMatcher.SubexpNames(), t.linkMatcher.FindStringSubmatch(link))
 	if match, ok := matches["twitter_id"]; ok && match != "" {
 		return &rpb.Source{

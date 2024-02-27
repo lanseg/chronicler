@@ -122,39 +122,47 @@ func TestWebRequestResponse(t *testing.T) {
 	}
 }
 
-func newWebSrc(url string) *rpb.Source {
-	return &rpb.Source{
-		Url:  url,
-		Type: rpb.SourceType_WEB,
+func newWebSrc(url string) []*rpb.Source {
+	return []*rpb.Source{
+		{
+			Url:  url,
+			Type: rpb.SourceType_WEB,
+		},
+	}
+}
+
+func linkRecord(links ...string) *rpb.Record {
+	return &rpb.Record{
+		Links: links,
 	}
 }
 
 func TestWebLinkMatcher(t *testing.T) {
 	for _, tc := range []struct {
-		desc string
-		link string
-		want *rpb.Source
+		desc   string
+		record *rpb.Record
+		want   []*rpb.Source
 	}{
 		{
-			desc: "link with and postfix prefix matches",
-			link: "http://somelink.com/whatever?param&b=c",
-			want: newWebSrc("http://somelink.com/whatever?param&b=c"),
+			desc:   "link with and postfix prefix matches",
+			record: linkRecord("http://somelink.com/whatever?param&b=c"),
+			want:   newWebSrc("http://somelink.com/whatever?param&b=c"),
 		},
 		{
-			desc: "double slash link matches",
-			link: "//somelink.com",
-			want: newWebSrc("//somelink.com"),
+			desc:   "double slash link matches",
+			record: linkRecord("//somelink.com"),
+			want:   newWebSrc("//somelink.com"),
 		},
 		{
-			desc: "empty string doesnt match",
-			link: "",
-			want: nil,
+			desc:   "empty string doesnt match",
+			record: linkRecord(""),
+			want:   []*rpb.Source{},
 		},
 	} {
 		t.Run(tc.desc, func(t *testing.T) {
 			tg := NewWebAdapter(nil, webdriver.NewFakeBrowser(&webdriver.NoopWebdriver{}))
 
-			result := tg.MatchLink(tc.link)
+			result := tg.FindSources(tc.record)
 			if fmt.Sprintf("%+v", tc.want) != fmt.Sprintf("%+v", result) {
 				t.Errorf("Expected result to be:\n%+v\nBut got:\n%+v", tc.want, result)
 			}
