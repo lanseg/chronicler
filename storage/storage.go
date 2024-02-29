@@ -25,7 +25,9 @@ const (
 type Storage interface {
 	SaveRecordSet(r *rpb.RecordSet) error
 	ListRecordSets() optional.Optional[[]*rpb.RecordSet]
+    GetRecordSet(id string) optional.Optional[*rpb.RecordSet]
 	DeleteRecordSet(id string) error
+
 	GetFile(id string, filename string) optional.Optional[[]byte]
 }
 
@@ -65,7 +67,7 @@ func (s *LocalStorage) saveBase64(id string, fname string) func(string) {
 	}
 }
 
-func (s *LocalStorage) getRecord(id string) optional.Optional[*rpb.RecordSet] {
+func (s *LocalStorage) GetRecordSet(id string) optional.Optional[*rpb.RecordSet] {
 	return optional.MapErr(
 		s.getOverlay(id).Read(recordsetFileName), cm.FromJson[rpb.RecordSet])
 }
@@ -120,7 +122,7 @@ func (s *LocalStorage) SaveRecordSet(r *rpb.RecordSet) error {
 	if r.Id == "" {
 		return fmt.Errorf("Record without an id")
 	}
-	return s.writeRecordSet(records.MergeRecordSets(s.getRecord(r.Id).OrElse(&rpb.RecordSet{}), r))
+	return s.writeRecordSet(records.MergeRecordSets(s.GetRecordSet(r.Id).OrElse(&rpb.RecordSet{}), r))
 }
 
 func (s *LocalStorage) getAllRecords() optional.Optional[[]*rpb.RecordSet] {
@@ -130,7 +132,7 @@ func (s *LocalStorage) getAllRecords() optional.Optional[[]*rpb.RecordSet] {
 		return optional.OfError([]*rpb.RecordSet{}, err)
 	}
 	for _, f := range files {
-		s.getRecord(f.Name()).IfPresent(func(r *rpb.RecordSet) {
+		s.GetRecordSet(f.Name()).IfPresent(func(r *rpb.RecordSet) {
 			result = append(result, r)
 		})
 	}
