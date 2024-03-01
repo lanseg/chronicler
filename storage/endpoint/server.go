@@ -88,7 +88,7 @@ func (s *storageServer) GetFile(in *ep.GetFileRequest, out ep.Storage_GetFileSer
 			s.logger.Warningf("Could not send file %d/chunk %d: %s", i, 0, err)
 			continue
 		}
-		s.logger.Debugf("Written file #%d (%s/%s), size %d", i, file.RecordSetId, file.Filename, len(f))
+		s.logger.Debugf("Written file #%d (%s/%s)", i, file.RecordSetId, file.Filename)
 	}
 	return nil
 }

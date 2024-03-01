@@ -16,32 +16,29 @@ func (f *FileData) String() string {
 	return fmt.Sprintf("FileData { Data: %q, Error: %q }", f.Data, f.Error)
 }
 
-func WriteAll(server ep.Storage_GetFileServer, data []byte, id int, chunkSize int) error {
-	size := len(data)
-	maxChunk := size / chunkSize
-	if chunkSize > size {
-		chunkSize = size
-	}
-	for chunk := 0; chunk <= maxChunk; chunk++ {
-		start := chunk * chunkSize
-		end := start + chunkSize
-		if end > size {
-			end = size
+func WriteAll(server ep.Storage_GetFileServer, data io.ReadCloser, id int, chunkSize int) error {
+	defer data.Close()
+	buf := make([]byte, chunkSize)
+	chunkId := 0
+	for {
+		end, err := data.Read(buf)
+		if err != nil {
+			return err
 		}
 		if err := server.Send(&ep.GetFileResponse{
 			Part: &ep.FilePart{
 				FileId: int32(id),
 				Data: &ep.FilePart_Chunk_{
 					Chunk: &ep.FilePart_Chunk{
-						ChunkId: int32(chunk),
-						Size:    int32(size),
-						Data:    data[start:end],
+						ChunkId: int32(chunkId),
+						Data:    buf[:end],
 					},
 				},
 			},
 		}); err != nil {
 			return err
 		}
+		chunkId++
 	}
 	return nil
 }

@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -25,10 +26,10 @@ const (
 type Storage interface {
 	SaveRecordSet(r *rpb.RecordSet) error
 	ListRecordSets() optional.Optional[[]*rpb.RecordSet]
-    GetRecordSet(id string) optional.Optional[*rpb.RecordSet]
+	GetRecordSet(id string) optional.Optional[*rpb.RecordSet]
 	DeleteRecordSet(id string) error
 
-	GetFile(id string, filename string) optional.Optional[[]byte]
+	GetFile(id string, filename string) optional.Optional[io.ReadCloser]
 }
 
 type LocalStorage struct {
@@ -69,7 +70,11 @@ func (s *LocalStorage) saveBase64(id string, fname string) func(string) {
 
 func (s *LocalStorage) GetRecordSet(id string) optional.Optional[*rpb.RecordSet] {
 	return optional.MapErr(
-		s.getOverlay(id).Read(recordsetFileName), cm.FromJson[rpb.RecordSet])
+		optional.MapErr(s.GetFile(id, recordsetFileName), func(r io.ReadCloser) ([]byte, error) {
+			defer r.Close()
+			return io.ReadAll(r)
+		}),
+		cm.FromJson[rpb.RecordSet])
 }
 
 func (s *LocalStorage) savePageView(id string, url string) {
@@ -96,7 +101,7 @@ func (s *LocalStorage) downloadFile(id string, link string) error {
 	return nil
 }
 
-func (s *LocalStorage) GetFile(id string, filename string) optional.Optional[[]byte] {
+func (s *LocalStorage) GetFile(id string, filename string) optional.Optional[io.ReadCloser] {
 	s.logger.Infof("GetFile %s %s", id, filename)
 	return s.getOverlay(id).Read(filename)
 }

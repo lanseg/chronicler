@@ -3,6 +3,7 @@ package storage
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -149,10 +150,11 @@ func (o *Overlay) Write(originalName string, bytes []byte) optional.Optional[*En
 		})
 }
 
-func (o *Overlay) Read(originalName string) optional.Optional[[]byte] {
+func (o *Overlay) Read(originalName string) optional.Optional[io.ReadCloser] {
 	e := o.mapping.getEntity(originalName)
 	if e == nil {
-		return optional.OfError([]byte{}, fmt.Errorf("No entity with name %s", originalName))
+		return optional.OfError[io.ReadCloser](nil, fmt.Errorf("No entity with name %s", originalName))
 	}
-	return optional.OfError(os.ReadFile(filepath.Join(o.root, e.Name)))
+	f, err := os.Open(filepath.Join(o.root, e.Name))
+	return optional.OfError[io.ReadCloser](io.ReadCloser(f), err)
 }

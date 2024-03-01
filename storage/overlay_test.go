@@ -2,6 +2,7 @@ package storage
 
 import (
 	"fmt"
+	"io"
 	"reflect"
 	"testing"
 )
@@ -90,7 +91,11 @@ func TestOverlay(t *testing.T) {
 			}
 			result := []*sampleFile{}
 			for _, f := range tc.expectedFiles {
-				content, err := o.Read(f.originalFileName).Get()
+				reader, err := o.Read(f.originalFileName).Get()
+				content := []byte{}
+				if err == nil {
+					content, err = io.ReadAll(reader)
+				}
 				if err == nil {
 					result = append(result, &sampleFile{f.originalFileName, content})
 				}

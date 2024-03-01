@@ -1,6 +1,7 @@
 package endpoint
 
 import (
+    "bytes"
 	"context"
 	"fmt"
 	"io"
@@ -46,11 +47,11 @@ func (fs *FakeStorage) DeleteRecordSet(id string) error {
 	return nil
 }
 
-func (fs *FakeStorage) GetFile(id string, filename string) optional.Optional[[]byte] {
+func (fs *FakeStorage) GetFile(id string, filename string) optional.Optional[io.ReadCloser] {
 	if data, ok := fs.fileData[fmt.Sprintf("%s_%s", id, filename)]; ok {
-		return optional.Of(data)
+		return optional.Of(io.NopCloser(bytes.NewReader(data)))
 	}
-	return optional.OfError[[]byte](nil, fmt.Errorf("No file %s/%s", id, filename))
+	return optional.OfError[io.ReadCloser](nil, fmt.Errorf("No file %s/%s", id, filename))
 }
 
 type testBed struct {
