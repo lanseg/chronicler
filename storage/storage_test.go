@@ -100,6 +100,12 @@ func TestPutFile(t *testing.T) {
 			toPut: []*FileDef{
 				{rsId1, "filename", []byte("Hello there")},
 			},
+		}, {
+			name: "Put multiple files same id different names",
+			toPut: []*FileDef{
+				{rsId1, "filename", []byte("Hello there")},
+				{rsId1, "filename2", []byte("Hello world")},
+			},
 		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
