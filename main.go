@@ -71,9 +71,10 @@ func main() {
 	logger.Infof("Config.TwitterApiKey: %d", len(*cfg.TwitterApiKey))
 	logger.Infof("Config.TelegramBotKey: %d", len(*cfg.TelegramBotKey))
 
-	downloader := downloader.NewDownloader(initHttpClient())
+	storage := storage.NewStorage(*cfg.StorageRoot)
+	downloader := downloader.NewDownloader(initHttpClient(), storage)
 	webDriver := webdriver.NewBrowser(*cfg.ScenarioLibrary)
-	storage := storage.NewStorage(*cfg.StorageRoot, webDriver, downloader)
+	resolver := NewResolver(webDriver, downloader, storage)
 	storageServer := ep.NewStorageServer(fmt.Sprintf("localhost:%d", *cfg.StorageServerPort), storage)
 	if err := storageServer.Start(); err != nil {
 		logger.Errorf("Could not start storage server endpoint: %s", err)
@@ -136,6 +137,7 @@ func main() {
 						Content: []byte(msg),
 					}
 				}
+				resolver.Resolve(records.Id)
 			}
 			logger.Infof("Extracting requests from %s (%s) of size %d", result.Request,
 				result.Request.Origin, len(result.Result))

@@ -5,10 +5,8 @@ import (
 	"os"
 	"sync"
 
-	"chronicler/downloader"
 	"chronicler/storage"
 	"chronicler/storage/endpoint"
-	"chronicler/webdriver"
 
 	cm "github.com/lanseg/golang-commons/common"
 )
@@ -32,7 +30,7 @@ func main() {
 	logger.Infof("Config.StorageRoot: %s", *cfg.StorageRoot)
 	logger.Infof("Config.StorageServerPort: %s", *cfg.StorageServerPort)
 
-	stg := storage.NewStorage(*cfg.StorageRoot, webdriver.NewFakeBrowser(nil), downloader.NewNoopDownloader())
+	stg := storage.NewStorage(*cfg.StorageRoot)
 	eps := endpoint.NewStorageServer(fmt.Sprintf("localhost:%d", *cfg.StorageServerPort), stg)
 	eps.Start()
 	wg := sync.WaitGroup{}

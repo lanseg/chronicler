@@ -1,7 +1,6 @@
 package storage
 
 import (
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -9,10 +8,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"chronicler/downloader"
 	"chronicler/records"
 	rpb "chronicler/records/proto"
-	"chronicler/webdriver"
 
 	"github.com/lanseg/golang-commons/collections"
 	cm "github.com/lanseg/golang-commons/common"
@@ -36,13 +33,9 @@ type Storage interface {
 type LocalStorage struct {
 	Storage
 
-	browser    webdriver.Browser
-	downloader downloader.Downloader
-	overlay    *Overlay
-
-	logger *cm.Logger
-	root   string
-
+	overlay     *Overlay
+	logger      *cm.Logger
+	root        string
 	recordCache map[string]*rpb.RecordSet
 }
 
@@ -54,21 +47,6 @@ func (s *LocalStorage) getOverlay(id string) *Overlay {
 	return s.overlay
 }
 
-func (s *LocalStorage) saveBase64(id string, fname string) func(string) {
-	return func(content string) {
-		e, err := optional.MapErr(
-			optional.OfError(base64.StdEncoding.DecodeString(content)),
-			func(sDec []byte) (*Entity, error) {
-				return s.getOverlay(id).Write(fname, sDec).Get()
-			}).Get()
-		if err == nil {
-			s.logger.Debugf("Written %v to file %v", e.OriginalName, e.Name)
-		} else {
-			s.logger.Warningf("Could not save base64 data to %q: %v", fname, err)
-		}
-	}
-}
-
 func (s *LocalStorage) GetRecordSet(id string) optional.Optional[*rpb.RecordSet] {
 	return optional.MapErr(
 		optional.MapErr(s.GetFile(id, recordsetFileName), func(r io.ReadCloser) ([]byte, error) {
@@ -76,30 +54,6 @@ func (s *LocalStorage) GetRecordSet(id string) optional.Optional[*rpb.RecordSet]
 			return io.ReadAll(r)
 		}),
 		cm.FromJson[rpb.RecordSet])
-}
-
-func (s *LocalStorage) savePageView(id string, url string) {
-	s.browser.RunSession(func(d webdriver.WebDriver) {
-		d.Navigate(url)
-		d.TakeScreenshot().IfPresent(s.saveBase64(id, "pageview_page.png"))
-		d.Print().IfPresent(s.saveBase64(id, "pageview_page.pdf"))
-		d.GetPageSource().IfPresent(func(src string) {
-			s.getOverlay(id).Write("pageview_page.html", []byte(src))
-		})
-	})
-}
-
-func (s *LocalStorage) downloadFile(id string, link string) error {
-	o := s.getOverlay(id)
-	path, err := optional.Map(o.Create(link), o.ResolvePath).Get()
-	if err != nil {
-		return err
-	}
-	if err = s.downloader.ScheduleDownload(link, path); err != nil {
-		s.logger.Warningf("Failed to download file %s: %s", link, err)
-		return err
-	}
-	return nil
 }
 
 func (s *LocalStorage) GetFile(id string, filename string) optional.Optional[io.ReadCloser] {
@@ -154,27 +108,6 @@ func (s *LocalStorage) writeRecordSet(rs *rpb.RecordSet) error {
 	if rs.Id == "" {
 		return fmt.Errorf("Record must have an ID")
 	}
-	for _, r := range rs.Records {
-		if r.Source != nil && r.Source.Url != "" {
-			s.savePageView(rs.Id, r.Source.Url)
-			r.Files = append(r.Files, &rpb.File{
-				FileId:   "page_view_png",
-				LocalUrl: "pageview_page.png",
-			}, &rpb.File{
-				FileId:   "page_view_pdf",
-				LocalUrl: "pageview_page.pdf",
-			}, &rpb.File{
-				FileId:   "page_view_html",
-				LocalUrl: "pageview_page.html",
-			})
-		}
-
-		for _, file := range r.GetFiles() {
-			if err := s.downloadFile(rs.Id, file.FileUrl); err != nil {
-				s.logger.Warningf("Could not download file %q: %s", file.FileUrl, err)
-			}
-		}
-	}
 
 	bytes, err := json.Marshal(rs)
 	if err != nil {
@@ -205,15 +138,13 @@ func (s *LocalStorage) refreshCache() {
 
 }
 
-func NewStorage(root string, browser webdriver.Browser, downloader downloader.Downloader) Storage {
+func NewStorage(root string) Storage {
 	log := cm.NewLogger("storage")
 	log.Infof("Storage root set to \"%s\"", root)
 
 	ls := &LocalStorage{
-		root:       root,
-		logger:     log,
-		browser:    browser,
-		downloader: downloader,
+		root:   root,
+		logger: log,
 	}
 	ls.refreshCache()
 	return ls

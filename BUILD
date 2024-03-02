@@ -4,6 +4,7 @@ go_binary(
     name = "main",
     srcs = [
         "main.go",
+        "resolver.go",
     ],
     deps = [
         "//adapter",

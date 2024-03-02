@@ -139,7 +139,7 @@ func (o *Overlay) Create(originalName string) optional.Optional[*Entity] {
 
 func (o *Overlay) CopyFrom(originalName string, src io.Reader) error {
 	name := safeName(originalName)
-	file, err := os.OpenFile(filepath.Join(o.root, originalName), os.O_RDWR|os.O_CREATE, 0644)
+	file, err := os.OpenFile(filepath.Join(o.root, name), os.O_RDWR|os.O_CREATE, 0644)
 	defer file.Close()
 	if err != nil {
 		return err

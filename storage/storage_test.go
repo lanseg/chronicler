@@ -7,33 +7,11 @@ import (
 	"reflect"
 	"testing"
 
-	"chronicler/downloader"
 	rpb "chronicler/records/proto"
-	"chronicler/webdriver"
 
 	cm "github.com/lanseg/golang-commons/common"
 	"github.com/lanseg/golang-commons/optional"
 )
-
-type fakeBrowser struct {
-	webdriver.Browser
-}
-
-func (fws *fakeBrowser) RunSession(func(webdriver.WebDriver)) error {
-	return nil
-}
-
-type fakeDownloader struct {
-	downloader.Downloader
-}
-
-func (fd *fakeDownloader) ScheduleDownload(string, string) error {
-	return nil
-}
-
-type FakeDriver struct {
-	webdriver.WebDriver
-}
 
 func newRecordSet(id int, name string) *rpb.RecordSet {
 	rs := &rpb.RecordSet{
@@ -57,7 +35,7 @@ func newRecordSetFull(id int, name string, nrecords int) *rpb.RecordSet {
 
 func TestDeleteRecord(t *testing.T) {
 	t.Run("Create delete record", func(t *testing.T) {
-		s := NewStorage(t.TempDir(), &fakeBrowser{}, &fakeDownloader{})
+		s := NewStorage(t.TempDir())
 
 		recordSets := []*rpb.RecordSet{}
 		for i := 1; i < 10; i++ {
@@ -109,7 +87,7 @@ func TestPutFile(t *testing.T) {
 		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			s := NewStorage("/tmp/test_storage", &fakeBrowser{}, &fakeDownloader{})
+			s := NewStorage("/tmp/test_storage")
 			if saveError := s.SaveRecordSet(&rpb.RecordSet{Id: rsId1}); saveError != nil {
 				t.Errorf("Error while saving a request: %s", saveError)
 			}
@@ -164,7 +142,7 @@ func TestStorage(t *testing.T) {
 		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			s := NewStorage(t.TempDir(), &fakeBrowser{}, &fakeDownloader{})
+			s := NewStorage(t.TempDir())
 			for _, rec := range tc.records {
 				if saveError := s.SaveRecordSet(rec); saveError != nil {
 					t.Errorf("Error while saving a request: %s", saveError)

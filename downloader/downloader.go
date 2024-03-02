@@ -4,7 +4,8 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"os"
+
+	"chronicler/storage"
 
 	cm "github.com/lanseg/golang-commons/common"
 )
@@ -18,18 +19,19 @@ const (
 )
 
 type downloadTask struct {
+	id     string
 	source string
-	target string
 }
 
 type Downloader interface {
-	ScheduleDownload(source string, target string) error
+	ScheduleDownload(id string, source string) error
 }
 
 type httpDownloader struct {
 	Downloader
 
 	tasks      chan downloadTask
+	storage    storage.Storage
 	httpClient *http.Client
 	logger     *cm.Logger
 }
@@ -79,7 +81,7 @@ func (h *httpDownloader) downloadLoop() {
 	go (func() {
 		for {
 			task := <-h.tasks
-			h.logger.Debugf("Started downloading %q to %q", task.source, task.target)
+			h.logger.Debugf("Started downloading %q to %q", task.source, task.id)
 			u, err := url.Parse(task.source)
 			if err != nil {
 				h.logger.Warningf("Incorrect source url %s: %s", task.source, err)
@@ -92,34 +94,25 @@ func (h *httpDownloader) downloadLoop() {
 				continue
 			}
 
-			dst, err := os.OpenFile(task.target, os.O_RDWR|os.O_CREATE, 0644)
-			if err != nil {
-				h.logger.Warningf("Cannot open write stream for local file %s: %s", task.target, err)
-				dst.Close()
-				continue
-			}
-
 			src := resp.Body
 			h.logger.Debugf("Content size is: %d", resp.ContentLength)
-
-			bytesWritten, err := h.copyData(src, dst, resp.ContentLength)
-			if err != nil {
-				h.logger.Warningf("Error while writing data from %s to %s: %s", u, task.target, err)
-				src.Close()
+			if err := h.storage.PutFile(task.id, task.source, src); err != nil {
+				h.logger.Warningf("Error while writing data from %s to %s: %s", u, task.id, err)
 			}
-			h.logger.Debugf("Written %d byte(s) from %q to %q", bytesWritten, task.source, task.target)
+			src.Close()
 		}
 	})()
 }
 
-func (h *httpDownloader) ScheduleDownload(source string, target string) error {
-	h.tasks <- downloadTask{source, target}
-	h.logger.Infof("Scheduled new download %q to %q", source, target)
+func (h *httpDownloader) ScheduleDownload(id string, source string) error {
+	h.tasks <- downloadTask{id, source}
+	h.logger.Infof("Scheduled new download %q to %q", source, id)
 	return nil
 }
 
-func NewDownloader(httpClient *http.Client) Downloader {
+func NewDownloader(httpClient *http.Client, storage storage.Storage) Downloader {
 	loader := &httpDownloader{
+		storage:    storage,
 		tasks:      make(chan downloadTask, downloadQueueSize),
 		httpClient: httpClient,
 		logger:     cm.NewLogger("downloader"),

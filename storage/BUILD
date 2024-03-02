@@ -10,11 +10,9 @@ go_library(
     ],
     importpath = "chronicler/storage",
     deps = [
-        "//downloader",
         "//records",
         "//records:records_go_proto",
         "//util",
-        "//webdriver",
         "@golang-commons//collections",
         "@golang-commons//common",
         "@golang-commons//optional",

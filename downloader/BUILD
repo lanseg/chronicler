@@ -9,6 +9,7 @@ go_library(
     ],
     importpath = "chronicler/downloader",
     deps = [
+        "//storage",
         "@golang-commons//collections",
         "@golang-commons//common",
         "@golang-commons//concurrent",
