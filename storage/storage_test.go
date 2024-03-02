@@ -1,7 +1,10 @@
 package storage
 
 import (
+	"bytes"
 	"fmt"
+	"io"
+	"reflect"
 	"testing"
 
 	"chronicler/downloader"
@@ -9,6 +12,7 @@ import (
 	"chronicler/webdriver"
 
 	cm "github.com/lanseg/golang-commons/common"
+	"github.com/lanseg/golang-commons/optional"
 )
 
 type fakeBrowser struct {
@@ -77,6 +81,52 @@ func TestDeleteRecord(t *testing.T) {
 		}
 	})
 
+}
+
+type FileDef struct {
+	rsId string
+	name string
+	data []byte
+}
+
+func TestPutFile(t *testing.T) {
+	rsId1 := cm.UUID4()
+	for _, tc := range []struct {
+		name  string
+		toPut []*FileDef
+	}{
+		{
+			name: "Put single file",
+			toPut: []*FileDef{
+				{rsId1, "filename", []byte("Hello there")},
+			},
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			s := NewStorage("/tmp/test_storage", &fakeBrowser{}, &fakeDownloader{})
+			if saveError := s.SaveRecordSet(&rpb.RecordSet{Id: rsId1}); saveError != nil {
+				t.Errorf("Error while saving a request: %s", saveError)
+			}
+
+			for _, fd := range tc.toPut {
+				if err := s.PutFile(fd.rsId, fd.name, bytes.NewReader(fd.data)); err != nil {
+					t.Errorf("Error while putting file  %s/%s: %s", fd.rsId, fd.name, err)
+					return
+				}
+
+				got, err := optional.MapErr(s.GetFile(fd.rsId, fd.name),
+					func(rc io.ReadCloser) ([]byte, error) {
+						defer rc.Close()
+						return io.ReadAll(rc)
+					}).Get()
+
+				if err != nil || !reflect.DeepEqual(fd.data, got) {
+					t.Errorf("Expected GetFile(%s, %s) to return (%s, nil), but got (%s, %s)",
+						fd.rsId, fd.name, fd.data, got, err)
+				}
+			}
+		})
+	}
 }
 
 func TestStorage(t *testing.T) {

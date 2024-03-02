@@ -1,7 +1,7 @@
 package endpoint
 
 import (
-    "bytes"
+	"bytes"
 	"context"
 	"fmt"
 	"io"

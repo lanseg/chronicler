@@ -85,7 +85,6 @@ func TestOverlay(t *testing.T) {
 			for _, f := range tc.originalFiles {
 				o.Write(f.originalFileName, f.content)
 			}
-
 			if tc.expectedFiles == nil {
 				tc.expectedFiles = tc.originalFiles
 			}

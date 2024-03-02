@@ -137,14 +137,33 @@ func (o *Overlay) Create(originalName string) optional.Optional[*Entity] {
 	return o.Write(originalName, []byte{})
 }
 
+func (o *Overlay) CopyFrom(originalName string, src io.Reader) error {
+	name := safeName(originalName)
+	file, err := os.OpenFile(filepath.Join(o.root, originalName), os.O_RDWR|os.O_CREATE, 0644)
+	defer file.Close()
+	if err != nil {
+		return err
+	}
+	if _, err = io.Copy(file, src); err != nil {
+		return err
+	}
+	o.newEntity(o.idSrc(), name, originalName)
+	return nil
+}
+
+func (o *Overlay) newEntity(id string, name string, originalName string) *Entity {
+	e := &Entity{id, name, originalName}
+	o.mapping.addEntity(e)
+	o.saveMapping()
+	return e
+}
+
 func (o *Overlay) Write(originalName string, bytes []byte) optional.Optional[*Entity] {
 	name := safeName(originalName)
 	return optional.Map(
 		write(filepath.Join(o.root, name), bytes),
 		func(int) *Entity {
-			e := &Entity{o.idSrc(), name, originalName}
-			o.mapping.addEntity(e)
-			o.saveMapping()
+			e := o.newEntity(o.idSrc(), name, originalName)
 			o.logger.Debugf("Saved %s to %s", originalName, name)
 			return e
 		})

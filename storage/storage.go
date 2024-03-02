@@ -30,6 +30,7 @@ type Storage interface {
 	DeleteRecordSet(id string) error
 
 	GetFile(id string, filename string) optional.Optional[io.ReadCloser]
+	PutFile(id string, filename string, src io.Reader) error
 }
 
 type LocalStorage struct {
@@ -104,6 +105,11 @@ func (s *LocalStorage) downloadFile(id string, link string) error {
 func (s *LocalStorage) GetFile(id string, filename string) optional.Optional[io.ReadCloser] {
 	s.logger.Infof("GetFile %s %s", id, filename)
 	return s.getOverlay(id).Read(filename)
+}
+
+func (s *LocalStorage) PutFile(id string, filename string, src io.Reader) error {
+	s.logger.Infof("PutFile %s/%s", id, filename)
+	return s.getOverlay(id).CopyFrom(filename, src)
 }
 
 func (s *LocalStorage) ListRecordSets() optional.Optional[[]*rpb.RecordSet] {
