@@ -71,7 +71,7 @@ func main() {
 	logger.Infof("Config.TwitterApiKey: %d", len(*cfg.TwitterApiKey))
 	logger.Infof("Config.TelegramBotKey: %d", len(*cfg.TelegramBotKey))
 
-	storage := storage.NewStorage(*cfg.StorageRoot)
+	storage := storage.NewLocalStorage(*cfg.StorageRoot)
 	downloader := downloader.NewDownloader(initHttpClient(), storage)
 	webDriver := webdriver.NewBrowser(*cfg.ScenarioLibrary)
 	resolver := NewResolver(webDriver, downloader, storage)

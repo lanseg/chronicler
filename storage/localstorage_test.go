@@ -35,7 +35,7 @@ func newRecordSetFull(id int, name string, nrecords int) *rpb.RecordSet {
 
 func TestDeleteRecord(t *testing.T) {
 	t.Run("Create delete record", func(t *testing.T) {
-		s := NewStorage(t.TempDir())
+		s := NewLocalStorage(t.TempDir())
 
 		recordSets := []*rpb.RecordSet{}
 		for i := 1; i < 10; i++ {
@@ -87,7 +87,7 @@ func TestPutFile(t *testing.T) {
 		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			s := NewStorage("/tmp/test_storage")
+			s := NewLocalStorage(t.TempDir())
 			if saveError := s.SaveRecordSet(&rpb.RecordSet{Id: rsId1}); saveError != nil {
 				t.Errorf("Error while saving a request: %s", saveError)
 			}
@@ -142,7 +142,7 @@ func TestStorage(t *testing.T) {
 		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			s := NewStorage(t.TempDir())
+			s := NewLocalStorage(t.TempDir())
 			for _, rec := range tc.records {
 				if saveError := s.SaveRecordSet(rec); saveError != nil {
 					t.Errorf("Error while saving a request: %s", saveError)

@@ -7,6 +7,7 @@ go_library(
     srcs = [
         "overlay.go",
         "storage.go",
+        "localstorage.go",
     ],
     importpath = "chronicler/storage",
     deps = [
@@ -24,7 +25,7 @@ go_test(
     size = "small",
     srcs = [
         "overlay_test.go",
-        "storage_test.go",
+        "localstorage_test.go",
     ],
     embed = [
         ":storage",

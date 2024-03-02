@@ -30,7 +30,7 @@ func main() {
 	logger.Infof("Config.StorageRoot: %s", *cfg.StorageRoot)
 	logger.Infof("Config.StorageServerPort: %s", *cfg.StorageServerPort)
 
-	stg := storage.NewStorage(*cfg.StorageRoot)
+	stg := storage.NewLocalStorage(*cfg.StorageRoot)
 	eps := endpoint.NewStorageServer(fmt.Sprintf("localhost:%d", *cfg.StorageServerPort), stg)
 	eps.Start()
 	wg := sync.WaitGroup{}
