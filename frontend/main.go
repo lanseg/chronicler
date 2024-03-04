@@ -28,12 +28,13 @@ func main() {
 	logger.Infof("FrontendPort: %d", *cfg.FrontendPort)
 	logger.Infof("StorageServerPort: %d", *cfg.StorageServerPort)
 
-	storageClient, err := sep.NewEndpointClient(fmt.Sprintf("localhost:%d", *cfg.StorageServerPort))
+	storage, err := sep.NewRemoteStorage(fmt.Sprintf("localhost:%d", *cfg.StorageServerPort))
+
 	if err != nil {
 		logger.Errorf("Could not connect to the storage: %v", err)
 		os.Exit(-1)
 	}
-	server := frontend.NewServer(*cfg.FrontendPort, *cfg.StaticRoot, storageClient)
+	server := frontend.NewServer(*cfg.FrontendPort, *cfg.StaticRoot, storage)
 	if err := server.ListenAndServe(); err != nil {
 		logger.Errorf("Failed to start server: %s", err)
 	}

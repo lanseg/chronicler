@@ -50,6 +50,7 @@ go_library(
         "//records:records_go_proto",
         "//storage",
         "@golang-commons//common",
+        "@golang-commons//optional",
         "@org_golang_google_grpc//:grpc",
         "@org_golang_google_grpc//credentials/insecure",
         "@org_golang_google_grpc//encoding/gzip",

@@ -21,6 +21,7 @@ go_library(
         "@golang-commons//almosthtml",
         "@golang-commons//collections",
         "@golang-commons//common",
+        "@golang-commons//optional",
     ],
 )
 

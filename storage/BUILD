@@ -5,9 +5,9 @@ load("@rules_go//go:def.bzl", "go_binary", "go_library", "go_test")
 go_library(
     name = "storage",
     srcs = [
+        "localstorage.go",
         "overlay.go",
         "storage.go",
-        "localstorage.go",
     ],
     importpath = "chronicler/storage",
     deps = [
@@ -24,8 +24,8 @@ go_test(
     name = "storage_test",
     size = "small",
     srcs = [
-        "overlay_test.go",
         "localstorage_test.go",
+        "overlay_test.go",
     ],
     embed = [
         ":storage",

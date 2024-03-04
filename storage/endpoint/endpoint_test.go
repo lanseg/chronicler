@@ -71,7 +71,7 @@ func setupServer(tb testing.TB) (*testBed, error) {
 	}
 
 	client, err := concurrent.WaitForSomething(func() optional.Optional[ep.StorageClient] {
-		return optional.OfError(NewEndpointClient(testAddr))
+		return optional.OfError(newEndpointClient(testAddr))
 	}).Get()
 	if err != nil {
 		return nil, err

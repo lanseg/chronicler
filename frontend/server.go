@@ -1,7 +1,6 @@
 package frontend
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -10,11 +9,11 @@ import (
 
 	"chronicler/records"
 	rpb "chronicler/records/proto"
-	"chronicler/storage/endpoint"
-	ep "chronicler/storage/endpoint_go_proto"
+	"chronicler/storage"
 
 	"github.com/lanseg/golang-commons/collections"
 	cm "github.com/lanseg/golang-commons/common"
+	"github.com/lanseg/golang-commons/optional"
 )
 
 type DeleteRecordResponse struct {
@@ -24,8 +23,8 @@ type DeleteRecordResponse struct {
 }
 
 type WebServer struct {
-	storage ep.StorageClient
-	logger  *cm.Logger
+	data   storage.Storage
+	logger *cm.Logger
 }
 
 func (ws *WebServer) Error(w http.ResponseWriter, msg string, code int) {
@@ -43,28 +42,7 @@ func (ws *WebServer) writeJson(w http.ResponseWriter, data any) {
 }
 
 func (ws *WebServer) handleRecordSetList(p PathParams, w http.ResponseWriter, r *http.Request) {
-	recv, err := ws.storage.List(context.Background(), &ep.ListRequest{})
-	if err != nil {
-		ws.Error(w, fmt.Sprintf("Cannot get RecordSets: %s", err.Error()), 500)
-		return
-	}
-	sets := []*rpb.RecordSet{}
-	for {
-		rs, err := recv.Recv()
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			ws.Error(w, fmt.Sprintf("Error while getting RecordSets: %s", err), 500)
-			return
-		}
-		if err == io.EOF {
-			break
-		}
-		sets = append(sets, rs.RecordSet)
-	}
-
-	rs := records.SortRecordSets(sets)
+	rs := records.SortRecordSets(ws.data.ListRecordSets().OrElse([]*rpb.RecordSet{}))
 
 	userById := map[string]*rpb.UserMetadata{}
 	result := &rpb.RecordListResponse{}
@@ -79,23 +57,19 @@ func (ws *WebServer) handleRecordSetList(p PathParams, w http.ResponseWriter, r 
 }
 
 func (ws *WebServer) responseFile(w http.ResponseWriter, id string, filename string) {
-	files, err := endpoint.ReadAll(ws.storage.GetFile(context.Background(), &ep.GetFileRequest{
-		File: []*ep.GetFileRequest_FileDef{
-			{RecordSetId: id, Filename: filename},
-		},
-	}))
+	data, err := optional.MapErr(ws.data.GetFile(id, filename), func(rc io.ReadCloser) ([]byte, error) {
+		defer rc.Close()
+		return io.ReadAll(rc)
+	}).Get()
+
 	if err != nil {
 		ws.Error(w, err.Error(), 500)
-		return
-	}
-	if files == nil || len(files) == 0 || files[0] == nil {
-		ws.Error(w, fmt.Sprintf("File %s/%s not found", id, filename), 404)
 		return
 	}
 
 	if filename == "record.json" {
 		rs := records.NewRecordSet(&rpb.RecordSet{})
-		err = json.Unmarshal(files[0].Data, rs)
+		err = json.Unmarshal(data, rs)
 		if err != nil {
 			ws.Error(w, err.Error(), 500)
 			return
@@ -104,7 +78,7 @@ func (ws *WebServer) responseFile(w http.ResponseWriter, id string, filename str
 		ws.writeJson(w, rs)
 		return
 	}
-	w.Write(files[0].Data)
+	w.Write(data)
 }
 
 func (ws *WebServer) handleDeleteRecord(p PathParams, w http.ResponseWriter, r *http.Request) {
@@ -112,9 +86,10 @@ func (ws *WebServer) handleDeleteRecord(p PathParams, w http.ResponseWriter, r *
 	ws.logger.Infof("Request [delete]: %s", queryParams)
 
 	idsToDelete := strings.Split(queryParams.Get("ids"), ",")
-	_, err := ws.storage.Delete(context.Background(), &ep.DeleteRequest{
-		RecordSetIds: idsToDelete,
-	})
+	var err error
+	for _, id := range idsToDelete {
+		err = ws.data.DeleteRecordSet(id)
+	}
 	if err != nil {
 		ws.Error(w, err.Error(), 500)
 		return
@@ -141,10 +116,10 @@ func (ws *WebServer) handleRecord(p PathParams, w http.ResponseWriter, r *http.R
 	ws.responseFile(w, p["recordId"], filename)
 }
 
-func NewServer(port int, staticFiles string, storageClient ep.StorageClient) *http.Server {
+func NewServer(port int, staticFiles string, storage storage.Storage) *http.Server {
 	server := &WebServer{
-		logger:  cm.NewLogger("frontend"),
-		storage: storageClient,
+		logger: cm.NewLogger("frontend"),
+		data:   storage,
 	}
 
 	handler := &PathParamHandler{
