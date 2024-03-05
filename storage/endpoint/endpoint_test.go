@@ -199,7 +199,7 @@ func TestGetFile(t *testing.T) {
 				"456_SomeFile": []byte("Hello there"),
 			},
 			request: &ep.GetFileRequest{
-				File: []*ep.GetFileRequest_FileDef{
+				File: []*ep.FileDef{
 					{RecordSetId: "123", Filename: "SomeFile"},
 					{RecordSetId: "456", Filename: "SomeFile"},
 				},
@@ -215,7 +215,7 @@ func TestGetFile(t *testing.T) {
 				"123_SomeFile": []byte("Hello world"),
 			},
 			request: &ep.GetFileRequest{
-				File: []*ep.GetFileRequest_FileDef{
+				File: []*ep.FileDef{
 					{RecordSetId: "123", Filename: "SomeFile"},
 					{RecordSetId: "456", Filename: "NonExistingFile"},
 				},
@@ -231,7 +231,7 @@ func TestGetFile(t *testing.T) {
 				"123_SomeFile": genTestFile(chunkSize + 10),
 			},
 			request: &ep.GetFileRequest{
-				File: []*ep.GetFileRequest_FileDef{
+				File: []*ep.FileDef{
 					{RecordSetId: "123", Filename: "SomeFile"},
 				},
 			},

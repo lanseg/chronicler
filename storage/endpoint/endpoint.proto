@@ -30,11 +30,13 @@ message GetRequest { repeated string recordSetIds = 1; }
 
 message GetResponse { repeated chronicler.records.RecordSet recordSets = 1; }
 
+message FileDef {
+  string recordSetId = 1;
+  string filename = 2;
+}
+
+
 message GetFileRequest {
-  message FileDef {
-    string recordSetId = 1;
-    string filename = 2;
-  }
   repeated FileDef file = 1;
 }
 

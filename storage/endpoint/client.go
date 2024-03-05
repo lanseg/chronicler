@@ -95,7 +95,7 @@ func (rs *remoteStorage) DeleteRecordSet(id string) error {
 
 func (rs *remoteStorage) GetFile(id string, filename string) optional.Optional[io.ReadCloser] {
 	files, err := ReadAll(rs.client.GetFile(rs.context, &ep.GetFileRequest{
-		File: []*ep.GetFileRequest_FileDef{
+		File: []*ep.FileDef{
 			{RecordSetId: id, Filename: filename},
 		},
 	}))
