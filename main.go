@@ -13,7 +13,6 @@ import (
 	twi_adapter "chronicler/adapter/twitter"
 	web_adapter "chronicler/adapter/web"
 	"chronicler/downloader"
-	"chronicler/storage"
 	ep "chronicler/storage/endpoint"
 	"chronicler/webdriver"
 
@@ -71,16 +70,14 @@ func main() {
 	logger.Infof("Config.TwitterApiKey: %d", len(*cfg.TwitterApiKey))
 	logger.Infof("Config.TelegramBotKey: %d", len(*cfg.TelegramBotKey))
 
-	storage := storage.NewLocalStorage(*cfg.StorageRoot)
+	storage, err := ep.NewRemoteStorage(fmt.Sprintf("localhost:%d", *cfg.StorageServerPort))
+	if err != nil {
+		logger.Errorf("Could not connect to the storage: %s", err)
+		os.Exit(-1)
+	}
 	downloader := downloader.NewDownloader(initHttpClient(), storage)
 	webDriver := webdriver.NewBrowser(*cfg.ScenarioLibrary)
 	resolver := NewResolver(webDriver, downloader, storage)
-	storageServer := ep.NewStorageServer(fmt.Sprintf("localhost:%d", *cfg.StorageServerPort), storage)
-	if err := storageServer.Start(); err != nil {
-		logger.Errorf("Could not start storage server endpoint: %s", err)
-		os.Exit(-1)
-	}
-
 	tgBot := tgbot.NewBot(*cfg.TelegramBotKey)
 	twClient := twi_adapter.NewClient(*cfg.TwitterApiKey)
 

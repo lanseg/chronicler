@@ -30,6 +30,7 @@ type storageServer struct {
 
 func (s *storageServer) Save(ctx context.Context, in *ep.SaveRequest) (*ep.SaveResponse, error) {
 	s.logger.Debugf("Save request: %v", in)
+	s.baseStorage.SaveRecordSet(in.RecordSet)
 	// TODO: Implement saving record sets
 	return &ep.SaveResponse{}, nil
 }

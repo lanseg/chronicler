@@ -6,7 +6,9 @@ option go_package = "chronicler/storage/endpoint";
 
 package chronicler.storage;
 
-message SaveRequest {}
+message SaveRequest {
+    chronicler.records.RecordSet recordSet = 1;
+}
 
 message SaveResponse {}
 

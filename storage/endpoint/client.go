@@ -36,9 +36,9 @@ func NewRemoteStorage(addr string) (storage.Storage, error) {
 		return nil, err
 	}
 	return &remoteStorage{
-		client: client,
-
-		logger: cm.NewLogger("RemoteStorage"),
+		client:  client,
+		context: context.Background(),
+		logger:  cm.NewLogger("RemoteStorage"),
 	}, nil
 }
 
@@ -51,7 +51,9 @@ type remoteStorage struct {
 }
 
 func (rs *remoteStorage) SaveRecordSet(r *rpb.RecordSet) error {
-	_, err := rs.client.Save(rs.context, &ep.SaveRequest{})
+	_, err := rs.client.Save(rs.context, &ep.SaveRequest{
+		RecordSet: r,
+	})
 	return err
 }
 
@@ -107,5 +109,42 @@ func (rs *remoteStorage) GetFile(id string, filename string) optional.Optional[i
 }
 
 func (rs *remoteStorage) PutFile(id string, filename string, src io.Reader) error {
-	return nil
+	put, err := rs.client.PutFile(rs.context)
+	if err != nil {
+		return err
+	}
+	buf := make([]byte, chunkSize)
+	for chunkId := 0; ; chunkId++ {
+		size, err := src.Read(buf)
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			put.Send(&ep.PutFileRequest{
+				Part: &ep.FilePart{
+					FileId: int32(0),
+					Data: &ep.FilePart_Error_{
+						Error: &ep.FilePart_Error{
+							Error: err.Error(),
+						},
+					},
+				},
+			})
+			break
+		}
+		if err := put.Send(&ep.PutFileRequest{
+			Part: &ep.FilePart{
+				FileId: int32(0),
+				Data: &ep.FilePart_Chunk_{
+					Chunk: &ep.FilePart_Chunk{
+						ChunkId: int32(chunkId),
+						Data:    buf[:size],
+					},
+				},
+			},
+		}); err != nil {
+			break
+		}
+	}
+	return err
 }
