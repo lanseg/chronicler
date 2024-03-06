@@ -21,9 +21,9 @@ go_proto_library(
 )
 
 go_binary(
-    name = "main",
+    name = "storageserver",
     srcs = [
-        "main.go",
+        "storageserver.go",
     ],
     deps = [
         ":endpoint",

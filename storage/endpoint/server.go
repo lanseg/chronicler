@@ -43,12 +43,13 @@ func (s *storageServer) List(in *ep.ListRequest, out ep.Storage_ListServer) erro
 	s.logger.Debugf("List request: %v", in)
 	// TODO: Return errors properly
 	s.baseStorage.ListRecordSets().IfPresent(func(rss []*rpb.RecordSet) {
-		for _, rs := range rss {
+		for i, rs := range rss {
 			if err := out.Send(&ep.ListResponse{
 				RecordSet: rs,
 			}); err != nil {
 				break
 			}
+			s.logger.Debugf("Sent %d of %d recordsets\n", i, len(rss))
 		}
 	})
 	return nil
