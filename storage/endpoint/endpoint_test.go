@@ -20,12 +20,23 @@ const (
 	testAddr = "localhost:12345"
 )
 
-func genTestFile(length int) []byte {
-	result := make([]byte, length)
-	for i := 0; i < length; i++ {
-		result[i] = byte('a' + i%24)
+func newPutRequest(id string, fileId int, name string, data []byte) *ep.PutFileRequest {
+	return &ep.PutFileRequest{
+		File: &ep.FileDef{
+			RecordSetId: id,
+			Filename:    name,
+		},
+		Part: &ep.FilePart{
+			FileId: int32(fileId),
+			Data: &ep.FilePart_Chunk_{
+				Chunk: &ep.FilePart_Chunk{
+					ChunkId: int32(0),
+					Size:    int32(len(data)),
+					Data:    data,
+				},
+			},
+		},
 	}
-	return result
 }
 
 type FakeStorage struct {
@@ -52,6 +63,23 @@ func (fs *FakeStorage) GetFile(id string, filename string) optional.Optional[io.
 		return optional.Of(io.NopCloser(bytes.NewReader(data)))
 	}
 	return optional.OfError[io.ReadCloser](nil, fmt.Errorf("No file %s/%s", id, filename))
+}
+
+func (fs *FakeStorage) PutFile(id string, filename string, reader io.Reader) error {
+	data, err := io.ReadAll(reader)
+	if err != nil {
+		return err
+	}
+	fs.fileData[fmt.Sprintf("%s_%s", id, filename)] = data
+	return nil
+}
+
+func genTestFile(length int) []byte {
+	result := make([]byte, length)
+	for i := 0; i < length; i++ {
+		result[i] = byte('a' + i%24)
+	}
+	return result
 }
 
 type testBed struct {
@@ -255,6 +283,56 @@ func TestGetFile(t *testing.T) {
 
 			if !reflect.DeepEqual(tc.want, result) {
 				t.Errorf("Expected GetFile(%v) = %v, but got %v", tc.request, tc.want, result)
+			}
+		})
+	}
+}
+
+func TestPutFile(t *testing.T) {
+	tb, err := setupServer(t)
+	if err != nil {
+		t.Fatalf("Failed to initialize client-server: %s", err)
+	}
+	defer tb.tearDown(t)
+
+	for _, tc := range []struct {
+		name         string
+		reqs         []*ep.PutFileRequest
+		wantFiles    map[string][]byte
+		wantResponse *ep.PutFileResponse
+	}{
+		{
+			name: "put small file",
+			reqs: []*ep.PutFileRequest{
+				newPutRequest("id0", 0, "fn0", []byte("HELLO")),
+				newPutRequest("id0", 1, "fn1", []byte("THERE")),
+			},
+			wantFiles: map[string][]byte{
+				"id0_fn0": []byte("HELLO"),
+				"id0_fn1": []byte("THERE"),
+			},
+			wantResponse: &ep.PutFileResponse{},
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			tb.storage.fileData = map[string]([]byte){}
+			client, err := tb.client.PutFile(context.Background())
+			if err != nil {
+				t.Fatalf("Could not open stream: %s", err)
+			}
+
+			for _, req := range tc.reqs {
+				if err := client.Send(req); err != nil {
+					t.Fatalf("Could not send file: %s", err)
+				}
+			}
+			resp, err := client.CloseAndRecv()
+
+			if err != nil || fmt.Sprintf("%s", tc.wantResponse) != fmt.Sprintf("%s", resp) {
+				t.Errorf("Expected response to be (%s, nil), but got (%s, %s)", tc.wantResponse, resp, err)
+			}
+			if !reflect.DeepEqual(tc.wantFiles, tb.storage.fileData) {
+				t.Errorf("Expected to get files %s, but got %s", tc.wantFiles, tb.storage.fileData)
 			}
 		})
 	}
