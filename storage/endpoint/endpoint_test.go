@@ -95,11 +95,16 @@ func TestStorage(t *testing.T) {
 	defer tb.tearDown(t)
 
 	t.Run("Save", func(t *testing.T) {
-		result, err := tb.client.Save(context.Background(), &ep.SaveRequest{})
+		_, err := tb.client.Save(context.Background(), &ep.SaveRequest{
+			RecordSet: &rpb.RecordSet{
+				Records: []*rpb.Record{
+					{},
+				},
+			},
+		})
 		if err != nil {
 			t.Errorf("Failed to perform Save operation: %s", err)
 		}
-		fmt.Println(result)
 	})
 
 	t.Run("Delete", func(t *testing.T) {

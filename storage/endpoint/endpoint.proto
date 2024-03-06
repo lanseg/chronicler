@@ -59,7 +59,10 @@ message FilePart {
 
 message GetFileResponse { FilePart part = 1; }
 
-message PutFileRequest { FilePart part = 1;}
+message PutFileRequest { 
+    FileDef file = 1;
+    FilePart part = 2;
+}
 
 message PutFileResponse {
 };

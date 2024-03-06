@@ -1,7 +1,9 @@
 package endpoint
 
 import (
+	"bytes"
 	"context"
+	"fmt"
 	"net"
 
 	rpb "chronicler/records/proto"
@@ -29,9 +31,11 @@ type storageServer struct {
 }
 
 func (s *storageServer) Save(ctx context.Context, in *ep.SaveRequest) (*ep.SaveResponse, error) {
-	s.logger.Debugf("Save request: %v", in)
+	if in.RecordSet == nil || len(in.RecordSet.Records) == 0 {
+		return nil, fmt.Errorf("Empty save request")
+	}
+	s.logger.Debugf("Save request, recordset of size %v", len(in.RecordSet.Records))
 	s.baseStorage.SaveRecordSet(in.RecordSet)
-	// TODO: Implement saving record sets
 	return &ep.SaveResponse{}, nil
 }
 
@@ -61,7 +65,11 @@ func (s *storageServer) Delete(ctx context.Context, in *ep.DeleteRequest) (*ep.D
 func (s *storageServer) Get(ctx context.Context, in *ep.GetRequest) (*ep.GetResponse, error) {
 	s.logger.Debugf("Get request: %v", in)
 	sets := []*rpb.RecordSet{}
-	// TODO: Implement getting record sets
+	for _, id := range in.RecordSetIds {
+		s.baseStorage.GetRecordSet(id).IfPresent(func(rs *rpb.RecordSet) {
+			sets = append(sets, rs)
+		})
+	}
 	return &ep.GetResponse{
 		RecordSets: sets,
 	}, nil
@@ -92,6 +100,28 @@ func (s *storageServer) GetFile(in *ep.GetFileRequest, out ep.Storage_GetFileSer
 		s.logger.Debugf("Written file #%d (%s/%s)", i, file.RecordSetId, file.Filename)
 	}
 	return nil
+}
+
+func (s *storageServer) PutFile(out ep.Storage_PutFileServer) error {
+	defs := map[int32]*ep.FileDef{}
+	data := map[int32][]byte{}
+	for {
+		f, err := out.Recv()
+		if err != nil {
+			break
+		}
+		if f.File != nil {
+			s.logger.Infof("Put file %s", f.File)
+			defs[f.Part.FileId] = f.File
+			data[f.Part.FileId] = []byte{}
+		}
+		data[f.Part.FileId] = append(data[f.Part.FileId], f.Part.GetChunk().Data...)
+	}
+	for index, dataBytes := range data {
+		def := defs[index]
+		s.baseStorage.PutFile(def.RecordSetId, def.Filename, bytes.NewReader(dataBytes))
+	}
+	return out.SendAndClose(&ep.PutFileResponse{})
 }
 
 func (s *storageServer) Start() error {

@@ -134,7 +134,9 @@ func main() {
 						Content: []byte(msg),
 					}
 				}
-				resolver.Resolve(records.Id)
+				if err = resolver.Resolve(records.Id); err != nil {
+					logger.Warningf("Error while resolving record contents for %s: %s", records.Id, err)
+				}
 			}
 			logger.Infof("Extracting requests from %s (%s) of size %d", result.Request,
 				result.Request.Origin, len(result.Result))

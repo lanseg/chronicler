@@ -119,32 +119,36 @@ func (rs *remoteStorage) PutFile(id string, filename string, src io.Reader) erro
 		if err == io.EOF {
 			break
 		}
-		if err != nil {
-			put.Send(&ep.PutFileRequest{
-				Part: &ep.FilePart{
-					FileId: int32(0),
-					Data: &ep.FilePart_Error_{
-						Error: &ep.FilePart_Error{
-							Error: err.Error(),
-						},
-					},
-				},
-			})
-			break
-		}
-		if err := put.Send(&ep.PutFileRequest{
+		part := &ep.PutFileRequest{
 			Part: &ep.FilePart{
 				FileId: int32(0),
-				Data: &ep.FilePart_Chunk_{
-					Chunk: &ep.FilePart_Chunk{
-						ChunkId: int32(chunkId),
-						Data:    buf[:size],
-					},
-				},
 			},
-		}); err != nil {
+		}
+		if chunkId == 0 {
+			part.File = &ep.FileDef{
+				RecordSetId: id,
+				Filename:    filename,
+			}
+		}
+		if err != nil {
+			part.Part.Data = &ep.FilePart_Error_{
+				Error: &ep.FilePart_Error{
+					Error: err.Error(),
+				},
+			}
+		} else {
+			part.Part.Data = &ep.FilePart_Chunk_{
+				Chunk: &ep.FilePart_Chunk{
+					ChunkId: int32(chunkId),
+					Data:    buf[:size],
+				},
+			}
+
+		}
+		if err := put.Send(part); err != nil {
 			break
 		}
 	}
+	_, err = put.CloseAndRecv()
 	return err
 }

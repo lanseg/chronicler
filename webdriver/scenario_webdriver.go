@@ -31,7 +31,7 @@ func (wd *scenarioWebdriver) getScenario() optional.Optional[Scenario] {
 func (wd *scenarioWebdriver) runScenario(script string) {
 	concurrent.WaitForValueRetries("true", func() optional.Optional[string] {
 		return wd.baseDriver.ExecuteScript(script)
-	}, 60)
+	}, 120)
 }
 
 func (wd *scenarioWebdriver) NewSession() {
