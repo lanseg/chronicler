@@ -64,7 +64,7 @@ func (s *localStorage) DeleteRecordSet(id string) error {
 	if err := os.RemoveAll(filepath.Join(s.root, id)); err != nil {
 		return err
 	}
-    delete(s.recordCache, id)
+	delete(s.recordCache, id)
 	s.logger.Debugf("Deleted recordset at %s", path)
 	return nil
 }

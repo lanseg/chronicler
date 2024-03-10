@@ -5,7 +5,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-    "time"
+	"time"
 
 	"chronicler/adapter"
 	"chronicler/util"
@@ -134,7 +134,7 @@ func groupRecords(updates []*tgbot.Update) []*rpb.RecordSet {
 	for _, v := range grouped {
 		record, users := updateToRecords(v)
 		rs := &rpb.RecordSet{
-			Id:           cm.UUID4(),
+			Id:           cm.UUID4For(record.Source),
 			Records:      []*rpb.Record{record},
 			UserMetadata: users,
 		}
@@ -220,8 +220,8 @@ func toSource(msg int64, chat int64, user int64) *rpb.Source {
 
 func updateToRecords(upds []*tgbot.Update) (*rpb.Record, []*rpb.UserMetadata) {
 	result := &rpb.Record{
-        FetchTime: time.Now().Unix(),
-    }
+		FetchTime: time.Now().Unix(),
+	}
 	users := map[string]*rpb.UserMetadata{}
 
 	for _, vv := range upds {

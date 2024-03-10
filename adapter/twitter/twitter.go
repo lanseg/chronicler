@@ -1,6 +1,7 @@
 package twitter
 
 import (
+	"fmt"
 	"regexp"
 	"sort"
 	"time"
@@ -68,7 +69,7 @@ func (t *twitterAdapter) GetResponse(request *rpb.Request) []*rpb.Response {
 		return []*rpb.Response{}
 	}
 	result := t.tweetToRecord(conv)
-	result.Id = request.Id
+	result.Id = cm.UUID4For(request.Target)
 	return []*rpb.Response{{
 		Request: request,
 		Result:  []*rpb.RecordSet{result},
@@ -142,7 +143,6 @@ func (t *twitterAdapter) tweetToRecord(response *Response[Tweet]) *rpb.RecordSet
 		return rs[i].Time < rs[j].Time
 	})
 	return &rpb.RecordSet{
-		Id:           cm.UUID4(),
 		Records:      rs,
 		UserMetadata: um,
 	}

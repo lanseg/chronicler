@@ -70,7 +70,7 @@ func (p *pikabuAdapter) matchLink(link string) *rpb.Source {
 func (p *pikabuAdapter) parseStory(node *almosthtml.Node) (*rpb.Record, *rpb.UserMetadata) {
 	author := &rpb.UserMetadata{}
 	result := &rpb.Record{
-        FetchTime: time.Now().Unix(),
+		FetchTime: time.Now().Unix(),
 		Source: &rpb.Source{
 			Type: rpb.SourceType_PIKABU,
 		},
@@ -187,7 +187,7 @@ func (p *pikabuAdapter) parseComment(n *almosthtml.Node) (*rpb.Record, *rpb.User
 	}
 
 	result := &rpb.Record{
-        FetchTime: time.Now().Unix(),
+		FetchTime: time.Now().Unix(),
 		Source: &rpb.Source{
 			SenderId:  meta["aid"],
 			ChannelId: meta["sid"],
@@ -287,7 +287,7 @@ func (p *pikabuAdapter) GetResponse(rq *rpb.Request) []*rpb.Response {
 		Request: rq,
 		Result: []*rpb.RecordSet{
 			{
-                Id: cm.UUID4For(rq.Target.ChannelId),
+				Id:           cm.UUID4For(rq.Target),
 				Records:      resultRecords,
 				UserMetadata: collections.Values(userById),
 			},
