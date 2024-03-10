@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"hash/fnv"
 	"sort"
-	"time"
 
 	rpb "chronicler/records/proto"
 
@@ -17,15 +16,6 @@ import (
 const (
 	textSampleSize = 512
 )
-
-func NewRecord(data *rpb.Record) *rpb.Record {
-	data.FetchTime = time.Now().Unix()
-	return data
-}
-
-func NewRecordSet(data *rpb.RecordSet) *rpb.RecordSet {
-	return data
-}
 
 func hashSource(src *rpb.Source) string {
 	if src == nil {

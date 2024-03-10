@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"chronicler/adapter"
-	"chronicler/records"
 	rpb "chronicler/records/proto"
 	"chronicler/webdriver"
 
@@ -70,11 +69,12 @@ func (p *pikabuAdapter) matchLink(link string) *rpb.Source {
 
 func (p *pikabuAdapter) parseStory(node *almosthtml.Node) (*rpb.Record, *rpb.UserMetadata) {
 	author := &rpb.UserMetadata{}
-	result := records.NewRecord(&rpb.Record{
+	result := &rpb.Record{
+        FetchTime: time.Now().Unix(),
 		Source: &rpb.Source{
 			Type: rpb.SourceType_PIKABU,
 		},
-	})
+	}
 	inContent := false
 	textContent := strings.Builder{}
 	collections.IterateTree(node, collections.DepthFirst, func(n *almosthtml.Node) []*almosthtml.Node {
@@ -186,14 +186,15 @@ func (p *pikabuAdapter) parseComment(n *almosthtml.Node) (*rpb.Record, *rpb.User
 		meta[params[0]] = params[1]
 	}
 
-	result := records.NewRecord(&rpb.Record{
+	result := &rpb.Record{
+        FetchTime: time.Now().Unix(),
 		Source: &rpb.Source{
 			SenderId:  meta["aid"],
 			ChannelId: meta["sid"],
 			MessageId: n.Params["data-id"],
 			Type:      rpb.SourceType_PIKABU,
 		},
-	})
+	}
 
 	if meta["pid"] != "0" {
 		result.Parent = &rpb.Source{
@@ -286,7 +287,7 @@ func (p *pikabuAdapter) GetResponse(rq *rpb.Request) []*rpb.Response {
 		Request: rq,
 		Result: []*rpb.RecordSet{
 			{
-				Id:           cm.UUID4(),
+                Id: cm.UUID4For(rq.Target.ChannelId),
 				Records:      resultRecords,
 				UserMetadata: collections.Values(userById),
 			},

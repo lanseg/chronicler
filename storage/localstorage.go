@@ -13,7 +13,7 @@ import (
 
 	"github.com/lanseg/golang-commons/collections"
 	cm "github.com/lanseg/golang-commons/common"
-	"github.com/lanseg/golang-commons/optional"
+	opt "github.com/lanseg/golang-commons/optional"
 )
 
 type localStorage struct {
@@ -33,16 +33,16 @@ func (s *localStorage) getOverlay(id string) *Overlay {
 	return s.overlay
 }
 
-func (s *localStorage) GetRecordSet(id string) optional.Optional[*rpb.RecordSet] {
-	return optional.MapErr(
-		optional.MapErr(s.GetFile(id, recordsetFileName), func(r io.ReadCloser) ([]byte, error) {
+func (s *localStorage) GetRecordSet(id string) opt.Optional[*rpb.RecordSet] {
+	return opt.MapErr(
+		opt.MapErr(s.GetFile(id, recordsetFileName), func(r io.ReadCloser) ([]byte, error) {
 			defer r.Close()
 			return io.ReadAll(r)
 		}),
 		cm.FromJson[rpb.RecordSet])
 }
 
-func (s *localStorage) GetFile(id string, filename string) optional.Optional[io.ReadCloser] {
+func (s *localStorage) GetFile(id string, filename string) opt.Optional[io.ReadCloser] {
 	s.logger.Infof("GetFile %s %s", id, filename)
 	return s.getOverlay(id).Read(filename)
 }
@@ -52,8 +52,8 @@ func (s *localStorage) PutFile(id string, filename string, src io.Reader) error 
 	return s.getOverlay(id).CopyFrom(filename, src)
 }
 
-func (s *localStorage) ListRecordSets() optional.Optional[[]*rpb.RecordSet] {
-	return optional.Of(records.SortRecordSets(collections.Values(s.recordCache)))
+func (s *localStorage) ListRecordSets() opt.Optional[[]*rpb.RecordSet] {
+	return opt.Of(records.SortRecordSets(collections.Values(s.recordCache)))
 }
 
 func (s *localStorage) DeleteRecordSet(id string) error {
@@ -64,37 +64,36 @@ func (s *localStorage) DeleteRecordSet(id string) error {
 	if err := os.RemoveAll(filepath.Join(s.root, id)); err != nil {
 		return err
 	}
+    delete(s.recordCache, id)
 	s.logger.Debugf("Deleted recordset at %s", path)
-	s.refreshCache()
 	return nil
 }
 
-func (s *localStorage) SaveRecordSet(r *rpb.RecordSet) error {
-	if r.Id == "" {
+func (s *localStorage) SaveRecordSet(newSet *rpb.RecordSet) error {
+	if newSet.Id == "" {
 		return fmt.Errorf("Record without an id")
 	}
-	return s.writeRecordSet(records.MergeRecordSets(s.GetRecordSet(r.Id).OrElse(&rpb.RecordSet{}), r))
+	return s.writeRecordSet(
+		records.MergeRecordSets(
+			s.GetRecordSet(newSet.Id).OrElse(&rpb.RecordSet{}),
+			newSet))
 }
 
-func (s *localStorage) getAllRecords() optional.Optional[[]*rpb.RecordSet] {
+func (s *localStorage) getAllRecords() opt.Optional[[]*rpb.RecordSet] {
 	result := []*rpb.RecordSet{}
 	files, err := ioutil.ReadDir(s.root)
 	if err != nil {
-		return optional.OfError([]*rpb.RecordSet{}, err)
+		return opt.OfError([]*rpb.RecordSet{}, err)
 	}
 	for _, f := range files {
 		s.GetRecordSet(f.Name()).IfPresent(func(r *rpb.RecordSet) {
 			result = append(result, r)
 		})
 	}
-	return optional.Of(records.SortRecordSets(result))
+	return opt.Of(records.SortRecordSets(result))
 }
 
 func (s *localStorage) writeRecordSet(rs *rpb.RecordSet) error {
-	if rs.Id == "" {
-		return fmt.Errorf("Record must have an ID")
-	}
-
 	bytes, err := json.Marshal(rs)
 	if err != nil {
 		return err

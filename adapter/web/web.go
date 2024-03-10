@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"chronicler/adapter"
-	"chronicler/records"
 	rpb "chronicler/records/proto"
 	"chronicler/webdriver"
 
@@ -138,7 +137,8 @@ func (w *webAdapter) GetResponse(request *rpb.Request) []*rpb.Response {
 
 	requestUrl, _ := url.Parse(fixLink("https", "", actualUrl))
 	w.logger.Infof("Resolved actual URL as %s", requestUrl)
-	record := records.NewRecord(&rpb.Record{
+	record := &rpb.Record{
+        FetchTime: time.Now().Unix(), 
 		Source: &rpb.Source{
 			ChannelId: requestUrl.Host,
 			Url:       requestUrl.String(),
@@ -147,7 +147,7 @@ func (w *webAdapter) GetResponse(request *rpb.Request) []*rpb.Response {
 		Time:        w.timeSource().Unix(),
 		TextContent: almosthtml.StripTags(string(body)),
 		RawContent:  body,
-	})
+	}
 
 	w.logger.Debugf("Parsing html content")
 	root, _ := almosthtml.ParseHTML(string(body))
@@ -171,11 +171,11 @@ func (w *webAdapter) GetResponse(request *rpb.Request) []*rpb.Response {
 	}
 	w.logger.Debugf("Done loading page: %d byte(s), %d file link(s), %d other link(s)",
 		len(body), len(record.Files), len(record.Links))
-	rs := records.NewRecordSet(&rpb.RecordSet{
+	rs := &rpb.RecordSet{
 		Id:           cm.UUID4(),
 		Records:      []*rpb.Record{record},
 		UserMetadata: []*rpb.UserMetadata{},
-	})
+	}
 	return []*rpb.Response{{
 		Request: request,
 		Result:  []*rpb.RecordSet{rs},
