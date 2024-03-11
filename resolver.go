@@ -64,7 +64,7 @@ func (r *resolverImpl) Resolve(id string) error {
 			}
 		}
 	}
-	return nil
+    return r.storage.SaveRecordSet(rs)
 }
 
 func (r *resolverImpl) saveBase64(id string, fname string) func(string) {

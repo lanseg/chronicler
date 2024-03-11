@@ -1,7 +1,6 @@
 package twitter
 
 import (
-	"fmt"
 	"regexp"
 	"sort"
 	"time"
