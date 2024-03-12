@@ -72,6 +72,9 @@ func merge[T any](a []T, b []T, hash func(T) uint32, merger func(T, T) T) []T {
 
 func MergeFiles(a []*rpb.File, b []*rpb.File) []*rpb.File {
 	result := merge(a, b, func(f *rpb.File) uint32 {
+		if f.FileId == "" {
+			return fnv32(f.FileUrl)
+		}
 		return fnv32(f.FileId)
 	}, func(af *rpb.File, bf *rpb.File) *rpb.File {
 		if af.FileUrl == "" {
@@ -80,6 +83,9 @@ func MergeFiles(a []*rpb.File, b []*rpb.File) []*rpb.File {
 		return af
 	})
 	sort.Slice(result, func(a int, b int) bool {
+		if result[a].FileId == "" || result[b].FileId == "" {
+			return result[a].FileUrl < result[b].FileUrl
+		}
 		return result[a].FileId < result[b].FileId
 	})
 	return result

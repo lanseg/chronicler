@@ -109,6 +109,7 @@ func (rs *remoteStorage) GetFile(id string, filename string) optional.Optional[i
 }
 
 func (rs *remoteStorage) PutFile(id string, filename string, src io.Reader) error {
+	rs.logger.Infof("Saving file to %s/%s", id, filename)
 	put, err := rs.client.PutFile(rs.context)
 	if err != nil {
 		return err
@@ -116,9 +117,10 @@ func (rs *remoteStorage) PutFile(id string, filename string, src io.Reader) erro
 	buf := make([]byte, chunkSize)
 	for chunkId := 0; ; chunkId++ {
 		size, err := src.Read(buf)
-		if err == io.EOF {
+		if err == io.EOF && size == 0 {
 			break
 		}
+		rs.logger.Infof("Read %d bytes from %s/%s", size, id, filename)
 		part := &ep.PutFileRequest{
 			Part: &ep.FilePart{
 				FileId: int32(0),
@@ -130,13 +132,8 @@ func (rs *remoteStorage) PutFile(id string, filename string, src io.Reader) erro
 				Filename:    filename,
 			}
 		}
-		if err != nil {
-			part.Part.Data = &ep.FilePart_Error_{
-				Error: &ep.FilePart_Error{
-					Error: err.Error(),
-				},
-			}
-		} else {
+
+		if size > 0 {
 			part.Part.Data = &ep.FilePart_Chunk_{
 				Chunk: &ep.FilePart_Chunk{
 					ChunkId: int32(chunkId),
@@ -144,8 +141,15 @@ func (rs *remoteStorage) PutFile(id string, filename string, src io.Reader) erro
 				},
 			}
 
+		} else if err != nil {
+			part.Part.Data = &ep.FilePart_Error_{
+				Error: &ep.FilePart_Error{
+					Error: err.Error(),
+				},
+			}
 		}
 		if err := put.Send(part); err != nil {
+			rs.logger.Infof("Error while sending file part %s\n", part.File)
 			break
 		}
 	}

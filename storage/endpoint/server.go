@@ -116,6 +116,7 @@ func (s *storageServer) PutFile(out ep.Storage_PutFileServer) error {
 			defs[f.Part.FileId] = f.File
 			data[f.Part.FileId] = []byte{}
 		}
+		// TODO: Handle errors here
 		data[f.Part.FileId] = append(data[f.Part.FileId], f.Part.GetChunk().Data...)
 	}
 	for index, dataBytes := range data {

@@ -48,6 +48,13 @@ func (r *resolverImpl) Resolve(id string) error {
 		return err
 	}
 	for _, rec := range rs.Records {
+		for _, file := range rec.GetFiles() {
+			r.logger.Infof("Started downloading %s", file)
+			if err := r.downloader.ScheduleDownload(rs.Id, file.FileUrl); err != nil {
+				r.logger.Warningf("Could not download file %s", file)
+			}
+		}
+
 		if rec.Source != nil && rec.Source.Url != "" {
 			r.savePageView(rs.Id, rec.Source.Url)
 			rec.Files = append(rec.Files,
@@ -56,15 +63,8 @@ func (r *resolverImpl) Resolve(id string) error {
 				newFile("page_view_html", "pageview_page.html"),
 			)
 		}
-
-		for _, file := range rec.GetFiles() {
-			r.logger.Infof("Started downloading %f")
-			if err := r.downloader.ScheduleDownload(rs.Id, file.FileUrl); err != nil {
-				r.logger.Warningf("Could not download file %s", file)
-			}
-		}
 	}
-    return r.storage.SaveRecordSet(rs)
+	return r.storage.SaveRecordSet(rs)
 }
 
 func (r *resolverImpl) saveBase64(id string, fname string) func(string) {
