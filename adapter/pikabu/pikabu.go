@@ -299,3 +299,4 @@ func (p *pikabuAdapter) GetResponse(rq *rpb.Request) []*rpb.Response {
 
 func (p *pikabuAdapter) SendMessage(m *rpb.Message) {
 }
+

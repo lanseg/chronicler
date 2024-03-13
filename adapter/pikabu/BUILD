@@ -6,6 +6,7 @@ go_library(
     name = "pikabu",
     srcs = [
         "pikabu.go",
+        "sourceprovider.go",
     ],
     importpath = "chronicler/adapter/pikabu",
     deps = [
@@ -24,6 +25,7 @@ go_test(
     size = "small",
     srcs = [
         "pikabu_test.go",
+        "sourceprovider_test.go",
     ],
     data = glob(["testdata/*"]),
     embed = [

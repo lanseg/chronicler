@@ -9,3 +9,7 @@ type Adapter interface {
 	GetResponse(*rpb.Request) []*rpb.Response
 	SendMessage(*rpb.Message)
 }
+
+type SourceProvider interface {
+    GetSources() []*rpb.Source
+}
