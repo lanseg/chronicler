@@ -11,5 +11,5 @@ type Adapter interface {
 }
 
 type SourceProvider interface {
-    GetSources() []*rpb.Source
+	GetSources() []*rpb.Source
 }

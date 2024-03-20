@@ -20,6 +20,28 @@ const (
 	pikabuStoryRe = "/story/.*_(?P<story_id>[0-9]+)[#/]?"
 )
 
+func matchLink(link string) *rpb.Source {
+	if link == "" {
+		return nil
+	}
+	u, err := url.Parse(link)
+	if err != nil || u.Host != "pikabu.ru" {
+		return nil
+	}
+	linkMatcher := regexp.MustCompile(pikabuStoryRe)
+	matches := collections.NewMap(
+		linkMatcher.SubexpNames(),
+		linkMatcher.FindStringSubmatch(u.Path))
+	if match, ok := matches["story_id"]; ok && match != "" {
+		return &rpb.Source{
+			ChannelId: match,
+			Url:       u.String(),
+			Type:      rpb.SourceType_PIKABU,
+		}
+	}
+	return nil
+}
+
 type pikabuAdapter struct {
 	adapter.Adapter
 
@@ -30,41 +52,19 @@ type pikabuAdapter struct {
 
 func NewPikabuAdapter(browser webdriver.Browser) adapter.Adapter {
 	return &pikabuAdapter{
-		linkMatcher: regexp.MustCompile(pikabuStoryRe),
-		logger:      cm.NewLogger("PikabuAdapter"),
-		browser:     browser,
+		logger:  cm.NewLogger("PikabuAdapter"),
+		browser: browser,
 	}
 }
 
 func (p *pikabuAdapter) FindSources(r *rpb.Record) []*rpb.Source {
 	result := []*rpb.Source{}
 	for _, link := range r.Links {
-		if src := p.matchLink(link); src != nil {
+		if src := matchLink(link); src != nil {
 			result = append(result, src)
 		}
 	}
 	return result
-}
-
-func (p *pikabuAdapter) matchLink(link string) *rpb.Source {
-	if link == "" {
-		return nil
-	}
-	u, err := url.Parse(link)
-	if err != nil || u.Host != "pikabu.ru" {
-		return nil
-	}
-	matches := collections.NewMap(
-		p.linkMatcher.SubexpNames(),
-		p.linkMatcher.FindStringSubmatch(u.Path))
-	if match, ok := matches["story_id"]; ok && match != "" {
-		return &rpb.Source{
-			ChannelId: match,
-			Url:       u.String(),
-			Type:      rpb.SourceType_PIKABU,
-		}
-	}
-	return nil
 }
 
 func (p *pikabuAdapter) parseStory(node *almosthtml.Node) (*rpb.Record, *rpb.UserMetadata) {
@@ -299,4 +299,3 @@ func (p *pikabuAdapter) GetResponse(rq *rpb.Request) []*rpb.Response {
 
 func (p *pikabuAdapter) SendMessage(m *rpb.Message) {
 }
-
