@@ -92,7 +92,7 @@ func (p *pikabuAdapter) parseStory(node *almosthtml.Node) (*rpb.Record, *rpb.Use
 			result.Source.SenderId = author.Id
 		} else if class == "image-link" {
 			result.Files = append(result.Files, &rpb.File{
-				FileId:  cm.UUID4(),
+				FileId:  cm.UUID4For(n.Params["href"]),
 				FileUrl: n.Params["href"],
 			})
 		} else if n.Name == "a" && n.Params["href"] != "" {
@@ -100,13 +100,13 @@ func (p *pikabuAdapter) parseStory(node *almosthtml.Node) (*rpb.Record, *rpb.Use
 		}
 		if dataLargeImage, hasLargeImage := n.Params["data-large-image"]; hasLargeImage {
 			result.Files = append(result.Files, &rpb.File{
-				FileId:  cm.UUID4(),
+				FileId:  cm.UUID4For(dataLargeImage),
 				FileUrl: dataLargeImage,
 			})
 		}
 		if src, hasSrc := n.Params["src"]; hasSrc && n.Name == "source" {
 			result.Files = append(result.Files, &rpb.File{
-				FileId:  cm.UUID4(),
+				FileId:  cm.UUID4For(src),
 				FileUrl: src,
 			})
 		}
@@ -183,7 +183,11 @@ func (p *pikabuAdapter) parseComment(n *almosthtml.Node) (*rpb.Record, *rpb.User
 	meta := map[string]string{}
 	for _, m := range strings.Split(n.Params["data-meta"], ";") {
 		params := strings.Split(m, "=")
-		meta[params[0]] = params[1]
+		if len(params) == 2 {
+			meta[params[0]] = params[1]
+		} else {
+			meta[params[0]] = ""
+		}
 	}
 
 	result := &rpb.Record{
@@ -222,7 +226,7 @@ func (p *pikabuAdapter) parseComment(n *almosthtml.Node) (*rpb.Record, *rpb.User
 	result.Links = append(result.Links, links...)
 	for _, f := range files {
 		result.Files = append(result.Files, &rpb.File{
-			FileId:  cm.UUID4(),
+			FileId:  cm.UUID4For(f),
 			FileUrl: f,
 		})
 	}
@@ -252,6 +256,12 @@ func (p *pikabuAdapter) GetResponse(rq *rpb.Request) []*rpb.Response {
 	userById := map[string]*rpb.UserMetadata{}
 	commentById := map[string]*rpb.Source{}
 	root, _ := almosthtml.ParseHTML(content)
+	if n := root.GetElementsByTags("title"); len(n) != 0 {
+		if n[0].InnerHTML() == "Страница удалена" {
+			p.logger.Infof("Page was deleted, nothing to parse")
+			return []*rpb.Response{}
+		}
+	}
 	for _, n := range root.GetElementsByTagAndClass("div") {
 		if n.Params["class"] == "story__main" {
 			story, author := p.parseStory(n)

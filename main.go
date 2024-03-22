@@ -6,6 +6,7 @@ import (
 	"net/http/cookiejar"
 	"os"
 	"sync"
+	"time"
 
 	"chronicler/adapter"
 	pkb_adapter "chronicler/adapter/pikabu"
@@ -177,6 +178,25 @@ func main() {
 			}
 		}
 	})()
+
+	pkbsrc := pkb_adapter.NewDisputedProvider(initHttpClient())
+	ticker := time.NewTicker(5 * time.Minute)
+	go func() {
+		logger := cm.NewLogger("Pikabu disputed request")
+		for {
+			srcs := pkbsrc.GetSources()
+			logger.Infof("TICK: %d", len(srcs))
+			for _, src := range srcs {
+				requests <- &rpb.Request{
+					Id:     cm.UUID4(),
+					Target: src,
+				}
+			}
+
+			<-ticker.C
+		}
+	}()
+
 	wg := sync.WaitGroup{}
 	wg.Add(1)
 	wg.Wait()

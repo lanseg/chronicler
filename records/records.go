@@ -72,10 +72,10 @@ func merge[T any](a []T, b []T, hash func(T) uint32, merger func(T, T) T) []T {
 
 func MergeFiles(a []*rpb.File, b []*rpb.File) []*rpb.File {
 	result := merge(a, b, func(f *rpb.File) uint32 {
-		if f.FileId == "" {
-			return fnv32(f.FileUrl)
+		if f.FileUrl == "" {
+			return fnv32(f.FileId)
 		}
-		return fnv32(f.FileId)
+		return fnv32(f.FileUrl)
 	}, func(af *rpb.File, bf *rpb.File) *rpb.File {
 		if af.FileUrl == "" {
 			return bf

@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"sync"
 
 	cm "github.com/lanseg/golang-commons/common"
 	"github.com/lanseg/golang-commons/optional"
@@ -59,6 +60,7 @@ func (m *Mapping) getEntity(originalName string) *Entity {
 type Overlay struct {
 	logger *cm.Logger
 
+	mux     sync.Mutex
 	idSrc   IdSource
 	mapping *Mapping
 	root    string
@@ -138,6 +140,9 @@ func (o *Overlay) Create(originalName string) optional.Optional[*Entity] {
 }
 
 func (o *Overlay) CopyFrom(originalName string, src io.Reader) error {
+	o.mux.Lock()
+	defer o.mux.Unlock()
+
 	name := safeName(originalName)
 	file, err := os.OpenFile(filepath.Join(o.root, name), os.O_RDWR|os.O_CREATE, 0644)
 	defer file.Close()
@@ -159,6 +164,9 @@ func (o *Overlay) newEntity(id string, name string, originalName string) *Entity
 }
 
 func (o *Overlay) Write(originalName string, bytes []byte) optional.Optional[*Entity] {
+	o.mux.Lock()
+	defer o.mux.Unlock()
+
 	name := safeName(originalName)
 	return optional.Map(
 		write(filepath.Join(o.root, name), bytes),
@@ -170,6 +178,9 @@ func (o *Overlay) Write(originalName string, bytes []byte) optional.Optional[*En
 }
 
 func (o *Overlay) Read(originalName string) optional.Optional[io.ReadCloser] {
+	o.mux.Lock()
+	defer o.mux.Unlock()
+
 	e := o.mapping.getEntity(originalName)
 	if e == nil {
 		return optional.OfError[io.ReadCloser](nil, fmt.Errorf("No entity with name %s", originalName))
