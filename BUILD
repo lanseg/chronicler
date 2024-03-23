@@ -21,6 +21,7 @@ go_binary(
         "//webdriver",
         "@golang-commons//collections",
         "@golang-commons//common",
+        "@golang-commons//concurrent",
         "@golang-commons//optional",
         "@tgbot//:telegram_bot",
     ],

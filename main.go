@@ -20,6 +20,7 @@ import (
 	rpb "chronicler/records/proto"
 
 	cm "github.com/lanseg/golang-commons/common"
+	conc "github.com/lanseg/golang-commons/concurrent"
 	tgbot "github.com/lanseg/tgbot"
 )
 
@@ -196,6 +197,20 @@ func main() {
 			<-ticker.C
 		}
 	}()
+
+	conc.RunPeriodically(func() {
+		for _, resp := range adapters[rpb.SourceType_TELEGRAM].GetResponse(&rpb.Request{
+			Id: telegramRequestUUID,
+		}) {
+			response <- resp
+		}
+	}, nil, time.Minute)
+
+	conc.RunPeriodically(func() {
+		for _, src := range pkbsrc.GetSources() {
+			requests <- &rpb.Request{Id: cm.UUID4(), Target: src}
+		}
+	}, nil, 5*time.Minute)
 
 	wg := sync.WaitGroup{}
 	wg.Add(1)
