@@ -60,6 +60,14 @@ func extractRequests(adapters []adapter.Adapter, rs *rpb.RecordSet) []*rpb.Reque
 	return result
 }
 
+func ScheduleRepeatedSource(provider adapter.SourceProvider, dst chan<- *rpb.Request, duration time.Duration) {
+	conc.RunPeriodically(func() {
+		for _, src := range provider.GetSources() {
+			dst <- &rpb.Request{Id: cm.UUID4(), Target: src}
+		}
+	}, nil, duration)
+}
+
 func main() {
 	cfg, err := cm.GetConfig[Config](os.Args[1:], "config")
 	if err != nil {
@@ -98,6 +106,11 @@ func main() {
 	requests := make(chan *rpb.Request, 10)
 	response := make(chan *rpb.Response, 10)
 	messages := make(chan *rpb.Message, 10)
+
+	ScheduleRepeatedSource(pkb_adapter.NewDisputedProvider(initHttpClient()), requests, 20*time.Minute)
+	ScheduleRepeatedSource(pkb_adapter.NewHotProvider(initHttpClient()), requests, 10*time.Minute)
+	ScheduleRepeatedSource(pkb_adapter.NewFreshProvider(initHttpClient()), requests, 5*time.Minute)
+
 
 	go (func() {
 		logger := cm.NewLogger("Chronicler")
@@ -164,40 +177,6 @@ func main() {
 		}
 	})()
 
-	go (func() {
-		logger := cm.NewLogger("Telegram AutoRequest")
-		logger.Infof("Starting telegram periodic fetcher")
-		for {
-			responses := adapters[rpb.SourceType_TELEGRAM].GetResponse(&rpb.Request{
-				Id: telegramRequestUUID,
-			})
-			if len(responses) == 0 {
-				continue
-			}
-			for _, resp := range responses {
-				response <- resp
-			}
-		}
-	})()
-
-	pkbsrc := pkb_adapter.NewDisputedProvider(initHttpClient())
-	ticker := time.NewTicker(5 * time.Minute)
-	go func() {
-		logger := cm.NewLogger("Pikabu disputed request")
-		for {
-			srcs := pkbsrc.GetSources()
-			logger.Infof("TICK: %d", len(srcs))
-			for _, src := range srcs {
-				requests <- &rpb.Request{
-					Id:     cm.UUID4(),
-					Target: src,
-				}
-			}
-
-			<-ticker.C
-		}
-	}()
-
 	conc.RunPeriodically(func() {
 		for _, resp := range adapters[rpb.SourceType_TELEGRAM].GetResponse(&rpb.Request{
 			Id: telegramRequestUUID,
@@ -205,12 +184,6 @@ func main() {
 			response <- resp
 		}
 	}, nil, time.Minute)
-
-	conc.RunPeriodically(func() {
-		for _, src := range pkbsrc.GetSources() {
-			requests <- &rpb.Request{Id: cm.UUID4(), Target: src}
-		}
-	}, nil, 5*time.Minute)
 
 	wg := sync.WaitGroup{}
 	wg.Add(1)

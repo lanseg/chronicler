@@ -257,7 +257,8 @@ func (p *pikabuAdapter) GetResponse(rq *rpb.Request) []*rpb.Response {
 	commentById := map[string]*rpb.Source{}
 	root, _ := almosthtml.ParseHTML(content)
 	if n := root.GetElementsByTags("title"); len(n) != 0 {
-		if n[0].InnerHTML() == "Страница удалена" {
+		title := n[0].InnerHTML()
+		if strings.Contains(title, "Страница удалена") || strings.Contains(title, "Страница не найдена") {
 			p.logger.Infof("Page was deleted, nothing to parse")
 			return []*rpb.Response{}
 		}
