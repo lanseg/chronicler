@@ -111,7 +111,6 @@ func main() {
 	ScheduleRepeatedSource(pkb_adapter.NewHotProvider(initHttpClient()), requests, 10*time.Minute)
 	ScheduleRepeatedSource(pkb_adapter.NewFreshProvider(initHttpClient()), requests, 5*time.Minute)
 
-
 	go (func() {
 		logger := cm.NewLogger("Chronicler")
 		logger.Infof("Starting chronicler thread")

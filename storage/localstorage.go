@@ -52,8 +52,8 @@ func (s *localStorage) PutFile(id string, filename string, src io.Reader) error 
 	return s.getOverlay(id).CopyFrom(filename, src)
 }
 
-func (s *localStorage) ListRecordSets() opt.Optional[[]*rpb.RecordSet] {
-	return opt.Of(records.SortRecordSets(collections.Values(s.recordCache)))
+func (s *localStorage) ListRecordSets(sorting *rpb.Sorting) opt.Optional[[]*rpb.RecordSet] {
+	return opt.Of(records.SortRecordSets(collections.Values(s.recordCache), sorting))
 }
 
 func (s *localStorage) DeleteRecordSet(id string) error {
@@ -90,7 +90,7 @@ func (s *localStorage) getAllRecords() opt.Optional[[]*rpb.RecordSet] {
 			result = append(result, r)
 		})
 	}
-	return opt.Of(records.SortRecordSets(result))
+	return opt.Of(result)
 }
 
 func (s *localStorage) writeRecordSet(rs *rpb.RecordSet) error {

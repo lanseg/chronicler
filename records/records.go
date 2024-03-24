@@ -130,7 +130,7 @@ func MergeRecords(a []*rpb.Record, b []*rpb.Record) []*rpb.Record {
 		result.FetchTime = target.FetchTime
 		return result
 	})
-	SortRecords(result)
+	SortRecords(result, &rpb.Sorting{Field: rpb.Sorting_CREATE_TIME})
 	return result
 }
 
@@ -150,7 +150,7 @@ func MergeStrings(a []string, b []string) []string {
 	return result
 }
 
-func SortRecords(r []*rpb.Record) []*rpb.Record {
+func SortRecords(r []*rpb.Record, sorting *rpb.Sorting) []*rpb.Record {
 	if r == nil {
 		return r
 	}
@@ -164,23 +164,24 @@ func SortRecords(r []*rpb.Record) []*rpb.Record {
 				return false
 			}
 		}
-		if r[i].FetchTime != r[j].FetchTime {
-			return r[i].FetchTime != r[j].FetchTime
-		}
-		if r[i].Time == r[j].Time {
-			return getRecordId(r[i]) < getRecordId(r[j])
+
+		switch sorting.Field {
+		case rpb.Sorting_FETCH_TIME:
+			return r[i].FetchTime < r[j].FetchTime
+		case rpb.Sorting_CREATE_TIME:
+			return r[i].Time < r[j].Time
 		}
 		return r[i].Time < r[j].Time
 	})
 	return r
 }
 
-func SortRecordSets(rs []*rpb.RecordSet) []*rpb.RecordSet {
+func SortRecordSets(rs []*rpb.RecordSet, sorting *rpb.Sorting) []*rpb.RecordSet {
 	if rs == nil {
 		return rs
 	}
 	for _, rset := range rs {
-		rset.Records = SortRecords(rset.Records)
+		rset.Records = SortRecords(rset.Records, sorting)
 	}
 	sort.Slice(rs, func(i int, j int) bool {
 		if len(rs[i].Records) == 0 && len(rs[j].Records) == 0 {
@@ -195,12 +196,11 @@ func SortRecordSets(rs []*rpb.RecordSet) []*rpb.RecordSet {
 		rsi := rs[i].Records[0]
 		rsj := rs[j].Records[0]
 
-		if rsi.FetchTime != rsj.FetchTime {
-			return rsi.FetchTime > rsj.FetchTime
-		}
-
-		if rsi.Time != rsj.Time {
-			return rsi.Time > rsj.Time
+		switch sorting.Field {
+		case rpb.Sorting_FETCH_TIME:
+			return rsi.FetchTime < rsj.FetchTime
+		case rpb.Sorting_CREATE_TIME:
+			return rsi.Time < rsj.Time
 		}
 		return rs[i].Id < rs[j].Id
 	})

@@ -13,8 +13,8 @@ const (
 )
 
 type Storage interface {
-	SaveRecordSet(r *rpb.RecordSet) error
-	ListRecordSets() optional.Optional[[]*rpb.RecordSet]
+	SaveRecordSet(*rpb.RecordSet) error
+	ListRecordSets(*rpb.Sorting) optional.Optional[[]*rpb.RecordSet]
 	GetRecordSet(id string) optional.Optional[*rpb.RecordSet]
 	DeleteRecordSet(id string) error
 

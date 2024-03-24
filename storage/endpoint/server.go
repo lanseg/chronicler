@@ -42,11 +42,16 @@ func (s *storageServer) Save(ctx context.Context, in *ep.SaveRequest) (*ep.SaveR
 func (s *storageServer) List(in *ep.ListRequest, out ep.Storage_ListServer) error {
 	s.logger.Debugf("List request: %v", in)
 	// TODO: Return errors properly
-	s.baseStorage.ListRecordSets().IfPresent(func(rss []*rpb.RecordSet) {
+	sort := in.Sorting
+	if sort == nil {
+		sort = &rpb.Sorting{Field: rpb.Sorting_CREATE_TIME}
+	}
+	s.baseStorage.ListRecordSets(sort).IfPresent(func(rss []*rpb.RecordSet) {
 		for i, rs := range rss {
-			if err := out.Send(&ep.ListResponse{
-				RecordSet: rs,
-			}); err != nil {
+			if in.Limit > 0 && i > int(in.Limit) {
+				break
+			}
+			if err := out.Send(&ep.ListResponse{RecordSet: rs}); err != nil {
 				break
 			}
 			s.logger.Debugf("Sent %d of %d recordsets\n", i, len(rss))

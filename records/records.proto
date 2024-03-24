@@ -38,6 +38,15 @@ message Source {
   SourceType type = 5;
 }
 
+message Sorting {
+    enum Field {
+        FETCH_TIME = 0;
+        CREATE_TIME = 1;
+    }
+
+    Field field = 1;
+}
+
 // Next id: 11
 message Record {
   Source source = 3;

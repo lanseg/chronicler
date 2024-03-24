@@ -42,7 +42,7 @@ func (ws *WebServer) writeJson(w http.ResponseWriter, data any) {
 }
 
 func (ws *WebServer) handleRecordSetList(p PathParams, w http.ResponseWriter, r *http.Request) {
-	rs := records.SortRecordSets(ws.data.ListRecordSets().OrElse([]*rpb.RecordSet{}))
+	rs := ws.data.ListRecordSets(&rpb.Sorting{Field: rpb.Sorting_FETCH_TIME}).OrElse([]*rpb.RecordSet{})
 
 	userById := map[string]*rpb.UserMetadata{}
 	result := &rpb.RecordListResponse{}
@@ -74,7 +74,7 @@ func (ws *WebServer) responseFile(w http.ResponseWriter, id string, filename str
 			ws.Error(w, err.Error(), 500)
 			return
 		}
-		rs.Records = records.SortRecords(rs.Records)
+		rs.Records = records.SortRecords(rs.Records, &rpb.Sorting{Field: rpb.Sorting_FETCH_TIME})
 		ws.writeJson(w, rs)
 		return
 	}
