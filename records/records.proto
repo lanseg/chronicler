@@ -39,12 +39,17 @@ message Source {
 }
 
 message Sorting {
+    enum Order {
+        DESC = 0;
+        ASC = 1;
+    }
     enum Field {
         FETCH_TIME = 0;
         CREATE_TIME = 1;
     }
 
     Field field = 1;
+    Order order = 2;
 }
 
 // Next id: 11

@@ -130,7 +130,7 @@ func MergeRecords(a []*rpb.Record, b []*rpb.Record) []*rpb.Record {
 		result.FetchTime = target.FetchTime
 		return result
 	})
-	SortRecords(result, &rpb.Sorting{Field: rpb.Sorting_CREATE_TIME})
+	SortRecords(result, &rpb.Sorting{Field: rpb.Sorting_CREATE_TIME, Order: rpb.Sorting_DESC})
 	return result
 }
 
@@ -164,14 +164,20 @@ func SortRecords(r []*rpb.Record, sorting *rpb.Sorting) []*rpb.Record {
 				return false
 			}
 		}
-
+       
+        lt := false
 		switch sorting.Field {
 		case rpb.Sorting_FETCH_TIME:
-			return r[i].FetchTime < r[j].FetchTime
+			lt = r[i].FetchTime < r[j].FetchTime
 		case rpb.Sorting_CREATE_TIME:
-			return r[i].Time < r[j].Time
-		}
-		return r[i].Time < r[j].Time
+			lt = r[i].Time < r[j].Time
+		default:
+            lt = r[i].Time < r[j].Time
+        }
+        if sorting.Order == rpb.Sorting_ASC {
+            lt = !lt
+        }
+		return lt
 	})
 	return r
 }
@@ -196,13 +202,19 @@ func SortRecordSets(rs []*rpb.RecordSet, sorting *rpb.Sorting) []*rpb.RecordSet 
 		rsi := rs[i].Records[0]
 		rsj := rs[j].Records[0]
 
+        lt := false
 		switch sorting.Field {
 		case rpb.Sorting_FETCH_TIME:
-			return rsi.FetchTime < rsj.FetchTime
+			lt = rsi.FetchTime < rsj.FetchTime
 		case rpb.Sorting_CREATE_TIME:
-			return rsi.Time < rsj.Time
-		}
-		return rs[i].Id < rs[j].Id
+			lt = rsi.Time < rsj.Time
+		default:
+            lt = rs[i].Id < rs[j].Id
+        }
+        if sorting.Order == rpb.Sorting_DESC {
+            lt = !lt
+        }
+		return lt
 	})
 	return rs
 }
