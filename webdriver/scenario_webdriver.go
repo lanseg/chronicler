@@ -30,7 +30,13 @@ func (wd *scenarioWebdriver) getScenario() optional.Optional[Scenario] {
 
 func (wd *scenarioWebdriver) runScenario(script string) {
 	concurrent.WaitForValueRetries("true", func() optional.Optional[string] {
-		return wd.baseDriver.ExecuteScript(script)
+		result := wd.baseDriver.ExecuteScript(script)
+		result.IfPresent(func(result string) {
+			wd.logger.Debugf("Executing scenario: %s, Result: %s",
+				cm.Ellipsis(script, 100, false),
+				cm.Ellipsis(result, 100, false))
+		})
+		return result
 	}, 120)
 }
 

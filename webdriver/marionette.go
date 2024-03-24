@@ -101,7 +101,7 @@ func (m *Marionette) reader() {
 			}
 			payload = append(payload, payloadBuffer[:bytesRead]...)
 		}
-		m.logger.Infof("Read [%d of %d] bytes of payload", len(payload), payloadSize)
+		m.logger.Debugf("Read [%d of %d] bytes of payload", len(payload), payloadSize)
 		m.onDataRead(payload)
 	}
 }
@@ -135,7 +135,7 @@ func (m *Marionette) onDataRead(data []byte) {
 		return
 	}
 	response := &Response{MessageId: id, Result: result[3]}
-	m.logger.Infof("Response id:%d err:%v result:%p [%p]", response.MessageId, response.Error, result[3], result[3])
+	m.logger.Debugf("Response id:%d err:%v result:%p [%p]", response.MessageId, response.Error, result[3], result[3])
 	ch <- optional.OfNullable(response)
 }
 
@@ -145,7 +145,7 @@ func (m *Marionette) write(command string, params any) optional.Optional[*Respon
 	optional.OfError(json.Marshal([]any{0, m.messageCounter, command, params})).
 		IfPresent(func(bytes []byte) {
 			msg := fmt.Sprintf("%d:%s", len(bytes), string(bytes))
-			m.logger.Infof("Writing json: %s", msg)
+			m.logger.Debugf("Writing json: %s", cm.Ellipsis(msg, 100, false))
 			m.connection.Write([]byte(msg))
 		})
 	m.messageCounter++
