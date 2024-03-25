@@ -130,7 +130,7 @@ func MergeRecords(a []*rpb.Record, b []*rpb.Record) []*rpb.Record {
 		result.FetchTime = target.FetchTime
 		return result
 	})
-	SortRecords(result, &rpb.Sorting{Field: rpb.Sorting_CREATE_TIME, Order: rpb.Sorting_DESC})
+	SortRecords(result, &rpb.Sorting{Field: rpb.Sorting_CREATE_TIME, Order: rpb.Sorting_ASC})
 	return result
 }
 
@@ -148,75 +148,6 @@ func MergeStrings(a []string, b []string) []string {
 	result := resultSet.Values()
 	sort.Strings(result)
 	return result
-}
-
-func SortRecords(r []*rpb.Record, sorting *rpb.Sorting) []*rpb.Record {
-	if r == nil {
-		return r
-	}
-
-	sort.Slice(r, func(i int, j int) bool {
-		if r[i].Parent != nil && r[j].Parent != nil {
-			if hashSource(r[i].Parent) == hashSource(r[j].Source) {
-				return true
-			}
-			if hashSource(r[i].Source) == hashSource(r[j].Parent) {
-				return false
-			}
-		}
-       
-        lt := false
-		switch sorting.Field {
-		case rpb.Sorting_FETCH_TIME:
-			lt = r[i].FetchTime < r[j].FetchTime
-		case rpb.Sorting_CREATE_TIME:
-			lt = r[i].Time < r[j].Time
-		default:
-            lt = r[i].Time < r[j].Time
-        }
-        if sorting.Order == rpb.Sorting_ASC {
-            lt = !lt
-        }
-		return lt
-	})
-	return r
-}
-
-func SortRecordSets(rs []*rpb.RecordSet, sorting *rpb.Sorting) []*rpb.RecordSet {
-	if rs == nil {
-		return rs
-	}
-	for _, rset := range rs {
-		rset.Records = SortRecords(rset.Records, sorting)
-	}
-	sort.Slice(rs, func(i int, j int) bool {
-		if len(rs[i].Records) == 0 && len(rs[j].Records) == 0 {
-			return rs[i].Id < rs[j].Id
-		}
-		if len(rs[i].Records) == 0 && len(rs[j].Records) != 0 {
-			return true
-		}
-		if len(rs[i].Records) != 0 && len(rs[j].Records) == 0 {
-			return false
-		}
-		rsi := rs[i].Records[0]
-		rsj := rs[j].Records[0]
-
-        lt := false
-		switch sorting.Field {
-		case rpb.Sorting_FETCH_TIME:
-			lt = rsi.FetchTime < rsj.FetchTime
-		case rpb.Sorting_CREATE_TIME:
-			lt = rsi.Time < rsj.Time
-		default:
-            lt = rs[i].Id < rs[j].Id
-        }
-        if sorting.Order == rpb.Sorting_DESC {
-            lt = !lt
-        }
-		return lt
-	})
-	return rs
 }
 
 func CreatePreview(rs *rpb.RecordSet) *rpb.RecordSetPreview {

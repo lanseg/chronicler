@@ -50,11 +50,16 @@ func extractRequests(adapters []adapter.Adapter, rs *rpb.RecordSet) []*rpb.Reque
 		return result
 	}
 	for _, a := range adapters {
+		found := false
 		for _, target := range a.FindSources(rs.Records[0]) {
 			result = append(result, &rpb.Request{
 				Id:     rs.Id,
 				Target: target,
 			})
+			found = true
+		}
+		if found {
+			break
 		}
 	}
 	return result

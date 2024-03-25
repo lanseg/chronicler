@@ -19,7 +19,10 @@ go_proto_library(
 
 go_library(
     name = "records",
-    srcs = ["records.go"],
+    srcs = [
+        "records.go",
+        "sort.go",
+    ],
     importpath = "chronicler/records",
     visibility = ["//visibility:public"],
     deps = [
@@ -35,6 +38,7 @@ go_test(
     size = "small",
     srcs = [
         "records_test.go",
+        "sort_test.go",
     ],
     embed = [
         ":records",
