@@ -65,10 +65,16 @@ func extractRequests(adapters []adapter.Adapter, rs *rpb.RecordSet) []*rpb.Reque
 	return result
 }
 
-func ScheduleRepeatedSource(provider adapter.SourceProvider, dst chan<- *rpb.Request, duration time.Duration) {
+func ScheduleRepeatedSource(provider adapter.SourceProvider, engine rpb.WebEngine, dst chan<- *rpb.Request, duration time.Duration) {
 	conc.RunPeriodically(func() {
 		for _, src := range provider.GetSources() {
-			dst <- &rpb.Request{Id: cm.UUID4(), Target: src}
+			dst <- &rpb.Request{
+				Id: cm.UUID4(),
+				Config: &rpb.RequestConfig{
+					Engine: engine,
+				},
+				Target: src,
+			}
 		}
 	}, nil, duration)
 }
@@ -112,9 +118,9 @@ func main() {
 	response := make(chan *rpb.Response, 10)
 	messages := make(chan *rpb.Message, 10)
 
-	ScheduleRepeatedSource(pkb_adapter.NewDisputedProvider(initHttpClient()), requests, 30*time.Minute)
-	ScheduleRepeatedSource(pkb_adapter.NewHotProvider(initHttpClient()), requests, 15*time.Minute)
-	ScheduleRepeatedSource(pkb_adapter.NewFreshProvider(initHttpClient()), requests, 5*time.Minute)
+	ScheduleRepeatedSource(pkb_adapter.NewDisputedProvider(initHttpClient()), rpb.WebEngine_WEBDRIVER, requests, 30*time.Minute)
+	ScheduleRepeatedSource(pkb_adapter.NewHotProvider(initHttpClient()), rpb.WebEngine_WEBDRIVER, requests, 15*time.Minute)
+	ScheduleRepeatedSource(pkb_adapter.NewFreshProvider(initHttpClient()), rpb.WebEngine_HTTP_PLAIN, requests, 5*time.Minute)
 
 	go (func() {
 		logger := cm.NewLogger("Chronicler")

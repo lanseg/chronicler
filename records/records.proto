@@ -22,7 +22,7 @@ enum FetchStatus {
 enum WebEngine {
   UNKNOWN_ENGINE = 0;
   HTTP_PLAIN     = 1;
-  MARIONETTE     = 2;
+  WEBDRIVER      = 2;
 }
 
 message FileMetadata {
@@ -103,6 +103,8 @@ message Request {
   string id     = 1;
   Source origin = 2;
   Source target = 3;
+
+  RequestConfig config = 4;
 }
 
 message Response {

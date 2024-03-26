@@ -15,6 +15,7 @@ go_library(
         "//records",
         "//records:records_go_proto",
         "//webdriver",
+        "@org_golang_x_text//encoding/charmap",
         "@golang-commons//almosthtml",
         "@golang-commons//collections",
         "@golang-commons//common",

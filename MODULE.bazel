@@ -26,7 +26,14 @@ go_deps.module(
   sum = "h1:TOvOcuXn30kRao+gfcvsebNEa5iZIiLkisYEkf7R7o0=",
 )
 
+go_deps.module(
+  path = "golang.org/x/text",
+  version = "v0.14.0",
+  sum = "h1:ScX5w1eTa3QqT8oi6+ziP7dTV1S2+ALU0bI+0zXKWiQ=",
+)
+
 use_repo(
   go_deps,
   "org_golang_google_grpc",
+  "org_golang_x_text",
 )

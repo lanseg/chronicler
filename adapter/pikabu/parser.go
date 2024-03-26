@@ -1,6 +1,7 @@
 package pikabu
 
 import (
+	"fmt"
 	"strings"
 	"time"
 
@@ -183,7 +184,7 @@ func parseComment(n *almosthtml.Node) (*rpb.Record, *rpb.UserMetadata) {
 	return result, userData
 }
 
-func parsePost(content string) *rpb.Response {
+func parsePost(content string) (*rpb.Response, error) {
 	resultRecords := []*rpb.Record{}
 	userById := map[string]*rpb.UserMetadata{}
 	commentById := map[string]*rpb.Source{}
@@ -191,7 +192,7 @@ func parsePost(content string) *rpb.Response {
 	if n := root.GetElementsByTags("title"); len(n) != 0 {
 		title := n[0].InnerHTML()
 		if strings.Contains(title, "Страница удалена") || strings.Contains(title, "Страница не найдена") {
-			return nil
+			return nil, fmt.Errorf("Page was removed: %s", title)
 		}
 	}
 	for _, n := range root.GetElementsByTagAndClass("div") {
@@ -232,5 +233,5 @@ func parsePost(content string) *rpb.Response {
 				UserMetadata: collections.Values(userById),
 			},
 		},
-	}
+	}, nil
 }
