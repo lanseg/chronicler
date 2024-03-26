@@ -112,8 +112,8 @@ func main() {
 	response := make(chan *rpb.Response, 10)
 	messages := make(chan *rpb.Message, 10)
 
-	ScheduleRepeatedSource(pkb_adapter.NewDisputedProvider(initHttpClient()), requests, 20*time.Minute)
-	ScheduleRepeatedSource(pkb_adapter.NewHotProvider(initHttpClient()), requests, 10*time.Minute)
+	ScheduleRepeatedSource(pkb_adapter.NewDisputedProvider(initHttpClient()), requests, 30*time.Minute)
+	ScheduleRepeatedSource(pkb_adapter.NewHotProvider(initHttpClient()), requests, 15*time.Minute)
 	ScheduleRepeatedSource(pkb_adapter.NewFreshProvider(initHttpClient()), requests, 5*time.Minute)
 
 	go (func() {
