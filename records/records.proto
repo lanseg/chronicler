@@ -19,65 +19,71 @@ enum FetchStatus {
   SUCCESS        = 3;
 }
 
+enum WebEngine {
+  UNKNOWN_ENGINE = 0;
+  HTTP_PLAIN     = 1;
+  MARIONETTE     = 2;
+}
+
 message FileMetadata {
     string mimetype = 1;
-    uint64 size = 2;
+    uint64 size     = 2;
 }
 
 message File {
-  string file_id = 1;
-  string file_url = 2;
+  string file_id   = 1;
+  string file_url  = 2;
   string local_url = 3;
 }
 
 message Source {
-  string sender_id = 1;
+  string sender_id  = 1;
   string channel_id = 2;
   string message_id = 3;
-  string url = 4;
-  SourceType type = 5;
+  string url        = 4;
+  SourceType type   = 5;
 }
 
 message Sorting {
     enum Order {
         DESC = 0;
-        ASC = 1;
+        ASC  = 1;
     }
     enum Field {
-        FETCH_TIME = 0;
+        FETCH_TIME  = 0;
         CREATE_TIME = 1;
     }
-
+ 
     Field field = 1;
     Order order = 2;
 }
 
 // Next id: 11
 message Record {
-  Source source = 3;
-  Source parent = 4;
-  string text_content = 5;
-  bytes raw_content = 9;
-  int64 time = 6;
-  int64 fetch_time = 10;
-  repeated File files = 7;
+  Source source         = 3;
+  Source parent         = 4;
+  string text_content   = 5;
+  bytes raw_content     = 9;
+  int64 time            = 6;
+  int64 fetch_time      = 10;
+  repeated File files   = 7;
   repeated string links = 8;
 }
 
 message UserMetadata {
-  string id = 1;
-  string username = 2;
+  string id              = 1;
+  string username        = 2;
   repeated string quotes = 3;
 }
 
 message RecordSet {
-  string id = 1;
-  repeated Record records = 3;
+  string id                          = 1;
+  repeated Record records            = 3;
   repeated UserMetadata userMetadata = 4;
 }
 
 message RecordSetPreview {
-  string id = 1;
+  string id          = 1;
   string description = 2;
   int32 record_count = 3;
 
@@ -86,17 +92,21 @@ message RecordSetPreview {
 
 message RecordListResponse {
   repeated RecordSetPreview record_sets = 1;
-  repeated UserMetadata user_metadata = 2;
+  repeated UserMetadata user_metadata   = 2;
+}
+
+message RequestConfig {
+  WebEngine engine = 1;
 }
 
 message Request {
-  string id = 1;
+  string id     = 1;
   Source origin = 2;
   Source target = 3;
 }
 
 message Response {
-  Request request = 1;
+  Request request           = 1;
   repeated RecordSet result = 2;
 }
 

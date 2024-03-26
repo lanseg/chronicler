@@ -6,6 +6,7 @@ go_library(
     name = "pikabu",
     srcs = [
         "pikabu.go",
+        "parser.go",
         "sourceprovider.go",
     ],
     importpath = "chronicler/adapter/pikabu",

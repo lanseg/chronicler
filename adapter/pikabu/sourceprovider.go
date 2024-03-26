@@ -94,6 +94,7 @@ func NewFreshProvider(client HttpClient) adapter.SourceProvider {
 func NewHotProvider(client HttpClient) adapter.SourceProvider {
 	return &pikabuSourceProvider{
 		httpClient: client,
+		skipSeen:   true,
 		page:       "https://pikabu.ru/hot",
 		logger:     cm.NewLogger("pikabu:hot"),
 	}
