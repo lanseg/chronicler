@@ -5,11 +5,11 @@ import (
 	"strings"
 	"time"
 
-	rpb "chronicler/records/proto"
-
 	"github.com/lanseg/golang-commons/almosthtml"
 	"github.com/lanseg/golang-commons/collections"
-	cm "github.com/lanseg/golang-commons/common"
+
+	"chronicler/records"
+	rpb "chronicler/records/proto"
 )
 
 type TimeSource func() time.Time
@@ -53,33 +53,21 @@ func parseStory(node *almosthtml.Node, timeSrc TimeSource) (*rpb.Record, *rpb.Us
 			author.Id = n.Params["data-id"]
 			result.Source.SenderId = author.Id
 		} else if class == "image-link" {
-			result.Files = append(result.Files, &rpb.File{
-				FileId:  cm.UUID4For(n.Params["href"]),
-				FileUrl: n.Params["href"],
-			})
+			result.Files = append(result.Files, records.NewFile(n.Params["href"]))
 		} else if n.Params["data-type"] != "" && n.Params["data-source"] != "" {
 			src := n.Params["data-source"]
 			if n.Params["data-type"] == "video-file" {
 				src += ".mp4"
 			}
-			result.Files = append(result.Files, &rpb.File{
-				FileId:  cm.UUID4For(n.Params["data-source"]),
-				FileUrl: n.Params["data-source"],
-			})
+			result.Files = append(result.Files, records.NewFile(n.Params["data-source"]))
 		} else if n.Name == "a" && n.Params["href"] != "" {
 			result.Links = append(result.Links, n.Params["href"])
 		}
 		if dataLargeImage, hasLargeImage := n.Params["data-large-image"]; hasLargeImage {
-			result.Files = append(result.Files, &rpb.File{
-				FileId:  cm.UUID4For(dataLargeImage),
-				FileUrl: dataLargeImage,
-			})
+			result.Files = append(result.Files, records.NewFile(dataLargeImage))
 		}
 		if src, hasSrc := n.Params["src"]; hasSrc && n.Name == "source" {
-			result.Files = append(result.Files, &rpb.File{
-				FileId:  cm.UUID4For(src),
-				FileUrl: src,
-			})
+			result.Files = append(result.Files, records.NewFile(src))
 		}
 
 		if n.Name == "time" {
@@ -197,10 +185,7 @@ func parseComment(n *almosthtml.Node, timeSrc TimeSource) (*rpb.Record, *rpb.Use
 
 	result.Links = append(result.Links, links...)
 	for _, f := range files {
-		result.Files = append(result.Files, &rpb.File{
-			FileId:  cm.UUID4For(f),
-			FileUrl: f,
-		})
+		result.Files = append(result.Files, records.NewFile(f))
 	}
 	result.TextContent = content
 	userData := &rpb.UserMetadata{

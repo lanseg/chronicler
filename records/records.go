@@ -177,3 +177,10 @@ func CreatePreview(rs *rpb.RecordSet) *rpb.RecordSetPreview {
 		RootRecord:  r,
 	}
 }
+
+func NewFile(url string) *rpb.File {
+	return &rpb.File{
+		FileId:  cm.UUID4For(url),
+		FileUrl: url,
+	}
+}

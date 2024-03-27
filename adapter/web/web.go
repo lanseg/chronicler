@@ -7,13 +7,14 @@ import (
 	"strings"
 	"time"
 
-	"chronicler/adapter"
-	rpb "chronicler/records/proto"
-	"chronicler/webdriver"
-
 	"github.com/lanseg/golang-commons/almosthtml"
 	"github.com/lanseg/golang-commons/collections"
 	cm "github.com/lanseg/golang-commons/common"
+
+	"chronicler/adapter"
+	"chronicler/records"
+	rpb "chronicler/records/proto"
+	"chronicler/webdriver"
 )
 
 const (
@@ -163,7 +164,7 @@ func (w *webAdapter) GetResponse(request *rpb.Request) []*rpb.Response {
 			knownLinks.Add(fixedLink)
 			pos := strings.LastIndex(fixedLink, ".")
 			if pos != -1 && isFileUrl(fixedLink[pos+1:]) {
-				record.Files = append(record.Files, &rpb.File{FileUrl: fixedLink})
+				record.Files = append(record.Files, records.NewFile(fixedLink))
 			} else {
 				record.Links = append(record.Links, fixedLink)
 			}

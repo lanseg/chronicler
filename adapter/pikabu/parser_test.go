@@ -32,14 +32,14 @@ func TestPikabuParser(t *testing.T) {
 		name string
 		file string
 	}{
-		// {
-		// 	name: "post no text with comments",
-		// 	file: "pikabu_10819340.html",
-		// },
-		// {
-		// 	name: "post text only with comments",
-		// 	file: "pikabu_11261377.html",
-		// },
+		{
+			name: "post no text with comments",
+			file: "pikabu_10819340.html",
+		},
+		{
+			name: "post text only with comments",
+			file: "pikabu_11261377.html",
+		},
 		{
 			name: "post with pikabu video links",
 			file: "pikabu_video_11265076.html",
