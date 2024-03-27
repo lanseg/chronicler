@@ -1,0 +1,152 @@
+{
+    "result": [
+        {
+            "records": [
+                {
+                    "source": {
+                        "sender_id": "914719",
+                        "type": 4
+                    },
+                    "text_content": "Пять уголовок хозяину питбуля и извинение &quot;по-кадыровски&quot;\n\nПрокуратура Сухого Лога удовлетворила коллективную жалобу горожан на бездействие полиции в отношении 45-летнего хозяина питбуля. использующего свою собаку, как оружие. В один день возбуждено 5 уголовных дел по эпизодам двух прошедших лет",
+                    "time": 1711524930,
+                    "fetch_time": 1711533845,
+                    "files": [
+                        {
+                            "file_id": "87cbc34f-1378-496f-baf7-4ef0285eda03",
+                            "file_url": "https://cs13.pikabu.ru/video/2024/03/27/1711524781240122062_8d8338fb_1280x720"
+                        },
+                        {
+                            "file_id": "762d747d-43c1-47c1-869d-bb4c4e45ef5f",
+                            "file_url": "https://cs13.pikabu.ru/video/2024/03/27/171152479028795582_bdc79514_1280x720"
+                        },
+                        {
+                            "file_id": "5968c5e0-fe38-440c-945b-552f7c77ed59",
+                            "file_url": "https://cs13.pikabu.ru/video/2024/03/27/1711524804210084181_49a76e40_1280x720"
+                        }
+                    ],
+                    "links": [
+                        "/new/27-03-2024",
+                        "/tag/%D0%9D%D0%B5%D0%B3%D0%B0%D1%82%D0%B8%D0%B2/hot",
+                        "/tag/%D0%9F%D1%80%D0%BE%D0%B8%D1%81%D1%88%D0%B5%D1%81%D1%82%D0%B2%D0%B8%D0%B5/hot",
+                        "/tag/%D0%A3%D0%B3%D0%BE%D0%BB%D0%BE%D0%B2%D0%BD%D0%BE%D0%B5%20%D0%B4%D0%B5%D0%BB%D0%BE/hot",
+                        "/tag/%D0%9C%D0%92%D0%94/hot",
+                        "/tag/%D0%9A%D0%BE%D0%BD%D1%84%D0%BB%D0%B8%D0%BA%D1%82/hot",
+                        "/tag/%D0%A1%D0%BE%D0%B1%D0%B0%D0%BA%D0%B0/hot",
+                        "/tag/%D0%92%D0%B8%D0%B4%D0%B5%D0%BE/hot",
+                        "/tag/%D0%94%D0%BB%D0%B8%D0%BD%D0%BD%D0%BE%D0%BF%D0%BE%D1%81%D1%82/hot",
+                        "/edits/11265076/tags"
+                    ]
+                },
+                {
+                    "source": {
+                        "sender_id": "1288935",
+                        "channel_id": "11265076",
+                        "message_id": "303623363",
+                        "type": 4
+                    },
+                    "parent": {
+                        "sender_id": "914719",
+                        "type": 4
+                    },
+                    "text_content": "Пусть в тюрячку садится. А собачку усыпить, она конечно не виновата, но ей просто не повезло.",
+                    "time": 1711525510,
+                    "fetch_time": 1711533845
+                },
+                {
+                    "source": {
+                        "sender_id": "5738728",
+                        "channel_id": "11265076",
+                        "message_id": "303624082",
+                        "type": 4
+                    },
+                    "parent": {
+                        "sender_id": "1288935",
+                        "channel_id": "11265076",
+                        "message_id": "303623363",
+                        "type": 4
+                    },
+                    "text_content": "Думаю ему к тюряге не привыкать",
+                    "time": 1711525922,
+                    "fetch_time": 1711533845
+                },
+                {
+                    "source": {
+                        "sender_id": "2493397",
+                        "channel_id": "11265076",
+                        "message_id": "303627199",
+                        "type": 4
+                    },
+                    "parent": {
+                        "sender_id": "5738728",
+                        "channel_id": "11265076",
+                        "message_id": "303624082",
+                        "type": 4
+                    },
+                    "text_content": "Тем более",
+                    "time": 1711527668,
+                    "fetch_time": 1711533845
+                },
+                {
+                    "source": {
+                        "sender_id": "974158",
+                        "channel_id": "11265076",
+                        "message_id": "303631081",
+                        "type": 4
+                    },
+                    "parent": {
+                        "sender_id": "1288935",
+                        "channel_id": "11265076",
+                        "message_id": "303623363",
+                        "type": 4
+                    },
+                    "text_content": "вместе с ментами, которые как всегда болт положили на защиту граждан.",
+                    "time": 1711529748,
+                    "fetch_time": 1711533845
+                },
+                {
+                    "source": {
+                        "sender_id": "1277542",
+                        "channel_id": "11265076",
+                        "message_id": "303628968",
+                        "type": 4
+                    },
+                    "parent": {
+                        "sender_id": "1288935",
+                        "channel_id": "11265076",
+                        "message_id": "303623363",
+                        "type": 4
+                    },
+                    "text_content": "Хозяина тоже усыпить.",
+                    "time": 1711528593,
+                    "fetch_time": 1711533845
+                }
+            ],
+            "userMetadata": [
+                {
+                    "id": "1277542",
+                    "username": "krikunand1978"
+                },
+                {
+                    "id": "914719",
+                    "username": "tauekb"
+                },
+                {
+                    "id": "1288935",
+                    "username": "Vincent.Law"
+                },
+                {
+                    "id": "5738728",
+                    "username": "OldBiker52"
+                },
+                {
+                    "id": "2493397",
+                    "username": "NykonaSharrowkyn"
+                },
+                {
+                    "id": "974158",
+                    "username": "mymmitroll"
+                }
+            ]
+        }
+    ]
+}
