@@ -59,7 +59,7 @@ func parseStory(node *almosthtml.Node, timeSrc TimeSource) (*rpb.Record, *rpb.Us
 			if n.Params["data-type"] == "video-file" {
 				src += ".mp4"
 			}
-			result.Files = append(result.Files, records.NewFile(n.Params["data-source"]))
+			result.Files = append(result.Files, records.NewFile(src))
 		} else if n.Name == "a" && n.Params["href"] != "" {
 			result.Links = append(result.Links, n.Params["href"])
 		}

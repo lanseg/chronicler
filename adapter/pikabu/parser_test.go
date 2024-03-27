@@ -44,6 +44,10 @@ func TestPikabuParser(t *testing.T) {
 			name: "post with pikabu video links",
 			file: "pikabu_video_11265076.html",
 		},
+		{
+			name: "post with video links loaded by curl",
+			file: "pikabu_video_curl_11266557.html",
+		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			data, err := os.ReadFile(filepath.Join("testdata", tc.file))
@@ -70,6 +74,8 @@ func TestPikabuParser(t *testing.T) {
 			wantStr := fmt.Sprintf("%s", want)
 
 			if resultStr != wantStr {
+				fmt.Println(resultStr)
+				fmt.Println(wantStr)
 				t.Errorf("Expected and actual result for %q differ", tc.name)
 			}
 		})
