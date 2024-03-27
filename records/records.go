@@ -6,11 +6,11 @@ import (
 	"hash/fnv"
 	"sort"
 
-	rpb "chronicler/records/proto"
-
 	"github.com/lanseg/golang-commons/almosthtml"
 	"github.com/lanseg/golang-commons/collections"
 	cm "github.com/lanseg/golang-commons/common"
+
+	rpb "chronicler/records/proto"
 )
 
 const (

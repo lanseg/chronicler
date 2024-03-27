@@ -4,13 +4,13 @@ import (
 	"bytes"
 	"encoding/base64"
 
+	cm "github.com/lanseg/golang-commons/common"
+	"github.com/lanseg/golang-commons/optional"
+
 	"chronicler/downloader"
 	rpb "chronicler/records/proto"
 	"chronicler/storage"
 	"chronicler/webdriver"
-
-	cm "github.com/lanseg/golang-commons/common"
-	"github.com/lanseg/golang-commons/optional"
 )
 
 type Resolver interface {

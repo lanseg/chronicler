@@ -8,14 +8,13 @@ import (
 	"regexp"
 	"time"
 
+	"github.com/lanseg/golang-commons/collections"
+	cm "github.com/lanseg/golang-commons/common"
+	"golang.org/x/text/encoding/charmap"
+
 	"chronicler/adapter"
 	rpb "chronicler/records/proto"
 	"chronicler/webdriver"
-
-	"golang.org/x/text/encoding/charmap"
-
-	"github.com/lanseg/golang-commons/collections"
-	cm "github.com/lanseg/golang-commons/common"
 )
 
 const (

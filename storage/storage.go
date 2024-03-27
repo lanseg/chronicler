@@ -3,9 +3,9 @@ package storage
 import (
 	"io"
 
-	rpb "chronicler/records/proto"
-
 	"github.com/lanseg/golang-commons/optional"
+
+	rpb "chronicler/records/proto"
 )
 
 const (

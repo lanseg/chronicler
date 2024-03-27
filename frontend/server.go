@@ -7,13 +7,13 @@ import (
 	"net/http"
 	"strings"
 
-	"chronicler/records"
-	rpb "chronicler/records/proto"
-	"chronicler/storage"
-
 	"github.com/lanseg/golang-commons/collections"
 	cm "github.com/lanseg/golang-commons/common"
 	"github.com/lanseg/golang-commons/optional"
+
+	"chronicler/records"
+	rpb "chronicler/records/proto"
+	"chronicler/storage"
 )
 
 type DeleteRecordResponse struct {

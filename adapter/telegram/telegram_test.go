@@ -7,11 +7,10 @@ import (
 	"path/filepath"
 	"testing"
 
-	rpb "chronicler/records/proto"
-
 	cm "github.com/lanseg/golang-commons/common"
-
 	"github.com/lanseg/tgbot"
+
+	rpb "chronicler/records/proto"
 )
 
 const (

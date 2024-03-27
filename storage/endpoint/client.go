@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io"
 
+	cm "github.com/lanseg/golang-commons/common"
+	"github.com/lanseg/golang-commons/optional"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/encoding/gzip"
@@ -13,9 +15,6 @@ import (
 	rpb "chronicler/records/proto"
 	"chronicler/storage"
 	ep "chronicler/storage/endpoint_go_proto"
-
-	cm "github.com/lanseg/golang-commons/common"
-	"github.com/lanseg/golang-commons/optional"
 )
 
 func newEndpointClient(addr string) (ep.StorageClient, error) {

@@ -8,12 +8,12 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/lanseg/golang-commons/concurrent"
+	"github.com/lanseg/golang-commons/optional"
+
 	rpb "chronicler/records/proto"
 	"chronicler/storage"
 	ep "chronicler/storage/endpoint_go_proto"
-
-	"github.com/lanseg/golang-commons/concurrent"
-	"github.com/lanseg/golang-commons/optional"
 )
 
 const (

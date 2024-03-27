@@ -6,14 +6,13 @@ import (
 	"fmt"
 	"net"
 
-	rpb "chronicler/records/proto"
-	"chronicler/storage"
-	ep "chronicler/storage/endpoint_go_proto"
-
+	cm "github.com/lanseg/golang-commons/common"
 	"google.golang.org/grpc"
 	_ "google.golang.org/grpc/encoding/gzip" // Install the gzip compressor
 
-	cm "github.com/lanseg/golang-commons/common"
+	rpb "chronicler/records/proto"
+	"chronicler/storage"
+	ep "chronicler/storage/endpoint_go_proto"
 )
 
 const (

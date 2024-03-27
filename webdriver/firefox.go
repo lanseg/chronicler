@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"os"
 
-	"chronicler/util"
-
 	cm "github.com/lanseg/golang-commons/common"
+
+	"chronicler/util"
 )
 
 const (

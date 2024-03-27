@@ -8,20 +8,19 @@ import (
 	"sync"
 	"time"
 
+	cm "github.com/lanseg/golang-commons/common"
+	conc "github.com/lanseg/golang-commons/concurrent"
+	tgbot "github.com/lanseg/tgbot"
+
 	"chronicler/adapter"
 	pkb_adapter "chronicler/adapter/pikabu"
 	tlg_adapter "chronicler/adapter/telegram"
 	twi_adapter "chronicler/adapter/twitter"
 	web_adapter "chronicler/adapter/web"
 	"chronicler/downloader"
+	rpb "chronicler/records/proto"
 	ep "chronicler/storage/endpoint"
 	"chronicler/webdriver"
-
-	rpb "chronicler/records/proto"
-
-	cm "github.com/lanseg/golang-commons/common"
-	conc "github.com/lanseg/golang-commons/concurrent"
-	tgbot "github.com/lanseg/tgbot"
 )
 
 var (

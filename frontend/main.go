@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"os"
 
+	cm "github.com/lanseg/golang-commons/common"
+
 	"chronicler/frontend"
 	sep "chronicler/storage/endpoint"
-
-	cm "github.com/lanseg/golang-commons/common"
 )
 
 type FrontendConfig struct {

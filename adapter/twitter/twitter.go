@@ -5,11 +5,11 @@ import (
 	"sort"
 	"time"
 
-	"chronicler/adapter"
-	rpb "chronicler/records/proto"
-
 	"github.com/lanseg/golang-commons/collections"
 	cm "github.com/lanseg/golang-commons/common"
+
+	"chronicler/adapter"
+	rpb "chronicler/records/proto"
 )
 
 const (

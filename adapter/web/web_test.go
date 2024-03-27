@@ -10,11 +10,11 @@ import (
 	"testing"
 	"time"
 
-	rpb "chronicler/records/proto"
-	"chronicler/webdriver"
-
 	cm "github.com/lanseg/golang-commons/common"
 	"github.com/lanseg/golang-commons/optional"
+
+	rpb "chronicler/records/proto"
+	"chronicler/webdriver"
 )
 
 const (

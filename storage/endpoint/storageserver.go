@@ -5,10 +5,10 @@ import (
 	"os"
 	"sync"
 
+	cm "github.com/lanseg/golang-commons/common"
+
 	"chronicler/storage"
 	"chronicler/storage/endpoint"
-
-	cm "github.com/lanseg/golang-commons/common"
 )
 
 var (

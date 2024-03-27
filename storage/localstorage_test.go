@@ -7,10 +7,10 @@ import (
 	"reflect"
 	"testing"
 
-	rpb "chronicler/records/proto"
-
 	cm "github.com/lanseg/golang-commons/common"
 	"github.com/lanseg/golang-commons/optional"
+
+	rpb "chronicler/records/proto"
 )
 
 func newRecordSet(id int, name string) *rpb.RecordSet {

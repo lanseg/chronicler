@@ -7,15 +7,14 @@ import (
 	"strings"
 	"time"
 
-	"chronicler/adapter"
-	"chronicler/util"
-
 	"github.com/lanseg/golang-commons/collections"
 	cm "github.com/lanseg/golang-commons/common"
 	"github.com/lanseg/golang-commons/optional"
 	"github.com/lanseg/tgbot"
 
+	"chronicler/adapter"
 	rpb "chronicler/records/proto"
+	"chronicler/util"
 )
 
 type telegramAdapter struct {

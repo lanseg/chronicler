@@ -8,12 +8,12 @@ import (
 	"os"
 	"path/filepath"
 
-	"chronicler/records"
-	rpb "chronicler/records/proto"
-
 	"github.com/lanseg/golang-commons/collections"
 	cm "github.com/lanseg/golang-commons/common"
 	opt "github.com/lanseg/golang-commons/optional"
+
+	"chronicler/records"
+	rpb "chronicler/records/proto"
 )
 
 type localStorage struct {
