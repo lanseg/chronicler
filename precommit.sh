@@ -12,7 +12,7 @@ if [ $? -eq 0 ]; then
   exit 1
 fi
 
-find -iname '*css' -o -iname '*js' -o -iname '*html' | xargs prettier --print-width 100 --tab-width 4 --write
+find -iname '*css' -o -iname '*js' -o -iname '*html' -not -path '*/testdata/*' | xargs prettier --print-width 100 --tab-width 4 --write
 bazel test --enable_bzlmod --nocache_test_results --test_output=streamed  //...:all
 
 if [ $? -ne 0 ]; then

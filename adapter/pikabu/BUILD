@@ -26,7 +26,7 @@ go_test(
     name = "pikabu_test",
     size = "small",
     srcs = [
-        "pikabu_test.go",
+        "parser_test.go",
         "sourceprovider_test.go",
     ],
     data = glob(["testdata/*"]),

@@ -65,6 +65,7 @@ func SortRecordSets(rs []*rpb.RecordSet, sorting *rpb.Sorting) []*rpb.RecordSet 
 	}
 	for _, rset := range rs {
 		rset.Records = SortRecords(rset.Records, sorting)
+		rset.UserMetadata = SortUserMetadata(rset.UserMetadata, sorting)
 	}
 	sort.Slice(rs, func(i int, j int) bool {
 		if len(rs[i].Records) == 0 && len(rs[j].Records) == 0 {
@@ -79,4 +80,27 @@ func SortRecordSets(rs []*rpb.RecordSet, sorting *rpb.Sorting) []*rpb.RecordSet 
 		return CompareRecords(rs[i].Records[0], rs[j].Records[0], sorting) < 0
 	})
 	return rs
+}
+
+func CompareUserMetadata(a *rpb.UserMetadata, b *rpb.UserMetadata) bool {
+	if a.Username < b.Username {
+		return true
+	} else if a.Username == b.Username {
+		return a.Id < b.Id
+	}
+	return false
+}
+
+func SortUserMetadata(users []*rpb.UserMetadata, sorting *rpb.Sorting) []*rpb.UserMetadata {
+	if users == nil {
+		return nil
+	}
+	sort.Slice(users, func(i int, j int) bool {
+		if sorting.Order == rpb.Sorting_ASC {
+			return CompareUserMetadata(users[i], users[j])
+		} else {
+			return CompareUserMetadata(users[j], users[i])
+		}
+	})
+	return users
 }

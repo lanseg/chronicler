@@ -12,10 +12,20 @@ import (
 	cm "github.com/lanseg/golang-commons/common"
 )
 
-func parseStory(node *almosthtml.Node) (*rpb.Record, *rpb.UserMetadata) {
+type TimeSource func() time.Time
+
+func mergeTagText(content string) string {
+	splitted := strings.Split(content, "\n")
+	for i, sss := range splitted {
+		splitted[i] = strings.TrimSpace(sss)
+	}
+	return strings.Join(splitted, " ")
+}
+
+func parseStory(node *almosthtml.Node, timeSrc TimeSource) (*rpb.Record, *rpb.UserMetadata) {
 	author := &rpb.UserMetadata{}
 	result := &rpb.Record{
-		FetchTime: time.Now().Unix(),
+		FetchTime: timeSrc().Unix(),
 		Source: &rpb.Source{
 			Type: rpb.SourceType_PIKABU,
 		},
@@ -31,6 +41,13 @@ func parseStory(node *almosthtml.Node) (*rpb.Record, *rpb.UserMetadata) {
 	}).ForEachRemaining(func(n *almosthtml.Node) bool {
 		class := n.Params["class"]
 		dataName, hasDataName := n.Params["data-name"]
+		if class == "story__title-link" {
+			result := mergeTagText(n.Children[0].Raw)
+			if result != "" {
+				textContent.WriteString(result)
+				textContent.WriteRune('\n')
+			}
+		}
 		if class == "story__user-link user__nick" && hasDataName {
 			author.Username = dataName
 			author.Id = n.Params["data-id"]
@@ -39,6 +56,15 @@ func parseStory(node *almosthtml.Node) (*rpb.Record, *rpb.UserMetadata) {
 			result.Files = append(result.Files, &rpb.File{
 				FileId:  cm.UUID4For(n.Params["href"]),
 				FileUrl: n.Params["href"],
+			})
+		} else if n.Params["data-type"] != "" && n.Params["data-source"] != "" {
+			src := n.Params["data-source"]
+			if n.Params["data-type"] == "video-file" {
+				src += ".mp4"
+			}
+			result.Files = append(result.Files, &rpb.File{
+				FileId:  cm.UUID4For(n.Params["data-source"]),
+				FileUrl: n.Params["data-source"],
 			})
 		} else if n.Name == "a" && n.Params["href"] != "" {
 			result.Links = append(result.Links, n.Params["href"])
@@ -114,9 +140,10 @@ func parseCommentContent(node *almosthtml.Node) (string, []string, []string) {
 			result.WriteRune('\n')
 		}
 		if n.Name == "#text" {
-			text := strings.ReplaceAll(strings.TrimSpace(n.Raw), "\n", "")
+			text := mergeTagText(n.Raw)
 			if text != "" {
 				result.WriteString(text)
+				result.WriteRune('\n')
 			}
 		}
 		return false
@@ -124,7 +151,7 @@ func parseCommentContent(node *almosthtml.Node) (string, []string, []string) {
 	return strings.TrimSpace(result.String()), links, files
 }
 
-func parseComment(n *almosthtml.Node) (*rpb.Record, *rpb.UserMetadata) {
+func parseComment(n *almosthtml.Node, timeSrc TimeSource) (*rpb.Record, *rpb.UserMetadata) {
 	meta := map[string]string{}
 	for _, m := range strings.Split(n.Params["data-meta"], ";") {
 		params := strings.Split(m, "=")
@@ -136,7 +163,7 @@ func parseComment(n *almosthtml.Node) (*rpb.Record, *rpb.UserMetadata) {
 	}
 
 	result := &rpb.Record{
-		FetchTime: time.Now().Unix(),
+		FetchTime: timeSrc().Unix(),
 		Source: &rpb.Source{
 			SenderId:  meta["aid"],
 			ChannelId: meta["sid"],
@@ -184,7 +211,7 @@ func parseComment(n *almosthtml.Node) (*rpb.Record, *rpb.UserMetadata) {
 	return result, userData
 }
 
-func parsePost(content string) (*rpb.Response, error) {
+func parsePost(content string, timeSrc TimeSource) (*rpb.Response, error) {
 	resultRecords := []*rpb.Record{}
 	userById := map[string]*rpb.UserMetadata{}
 	commentById := map[string]*rpb.Source{}
@@ -197,15 +224,18 @@ func parsePost(content string) (*rpb.Response, error) {
 	}
 	for _, n := range root.GetElementsByTagAndClass("div") {
 		if n.Params["class"] == "story__main" {
-			story, author := parseStory(n)
+			story, author := parseStory(n, timeSrc)
 			resultRecords = append(resultRecords, story)
 			userById[author.Id] = author
 		}
 		if n.Params["class"] == "section-hr" {
 			break
 		}
+		if n.Params["data-type"] != "" {
+
+		}
 		if n.Params["data-meta"] != "" && n.Params["class"] == "comment" {
-			comment, user := parseComment(n)
+			comment, user := parseComment(n, timeSrc)
 			if comment == nil {
 				continue
 			}

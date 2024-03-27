@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/url"
 	"regexp"
+	"time"
 
 	"chronicler/adapter"
 	rpb "chronicler/records/proto"
@@ -111,7 +112,7 @@ func (p *pikabuAdapter) GetResponse(rq *rpb.Request) []*rpb.Response {
 	}
 
 	p.logger.Infof("Loaded page content, got string of %d: %s", len(content), cm.Ellipsis(content, 100, true))
-	resp, err := parsePost(content)
+	resp, err := parsePost(content, time.Now)
 	if resp == nil || err != nil {
 		p.logger.Warningf("Error while parsing request: %s", rq)
 		return []*rpb.Response{}
