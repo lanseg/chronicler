@@ -25,6 +25,8 @@ type DeleteRecordResponse struct {
 type WebServer struct {
 	data   storage.Storage
 	logger *cm.Logger
+
+    sorting *rpb.Sorting
 }
 
 func (ws *WebServer) Error(w http.ResponseWriter, msg string, code int) {
@@ -42,7 +44,7 @@ func (ws *WebServer) writeJson(w http.ResponseWriter, data any) {
 }
 
 func (ws *WebServer) handleRecordSetList(p PathParams, w http.ResponseWriter, r *http.Request) {
-	rs := ws.data.ListRecordSets(&rpb.Sorting{Field: rpb.Sorting_FETCH_TIME}).OrElse([]*rpb.RecordSet{})
+	rs := ws.data.ListRecordSets(ws.sorting).OrElse([]*rpb.RecordSet{})
 
 	userById := map[string]*rpb.UserMetadata{}
 	result := &rpb.RecordListResponse{}
@@ -74,7 +76,7 @@ func (ws *WebServer) responseFile(w http.ResponseWriter, id string, filename str
 			ws.Error(w, err.Error(), 500)
 			return
 		}
-		rs.Records = records.SortRecords(rs.Records, &rpb.Sorting{Field: rpb.Sorting_FETCH_TIME})
+		rs.Records = records.SortRecords(rs.Records, ws.sorting)
 		ws.writeJson(w, rs)
 		return
 	}
@@ -120,6 +122,8 @@ func NewServer(port int, staticFiles string, storage storage.Storage) *http.Serv
 	server := &WebServer{
 		logger: cm.NewLogger("frontend"),
 		data:   storage,
+
+        sorting: &rpb.Sorting{Field: rpb.Sorting_CREATE_TIME},
 	}
 
 	handler := &PathParamHandler{
