@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/http/cookiejar"
 	"os"
+	"strings"
 	"sync"
 	"time"
 
@@ -78,6 +79,12 @@ func ScheduleRepeatedSource(provider adapter.SourceProvider, engine rpb.WebEngin
 	}, nil, duration)
 }
 
+func sendAll[T any](items []T, ch chan T) {
+	for _, item := range items {
+		ch <- item
+	}
+}
+
 func main() {
 	cfg, err := cm.GetConfig[Config](os.Args[1:], "config")
 	if err != nil {
@@ -125,21 +132,42 @@ func main() {
 	requests := make(chan *rpb.Request, 10)
 	response := make(chan *rpb.Response, 10)
 	messages := make(chan *rpb.Message, 10)
+	toresolve := make(chan string, 10)
 
 	ScheduleRepeatedSource(pkb_adapter.NewDisputedProvider(initHttpClient()), rpb.WebEngine_WEBDRIVER, requests, 30*time.Minute)
 	ScheduleRepeatedSource(pkb_adapter.NewHotProvider(initHttpClient()), rpb.WebEngine_WEBDRIVER, requests, 15*time.Minute)
 	ScheduleRepeatedSource(pkb_adapter.NewFreshProvider(initHttpClient()), rpb.WebEngine_HTTP_PLAIN, requests, 5*time.Minute)
 
 	go (func() {
+		logger := cm.NewLogger("Resolver")
+		logger.Infof("Starting resolver thread")
+		for {
+			if err = resolver.Resolve(<-toresolve); err != nil {
+				logger.Warningf("Error while resolving record contents for %s: %s", toresolve, err)
+			}
+		}
+	})()
+
+	go (func() {
+		logger := cm.NewLogger("Messages")
+		logger.Infof("Starting message thread")
+		for {
+			newMessage := <-messages
+			if a, ok := messagers[newMessage.Target.Type]; ok {
+				a.SendMessage(newMessage)
+			} else {
+				logger.Infof("No handler for message: %s", newMessage)
+			}
+		}
+	})()
+
+	go (func() {
 		logger := cm.NewLogger("Chronicler")
 		logger.Infof("Starting chronicler thread")
 		for {
 			newRequest := <-requests
-			logger.Infof("Got new request for %s: %s", newRequest.Target.Type, newRequest)
 			if a, ok := responses[newRequest.Target.Type]; ok {
-				for _, resp := range a.GetResponse(newRequest) {
-					response <- resp
-				}
+				sendAll(a.GetResponse(newRequest), response)
 			} else {
 				logger.Infof("No handler for request: %s", newRequest)
 			}
@@ -152,46 +180,31 @@ func main() {
 		for {
 			result := <-response
 			logger.Infof("Got new response for request %s (%s) of size %d", result.Request, result.Request.Origin, len(result.Result))
-			for _, records := range result.Result {
-				msg := fmt.Sprintf("Saved as %s", records.Id)
+			report := make([]string, len(result.Result))
+			for i, records := range result.Result {
 				if err := storage.SaveRecordSet(records); err != nil {
-					msg = fmt.Sprintf("Error while saving %q", records.Id)
+					report[i] = fmt.Sprintf("Error while saving %q", records.Id)
 					logger.Warningf("Error while saving %q: %s", records.Id, err)
 				} else {
+					report[i] = fmt.Sprintf("Saved as %s", records.Id)
 					logger.Infof("Saved as %q", records.Id)
-				}
-
-				if result.Request != nil && result.Request.Origin != nil {
-					messages <- &rpb.Message{
-						Target:  result.Request.Origin,
-						Content: []byte(msg),
-					}
-				}
-				if err = resolver.Resolve(records.Id); err != nil {
-					logger.Warningf("Error while resolving record contents for %s: %s", records.Id, err)
+					toresolve <- records.Id
 				}
 			}
-			logger.Infof("Extracting requests from %s (%s) of size %d", result.Request,
-				result.Request.Origin, len(result.Result))
+			if result.Request != nil && result.Request.Origin != nil {
+				messages <- &rpb.Message{
+					Target:  result.Request.Origin,
+					Content: []byte(strings.Join(report, "\n")),
+				}
+			}
+			logger.Infof("Extracting requests from %s (%s) of size %d",
+				result.Request, result.Request.Origin, len(result.Result))
 			for _, records := range result.Result {
 				for _, req := range extractRequests(linkMatchers, records) {
 					req.Origin = result.Request.Origin
 					requests <- req
 				}
 			}
-		}
-	})()
-
-	go (func() {
-		logger := cm.NewLogger("Messages")
-		logger.Infof("Starting message thread")
-		for {
-			newMessage := <-messages
-			logger.Infof("Got new message to send: %s", newMessage)
-			if a, ok := messagers[newMessage.Target.Type]; ok {
-				a.SendMessage(newMessage)
-			}
-			logger.Infof("No adapter for message %s", newMessage)
 		}
 	})()
 
