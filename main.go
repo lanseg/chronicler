@@ -43,12 +43,12 @@ func initHttpClient() *http.Client {
 	}
 }
 
-func extractRequests(adapters []adapter.Adapter, rs *rpb.RecordSet) []*rpb.Request {
+func extractRequests(finders []adapter.SourceFinder, rs *rpb.RecordSet) []*rpb.Request {
 	result := []*rpb.Request{}
 	if len(rs.Records) > 0 && (rs.Records[0].Source.Type == rpb.SourceType_WEB || rs.Records[0].Source.Type == rpb.SourceType_PIKABU) {
 		return result
 	}
-	for _, a := range adapters {
+	for _, a := range finders {
 		found := false
 		for _, target := range a.FindSources(rs.Records[0]) {
 			result = append(result, &rpb.Request{
@@ -107,10 +107,19 @@ func main() {
 		rpb.SourceType_PIKABU:   pkb_adapter.NewPikabuAdapter(webDriver),
 		rpb.SourceType_WEB:      web_adapter.NewWebAdapter(nil, webDriver),
 	}
-	linkMatchers := []adapter.Adapter{
+	responses := map[rpb.SourceType]adapter.ResponseProvider{
+		rpb.SourceType_TELEGRAM: adapters[rpb.SourceType_TELEGRAM],
+		rpb.SourceType_TWITTER:  adapters[rpb.SourceType_TWITTER],
+		rpb.SourceType_PIKABU:   adapters[rpb.SourceType_PIKABU],
+		rpb.SourceType_WEB:      adapters[rpb.SourceType_WEB],
+	}
+	linkMatchers := []adapter.SourceFinder{
 		adapters[rpb.SourceType_TWITTER],
 		adapters[rpb.SourceType_PIKABU],
 		adapters[rpb.SourceType_WEB],
+	}
+	messagers := map[rpb.SourceType]adapter.MessageSender{
+		rpb.SourceType_TELEGRAM: adapters[rpb.SourceType_TELEGRAM],
 	}
 
 	requests := make(chan *rpb.Request, 10)
@@ -127,7 +136,7 @@ func main() {
 		for {
 			newRequest := <-requests
 			logger.Infof("Got new request for %s: %s", newRequest.Target.Type, newRequest)
-			if a, ok := adapters[newRequest.Target.Type]; ok {
+			if a, ok := responses[newRequest.Target.Type]; ok {
 				for _, resp := range a.GetResponse(newRequest) {
 					response <- resp
 				}
@@ -179,7 +188,7 @@ func main() {
 		for {
 			newMessage := <-messages
 			logger.Infof("Got new message to send: %s", newMessage)
-			if a, ok := adapters[newMessage.Target.Type]; ok {
+			if a, ok := messagers[newMessage.Target.Type]; ok {
 				a.SendMessage(newMessage)
 			}
 			logger.Infof("No adapter for message %s", newMessage)
@@ -187,7 +196,7 @@ func main() {
 	})()
 
 	conc.RunPeriodically(func() {
-		for _, resp := range adapters[rpb.SourceType_TELEGRAM].GetResponse(&rpb.Request{
+		for _, resp := range responses[rpb.SourceType_TELEGRAM].GetResponse(&rpb.Request{
 			Id: telegramRequestUUID,
 		}) {
 			response <- resp

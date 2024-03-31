@@ -26,7 +26,7 @@ type WebServer struct {
 	data   storage.Storage
 	logger *cm.Logger
 
-    sorting *rpb.Sorting
+	sorting *rpb.Sorting
 }
 
 func (ws *WebServer) Error(w http.ResponseWriter, msg string, code int) {
@@ -123,7 +123,7 @@ func NewServer(port int, staticFiles string, storage storage.Storage) *http.Serv
 		logger: cm.NewLogger("frontend"),
 		data:   storage,
 
-        sorting: &rpb.Sorting{Field: rpb.Sorting_CREATE_TIME},
+		sorting: &rpb.Sorting{Field: rpb.Sorting_CREATE_TIME},
 	}
 
 	handler := &PathParamHandler{

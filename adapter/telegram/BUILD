@@ -23,7 +23,9 @@ go_library(
 go_test(
     name = "telegram_test",
     size = "small",
-    srcs = ["telegram_test.go"],
+    srcs = [
+        "telegram_test.go",
+    ],
     data = glob(["testdata/*"]),
     embed = [":telegram"],
     deps = ["//records:records_go_proto"],

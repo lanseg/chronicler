@@ -5,11 +5,23 @@ import (
 )
 
 type Adapter interface {
+	SourceFinder
+	ResponseProvider
+	MessageSender
+}
+
+type SourceFinder interface {
 	FindSources(*rpb.Record) []*rpb.Source
-	GetResponse(*rpb.Request) []*rpb.Response
-	SendMessage(*rpb.Message)
 }
 
 type SourceProvider interface {
 	GetSources() []*rpb.Source
+}
+
+type ResponseProvider interface {
+	GetResponse(*rpb.Request) []*rpb.Response
+}
+
+type MessageSender interface {
+	SendMessage(*rpb.Message)
 }
