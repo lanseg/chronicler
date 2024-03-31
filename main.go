@@ -85,6 +85,9 @@ func sendAll[T any](items []T, ch chan T) {
 	}
 }
 
+type ResolveRequest struct {
+}
+
 func main() {
 	cfg, err := cm.GetConfig[Config](os.Args[1:], "config")
 	if err != nil {
@@ -132,13 +135,14 @@ func main() {
 	requests := make(chan *rpb.Request, 10)
 	response := make(chan *rpb.Response, 10)
 	messages := make(chan *rpb.Message, 10)
+	srcfinder := make(chan *rpb.Response, 10)
 	toresolve := make(chan string, 10)
 
 	ScheduleRepeatedSource(pkb_adapter.NewDisputedProvider(initHttpClient()), rpb.WebEngine_WEBDRIVER, requests, 30*time.Minute)
 	ScheduleRepeatedSource(pkb_adapter.NewHotProvider(initHttpClient()), rpb.WebEngine_WEBDRIVER, requests, 15*time.Minute)
 	ScheduleRepeatedSource(pkb_adapter.NewFreshProvider(initHttpClient()), rpb.WebEngine_HTTP_PLAIN, requests, 5*time.Minute)
 
-	go (func() {
+	go func() {
 		logger := cm.NewLogger("Resolver")
 		logger.Infof("Starting resolver thread")
 		for {
@@ -146,9 +150,9 @@ func main() {
 				logger.Warningf("Error while resolving record contents for %s: %s", toresolve, err)
 			}
 		}
-	})()
+	}()
 
-	go (func() {
+	go func() {
 		logger := cm.NewLogger("Messages")
 		logger.Infof("Starting message thread")
 		for {
@@ -159,9 +163,9 @@ func main() {
 				logger.Infof("No handler for message: %s", newMessage)
 			}
 		}
-	})()
+	}()
 
-	go (func() {
+	go func() {
 		logger := cm.NewLogger("Chronicler")
 		logger.Infof("Starting chronicler thread")
 		for {
@@ -172,7 +176,23 @@ func main() {
 				logger.Infof("No handler for request: %s", newRequest)
 			}
 		}
-	})()
+	}()
+
+	go func() {
+		logger := cm.NewLogger("SourceFinder")
+		logger.Infof("Starting source finder thread")
+		for {
+			result := <-srcfinder
+			logger.Infof("Extracting requests from %s (%s) of size %d",
+				result.Request, result.Request.Origin, len(result.Result))
+			for _, records := range result.Result {
+				for _, req := range extractRequests(linkMatchers, records) {
+					req.Origin = result.Request.Origin
+					requests <- req
+				}
+			}
+		}
+	}()
 
 	go (func() {
 		logger := cm.NewLogger("Storage")
@@ -197,14 +217,7 @@ func main() {
 					Content: []byte(strings.Join(report, "\n")),
 				}
 			}
-			logger.Infof("Extracting requests from %s (%s) of size %d",
-				result.Request, result.Request.Origin, len(result.Result))
-			for _, records := range result.Result {
-				for _, req := range extractRequests(linkMatchers, records) {
-					req.Origin = result.Request.Origin
-					requests <- req
-				}
-			}
+			srcfinder <- result
 		}
 	})()
 
