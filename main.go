@@ -85,9 +85,6 @@ func sendAll[T any](items []T, ch chan T) {
 	}
 }
 
-type ResolveRequest struct {
-}
-
 func main() {
 	cfg, err := cm.GetConfig[Config](os.Args[1:], "config")
 	if err != nil {
@@ -136,6 +133,7 @@ func main() {
 	response := make(chan *rpb.Response, 10)
 	messages := make(chan *rpb.Message, 10)
 	srcfinder := make(chan *rpb.Response, 10)
+	saver := make(chan *rpb.RecordSet, 10)
 	toresolve := make(chan string, 10)
 
 	ScheduleRepeatedSource(pkb_adapter.NewDisputedProvider(initHttpClient()), rpb.WebEngine_WEBDRIVER, requests, 30*time.Minute)
@@ -194,6 +192,20 @@ func main() {
 		}
 	}()
 
+	go func() {
+		logger := cm.NewLogger("Storage")
+		logger.Infof("Starting storage thread")
+		for {
+			rs := <-saver
+			if err := storage.SaveRecordSet(rs); err != nil {
+				logger.Warningf("Error while saving %q: %s", rs.Id, err)
+			} else {
+				logger.Infof("Saved as %q", rs.Id)
+				toresolve <- rs.Id
+			}
+		}
+	}()
+
 	go (func() {
 		logger := cm.NewLogger("Storage")
 		logger.Infof("Starting storage thread")
@@ -202,14 +214,9 @@ func main() {
 			logger.Infof("Got new response for request %s (%s) of size %d", result.Request, result.Request.Origin, len(result.Result))
 			report := make([]string, len(result.Result))
 			for i, records := range result.Result {
-				if err := storage.SaveRecordSet(records); err != nil {
-					report[i] = fmt.Sprintf("Error while saving %q", records.Id)
-					logger.Warningf("Error while saving %q: %s", records.Id, err)
-				} else {
-					report[i] = fmt.Sprintf("Saved as %s", records.Id)
-					logger.Infof("Saved as %q", records.Id)
-					toresolve <- records.Id
-				}
+				saver <- records
+				logger.Warningf("Error while saving %q: %s", records.Id, err)
+				report[i] = fmt.Sprintf("Saved as %s", records.Id)
 			}
 			if result.Request != nil && result.Request.Origin != nil {
 				messages <- &rpb.Message{

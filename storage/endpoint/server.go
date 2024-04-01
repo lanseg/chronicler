@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	chunkSize  = 8192
+	chunkSize  = 1024 * 1024
 	maxMsgSize = 16 * 1024 * 1024
 )
 
