@@ -159,6 +159,10 @@ export function createRecordSet(rs, metadata) {
         recordEl.innerHTML = `<div class='content error'>No record for id ${rs["id"]}</div>`;
         return recordEl;
     }
+    const text = (rs.description ?? "")
+    .split("\n")
+    .map((s) => `<p>${s.trim()}</p>`)
+    .join("<br/>");
     const wrapper = createElement("label", { class: "record_wrapper", for: `${rs.id}_checkbox` });
     wrapper.innerHTML = `
     <input type="checkbox" class="selection_marker" data-record="${rs.id}" id="${rs.id}_checkbox" />
@@ -177,7 +181,7 @@ export function createRecordSet(rs, metadata) {
         <a href="?record_id=${rs.id}">${rs.recordCount}</a>
         <a href="/chronicler/records/${rs.id}?file=record.json">json<a>
       </div>
-      <div class="content">${rs.description}</div>
+      <div class="content">${text}</div>
     </div>
     `;
     return wrapper;
@@ -198,8 +202,8 @@ export function createRecord(rsId, record, metadata) {
 
     const text = record.textContent
         .split("\n")
-        .map((s) => s.trim())
-        .join("</p><p>");
+        .map((s) => `<p>${s.trim()}</p>`)
+        .join("<br/>");
     recordEl.innerHTML = `<div class='header'>
         <span class="icon ${src.sourceType.name}">&nbsp;</span>
         <span class="datetime">${formatDateTime(record.time)}</span>
@@ -207,7 +211,7 @@ export function createRecord(rsId, record, metadata) {
             <span class="username">${recordName}</span>
             <span class="username">→ <a href="#${parentMsg}">${parentName}</a></span>
         </div>
-        <div class='content'><p>${text}</p></div>`;
+        <div class='content'>${text}</div>`;
     recordEl.appendChild(renderFileList(rsId, record.files));
     return recordEl;
 }
