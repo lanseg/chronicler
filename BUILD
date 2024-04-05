@@ -4,6 +4,7 @@ go_binary(
     name = "main",
     srcs = [
         "main.go",
+        "chronicler.go",
         "resolver.go",
     ],
     deps = [

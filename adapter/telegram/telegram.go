@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/lanseg/golang-commons/collections"
+	col "github.com/lanseg/golang-commons/collections"
 	cm "github.com/lanseg/golang-commons/common"
 	"github.com/lanseg/golang-commons/optional"
 	"github.com/lanseg/tgbot"
@@ -65,7 +65,7 @@ func (ts *telegramAdapter) getUpdates() []*tgbot.Update {
 }
 
 func (ts *telegramAdapter) waitForUpdate() []*tgbot.Update {
-	return collections.IterateSlice(ts.getUpdates()).
+	return col.SliceStream(ts.getUpdates()).
 		Peek(func(u *tgbot.Update) {
 			if ts.cursor <= u.UpdateID {
 				ts.cursor = u.UpdateID + 1
@@ -123,7 +123,7 @@ func (ts *telegramAdapter) SendMessage(message *rpb.Message) {
 // ----------
 
 func groupRecords(updates []*tgbot.Update) []*rpb.RecordSet {
-	grouped := collections.GroupBy(updates, func(u *tgbot.Update) string {
+	grouped := col.GroupBy(updates, func(u *tgbot.Update) string {
 		if u.Message == nil {
 			return ""
 		}
@@ -282,12 +282,12 @@ func updateToRecords(upds []*tgbot.Update) (*rpb.Record, []*rpb.UserMetadata) {
 	}
 
 	result.TextContent = strings.TrimSpace(result.TextContent)
-	result.Links = collections.Unique(
+	result.Links = col.Unique(
 		append(result.Links, util.FindWebLinks(result.TextContent)...))
 
 	sort.Strings(result.Links)
 
-	userData := collections.Values(users)
+	userData := col.Values(users)
 	sort.Slice(userData, func(i int, j int) bool {
 		return userData[j].Id < userData[i].Id
 	})

@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"net/http/cookiejar"
 	"os"
-	"strings"
 	"sync"
 	"time"
 
@@ -65,16 +64,16 @@ func extractRequests(finders []adapter.SourceFinder, rs *rpb.RecordSet) []*rpb.R
 	return result
 }
 
-func ScheduleRepeatedSource(provider adapter.SourceProvider, engine rpb.WebEngine, dst chan<- *rpb.Request, duration time.Duration) {
+func ScheduleRepeatedSource(provider adapter.SourceProvider, engine rpb.WebEngine, ch Chronicler, duration time.Duration) {
 	conc.RunPeriodically(func() {
 		for _, src := range provider.GetSources() {
-			dst <- &rpb.Request{
+			ch.SubmitRequest(&rpb.Request{
 				Id: cm.UUID4(),
 				Config: &rpb.RequestConfig{
 					Engine: engine,
 				},
 				Target: src,
-			}
+			})
 		}
 	}, nil, duration)
 }
@@ -86,155 +85,37 @@ func sendAll[T any](items []T, ch chan T) {
 }
 
 func main() {
-	cfg, err := cm.GetConfig[Config](os.Args[1:], "config")
-	if err != nil {
-		logger.Errorf("Could not load config: %s", err)
-		os.Exit(-1)
-	}
+	cfg := cm.OrExit(cm.GetConfig[Config](os.Args[1:], "config"))
+
 	logger.Infof("Config.StorageRoot: %s", *cfg.StorageRoot)
 	logger.Infof("Config.StorageServerPort: %d", *cfg.StorageServerPort)
 	logger.Infof("Config.ScenarioLibry: %s", *cfg.ScenarioLibrary)
 	logger.Infof("Config.TwitterApiKey: %d", len(*cfg.TwitterApiKey))
 	logger.Infof("Config.TelegramBotKey: %d", len(*cfg.TelegramBotKey))
 
-	storage, err := ep.NewRemoteStorage(fmt.Sprintf("localhost:%d", *cfg.StorageServerPort))
-	if err != nil {
-		logger.Errorf("Could not connect to the storage: %s", err)
-		os.Exit(-1)
-	}
+	storage := cm.OrExit(ep.NewRemoteStorage(fmt.Sprintf("localhost:%d", *cfg.StorageServerPort)))
+
 	downloader := downloader.NewDownloader(initHttpClient(), storage)
 	webDriver := webdriver.NewBrowser(*cfg.ScenarioLibrary)
 	resolver := NewResolver(webDriver, downloader, storage)
 	tgBot := tgbot.NewBot(*cfg.TelegramBotKey)
 	twClient := twi_adapter.NewClient(*cfg.TwitterApiKey)
 
-	adapters := map[rpb.SourceType]adapter.Adapter{
-		rpb.SourceType_TELEGRAM: tlg_adapter.NewTelegramAdapter(tgBot),
-		rpb.SourceType_TWITTER:  twi_adapter.NewTwitterAdapter(twClient),
-		rpb.SourceType_PIKABU:   pkb_adapter.NewPikabuAdapter(webDriver),
-		rpb.SourceType_WEB:      web_adapter.NewWebAdapter(nil, webDriver),
-	}
-	responses := map[rpb.SourceType]adapter.ResponseProvider{
-		rpb.SourceType_TELEGRAM: adapters[rpb.SourceType_TELEGRAM],
-		rpb.SourceType_TWITTER:  adapters[rpb.SourceType_TWITTER],
-		rpb.SourceType_PIKABU:   adapters[rpb.SourceType_PIKABU],
-		rpb.SourceType_WEB:      adapters[rpb.SourceType_WEB],
-	}
-	linkMatchers := []adapter.SourceFinder{
-		adapters[rpb.SourceType_TWITTER],
-		adapters[rpb.SourceType_PIKABU],
-		adapters[rpb.SourceType_WEB],
-	}
-	messagers := map[rpb.SourceType]adapter.MessageSender{
-		rpb.SourceType_TELEGRAM: adapters[rpb.SourceType_TELEGRAM],
-	}
+	ch := NewLocalChronicler(resolver, storage)
+	ch.AddAdapter(rpb.SourceType_TELEGRAM, tlg_adapter.NewTelegramAdapter(tgBot))
+	ch.AddAdapter(rpb.SourceType_TWITTER, twi_adapter.NewTwitterAdapter(twClient))
+	ch.AddAdapter(rpb.SourceType_PIKABU, pkb_adapter.NewPikabuAdapter(webDriver))
+	ch.AddAdapter(rpb.SourceType_WEB, web_adapter.NewWebAdapter(nil, webDriver))
 
-	requests := make(chan *rpb.Request, 10)
-	response := make(chan *rpb.Response, 10)
-	messages := make(chan *rpb.Message, 10)
-	srcfinder := make(chan *rpb.Response, 10)
-	saver := make(chan *rpb.RecordSet, 10)
-	toresolve := make(chan string, 10)
-
-	ScheduleRepeatedSource(pkb_adapter.NewDisputedProvider(initHttpClient()), rpb.WebEngine_WEBDRIVER, requests, 30*time.Minute)
-	ScheduleRepeatedSource(pkb_adapter.NewHotProvider(initHttpClient()), rpb.WebEngine_WEBDRIVER, requests, 15*time.Minute)
-	ScheduleRepeatedSource(pkb_adapter.NewFreshProvider(initHttpClient()), rpb.WebEngine_HTTP_PLAIN, requests, 5*time.Minute)
-
-	go func() {
-		logger := cm.NewLogger("Resolver")
-		logger.Infof("Starting resolver thread")
-		for {
-			if err = resolver.Resolve(<-toresolve); err != nil {
-				logger.Warningf("Error while resolving record contents for %s: %s", toresolve, err)
-			}
-		}
-	}()
-
-	go func() {
-		logger := cm.NewLogger("Messages")
-		logger.Infof("Starting message thread")
-		for {
-			newMessage := <-messages
-			if a, ok := messagers[newMessage.Target.Type]; ok {
-				a.SendMessage(newMessage)
-			} else {
-				logger.Infof("No handler for message: %s", newMessage)
-			}
-		}
-	}()
-
-	go func() {
-		logger := cm.NewLogger("Chronicler")
-		logger.Infof("Starting chronicler thread")
-		for {
-			newRequest := <-requests
-			if a, ok := responses[newRequest.Target.Type]; ok {
-				sendAll(a.GetResponse(newRequest), response)
-			} else {
-				logger.Infof("No handler for request: %s", newRequest)
-			}
-		}
-	}()
-
-	go func() {
-		logger := cm.NewLogger("SourceFinder")
-		logger.Infof("Starting source finder thread")
-		for {
-			result := <-srcfinder
-			logger.Infof("Extracting requests from %s (%s) of size %d",
-				result.Request, result.Request.Origin, len(result.Result))
-			for _, records := range result.Result {
-				for _, req := range extractRequests(linkMatchers, records) {
-					req.Origin = result.Request.Origin
-					requests <- req
-				}
-			}
-		}
-	}()
-
-	go func() {
-		logger := cm.NewLogger("Storage")
-		logger.Infof("Starting storage thread")
-		for {
-			rs := <-saver
-			if err := storage.SaveRecordSet(rs); err != nil {
-				logger.Warningf("Error while saving %q: %s", rs.Id, err)
-			} else {
-				logger.Infof("Saved as %q", rs.Id)
-				toresolve <- rs.Id
-			}
-		}
-	}()
-
-	go (func() {
-		logger := cm.NewLogger("Storage")
-		logger.Infof("Starting storage thread")
-		for {
-			result := <-response
-			logger.Infof("Got new response for request %s (%s) of size %d", result.Request, result.Request.Origin, len(result.Result))
-			report := make([]string, len(result.Result))
-			for i, records := range result.Result {
-				saver <- records
-				logger.Warningf("Error while saving %q: %s", records.Id, err)
-				report[i] = fmt.Sprintf("Saved as %s", records.Id)
-			}
-			if result.Request != nil && result.Request.Origin != nil {
-				messages <- &rpb.Message{
-					Target:  result.Request.Origin,
-					Content: []byte(strings.Join(report, "\n")),
-				}
-			}
-			srcfinder <- result
-		}
-	})()
+	ScheduleRepeatedSource(pkb_adapter.NewFreshProvider(initHttpClient()), rpb.WebEngine_HTTP_PLAIN, ch, 5*time.Minute)
+	ScheduleRepeatedSource(pkb_adapter.NewHotProvider(initHttpClient()), rpb.WebEngine_WEBDRIVER, ch, 15*time.Minute)
+	ScheduleRepeatedSource(pkb_adapter.NewDisputedProvider(initHttpClient()), rpb.WebEngine_WEBDRIVER, ch, 30*time.Minute)
 
 	conc.RunPeriodically(func() {
-		for _, resp := range responses[rpb.SourceType_TELEGRAM].GetResponse(&rpb.Request{
-			Id: telegramRequestUUID,
-		}) {
-			response <- resp
-		}
+		ch.SubmitRequest(&rpb.Request{Target: &rpb.Source{Type: rpb.SourceType_TELEGRAM}})
 	}, nil, time.Minute)
+
+	ch.Start()
 
 	wg := sync.WaitGroup{}
 	wg.Add(1)

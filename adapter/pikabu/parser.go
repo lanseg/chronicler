@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/lanseg/golang-commons/almosthtml"
-	"github.com/lanseg/golang-commons/collections"
+	col "github.com/lanseg/golang-commons/collections"
 
 	"chronicler/records"
 	rpb "chronicler/records/proto"
@@ -32,13 +32,13 @@ func parseStory(node *almosthtml.Node, timeSrc TimeSource) (*rpb.Record, *rpb.Us
 	}
 	inContent := false
 	textContent := strings.Builder{}
-	collections.IterateTree(node, collections.DepthFirst, func(n *almosthtml.Node) []*almosthtml.Node {
+	col.StreamIterator(col.IterateTree(node, col.DepthFirst, func(n *almosthtml.Node) []*almosthtml.Node {
 		class := n.Params["class"]
 		if n.Name == "div" && (class == "story__tags tags" || class == "story__footer") {
 			return []*almosthtml.Node{}
 		}
 		return n.Children
-	}).ForEachRemaining(func(n *almosthtml.Node) bool {
+	})).ForEachRemaining(func(n *almosthtml.Node) bool {
 		class := n.Params["class"]
 		dataName, hasDataName := n.Params["data-name"]
 		if class == "story__title-link" {
@@ -109,9 +109,9 @@ func parseCommentContent(node *almosthtml.Node) (string, []string, []string) {
 	result := strings.Builder{}
 	links := []string{}
 	files := []string{}
-	collections.IterateTree(node, collections.DepthFirst, func(n *almosthtml.Node) []*almosthtml.Node {
+	col.StreamIterator(col.IterateTree(node, col.DepthFirst, func(n *almosthtml.Node) []*almosthtml.Node {
 		return n.Children
-	}).ForEachRemaining(func(n *almosthtml.Node) bool {
+	})).ForEachRemaining(func(n *almosthtml.Node) bool {
 		if href, hasHref := n.Params["href"]; hasHref {
 			links = append(links, href)
 		}
@@ -245,7 +245,7 @@ func parsePost(content string, timeSrc TimeSource) (*rpb.Response, error) {
 		Result: []*rpb.RecordSet{
 			{
 				Records:      resultRecords,
-				UserMetadata: collections.Values(userById),
+				UserMetadata: col.Values(userById),
 			},
 		},
 	}, nil
