@@ -44,7 +44,9 @@ func (ws *WebServer) writeJson(w http.ResponseWriter, data any) {
 }
 
 func (ws *WebServer) handleRecordSetList(p PathParams, w http.ResponseWriter, r *http.Request) {
-	rs := ws.data.ListRecordSets(ws.sorting).OrElse([]*rpb.RecordSet{})
+	rs := records.SortRecordSets(
+		ws.data.ListRecordSets(ws.sorting).OrElse([]*rpb.RecordSet{}),
+		&rpb.Sorting{Field: rpb.Sorting_CREATE_TIME, Order: rpb.Sorting_ASC})
 
 	userById := map[string]*rpb.UserMetadata{}
 	result := &rpb.RecordListResponse{}
@@ -54,6 +56,7 @@ func (ws *WebServer) handleRecordSetList(p PathParams, w http.ResponseWriter, r 
 			userById[data.Id] = data
 		}
 	}
+	records.SortPreviews(result.RecordSets, &rpb.Sorting{Field: rpb.Sorting_CREATE_TIME, Order: rpb.Sorting_DESC})
 	result.UserMetadata = collections.Values(userById)
 	ws.writeJson(w, result)
 }
@@ -76,7 +79,6 @@ func (ws *WebServer) responseFile(w http.ResponseWriter, id string, filename str
 			ws.Error(w, err.Error(), 500)
 			return
 		}
-		rs.Records = records.SortRecords(rs.Records, ws.sorting)
 		ws.writeJson(w, rs)
 		return
 	}
@@ -123,7 +125,7 @@ func NewServer(port int, staticFiles string, storage storage.Storage) *http.Serv
 		logger: cm.NewLogger("frontend"),
 		data:   storage,
 
-		sorting: &rpb.Sorting{Field: rpb.Sorting_CREATE_TIME},
+		sorting: &rpb.Sorting{Field: rpb.Sorting_CREATE_TIME, Order: rpb.Sorting_ASC},
 	}
 
 	handler := &PathParamHandler{

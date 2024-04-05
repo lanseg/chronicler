@@ -57,7 +57,9 @@ func (rs *remoteStorage) SaveRecordSet(r *rpb.RecordSet) error {
 }
 
 func (rs *remoteStorage) ListRecordSets(sorting *rpb.Sorting) optional.Optional[[]*rpb.RecordSet] {
-	recv, err := rs.client.List(rs.context, &ep.ListRequest{})
+	recv, err := rs.client.List(rs.context, &ep.ListRequest{
+		Sorting: sorting,
+	})
 	if err != nil {
 		return optional.OfError[[]*rpb.RecordSet](nil, err)
 	}

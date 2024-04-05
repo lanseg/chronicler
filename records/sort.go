@@ -59,6 +59,16 @@ func SortRecords(r []*rpb.Record, sorting *rpb.Sorting) []*rpb.Record {
 	return r
 }
 
+func SortPreviews(r []*rpb.RecordSetPreview, sorting *rpb.Sorting) []*rpb.RecordSetPreview {
+	if r == nil {
+		return r
+	}
+	sort.Slice(r, func(i int, j int) bool {
+		return CompareRecords(r[i].RootRecord, r[j].RootRecord, sorting) < 0
+	})
+	return r
+}
+
 func SortRecordSets(rs []*rpb.RecordSet, sorting *rpb.Sorting) []*rpb.RecordSet {
 	if rs == nil {
 		return rs
