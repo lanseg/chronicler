@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"strings"
+	"sync"
+	"sync/atomic"
 
 	cm "github.com/lanseg/golang-commons/common"
 
@@ -10,6 +12,25 @@ import (
 	rpb "chronicler/records/proto"
 	"chronicler/storage"
 )
+
+type ChroniclerStatus struct {
+	waiter   sync.WaitGroup
+	jobCount uint32
+}
+
+func (cs *ChroniclerStatus) StartJob() {
+	cs.waiter.Add(1)
+	atomic.AddUint32(&cs.jobCount, uint32(1))
+}
+
+func (cs *ChroniclerStatus) StopJob() {
+	cs.waiter.Done()
+	atomic.AddUint32(&cs.jobCount, ^uint32(0))
+}
+
+func (cs *ChroniclerStatus) Wait() {
+	cs.waiter.Wait()
+}
 
 type Chronicler interface {
 	AddAdapter(rpb.SourceType, adapter.Adapter)
@@ -29,6 +50,7 @@ type localChronicler struct {
 	logger   *cm.Logger
 	resolver Resolver
 	storage  storage.Storage
+	status   *ChroniclerStatus
 	done     chan bool
 
 	requests chan *rpb.Request
@@ -42,11 +64,12 @@ type localChronicler struct {
 
 func NewLocalChronicler(resolver Resolver, storage storage.Storage) Chronicler {
 	return &localChronicler{
-		done:     make(chan bool),
 		logger:   cm.NewLogger("chronicler"),
 		resolver: resolver,
 		storage:  storage,
+		status:   &ChroniclerStatus{},
 
+		done:     make(chan bool),
 		requests: make(chan *rpb.Request),
 		response: make(chan *rpb.Response),
 		messages: make(chan *rpb.Message),
@@ -162,6 +185,7 @@ func (ch *localChronicler) closeChannels() {
 
 func (ch *localChronicler) Start() {
 	ch.logger.Infof("Starting chronicler")
+	ch.status.StartJob()
 	go func() {
 		done := false
 		for !done {
@@ -170,11 +194,24 @@ func (ch *localChronicler) Start() {
 				ch.logger.Infof("Shutting down chronicler gracefully")
 				done = true
 			case msg := <-ch.messages:
-				go ch.SendMessage(msg)
+				go func() {
+					ch.status.StartJob()
+					defer ch.status.StopJob()
+
+					ch.SendMessage(msg)
+				}()
 			case request := <-ch.requests:
-				go ch.SubmitRequest(request)
+				go func() {
+					ch.status.StartJob()
+					defer ch.status.StopJob()
+
+					ch.SubmitRequest(request)
+				}()
 			case response := <-ch.response:
 				go func() {
+					ch.status.StartJob()
+					defer ch.status.StopJob()
+
 					ch.HandleResponse(response)
 					ch.FindSources(response)
 					for _, rs := range response.Result {
@@ -182,11 +219,14 @@ func (ch *localChronicler) Start() {
 					}
 				}()
 			}
+			ch.logger.Infof("Job count: %d", atomic.LoadUint32(&ch.status.jobCount))
 		}
+		ch.status.StopJob()
 		ch.closeChannels()
-		ch.logger.Infof("Stopped")
+		ch.logger.Infof("Stopped chronicler")
 	}()
 	ch.logger.Infof("Started chronicler")
+	ch.status.Wait()
 }
 
 func (ch *localChronicler) Stop() {

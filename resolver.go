@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/base64"
+	"net/http"
 
 	cm "github.com/lanseg/golang-commons/common"
 	"github.com/lanseg/golang-commons/optional"
@@ -17,12 +18,12 @@ type Resolver interface {
 	Resolve(id string) error
 }
 
-func NewResolver(browser webdriver.Browser, downloader downloader.Downloader, storage storage.Storage) Resolver {
+func NewResolver(browser webdriver.Browser, storage storage.Storage) Resolver {
 	return &resolverImpl{
 		logger:     cm.NewLogger("Resolver"),
 		browser:    browser,
 		storage:    storage,
-		downloader: downloader,
+		downloader: downloader.NewDownloader(&http.Client{}, storage),
 	}
 }
 

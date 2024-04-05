@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"net/http/cookiejar"
 	"os"
-	"sync"
 	"time"
 
 	cm "github.com/lanseg/golang-commons/common"
@@ -17,7 +16,6 @@ import (
 	tlg_adapter "chronicler/adapter/telegram"
 	twi_adapter "chronicler/adapter/twitter"
 	web_adapter "chronicler/adapter/web"
-	"chronicler/downloader"
 	rpb "chronicler/records/proto"
 	ep "chronicler/storage/endpoint"
 	"chronicler/webdriver"
@@ -43,27 +41,6 @@ func initHttpClient() *http.Client {
 	}
 }
 
-func extractRequests(finders []adapter.SourceFinder, rs *rpb.RecordSet) []*rpb.Request {
-	result := []*rpb.Request{}
-	if len(rs.Records) > 0 && (rs.Records[0].Source.Type == rpb.SourceType_WEB || rs.Records[0].Source.Type == rpb.SourceType_PIKABU) {
-		return result
-	}
-	for _, a := range finders {
-		found := false
-		for _, target := range a.FindSources(rs.Records[0]) {
-			result = append(result, &rpb.Request{
-				Id:     rs.Id,
-				Target: target,
-			})
-			found = true
-		}
-		if found {
-			break
-		}
-	}
-	return result
-}
-
 func ScheduleRepeatedSource(provider adapter.SourceProvider, engine rpb.WebEngine, ch Chronicler, duration time.Duration) {
 	conc.RunPeriodically(func() {
 		for _, src := range provider.GetSources() {
@@ -78,12 +55,6 @@ func ScheduleRepeatedSource(provider adapter.SourceProvider, engine rpb.WebEngin
 	}, nil, duration)
 }
 
-func sendAll[T any](items []T, ch chan T) {
-	for _, item := range items {
-		ch <- item
-	}
-}
-
 func main() {
 	cfg := cm.OrExit(cm.GetConfig[Config](os.Args[1:], "config"))
 
@@ -95,15 +66,12 @@ func main() {
 
 	storage := cm.OrExit(ep.NewRemoteStorage(fmt.Sprintf("localhost:%d", *cfg.StorageServerPort)))
 
-	downloader := downloader.NewDownloader(initHttpClient(), storage)
 	webDriver := webdriver.NewBrowser(*cfg.ScenarioLibrary)
-	resolver := NewResolver(webDriver, downloader, storage)
-	tgBot := tgbot.NewBot(*cfg.TelegramBotKey)
-	twClient := twi_adapter.NewClient(*cfg.TwitterApiKey)
+	resolver := NewResolver(webDriver, storage)
 
 	ch := NewLocalChronicler(resolver, storage)
-	ch.AddAdapter(rpb.SourceType_TELEGRAM, tlg_adapter.NewTelegramAdapter(tgBot))
-	ch.AddAdapter(rpb.SourceType_TWITTER, twi_adapter.NewTwitterAdapter(twClient))
+	ch.AddAdapter(rpb.SourceType_TELEGRAM, tlg_adapter.NewTelegramAdapter(tgbot.NewBot(*cfg.TelegramBotKey)))
+	ch.AddAdapter(rpb.SourceType_TWITTER, twi_adapter.NewTwitterAdapter(twi_adapter.NewClient(*cfg.TwitterApiKey)))
 	ch.AddAdapter(rpb.SourceType_PIKABU, pkb_adapter.NewPikabuAdapter(webDriver))
 	ch.AddAdapter(rpb.SourceType_WEB, web_adapter.NewWebAdapter(nil, webDriver))
 
@@ -116,8 +84,4 @@ func main() {
 	}, nil, time.Minute)
 
 	ch.Start()
-
-	wg := sync.WaitGroup{}
-	wg.Add(1)
-	wg.Wait()
 }
