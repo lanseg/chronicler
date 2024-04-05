@@ -118,7 +118,7 @@ func (p *pikabuAdapter) GetResponse(rq *rpb.Request) []*rpb.Response {
 	}
 	resp.Request = rq
 	resp.Result[0].Records[0].Source.ChannelId = rq.Target.ChannelId
-	resp.Result[0].Id = cm.UUID4For(rq.Target)
+	resp.Result[0].Id = cm.UUID4For(rq.Target.ChannelId)
 	p.logger.Infof("Parsed post with %d record(s) and %d user(s)",
 		len(resp.Result[0].Records), len(resp.Result[0].UserMetadata))
 	return []*rpb.Response{resp}

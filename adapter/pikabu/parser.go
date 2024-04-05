@@ -97,10 +97,7 @@ func parseStory(node *almosthtml.Node, timeSrc TimeSource) (*rpb.Record, *rpb.Us
 		}
 		return false
 	})
-	result.Source = &rpb.Source{
-		SenderId: author.Id,
-		Type:     rpb.SourceType_PIKABU,
-	}
+	result.Source.SenderId = author.Id
 	result.TextContent = strings.TrimSpace(textContent.String())
 	return result, author
 }
@@ -207,9 +204,16 @@ func parsePost(content string, timeSrc TimeSource) (*rpb.Response, error) {
 			return nil, fmt.Errorf("Page was removed: %s", title)
 		}
 	}
+	storyId := ""
+	if arts := root.GetElementsByTags("article"); len(arts) != 0 {
+		if arts[0].Params["data-story-id"] != "" {
+			storyId = arts[0].Params["data-story-id"]
+		}
+	}
 	for _, n := range root.GetElementsByTagAndClass("div") {
 		if n.Params["class"] == "story__main" {
 			story, author := parseStory(n, timeSrc)
+			story.Source.ChannelId = storyId
 			resultRecords = append(resultRecords, story)
 			userById[author.Id] = author
 		}
