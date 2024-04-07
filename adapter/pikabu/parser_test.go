@@ -1,6 +1,7 @@
 package pikabu
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -48,6 +49,14 @@ func TestPikabuParser(t *testing.T) {
 			name: "post with video links loaded by curl",
 			file: "pikabu_video_curl_11266557.html",
 		},
+		{
+			name: "comment placeholder causes panic",
+			file: "pikabu_panic_11298350.html",
+		},
+		{
+			name: "comment placeholder causes panic",
+			file: "pikabu_panic_11298350.html",
+		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			data, err := os.ReadFile(filepath.Join("testdata", tc.file))
@@ -67,15 +76,18 @@ func TestPikabuParser(t *testing.T) {
 				return
 			}
 
-			records.SortRecordSets(result.Result, &rpb.Sorting{})
-			records.SortRecordSets(want.Result, &rpb.Sorting{})
+			result.Result = records.SortRecordSets(result.Result, &rpb.Sorting{Field: rpb.Sorting_CREATE_TIME, Order: rpb.Sorting_ASC})
+			want.Result = records.SortRecordSets(want.Result, &rpb.Sorting{Field: rpb.Sorting_CREATE_TIME, Order: rpb.Sorting_ASC})
 
 			resultStr := fmt.Sprintf("%s", result)
 			wantStr := fmt.Sprintf("%s", want)
 
 			if resultStr != wantStr {
-				fmt.Println(resultStr)
-				fmt.Println(wantStr)
+				res, _ := json.Marshal(result.Result)
+				wnt, _ := json.Marshal(want.Result)
+				fmt.Println(string(res))
+				fmt.Println(string(wnt))
+
 				t.Errorf("Expected and actual result for %q differ", tc.name)
 			}
 		})

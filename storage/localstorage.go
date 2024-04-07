@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
+	"sync"
 
 	"github.com/lanseg/golang-commons/collections"
 	cm "github.com/lanseg/golang-commons/common"
@@ -19,6 +19,7 @@ import (
 type localStorage struct {
 	Storage
 
+	mux         sync.Mutex
 	overlay     *Overlay
 	logger      *cm.Logger
 	root        string
@@ -48,6 +49,8 @@ func (s *localStorage) GetFile(id string, filename string) opt.Optional[io.ReadC
 }
 
 func (s *localStorage) PutFile(id string, filename string, src io.Reader) error {
+	s.mux.Lock()
+	defer s.mux.Unlock()
 	s.logger.Infof("PutFile %s/%s", id, filename)
 	return s.getOverlay(id).CopyFrom(filename, src)
 }
@@ -60,6 +63,8 @@ func (s *localStorage) DeleteRecordSet(id string) error {
 	if len(id) != 36 {
 		return fmt.Errorf("Looks like uuid is incorrect: %q", id)
 	}
+	s.mux.Lock()
+	defer s.mux.Unlock()
 	path := filepath.Join(s.root, id)
 	if err := os.RemoveAll(filepath.Join(s.root, id)); err != nil {
 		return err
@@ -70,6 +75,8 @@ func (s *localStorage) DeleteRecordSet(id string) error {
 }
 
 func (s *localStorage) SaveRecordSet(newSet *rpb.RecordSet) error {
+	s.mux.Lock()
+	defer s.mux.Unlock()
 	if newSet.Id == "" {
 		return fmt.Errorf("Record without an id")
 	}
@@ -81,7 +88,7 @@ func (s *localStorage) SaveRecordSet(newSet *rpb.RecordSet) error {
 
 func (s *localStorage) getAllRecords() opt.Optional[[]*rpb.RecordSet] {
 	result := []*rpb.RecordSet{}
-	files, err := ioutil.ReadDir(s.root)
+	files, err := os.ReadDir(s.root)
 	if err != nil {
 		return opt.OfError([]*rpb.RecordSet{}, err)
 	}

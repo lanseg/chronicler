@@ -23,6 +23,7 @@ func mergeTagText(content string) string {
 }
 
 func parseStory(node *almosthtml.Node, timeSrc TimeSource) (*rpb.Record, *rpb.UserMetadata) {
+	node = node.GetElementsByTagAndClass("div", "story__main")[0]
 	author := &rpb.UserMetadata{}
 	result := &rpb.Record{
 		FetchTime: timeSrc().Unix(),
@@ -165,10 +166,6 @@ func parseComment(n *almosthtml.Node, timeSrc TimeSource) (*rpb.Record, *rpb.Use
 		}
 	}
 
-	bodies := n.GetElementsByTagAndClass("div", "comment__body")
-	if len(bodies) == 0 {
-		return nil, nil
-	}
 	body := n.GetElementsByTagAndClass("div", "comment__body")[0]
 	header := body.GetElementsByTagAndClass("div", "comment__header")[0]
 	user := header.GetElementsByTagAndClass("div", "comment__user")[0]
@@ -210,35 +207,29 @@ func parsePost(content string, timeSrc TimeSource) (*rpb.Response, error) {
 			storyId = arts[0].Params["data-story-id"]
 		}
 	}
-	for _, n := range root.GetElementsByTagAndClass("div") {
-		if n.Params["class"] == "story__main" {
-			story, author := parseStory(n, timeSrc)
-			story.Source.ChannelId = storyId
-			resultRecords = append(resultRecords, story)
-			userById[author.Id] = author
-		}
-		if n.Params["class"] == "section-hr" {
-			break
-		}
-		if n.Params["data-type"] != "" {
+	stories := root.GetElementsByTagAndClass("div", "page-story")[0]
+	story, author := parseStory(stories.GetElementsByTagAndClass("div", "page-story__story")[0], timeSrc)
+	story.Source.ChannelId = storyId
+	resultRecords = append(resultRecords, story)
+	userById[author.Id] = author
 
-		}
-		if n.Params["data-meta"] != "" && n.Params["class"] == "comment" {
-			comment, user := parseComment(n, timeSrc)
-			if comment == nil {
-				continue
-			}
-			if comment.Parent == nil {
-				comment.Parent = resultRecords[0].Source
-			}
-			resultRecords = append(resultRecords, comment)
-			commentById[comment.Source.MessageId] = comment.Source
-			userById[user.Id] = user
-		}
-	}
-	for _, r := range resultRecords {
-		if r.Parent == nil {
+	commentsGroup := stories.GetElementsByTagAndClass("div", "story-comments")[0]
+	for _, commentDiv := range commentsGroup.GetElementsByTagAndClass("div", "comment") {
+		if cls, ok := commentDiv.Params["class"]; ok && cls == "comment comment_placeholder" {
 			continue
+		}
+		comment, author := parseComment(commentDiv, timeSrc)
+		resultRecords = append(resultRecords, comment)
+		commentById[comment.Source.MessageId] = comment.Source
+		userById[author.Id] = author
+	}
+
+	for _, r := range resultRecords {
+		if r == story {
+			continue
+		}
+		if r.Parent == nil {
+			r.Parent = story.Source
 		}
 		if parent := commentById[r.Parent.MessageId]; parent != nil {
 			r.Parent = parent
