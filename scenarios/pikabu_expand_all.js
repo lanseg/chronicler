@@ -32,6 +32,15 @@ if (expandComments.length > 0) {
     return false;
 }
 
+
+// Waiting for all comment templates to load
+const commentTemplates = [...document.querySelectorAll(".comment .comment_placeholder")].filter((e) => 
+    e.checkVisibility,
+);
+if (commentTemplates.length > 0) {
+    return false;
+}
+
 // Loading lazy images after all
 const imgs = [...document.querySelectorAll("img")];
 imgs.filter((img) => img.src === "").forEach(
