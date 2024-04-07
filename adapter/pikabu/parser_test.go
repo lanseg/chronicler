@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -30,8 +31,9 @@ func TestPikabuParser(t *testing.T) {
 	}
 
 	for _, tc := range []struct {
-		name string
-		file string
+		name    string
+		file    string
+		wantErr string
 	}{
 		{
 			name: "post no text with comments",
@@ -57,6 +59,11 @@ func TestPikabuParser(t *testing.T) {
 			name: "comment placeholder causes panic",
 			file: "pikabu_panic_11298350.html",
 		},
+		{
+			name:    "page not found",
+			file:    "pikabu_notfound_1.html",
+			wantErr: "Page was removed",
+		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			data, err := os.ReadFile(filepath.Join("testdata", tc.file))
@@ -65,9 +72,21 @@ func TestPikabuParser(t *testing.T) {
 				return
 			}
 			result, err := parsePost(string(data), timeSrc)
-			if err != nil {
-				t.Errorf("Error while parsing file %s: %s", tc.file, err)
+			if err != nil && tc.wantErr == "" {
+				t.Errorf("Unexpected error while parsing page %s: %s", tc.file, err)
 				return
+			}
+			if err == nil && tc.wantErr != "" {
+				t.Errorf("Expecting error %q, but got none", tc.wantErr)
+				return
+			}
+			if err != nil && tc.wantErr != "" {
+				if !strings.Contains(err.Error(), tc.wantErr) {
+					t.Errorf("Expected error %q, but got %q", tc.wantErr, err.Error())
+					return
+				} else {
+					return
+				}
 			}
 
 			want, err := readJson[rpb.Response](fmt.Sprintf("%s.json", tc.file))

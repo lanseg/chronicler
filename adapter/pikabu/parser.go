@@ -198,7 +198,7 @@ func parsePost(content string, timeSrc TimeSource) (*rpb.Response, error) {
 	if n := root.GetElementsByTags("title"); len(n) != 0 {
 		title := n[0].InnerHTML()
 		if strings.Contains(title, "Страница удалена") || strings.Contains(title, "Страница не найдена") {
-			return nil, fmt.Errorf("Page was removed: %s", title)
+			return nil, fmt.Errorf("Page was removed: %q", title)
 		}
 	}
 	storyId := ""
