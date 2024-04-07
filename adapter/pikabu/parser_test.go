@@ -64,6 +64,11 @@ func TestPikabuParser(t *testing.T) {
 			file:    "pikabu_notfound_1.html",
 			wantErr: "Page was removed",
 		},
+		{
+			name:    "page deleted",
+			file:    "pikabu_deleted_11298856.html",
+			wantErr: "Page was removed",
+		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			data, err := os.ReadFile(filepath.Join("testdata", tc.file))
