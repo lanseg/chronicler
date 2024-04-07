@@ -47,12 +47,13 @@ func TestDeleteRecord(t *testing.T) {
 			recordSets = append(recordSets, rs)
 		}
 
-		fromStorageBefore, _ := s.ListRecordSets(&rpb.Sorting{Field: rpb.Sorting_FETCH_TIME}).Get()
+		query := &rpb.Query{Sorting: &rpb.Sorting{Field: rpb.Sorting_FETCH_TIME}}
+		fromStorageBefore, _ := s.ListRecordSets(query).Get()
 		if removeErr := s.DeleteRecordSet(recordSets[2].Id); removeErr != nil {
 			t.Errorf("Error while removing a record set: %s", removeErr)
 		}
 
-		fromStorageAfter, _ := s.ListRecordSets(&rpb.Sorting{Field: rpb.Sorting_FETCH_TIME}).Get()
+		fromStorageAfter, _ := s.ListRecordSets(query).Get()
 		if len(fromStorageAfter) != len(fromStorageBefore)-1 {
 			t.Errorf("Record was not removed. Before: %d, After: %d",
 				len(fromStorageBefore), len(fromStorageAfter))
@@ -148,7 +149,8 @@ func TestStorage(t *testing.T) {
 					t.Errorf("Error while saving a request: %s", saveError)
 				}
 			}
-			fromStorage, readError := s.ListRecordSets(&rpb.Sorting{Field: rpb.Sorting_FETCH_TIME}).Get()
+			query := &rpb.Query{Sorting: &rpb.Sorting{Field: rpb.Sorting_FETCH_TIME}}
+			fromStorage, readError := s.ListRecordSets(query).Get()
 			if readError != nil {
 				t.Errorf("Error while reading a request: %s", readError)
 				return

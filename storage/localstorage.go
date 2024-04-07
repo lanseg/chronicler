@@ -55,7 +55,11 @@ func (s *localStorage) PutFile(id string, filename string, src io.Reader) error 
 	return s.getOverlay(id).CopyFrom(filename, src)
 }
 
-func (s *localStorage) ListRecordSets(sorting *rpb.Sorting) opt.Optional[[]*rpb.RecordSet] {
+func (s *localStorage) ListRecordSets(query *rpb.Query) opt.Optional[[]*rpb.RecordSet] {
+	var sorting *rpb.Sorting
+	if query != nil {
+		sorting = query.Sorting
+	}
 	return opt.Of(records.SortRecordSets(collections.Values(s.recordCache), sorting))
 }
 

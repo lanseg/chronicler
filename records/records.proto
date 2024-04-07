@@ -58,6 +58,11 @@ message Sorting {
     Order order = 2;
 }
 
+message Query {
+  Query query = 1;
+  Sorting sorting = 2;
+}
+
 // Next id: 11
 message Record {
   Source source         = 3;

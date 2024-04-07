@@ -14,8 +14,7 @@ message SaveResponse {}
 
 message ListRequest {
     // TODO: add filtering and pagination
-   chronicler.records.Sorting sorting = 1;
-   int32 limit = 2;
+   chronicler.records.Query query = 1;
 }
 
 message ListResponse { 

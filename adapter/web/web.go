@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/lanseg/golang-commons/almosthtml"
-	"github.com/lanseg/golang-commons/collections"
+	col "github.com/lanseg/golang-commons/collections"
 	cm "github.com/lanseg/golang-commons/common"
 
 	"chronicler/adapter"
@@ -22,7 +22,7 @@ const (
 )
 
 var (
-	webpageFileTypes = collections.NewSet([]string{
+	webpageFileTypes = col.NewSet([]string{
 		// images
 		"jpg", "png", "ico", "webp", "gif",
 		// page content
@@ -152,7 +152,7 @@ func (w *webAdapter) GetResponse(request *rpb.Request) []*rpb.Response {
 
 	w.logger.Debugf("Parsing html content")
 	root, _ := almosthtml.ParseHTML(string(body))
-	knownLinks := collections.NewSet([]string{})
+	knownLinks := col.NewSet([]string{})
 	linkNodes := root.GetElementsByTags("a", "img", "script", "link", "source", "srcset")
 
 	for _, node := range linkNodes {

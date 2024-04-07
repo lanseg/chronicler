@@ -2,6 +2,7 @@ package pikabu
 
 import (
 	"fmt"
+	"os"
 	"strings"
 	"time"
 
@@ -212,7 +213,13 @@ func parsePost(content string, timeSrc TimeSource) (*rpb.Response, error) {
 	story.Source.ChannelId = storyId
 	resultRecords = append(resultRecords, story)
 	userById[author.Id] = author
-
+	fmt.Printf("HHHHHH: %s\n", storyId)
+	defer func() {
+		if err := recover(); err != nil {
+			os.WriteFile("/tmp/errrr", []byte(content), 0666)
+			os.Exit(-1)
+		}
+	}()
 	commentsGroup := stories.GetElementsByTagAndClass("div", "story-comments")[0]
 	for _, commentDiv := range commentsGroup.GetElementsByTagAndClass("div", "comment") {
 		if cls, ok := commentDiv.Params["class"]; ok && cls == "comment comment_placeholder" {
