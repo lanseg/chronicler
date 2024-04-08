@@ -1,7 +1,7 @@
 "use strict";
 
-export async function getRecordSets() {
-    return fetch("/chronicler/records")
+export async function getRecordSets(offset = 0, size = 10) {
+    return fetch(`/chronicler/records?offset=${offset}&size=${size}`)
         .then((response) => response.text())
         .then((text) => JSON.parse(text));
 }

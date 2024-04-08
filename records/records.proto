@@ -58,9 +58,14 @@ message Sorting {
     Order order = 2;
 }
 
+message Paging {
+  uint32 offset = 1;
+  uint32 size = 2;
+}
+
 message Query {
-  Query query = 1;
-  Sorting sorting = 2;
+  Sorting sorting = 1;
+  Paging paging = 2;
 }
 
 // Next id: 11

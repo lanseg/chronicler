@@ -213,7 +213,6 @@ func parsePost(content string, timeSrc TimeSource) (*rpb.Response, error) {
 	story.Source.ChannelId = storyId
 	resultRecords = append(resultRecords, story)
 	userById[author.Id] = author
-	fmt.Printf("HHHHHH: %s\n", storyId)
 	defer func() {
 		if err := recover(); err != nil {
 			os.WriteFile("/tmp/errrr", []byte(content), 0666)

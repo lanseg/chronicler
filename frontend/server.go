@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/lanseg/golang-commons/collections"
@@ -44,8 +45,25 @@ func (ws *WebServer) writeJson(w http.ResponseWriter, data any) {
 }
 
 func (ws *WebServer) handleRecordSetList(p PathParams, w http.ResponseWriter, r *http.Request) {
+	queryParams := r.URL.Query()
+	offset := 0
+	if value, ok := queryParams["offset"]; ok && len(value) > 0 {
+		offset, _ = strconv.Atoi(value[0])
+	}
+
+	size := 100
+	if value, ok := queryParams["size"]; ok && len(value) > 0 {
+		size, _ = strconv.Atoi(value[0])
+	}
+
 	rs := records.SortRecordSets(
-		ws.data.ListRecordSets(&rpb.Query{Sorting: ws.sorting}).OrElse([]*rpb.RecordSet{}),
+		ws.data.ListRecordSets(&rpb.Query{
+			Sorting: &rpb.Sorting{Field: rpb.Sorting_CREATE_TIME, Order: rpb.Sorting_DESC},
+			Paging: &rpb.Paging{
+				Offset: uint32(offset),
+				Size:   uint32(size),
+			},
+		}).OrElse([]*rpb.RecordSet{}),
 		&rpb.Sorting{Field: rpb.Sorting_CREATE_TIME, Order: rpb.Sorting_ASC})
 
 	userById := map[string]*rpb.UserMetadata{}
@@ -124,8 +142,6 @@ func NewServer(port int, staticFiles string, storage storage.Storage) *http.Serv
 	server := &WebServer{
 		logger: cm.NewLogger("frontend"),
 		data:   storage,
-
-		sorting: &rpb.Sorting{Field: rpb.Sorting_CREATE_TIME, Order: rpb.Sorting_ASC},
 	}
 
 	handler := &PathParamHandler{

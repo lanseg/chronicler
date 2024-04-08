@@ -56,11 +56,19 @@ func (s *localStorage) PutFile(id string, filename string, src io.Reader) error 
 }
 
 func (s *localStorage) ListRecordSets(query *rpb.Query) opt.Optional[[]*rpb.RecordSet] {
-	var sorting *rpb.Sorting
+	sorting := &rpb.Sorting{Field: rpb.Sorting_CREATE_TIME, Order: rpb.Sorting_ASC}
+	paging := &rpb.Paging{Offset: 0, Size: 20}
 	if query != nil {
-		sorting = query.Sorting
+		if query.Sorting != nil {
+			sorting = query.Sorting
+		}
+		if query.Paging != nil {
+			paging = query.Paging
+		}
 	}
-	return opt.Of(records.SortRecordSets(collections.Values(s.recordCache), sorting))
+
+	sorted := records.SortRecordSets(collections.Values(s.recordCache), sorting)
+	return opt.Of(sorted[min(len(sorted), int(paging.Offset)):min(len(sorted), int(paging.Offset+paging.Size))])
 }
 
 func (s *localStorage) DeleteRecordSet(id string) error {

@@ -2,3 +2,4 @@ bazel-*
 chronicler_storage
 config.json
 deploy.sh
+out*
