@@ -215,19 +215,22 @@ func parsePost(content string, timeSrc TimeSource) (*rpb.Response, error) {
 	userById[author.Id] = author
 	defer func() {
 		if err := recover(); err != nil {
-			os.WriteFile("/tmp/errrr", []byte(content), 0666)
-			os.Exit(-1)
+			os.WriteFile("/tmp/error", []byte(content), 0666)
+			panic(err)
 		}
 	}()
-	commentsGroup := stories.GetElementsByTagAndClass("div", "story-comments")[0]
-	for _, commentDiv := range commentsGroup.GetElementsByTagAndClass("div", "comment") {
-		if cls, ok := commentDiv.Params["class"]; ok && cls == "comment comment_placeholder" {
-			continue
+
+	allComments := stories.GetElementsByTagAndClass("div", "story-comments")
+	if len(allComments) > 0 {
+		for _, commentDiv := range allComments[0].GetElementsByTagAndClass("div", "comment") {
+			if cls, ok := commentDiv.Params["class"]; ok && cls == "comment comment_placeholder" {
+				continue
+			}
+			comment, author := parseComment(commentDiv, timeSrc)
+			resultRecords = append(resultRecords, comment)
+			commentById[comment.Source.MessageId] = comment.Source
+			userById[author.Id] = author
 		}
-		comment, author := parseComment(commentDiv, timeSrc)
-		resultRecords = append(resultRecords, comment)
-		commentById[comment.Source.MessageId] = comment.Source
-		userById[author.Id] = author
 	}
 
 	for _, r := range resultRecords {
