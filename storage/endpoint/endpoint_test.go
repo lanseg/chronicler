@@ -50,7 +50,7 @@ func (fs *FakeStorage) SaveRecordSet(r *rpb.RecordSet) error {
 	return nil
 }
 
-func (fs *FakeStorage) ListRecordSets(_ *rpb.Query) optional.Optional[[]*rpb.RecordSet] {
+func (fs *FakeStorage) ListRecordSets(_ *rpb.ListRecordsRequest) optional.Optional[[]*rpb.RecordSet] {
 	return optional.Of(fs.recordSets)
 }
 

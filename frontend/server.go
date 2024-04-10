@@ -57,7 +57,7 @@ func (ws *WebServer) handleRecordSetList(p PathParams, w http.ResponseWriter, r 
 	}
 
 	rs := records.SortRecordSets(
-		ws.data.ListRecordSets(&rpb.Query{
+		ws.data.ListRecordSets(&rpb.ListRecordsRequest{
 			Sorting: &rpb.Sorting{Field: rpb.Sorting_CREATE_TIME, Order: rpb.Sorting_DESC},
 			Paging: &rpb.Paging{
 				Offset: uint32(offset),

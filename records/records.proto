@@ -44,30 +44,6 @@ message Source {
   SourceType type   = 5;
 }
 
-message Sorting {
-    enum Order {
-        DESC = 0;
-        ASC  = 1;
-    }
-    enum Field {
-        FETCH_TIME  = 0;
-        CREATE_TIME = 1;
-    }
- 
-    Field field = 1;
-    Order order = 2;
-}
-
-message Paging {
-  uint32 offset = 1;
-  uint32 size = 2;
-}
-
-message Query {
-  Sorting sorting = 1;
-  Paging paging = 2;
-}
-
 // Next id: 11
 message Record {
   Source source         = 3;
@@ -98,6 +74,30 @@ message RecordSetPreview {
   int32 record_count = 3;
 
   Record root_record = 4;
+}
+
+message Sorting {
+  enum Order {
+      DESC = 0;
+      ASC  = 1;
+  }
+  enum Field {
+      FETCH_TIME  = 0;
+      CREATE_TIME = 1;
+  }
+
+  Field field = 1;
+  Order order = 2;
+}
+
+message Paging {
+  uint32 offset = 1;
+  uint32 size = 2;
+}
+
+message ListRecordsRequest {
+  Sorting sorting = 1;
+  Paging paging = 2;
 }
 
 message RecordListResponse {

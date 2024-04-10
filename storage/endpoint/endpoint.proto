@@ -13,8 +13,7 @@ message SaveRequest {
 message SaveResponse {}
 
 message ListRequest {
-    // TODO: add filtering and pagination
-   chronicler.records.Query query = 1;
+   chronicler.records.ListRecordsRequest request = 1;
 }
 
 message ListResponse { 

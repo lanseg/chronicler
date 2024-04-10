@@ -41,7 +41,7 @@ func (s *storageServer) Save(ctx context.Context, in *ep.SaveRequest) (*ep.SaveR
 func (s *storageServer) List(in *ep.ListRequest, out ep.Storage_ListServer) error {
 	s.logger.Debugf("List request: %v", in)
 	// TODO: Return errors properly
-	s.baseStorage.ListRecordSets(in.Query).IfPresent(func(rss []*rpb.RecordSet) {
+	s.baseStorage.ListRecordSets(in.Request).IfPresent(func(rss []*rpb.RecordSet) {
 		for i, rs := range rss {
 			if err := out.Send(&ep.ListResponse{RecordSet: rs}); err != nil {
 				break

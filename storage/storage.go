@@ -14,7 +14,7 @@ const (
 
 type Storage interface {
 	SaveRecordSet(*rpb.RecordSet) error
-	ListRecordSets(*rpb.Query) optional.Optional[[]*rpb.RecordSet]
+	ListRecordSets(*rpb.ListRecordsRequest) optional.Optional[[]*rpb.RecordSet]
 	GetRecordSet(id string) optional.Optional[*rpb.RecordSet]
 	DeleteRecordSet(id string) error
 
@@ -30,7 +30,7 @@ func (ns *NoOpStorage) SaveRecordSet(r *rpb.RecordSet) error {
 	return nil
 }
 
-func (ns *NoOpStorage) ListRecordSets(*rpb.Query) optional.Optional[[]*rpb.RecordSet] {
+func (ns *NoOpStorage) ListRecordSets(*rpb.ListRecordsRequest) optional.Optional[[]*rpb.RecordSet] {
 	return optional.Nothing[[]*rpb.RecordSet]{}
 }
 

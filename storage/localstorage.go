@@ -55,15 +55,15 @@ func (s *localStorage) PutFile(id string, filename string, src io.Reader) error 
 	return s.getOverlay(id).CopyFrom(filename, src)
 }
 
-func (s *localStorage) ListRecordSets(query *rpb.Query) opt.Optional[[]*rpb.RecordSet] {
+func (s *localStorage) ListRecordSets(request *rpb.ListRecordsRequest) opt.Optional[[]*rpb.RecordSet] {
 	sorting := &rpb.Sorting{Field: rpb.Sorting_CREATE_TIME, Order: rpb.Sorting_ASC}
 	paging := &rpb.Paging{Offset: 0, Size: 20}
-	if query != nil {
-		if query.Sorting != nil {
-			sorting = query.Sorting
+	if request != nil {
+		if request.Sorting != nil {
+			sorting = request.Sorting
 		}
-		if query.Paging != nil {
-			paging = query.Paging
+		if request.Paging != nil {
+			paging = request.Paging
 		}
 	}
 
