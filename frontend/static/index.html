@@ -23,6 +23,18 @@
         const params = new URLSearchParams(document.location.search);
         const rcid = params.get("record_id");
         const selectedRecordSets = new Set();
+        const paging = {
+            offset: 0,
+            size: 10,
+        };
+
+        function loadRecordSets(offset, size) {
+            getRecordSets(offset, size)
+                .then((rsObj) => new RecordListResponse(rsObj))
+                .then(renderRecordSets)
+                .then(() => window.bus.publish("WorkEnded"))
+                .catch((err) => window.bus.publish("Error", err));
+        }
 
         function renderRecordSets(data) {
             const fragment = document.createDocumentFragment();
@@ -35,7 +47,7 @@
                 });
                 fragment.appendChild(el);
             }
-            records.append(fragment);
+            records.replaceChildren(fragment);
         }
 
         function renderRecord(cdata) {
@@ -120,6 +132,13 @@
 
         function onProgress(change) { }
 
+        function onPagingChange(offset) {
+            paging.offset = offset < 0 ? 0 : offset;
+            window.history.replaceState({}, '', `?offset=${paging.offset}`);
+            document.querySelector(".paging .page").innerHTML = `${(paging.offset / paging.size) | 0}`;
+            loadRecordSets(paging.offset, paging.size);
+        }
+
         window.onload = () => {
             window.bus = getBus();
 
@@ -137,6 +156,15 @@
             // Error events
             bus.subscribe("Error", onError);
 
+            // Paging
+            bus.subscribe("Paging.change", onPagingChange);
+            document.querySelector(".paging .prev").addEventListener("click", () => {
+                bus.publish("Paging.change", paging.offset - paging.size);
+            });
+            document.querySelector(".paging .next").addEventListener("click", () => {
+                bus.publish("Paging.change", paging.offset + paging.size);
+            });
+
             document.querySelector("#recordId .search-input").value = rcid;
             document.querySelector("#recordId button").addEventListener("click", () => {
                 const rid = document.querySelector("#recordId .search-input").value;
@@ -151,11 +179,9 @@
                     .then(() => bus.publish("WorkEnded"));
             } else {
                 const params = new URLSearchParams(window.location.search);
-                getRecordSets(parseInt(params.get("offset") ?? "0"), parseInt(params.get("size") ?? "10"))
-                    .then((rsObj) => new RecordListResponse(rsObj))
-                    .then(renderRecordSets)
-                    .then(() => bus.publish("WorkEnded"))
-                    .catch((err) => bus.publish("Error", err));
+                bus.publish("Paging.change",
+                    parseInt(params.get("page") ?? "0"),
+                    parseInt(params.get("size") ?? "10"));
             }
 
             document.querySelector(".do_delete").addEventListener("click", () => {
@@ -217,6 +243,11 @@
     <div class="records"></div>
     <div class="footer">
         <div class="bar_button do_delete">Delete</div>
+        <div class="paging">
+            <div class="prev bar_button">←</div>
+            <div class="page bar_button">0</div>
+            <div class="next bar_button">→</div>
+        </div>
     </div>
 </body>
 

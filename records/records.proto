@@ -76,6 +76,28 @@ message RecordSetPreview {
   Record root_record = 4;
 }
 
+message RequestConfig {
+  WebEngine engine = 1;
+}
+
+message Request {
+  string id     = 1;
+  Source origin = 2;
+  Source target = 3;
+
+  RequestConfig config = 4;
+}
+
+message Response {
+  Request request           = 1;
+  repeated RecordSet result = 2;
+}
+
+message Message {
+  Source target = 1;
+  bytes content = 2;
+}
+
 message Sorting {
   enum Order {
       DESC = 0;
@@ -104,26 +126,3 @@ message RecordListResponse {
   repeated RecordSetPreview record_sets = 1;
   repeated UserMetadata user_metadata   = 2;
 }
-
-message RequestConfig {
-  WebEngine engine = 1;
-}
-
-message Request {
-  string id     = 1;
-  Source origin = 2;
-  Source target = 3;
-
-  RequestConfig config = 4;
-}
-
-message Response {
-  Request request           = 1;
-  repeated RecordSet result = 2;
-}
-
-message Message {
-  Source target = 1;
-  bytes content = 2;
-}
-
