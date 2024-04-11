@@ -108,13 +108,19 @@ func (s *storageServer) PutFile(out ep.Storage_PutFileServer) error {
 		if err != nil {
 			break
 		}
-		if f.File != nil {
+		if f.File != nil && defs[f.Part.FileId] == nil {
 			s.logger.Infof("Put file %s", f.File)
 			defs[f.Part.FileId] = f.File
 			data[f.Part.FileId] = []byte{}
 		}
 		// TODO: Handle errors here
-		data[f.Part.FileId] = append(data[f.Part.FileId], f.Part.GetChunk().Data...)
+		if f.Part.GetChunk() != nil {
+			data[f.Part.FileId] = append(data[f.Part.FileId], f.Part.GetChunk().Data...)
+		} else if f.Part.GetError() != nil {
+			s.logger.Warningf("A client-side read error for %q: %s, got partial content.",
+				defs[f.Part.FileId], f.Part.GetError())
+			break
+		}
 	}
 	for index, dataBytes := range data {
 		def := defs[index]

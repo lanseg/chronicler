@@ -20,7 +20,7 @@ const (
 	testAddr = "localhost:12345"
 )
 
-func newPutRequest(id string, fileId int, name string, data []byte) *ep.PutFileRequest {
+func newPutRequest(id string, fileId int, chunkId int, name string, data []byte) *ep.PutFileRequest {
 	return &ep.PutFileRequest{
 		File: &ep.FileDef{
 			RecordSetId: id,
@@ -30,7 +30,7 @@ func newPutRequest(id string, fileId int, name string, data []byte) *ep.PutFileR
 			FileId: int32(fileId),
 			Data: &ep.FilePart_Chunk_{
 				Chunk: &ep.FilePart_Chunk{
-					ChunkId: int32(0),
+					ChunkId: int32(chunkId),
 					Size:    int32(len(data)),
 					Data:    data,
 				},
@@ -302,10 +302,23 @@ func TestPutFile(t *testing.T) {
 		wantResponse *ep.PutFileResponse
 	}{
 		{
-			name: "put small file",
+			name: "Put small file",
 			reqs: []*ep.PutFileRequest{
-				newPutRequest("id0", 0, "fn0", []byte("HELLO")),
-				newPutRequest("id0", 1, "fn1", []byte("THERE")),
+				newPutRequest("id0", 0, 0, "fn0", []byte("HELLO")),
+				newPutRequest("id0", 1, 0, "fn1", []byte("THERE")),
+			},
+			wantFiles: map[string][]byte{
+				"id0_fn0": []byte("HELLO"),
+				"id0_fn1": []byte("THERE"),
+			},
+			wantResponse: &ep.PutFileResponse{},
+		},
+		{
+			name: "Partial send",
+			reqs: []*ep.PutFileRequest{
+				newPutRequest("id0", 0, 0, "fn0", []byte("HELLO")),
+				newPutRequest("id0", 1, 0, "fn1", []byte("THE")),
+				newPutRequest("id0", 1, 1, "fn1", []byte("RE")),
 			},
 			wantFiles: map[string][]byte{
 				"id0_fn0": []byte("HELLO"),
