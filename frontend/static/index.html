@@ -29,6 +29,7 @@
         };
 
         function loadRecordSets(offset, size) {
+            bus.publish("WorkStarted");
             getRecordSets(offset, size)
                 .then((rsObj) => new RecordListResponse(rsObj))
                 .then(renderRecordSets)
@@ -118,11 +119,13 @@
         }
 
         function onWorkStarted(work) {
+            document.querySelector(".footer").classList.add("disabled");
             showLoading();
         }
 
         function onWorkEnded(work) {
             hideLoading();
+            document.querySelector(".footer").classList.remove("disabled");
         }
 
         function onError(err) {
@@ -171,7 +174,6 @@
                 window.location.href = "?record_id=" + rid;
             });
 
-            bus.publish("WorkStarted");
             if (params.get("record_id")) {
                 getRecord(params.get("record_id"))
                     .then((data) => new RecordSet(data))

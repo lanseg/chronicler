@@ -2,6 +2,10 @@
     margin: 0px;
 }
 
+.disabled {
+    pointer-events: none;
+}
+
 /* Bar commons */
 .bar_button {
     padding: 10px;
