@@ -150,10 +150,22 @@
     column-gap: 4px;
 }
 
+.footer .search {
+    display: flex;
+    flex-grow: 2;
+    column-gap: 4px;
+    padding-right: 8px;
+}
+
+.footer .search .search-input {
+    flex-grow: 2;
+}
+
 /* Records */
 .records {
     padding: 8px;
     padding-top: 60px;
+    padding-bottom: 68px;
     display: grid;
     grid-template-columns: 100%;
     row-gap: 6px;

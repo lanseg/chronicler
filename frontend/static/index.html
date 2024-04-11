@@ -23,14 +23,15 @@
         const params = new URLSearchParams(document.location.search);
         const rcid = params.get("record_id");
         const selectedRecordSets = new Set();
-        const paging = {
+        const filter = {
             offset: 0,
             size: 10,
+            query: "",
         };
 
-        function loadRecordSets(offset, size) {
+        function loadRecordSets(offset, size, query) {
             bus.publish("WorkStarted");
-            getRecordSets(offset, size)
+            getRecordSets(offset, size, query)
                 .then((rsObj) => new RecordListResponse(rsObj))
                 .then(renderRecordSets)
                 .then(() => window.bus.publish("WorkEnded"))
@@ -135,11 +136,17 @@
 
         function onProgress(change) { }
 
-        function onPagingChange(offset) {
-            paging.offset = offset < 0 ? 0 : offset;
-            window.history.replaceState({}, '', `?offset=${paging.offset}`);
-            document.querySelector(".paging .page").innerHTML = `${(paging.offset / paging.size) | 0}`;
-            loadRecordSets(paging.offset, paging.size);
+        function onFilterChange(offset, size, query) {
+            const queryBox = document.querySelector(".footer .search input");
+            filter.offset = (offset | 0) < 0 ? 0 : offset;
+            filter.query = query || queryBox.value || "";
+            filter.size = size || 10;
+
+            window.history.replaceState({}, '', `?offset=${filter.offset}&size=${filter.size}&query=${filter.query}`);
+            document.querySelector(".paging .page").innerHTML = `${(filter.offset / filter.size) | 0}`;
+            queryBox.value = filter.query;
+
+            loadRecordSets(filter.offset, filter.size, filter.query);
         }
 
         window.onload = () => {
@@ -159,13 +166,13 @@
             // Error events
             bus.subscribe("Error", onError);
 
-            // Paging
-            bus.subscribe("Paging.change", onPagingChange);
+            // Filter
+            bus.subscribe("Filter.change", onFilterChange);
             document.querySelector(".paging .prev").addEventListener("click", () => {
-                bus.publish("Paging.change", paging.offset - paging.size);
+                bus.publish("Filter.change", filter.offset - filter.size, filter.size, filter.query);
             });
             document.querySelector(".paging .next").addEventListener("click", () => {
-                bus.publish("Paging.change", paging.offset + paging.size);
+                bus.publish("Filter.change", filter.offset + filter.size, filter.size, filter.query);
             });
 
             document.querySelector("#recordId .search-input").value = rcid;
@@ -181,10 +188,15 @@
                     .then(() => bus.publish("WorkEnded"));
             } else {
                 const params = new URLSearchParams(window.location.search);
-                bus.publish("Paging.change",
-                    parseInt(params.get("page") ?? "0"),
-                    parseInt(params.get("size") ?? "10"));
+                bus.publish("Filter.change",
+                    parseInt(params.get("offset") ?? "0"),
+                    parseInt(params.get("size") ?? "10"),
+                    params.get("query"));
             }
+
+            document.querySelector(".footer button").addEventListener("click", () => {
+                bus.publish("Filter.change")
+            })
 
             document.querySelector(".do_delete").addEventListener("click", () => {
                 bus.publish("WorkStarted");
@@ -249,6 +261,10 @@
             <div class="prev bar_button">←</div>
             <div class="page bar_button">0</div>
             <div class="next bar_button">→</div>
+        </div>
+        <div class="search">
+            <input type="text" placeholder="Something" class="search-input" />
+            <button>Open</button>
         </div>
     </div>
 </body>
