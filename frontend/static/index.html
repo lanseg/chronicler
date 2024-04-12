@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="/style.css" />
+    <link rel="stylesheet" href="/style.css?v=2" />
     <script type="importmap">
             {
                 "imports": {
@@ -134,19 +134,23 @@
             handleError(err);
         }
 
-        function onProgress(change) { }
-
-        function onFilterChange(offset, size, query) {
-            const queryBox = document.querySelector(".footer .search input");
-            filter.offset = (offset | 0) < 0 ? 0 : offset;
-            filter.query = query || queryBox.value || "";
-            filter.size = size || 10;
-
-            window.history.replaceState({}, '', `?offset=${filter.offset}&size=${filter.size}&query=${filter.query}`);
-            document.querySelector(".paging .page").innerHTML = `${(filter.offset / filter.size) | 0}`;
-            queryBox.value = filter.query;
-
+        function applyFilter(filter) {
+            filter.offset = (filter.offset || 0) < 0 ? 0 : filter.offset;
+            filter.query = filter.query || "";
+            filter.size = filter.size || 10;
             loadRecordSets(filter.offset, filter.size, filter.query);
+            bus.publish("Filter.change", filter);
+        }
+
+        function onFilterChange(filter) {
+            window.history.replaceState(
+                {},
+                "",
+                `?offset=${filter.offset}&size=${filter.size}&query=${filter.query}`,
+            );
+            document.querySelector(".paging .page").innerHTML =
+                `${(filter.offset / filter.size) | 0}`;
+            document.querySelector(".footer .search input").value = filter.query;
         }
 
         window.onload = () => {
@@ -161,7 +165,6 @@
             // Background work
             bus.subscribe("WorkStarted", onWorkStarted);
             bus.subscribe("WorkEnded", onWorkEnded);
-            bus.subscribe("Progress", onProgress);
 
             // Error events
             bus.subscribe("Error", onError);
@@ -169,10 +172,12 @@
             // Filter
             bus.subscribe("Filter.change", onFilterChange);
             document.querySelector(".paging .prev").addEventListener("click", () => {
-                bus.publish("Filter.change", filter.offset - filter.size, filter.size, filter.query);
+                filter.offset -= filter.size;
+                applyFilter(filter);
             });
             document.querySelector(".paging .next").addEventListener("click", () => {
-                bus.publish("Filter.change", filter.offset + filter.size, filter.size, filter.query);
+                filter.offset += filter.size;
+                applyFilter(filter);
             });
 
             document.querySelector("#recordId .search-input").value = rcid;
@@ -188,15 +193,20 @@
                     .then(() => bus.publish("WorkEnded"));
             } else {
                 const params = new URLSearchParams(window.location.search);
-                bus.publish("Filter.change",
-                    parseInt(params.get("offset") ?? "0"),
-                    parseInt(params.get("size") ?? "10"),
-                    params.get("query"));
+                filter.offset = parseInt(params.get("offset") || "0");
+                filter.size = parseInt(params.get("size") || "10");
+                filter.query = params.get("query");
+                applyFilter(filter);
             }
 
-            document.querySelector(".footer button").addEventListener("click", () => {
-                bus.publish("Filter.change")
-            })
+            document
+                .querySelector(".footer .search-input")
+                .addEventListener("keypress", (e) => {
+                    if (event.key == "Enter") {
+                        filter.query = document.querySelector(".footer .search input").value;
+                        bus.publish("Filter.change", filter);
+                    }
+                });
 
             document.querySelector(".do_delete").addEventListener("click", () => {
                 bus.publish("WorkStarted");
@@ -264,7 +274,6 @@
         </div>
         <div class="search">
             <input type="text" placeholder="Something" class="search-input" />
-            <button>Open</button>
         </div>
     </div>
 </body>

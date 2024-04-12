@@ -120,6 +120,7 @@ message Paging {
 message ListRecordsRequest {
   Sorting sorting = 1;
   Paging paging = 2;
+  string query = 3;
 }
 
 message RecordListResponse {

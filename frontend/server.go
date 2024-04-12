@@ -56,6 +56,11 @@ func (ws *WebServer) handleRecordSetList(p PathParams, w http.ResponseWriter, r 
 		size, _ = strconv.Atoi(value[0])
 	}
 
+	searchQuery := ""
+	if value, ok := queryParams["query"]; ok && len(value) > 0 {
+		searchQuery = value[0]
+	}
+
 	rs := records.SortRecordSets(
 		ws.data.ListRecordSets(&rpb.ListRecordsRequest{
 			Sorting: &rpb.Sorting{Field: rpb.Sorting_CREATE_TIME, Order: rpb.Sorting_DESC},
@@ -63,6 +68,7 @@ func (ws *WebServer) handleRecordSetList(p PathParams, w http.ResponseWriter, r 
 				Offset: uint32(offset),
 				Size:   uint32(size),
 			},
+			Query: searchQuery,
 		}).OrElse([]*rpb.RecordSet{}),
 		&rpb.Sorting{Field: rpb.Sorting_CREATE_TIME, Order: rpb.Sorting_ASC})
 

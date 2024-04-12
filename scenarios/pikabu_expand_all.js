@@ -32,10 +32,9 @@ if (expandComments.length > 0) {
     return false;
 }
 
-
 // Waiting for all comment templates to load
-const commentTemplates = [...document.querySelectorAll(".comment .comment_placeholder")].filter((e) => 
-    e.checkVisibility,
+const commentTemplates = [...document.querySelectorAll(".comment .comment_placeholder")].filter(
+    (e) => e.checkVisibility,
 );
 if (commentTemplates.length > 0) {
     return false;

@@ -1,7 +1,9 @@
 "use strict";
 
 export async function getRecordSets(offset = 0, size = 10, query = "") {
-    return fetch(`/chronicler/records?offset=${encodeURI(offset)}&size=${encodeURI(size)}&query=${encodeURI(query)}`)
+    return fetch(
+        `/chronicler/records?offset=${encodeURI(offset)}&size=${encodeURI(size)}&query=${encodeURI(query)}`,
+    )
         .then((response) => response.text())
         .then((text) => JSON.parse(text));
 }

@@ -160,9 +160,9 @@ export function createRecordSet(rs, metadata) {
         return recordEl;
     }
     const text = (rs.description ?? "")
-    .split("\n")
-    .map((s) => `<p>${s.trim()}</p>`)
-    .join("<br/>");
+        .split("\n")
+        .map((s) => `<p>${s.trim()}</p>`)
+        .join("<br/>");
     const wrapper = createElement("label", { class: "record_wrapper", for: `${rs.id}_checkbox` });
     wrapper.innerHTML = `
     <input type="checkbox" class="selection_marker" data-record="${rs.id}" id="${rs.id}_checkbox" />

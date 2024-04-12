@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 
 	"github.com/lanseg/golang-commons/collections"
@@ -66,8 +67,17 @@ func (s *localStorage) ListRecordSets(request *rpb.ListRecordsRequest) opt.Optio
 			paging = request.Paging
 		}
 	}
-
-	sorted := records.SortRecordSets(collections.Values(s.recordCache), sorting)
+	values := []*rpb.RecordSet{}
+	if request.Query == "" {
+		values = collections.Values(s.recordCache)
+	} else {
+		for _, rs := range collections.Values(s.recordCache) {
+			if strings.Contains(fmt.Sprintf("%s", rs), request.Query) {
+				values = append(values, rs)
+			}
+		}
+	}
+	sorted := records.SortRecordSets(values, sorting)
 	return opt.Of(sorted[min(len(sorted), int(paging.Offset)):min(len(sorted), int(paging.Offset+paging.Size))])
 }
 
