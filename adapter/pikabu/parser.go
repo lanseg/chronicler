@@ -168,6 +168,9 @@ func parseComment(n *almosthtml.Node, timeSrc TimeSource) (*rpb.Record, *rpb.Use
 	}
 
 	body := n.GetElementsByTagAndClass("div", "comment__body")[0]
+	if len(body.GetElementsByTagAndClass("div", "comment__header")) == 0 {
+		return nil, nil
+	}
 	header := body.GetElementsByTagAndClass("div", "comment__header")[0]
 	user := header.GetElementsByTagAndClass("div", "comment__user")[0]
 	tvalue := header.GetElementsByTagAndClass("time")[0]
@@ -227,6 +230,9 @@ func parsePost(content string, timeSrc TimeSource) (*rpb.Response, error) {
 				continue
 			}
 			comment, author := parseComment(commentDiv, timeSrc)
+			if comment == nil && author == nil {
+				continue
+			}
 			resultRecords = append(resultRecords, comment)
 			commentById[comment.Source.MessageId] = comment.Source
 			userById[author.Id] = author

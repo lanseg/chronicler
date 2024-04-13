@@ -73,6 +73,10 @@ func TestPikabuParser(t *testing.T) {
 			name: "pikabu jobs",
 			file: "pikabu_jobs_11308419.html",
 		},
+		{
+			name: "pikabu comments still loading",
+			file: "pikabu_notloaded_11311749.html",
+		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			data, err := os.ReadFile(filepath.Join("testdata", tc.file))
@@ -111,8 +115,8 @@ func TestPikabuParser(t *testing.T) {
 			wantStr := fmt.Sprintf("%s", want)
 
 			if resultStr != wantStr {
-				res, _ := json.Marshal(result.Result)
-				wnt, _ := json.Marshal(want.Result)
+				res, _ := json.Marshal(result)
+				wnt, _ := json.Marshal(want)
 				fmt.Println(string(res))
 				fmt.Println(string(wnt))
 
