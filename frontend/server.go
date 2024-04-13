@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 
@@ -30,6 +31,24 @@ type WebServer struct {
 	sorting *rpb.Sorting
 }
 
+func parseListRequest(v url.Values) *rpb.ListRecordsRequest {
+	result := &rpb.ListRecordsRequest{
+		Paging: &rpb.Paging{
+			Offset: uint32(0),
+			Size:   uint32(10),
+		},
+		Query:   v.Get("query"),
+		Sorting: &rpb.Sorting{Field: rpb.Sorting_CREATE_TIME, Order: rpb.Sorting_DESC},
+	}
+	if value, err := strconv.Atoi(v.Get("offset")); err == nil {
+		result.Paging.Offset = uint32(value)
+	}
+	if value, err := strconv.Atoi(v.Get("size")); err == nil {
+		result.Paging.Size = uint32(value)
+	}
+	return result
+}
+
 func (ws *WebServer) Error(w http.ResponseWriter, msg string, code int) {
 	ws.logger.Warningf("HTTP %d: %s", code, msg)
 	http.Error(w, msg, code)
@@ -45,31 +64,8 @@ func (ws *WebServer) writeJson(w http.ResponseWriter, data any) {
 }
 
 func (ws *WebServer) handleRecordSetList(p PathParams, w http.ResponseWriter, r *http.Request) {
-	queryParams := r.URL.Query()
-	offset := 0
-	if value, ok := queryParams["offset"]; ok && len(value) > 0 {
-		offset, _ = strconv.Atoi(value[0])
-	}
-
-	size := 100
-	if value, ok := queryParams["size"]; ok && len(value) > 0 {
-		size, _ = strconv.Atoi(value[0])
-	}
-
-	searchQuery := ""
-	if value, ok := queryParams["query"]; ok && len(value) > 0 {
-		searchQuery = value[0]
-	}
-
 	rs := records.SortRecordSets(
-		ws.data.ListRecordSets(&rpb.ListRecordsRequest{
-			Sorting: &rpb.Sorting{Field: rpb.Sorting_CREATE_TIME, Order: rpb.Sorting_DESC},
-			Paging: &rpb.Paging{
-				Offset: uint32(offset),
-				Size:   uint32(size),
-			},
-			Query: searchQuery,
-		}).OrElse([]*rpb.RecordSet{}),
+		ws.data.ListRecordSets(parseListRequest(r.URL.Query())).OrElse([]*rpb.RecordSet{}),
 		&rpb.Sorting{Field: rpb.Sorting_CREATE_TIME, Order: rpb.Sorting_ASC})
 
 	userById := map[string]*rpb.UserMetadata{}
