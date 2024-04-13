@@ -113,8 +113,8 @@ message Sorting {
 }
 
 message Paging {
-  uint32 offset = 1;
-  uint32 size = 2;
+  uint64 offset = 1;
+  uint64 size = 2;
 }
 
 message ListRecordsRequest {

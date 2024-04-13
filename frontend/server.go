@@ -9,9 +9,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/lanseg/golang-commons/collections"
+	col "github.com/lanseg/golang-commons/collections"
 	cm "github.com/lanseg/golang-commons/common"
-	"github.com/lanseg/golang-commons/optional"
+	opt "github.com/lanseg/golang-commons/optional"
 
 	"chronicler/records"
 	rpb "chronicler/records/proto"
@@ -34,18 +34,14 @@ type WebServer struct {
 func parseListRequest(v url.Values) *rpb.ListRecordsRequest {
 	result := &rpb.ListRecordsRequest{
 		Paging: &rpb.Paging{
-			Offset: uint32(0),
-			Size:   uint32(10),
+			Offset: uint64(0),
+			Size:   uint64(10),
 		},
 		Query:   v.Get("query"),
 		Sorting: &rpb.Sorting{Field: rpb.Sorting_CREATE_TIME, Order: rpb.Sorting_DESC},
 	}
-	if value, err := strconv.Atoi(v.Get("offset")); err == nil {
-		result.Paging.Offset = uint32(value)
-	}
-	if value, err := strconv.Atoi(v.Get("size")); err == nil {
-		result.Paging.Size = uint32(value)
-	}
+	opt.OfError(strconv.ParseUint(v.Get("offset"), 10, 64)).IfPresent(cm.Set[uint64](&result.Paging.Offset))
+	opt.OfError(strconv.ParseUint(v.Get("size"), 10, 64)).IfPresent(cm.Set[uint64](&result.Paging.Size))
 	return result
 }
 
@@ -77,12 +73,12 @@ func (ws *WebServer) handleRecordSetList(p PathParams, w http.ResponseWriter, r 
 		}
 	}
 	records.SortPreviews(result.RecordSets, &rpb.Sorting{Field: rpb.Sorting_CREATE_TIME, Order: rpb.Sorting_DESC})
-	result.UserMetadata = collections.Values(userById)
+	result.UserMetadata = col.Values(userById)
 	ws.writeJson(w, result)
 }
 
 func (ws *WebServer) responseFile(w http.ResponseWriter, id string, filename string) {
-	data, err := optional.MapErr(ws.data.GetFile(id, filename), func(rc io.ReadCloser) ([]byte, error) {
+	data, err := opt.MapErr(ws.data.GetFile(id, filename), func(rc io.ReadCloser) ([]byte, error) {
 		defer rc.Close()
 		return io.ReadAll(rc)
 	}).Get()
