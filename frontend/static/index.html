@@ -203,7 +203,7 @@
                     .addEventListener("keypress", (e) => {
                         if (event.key == "Enter") {
                             filter.query = document.querySelector(".footer .search input").value;
-                            bus.publish("Filter.change", filter);
+                            applyFilter(filter);
                         }
                     });
 
