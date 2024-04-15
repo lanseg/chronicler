@@ -17,6 +17,7 @@ import (
 	twi_adapter "chronicler/adapter/twitter"
 	web_adapter "chronicler/adapter/web"
 	rpb "chronicler/records/proto"
+	"chronicler/resolver"
 	ep "chronicler/storage/endpoint"
 	"chronicler/webdriver"
 )
@@ -67,7 +68,7 @@ func main() {
 	storage := cm.OrExit(ep.NewRemoteStorage(fmt.Sprintf("localhost:%d", *cfg.StorageServerPort)))
 
 	webDriver := webdriver.NewBrowser(*cfg.ScenarioLibrary)
-	resolver := NewResolver(webDriver, storage)
+	resolver := resolver.NewResolver(webDriver, storage)
 
 	ch := NewLocalChronicler(resolver, storage)
 	ch.AddAdapter(rpb.SourceType_TELEGRAM, tlg_adapter.NewTelegramAdapter(tgbot.NewBot(*cfg.TelegramBotKey)))
@@ -75,9 +76,9 @@ func main() {
 	ch.AddAdapter(rpb.SourceType_PIKABU, pkb_adapter.NewPikabuAdapter(webDriver))
 	ch.AddAdapter(rpb.SourceType_WEB, web_adapter.NewWebAdapter(nil, webDriver))
 
-	ScheduleRepeatedSource(pkb_adapter.NewFreshProvider(initHttpClient()), rpb.WebEngine_HTTP_PLAIN, ch, 5*time.Minute)
-	ScheduleRepeatedSource(pkb_adapter.NewHotProvider(initHttpClient()), rpb.WebEngine_WEBDRIVER, ch, 15*time.Minute)
-	ScheduleRepeatedSource(pkb_adapter.NewDisputedProvider(initHttpClient()), rpb.WebEngine_WEBDRIVER, ch, 30*time.Minute)
+	ScheduleRepeatedSource(pkb_adapter.NewFreshProvider(initHttpClient()), rpb.WebEngine_HTTP_PLAIN, ch, 2*time.Minute)
+	ScheduleRepeatedSource(pkb_adapter.NewHotProvider(initHttpClient()), rpb.WebEngine_WEBDRIVER, ch, 10*time.Minute)
+	ScheduleRepeatedSource(pkb_adapter.NewDisputedProvider(initHttpClient()), rpb.WebEngine_WEBDRIVER, ch, 15*time.Minute)
 
 	conc.RunPeriodically(func() {
 		ch.SubmitRequest(&rpb.Request{Target: &rpb.Source{Type: rpb.SourceType_TELEGRAM}})

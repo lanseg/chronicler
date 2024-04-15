@@ -7,6 +7,10 @@
     opacity: 0.5;
 }
 
+.footer {
+    font-family: sans-serif;
+}
+
 /* Bar commons */
 .bar_button {
     padding: 10px;
@@ -71,7 +75,7 @@
     display: none;
 }
 
-.toggler_check:checked+.menuitems {
+.toggler_check:checked + .menuitems {
     display: block;
 }
 
@@ -222,7 +226,7 @@
     display: none;
 }
 
-.record_wrapper input.selection_marker:checked~.record {
+.record_wrapper input.selection_marker:checked ~ .record {
     background-color: lightgray;
 }
 
@@ -261,11 +265,11 @@
     display: none;
 }
 
-.record .section input.toggler:checked~.content {
+.record .section input.toggler:checked ~ .content {
     display: block;
 }
 
-.record .section .toggler:checked~.header .toggler_status {
+.record .section .toggler:checked ~ .header .toggler_status {
     transform: rotate(90deg) translateX(-3px);
 }
 

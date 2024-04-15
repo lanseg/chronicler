@@ -28,7 +28,6 @@ go_binary(
     deps = [
         ":endpoint",
         ":storage_endpoint_go_proto",
-        "//downloader",
         "//records:records_go_proto",
         "//storage",
         "//webdriver",
@@ -67,7 +66,6 @@ go_test(
         ":endpoint",
     ],
     deps = [
-        "//downloader",
         "//webdriver",
         "@golang-commons//concurrent",
         "@golang-commons//optional",

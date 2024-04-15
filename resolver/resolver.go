@@ -1,4 +1,4 @@
-package main
+package resolver
 
 import (
 	"bytes"
@@ -8,7 +8,6 @@ import (
 	cm "github.com/lanseg/golang-commons/common"
 	"github.com/lanseg/golang-commons/optional"
 
-	"chronicler/downloader"
 	rpb "chronicler/records/proto"
 	"chronicler/storage"
 	"chronicler/webdriver"
@@ -23,7 +22,7 @@ func NewResolver(browser webdriver.Browser, storage storage.Storage) Resolver {
 		logger:     cm.NewLogger("Resolver"),
 		browser:    browser,
 		storage:    storage,
-		downloader: downloader.NewDownloader(&http.Client{}, storage),
+		downloader: NewDownloader(&http.Client{}, storage),
 	}
 }
 
@@ -33,7 +32,7 @@ type resolverImpl struct {
 	logger     *cm.Logger
 	storage    storage.Storage
 	browser    webdriver.Browser
-	downloader downloader.Downloader
+	downloader Downloader
 }
 
 func newFile(id string, name string) *rpb.File {

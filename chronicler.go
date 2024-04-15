@@ -10,6 +10,7 @@ import (
 
 	"chronicler/adapter"
 	rpb "chronicler/records/proto"
+	"chronicler/resolver"
 	"chronicler/storage"
 )
 
@@ -76,7 +77,7 @@ type localChronicler struct {
 	Chronicler
 
 	logger   *cm.Logger
-	resolver Resolver
+	resolver resolver.Resolver
 	storage  storage.Storage
 	status   *ChroniclerStatus
 	done     chan bool
@@ -90,7 +91,7 @@ type localChronicler struct {
 	messageSenders    map[rpb.SourceType]adapter.MessageSender
 }
 
-func NewLocalChronicler(resolver Resolver, storage storage.Storage) Chronicler {
+func NewLocalChronicler(resolver resolver.Resolver, storage storage.Storage) Chronicler {
 	return &localChronicler{
 		logger:   cm.NewLogger("chronicler"),
 		resolver: resolver,
