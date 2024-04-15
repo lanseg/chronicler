@@ -4,6 +4,7 @@
 
 .disabled {
     pointer-events: none;
+    opacity: 0.5;
 }
 
 /* Bar commons */
@@ -70,7 +71,7 @@
     display: none;
 }
 
-.toggler_check:checked + .menuitems {
+.toggler_check:checked+.menuitems {
     display: block;
 }
 
@@ -150,9 +151,11 @@
 
 .footer .search {
     flex-grow: 2;
+    display: flex;
 }
 
 .footer .search .search-input {
+    flex-grow: 2;
     width: 100%;
     height: 100%;
     min-height: 50px;
@@ -219,7 +222,7 @@
     display: none;
 }
 
-.record_wrapper input.selection_marker:checked ~ .record {
+.record_wrapper input.selection_marker:checked~.record {
     background-color: lightgray;
 }
 
@@ -258,11 +261,11 @@
     display: none;
 }
 
-.record .section input.toggler:checked ~ .content {
+.record .section input.toggler:checked~.content {
     display: block;
 }
 
-.record .section .toggler:checked ~ .header .toggler_status {
+.record .section .toggler:checked~.header .toggler_status {
     transform: rotate(90deg) translateX(-3px);
 }
 
