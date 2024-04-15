@@ -13,6 +13,15 @@ import (
 	"chronicler/storage"
 )
 
+var (
+	SOURCE_TYPE_PRIORITY = []rpb.SourceType{
+		rpb.SourceType_TWITTER,
+		rpb.SourceType_PIKABU,
+		rpb.SourceType_TELEGRAM,
+		rpb.SourceType_WEB,
+	}
+)
+
 type ChroniclerStatus struct {
 	waiter   sync.WaitGroup
 	mux      sync.RWMutex
@@ -174,17 +183,19 @@ func (ch *localChronicler) FindSources(resp *rpb.Response) {
 			continue
 		}
 		for _, record := range rs.Records {
-			for _, a := range ch.sourceFinders {
+			for _, pp := range SOURCE_TYPE_PRIORITY {
 				found := false
-				for _, target := range a.FindSources(record) {
-					result = append(result, &rpb.Request{
-						Id:     rs.Id,
-						Target: target,
-					})
-					found = true
+				if sf, ok := ch.sourceFinders[pp]; ok {
+					for _, target := range sf.FindSources(record) {
+						result = append(result, &rpb.Request{
+							Id:     rs.Id,
+							Target: target,
+						})
+						found = true
+					}
 				}
 				if found {
-					continue
+					break
 				}
 			}
 		}

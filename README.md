@@ -7,8 +7,6 @@ references.
 
 ## How it works
 
-## Future plans
-
 // TODO: add plans here
 
 ## Details
@@ -25,7 +23,7 @@ references in the text and loads information by that reference in a [RecordSet](
 Currently supported:
 * Telegram (Messages forwarded to the bot)
 * Twitter (Links to twitter threads)
-* Pikabui (Link to pikabu stories)
+* Pikabu (Link to pikabu stories)
 * Web pages (Just a regular http/https link)
 
 ### Webdriver
@@ -48,3 +46,7 @@ Storage for records.
 
 Web page.
 // TODO: add frontend description
+
+### Monitoring
+
+// TODO: add information about monitoring
