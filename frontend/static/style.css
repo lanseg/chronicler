@@ -7,11 +7,17 @@
     opacity: 0.5;
 }
 
-.footer {
-    font-family: sans-serif;
+/* Bar commons */
+.bar {
+    background-color: black;
+    width: 100%;
+    display: flex;
+    color: white;
+    align-items: center;
+    justify-content: center;
+    padding: 2px;
 }
 
-/* Bar commons */
 .bar_button {
     padding: 10px;
     min-height: 26px;
@@ -31,16 +37,7 @@
     width: 100%;
 }
 
-.menubar {
-    background-color: black;
-    width: 100%;
-    display: flex;
-    color: white;
-    align-items: center;
-    justify-content: center;
-}
-
-.menubar .title {
+.bar .title {
     flex-grow: 2;
     font-size: 25px;
     padding: 4px;
@@ -48,12 +45,12 @@
     font-family: serif;
 }
 
-.topheader .menubar .title a {
+.topheader .bar .title a {
     text-decoration: none;
     color: white;
 }
 
-.topheader .menubar .menu .hamburger-lines {
+.topheader .bar .menu .hamburger-lines {
     display: block;
     top: 17px;
     left: 20px;
@@ -63,7 +60,7 @@
     justify-content: space-between;
 }
 
-.topheader .menubar .menu .hamburger-lines .line {
+.topheader .bar .menu .hamburger-lines .line {
     display: block;
     height: 2px;
     width: 100%;
@@ -75,7 +72,7 @@
     display: none;
 }
 
-.toggler_check:checked + .menuitems {
+.toggler_check:checked+.menuitems {
     display: block;
 }
 
@@ -130,17 +127,9 @@
 
 /* Footer */
 .footer {
+    font-family: sans-serif;
     position: fixed;
     bottom: 0px;
-    background-color: black;
-    width: 100%;
-    color: white;
-    font-size: 25px;
-    padding: 4px;
-    display: flex;
-    column-gap: 4px;
-    box-sizing: border-box;
-    justify-content: center;
 }
 
 .footer .do_delete {
@@ -156,6 +145,9 @@
 .footer .search {
     flex-grow: 2;
     display: flex;
+    padding-left: 4px;
+    padding-right: 6px;
+    padding-top
 }
 
 .footer .search .search-input {
@@ -226,7 +218,7 @@
     display: none;
 }
 
-.record_wrapper input.selection_marker:checked ~ .record {
+.record_wrapper input.selection_marker:checked~.record {
     background-color: lightgray;
 }
 
@@ -265,11 +257,11 @@
     display: none;
 }
 
-.record .section input.toggler:checked ~ .content {
+.record .section input.toggler:checked~.content {
     display: block;
 }
 
-.record .section .toggler:checked ~ .header .toggler_status {
+.record .section .toggler:checked~.header .toggler_status {
     transform: rotate(90deg) translateX(-3px);
 }
 
