@@ -60,8 +60,42 @@ func TestStatus(t *testing.T) {
 			put:  []*sp.Metric{{Name: "metric", Value: &sp.Metric_IntValue{IntValue: int64(10)}}},
 			want: []*sp.Metric{{Name: "metric", Value: &sp.Metric_IntValue{IntValue: int64(10)}}},
 		},
+		{
+			name: "all metric",
+			put: []*sp.Metric{
+				{Name: "metric", Value: &sp.Metric_IntValue{IntValue: int64(10)}},
+				{Name: "metric1", Value: &sp.Metric_DoubleValue{DoubleValue: float64(10.20)}},
+				{Name: "metric2", Value: &sp.Metric_StringValue{StringValue: "SomeValue"}},
+				{Name: "metric3", Value: &sp.Metric_IntRangeValue{IntRangeValue: &sp.IntRange{
+					MinValue: int64(0),
+					MaxValue: int64(100500),
+					Value:    int64(12345),
+				}}},
+				{Name: "metric4", Value: &sp.Metric_DoubleRangeValue{DoubleRangeValue: &sp.DoubleRange{
+					MinValue: float64(-123.456),
+					MaxValue: float64(123.456),
+					Value:    float64(0.5),
+				}}},
+			},
+			want: []*sp.Metric{
+				{Name: "metric", Value: &sp.Metric_IntValue{IntValue: int64(10)}},
+				{Name: "metric1", Value: &sp.Metric_DoubleValue{DoubleValue: float64(10.20)}},
+				{Name: "metric2", Value: &sp.Metric_StringValue{StringValue: "SomeValue"}},
+				{Name: "metric3", Value: &sp.Metric_IntRangeValue{IntRangeValue: &sp.IntRange{
+					MinValue: int64(0),
+					MaxValue: int64(100500),
+					Value:    int64(12345),
+				}}},
+				{Name: "metric4", Value: &sp.Metric_DoubleRangeValue{DoubleRangeValue: &sp.DoubleRange{
+					MinValue: float64(-123.456),
+					MaxValue: float64(123.456),
+					Value:    float64(0.5),
+				}}},
+			},
+		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
+			tb.server.metrics = map[string]*sp.Metric{}
 			for _, v := range tc.put {
 				if err := tb.client.PutValue(v); err != nil {
 					t.Errorf("Could not send metrics to server: %s", err)
