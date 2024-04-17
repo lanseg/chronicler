@@ -81,6 +81,7 @@ func (s *statusServer) Stop() {
 
 func NewStatusServer(address string) *statusServer {
 	return &statusServer{
+		address: address,
 		logger:  cm.NewLogger("StatusServer"),
 		metrics: map[string]*sp.Metric{},
 	}
