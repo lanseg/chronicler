@@ -3,3 +3,50 @@ syntax = "proto3";
 option go_package = "chronicler/status";
 
 package chronicler.status;
+
+message IntRange {
+    int64 minValue = 1;
+    int64 maxValue = 2;
+    int64 value = 3;
+}
+
+message DoubleRange {
+    double minValue = 1;
+    double maxValue = 2;
+    double value = 3;
+}
+
+message Metric {
+
+    string name = 1;
+
+    oneof value {
+        int64 intValue = 2;
+        double doubleValue = 3;
+        string stringValue = 4;
+        IntRange intRangeValue = 5;
+        DoubleRange doubleRangeValue = 6;
+    }
+}
+
+message GetStatusRequest {
+    string metricName = 1;
+}
+
+message GetStatusResponse {
+    repeated Metric metric = 1;
+}
+
+message PutStatusRequest {
+    repeated Metric metric = 1;
+}
+
+message PutStatusResponse {
+
+}
+
+service Status {
+    rpc getStatus(GetStatusRequest) returns (stream GetStatusResponse) {};
+    rpc putStatus(stream PutStatusRequest) returns (PutStatusResponse) {};
+}
+  

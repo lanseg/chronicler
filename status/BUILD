@@ -12,7 +12,7 @@ proto_library(
 go_proto_library(
     name = "status_go_proto",
     compilers = ["@rules_go//proto:go_grpc"],
-    importpath = "chronicler/status_go_proto",
+    importpath = "chronicler/status/status_go_proto",
     protos = [":status_proto"],
 )
 
@@ -38,6 +38,7 @@ go_library(
     importpath = "chronicler/status",
     deps = [
         ":status_go_proto",
+        "@golang-commons//collections",
         "@golang-commons//common",
         "@golang-commons//optional",
         "@org_golang_google_grpc//:grpc",
