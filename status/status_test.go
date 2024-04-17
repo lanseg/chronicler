@@ -61,6 +61,25 @@ func TestStatus(t *testing.T) {
 			want: []*sp.Metric{{Name: "metric", Value: &sp.Metric_IntValue{IntValue: int64(10)}}},
 		},
 		{
+			name: "metric with the same name overwrites value",
+			put: []*sp.Metric{
+				{Name: "metric", Value: &sp.Metric_IntValue{IntValue: int64(10)}},
+				{Name: "metric", Value: &sp.Metric_DoubleValue{DoubleValue: float64(10.20)}},
+			},
+			want: []*sp.Metric{
+				{Name: "metric", Value: &sp.Metric_DoubleValue{DoubleValue: float64(10.20)}},
+			},
+		},
+		{
+			name: "metric with no value removes metric",
+			put: []*sp.Metric{
+				{Name: "metric", Value: &sp.Metric_IntValue{IntValue: int64(10)}},
+				{Name: "metric", Value: &sp.Metric_DoubleValue{DoubleValue: float64(10.20)}},
+				{Name: "metric"},
+			},
+			want: []*sp.Metric{},
+		},
+		{
 			name: "all metric",
 			put: []*sp.Metric{
 				{Name: "metric", Value: &sp.Metric_IntValue{IntValue: int64(10)}},

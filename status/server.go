@@ -46,7 +46,11 @@ func (s *statusServer) PutStatus(out sp.Status_PutStatusServer) error {
 			return err
 		}
 		for _, r := range result.Metric {
-			s.metrics[r.Name] = r
+			if r.GetValue() == nil {
+				delete(s.metrics, r.Name)
+			} else {
+				s.metrics[r.Name] = r
+			}
 		}
 	}
 	return out.SendAndClose(&sp.PutStatusResponse{})
