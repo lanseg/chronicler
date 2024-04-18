@@ -40,8 +40,8 @@ func setupServer(tb testing.TB) (*testBed, error) {
 		client: client,
 		server: server,
 		tearDown: func(tb testing.TB) {
-			server.Stop()
 			client.Stop()
+			server.Stop()
 		},
 	}, nil
 }

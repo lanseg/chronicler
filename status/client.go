@@ -1,24 +1,34 @@
 package status
 
 import (
-	sp "chronicler/status/status_go_proto"
 	"context"
 	"io"
-
-	cm "github.com/lanseg/golang-commons/common"
+	"time"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/encoding/gzip"
+	"google.golang.org/grpc/keepalive"
+
+	cm "github.com/lanseg/golang-commons/common"
+
+	sp "chronicler/status/status_go_proto"
 )
 
 const (
 	maxMsgSize = 1024 * 1024
 )
 
+var kacp = keepalive.ClientParameters{
+	Time:                10 * time.Second, // send pings every 10 seconds if there is no activity
+	Timeout:             time.Second,      // wait 1 second for ping ack before considering the connection dead
+	PermitWithoutStream: true,             // send pings even without active streams
+}
+
 func newStatusClient(addr string) (sp.StatusClient, error) {
 	conn, err := grpc.Dial(addr,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithKeepaliveParams(kacp),
 		grpc.WithDefaultCallOptions(
 			grpc.MaxCallRecvMsgSize(maxMsgSize),
 			grpc.UseCompressor(gzip.Name)))
@@ -81,30 +91,28 @@ func (sc *StatusClient) Start() {
 	go func() {
 		done := false
 		sc.logger.Infof("Starting status client")
+		put, err := sc.client.PutStatus(sc.context)
+		if err != nil {
+			sc.logger.Warningf("Could not initialize the connection: %s", err)
+			done = true
+		}
 		for !done {
 			select {
 			case metric := <-sc.putter:
-				put, err := sc.client.PutStatus(sc.context)
-				if err != nil {
-					sc.logger.Warningf("Could not initialize the connection: %s", err)
-					continue
-				}
 				if err := put.Send(&sp.PutStatusRequest{
 					Metric: []*sp.Metric{metric},
 				}); err != nil {
 					sc.logger.Warningf("Error while sending the metrics: %s", err)
 					continue
 				}
-
-				_, err = put.CloseAndRecv()
-
 			case <-sc.done:
-				sc.logger.Infof("Shutting down status client")
-				close(sc.putter)
-				close(sc.done)
 				done = true
 			}
 		}
+		sc.logger.Infof("Shutting down status client")
+		_, err = put.CloseAndRecv()
+		close(sc.putter)
+		close(sc.done)
 		sc.logger.Infof("Status client stopped")
 	}()
 }
