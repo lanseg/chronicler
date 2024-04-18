@@ -1,6 +1,7 @@
 package status
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 
@@ -33,11 +34,14 @@ func setupServer(tb testing.TB) (*testBed, error) {
 		return nil, err
 	}
 
+	client.Start()
+
 	return &testBed{
 		client: client,
 		server: server,
 		tearDown: func(tb testing.TB) {
 			server.Stop()
+			client.Stop()
 		},
 	}, nil
 }
@@ -116,20 +120,22 @@ func TestStatus(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			tb.server.metrics = map[string]*sp.Metric{}
 			for _, v := range tc.put {
-				if err := tb.client.PutValue(v); err != nil {
-					t.Errorf("Could not send metrics to server: %s", err)
-					return
-				}
+				tb.client.PutValue(v)
 			}
 
-			values, err := tb.client.GetValues()
-			if err != nil {
+			if _, err := conc.WaitForSomething(func() opt.Optional[[]*sp.Metric] {
+				vals, err := tb.client.GetValues()
+				if err != nil {
+					return opt.OfError[[]*sp.Metric](nil, err)
+				}
+				if !reflect.DeepEqual(tc.want, vals) {
+					return opt.OfError[[]*sp.Metric](
+						nil, fmt.Errorf("Expected to get %v, but got %v", tc.want, vals))
+				}
+				return opt.Of(vals)
+			}).Get(); err != nil {
 				t.Errorf("Could not read metrics from server: %s", err)
 				return
-			}
-
-			if !reflect.DeepEqual(tc.want, values) {
-				t.Errorf("Expected metrics to be %v, but got %v", tc.want, values)
 			}
 		})
 	}

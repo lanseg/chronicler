@@ -32,6 +32,9 @@ type StatusClient struct {
 	client  sp.StatusClient
 	context context.Context
 	logger  *cm.Logger
+
+	putter chan *sp.Metric
+	done   chan bool
 }
 
 func NewStatusClient(addr string) (*StatusClient, error) {
@@ -42,23 +45,14 @@ func NewStatusClient(addr string) (*StatusClient, error) {
 	return &StatusClient{
 		client:  client,
 		context: context.Background(),
+		putter:  make(chan *sp.Metric, 10),
+		done:    make(chan bool),
 		logger:  cm.NewLogger("RemoteStorage"),
 	}, nil
 }
 
-func (sc *StatusClient) PutValue(metric *sp.Metric) error {
-	put, err := sc.client.PutStatus(sc.context)
-	if err != nil {
-		return err
-	}
-	if err := put.Send(&sp.PutStatusRequest{
-		Metric: []*sp.Metric{metric},
-	}); err != nil {
-		return err
-	}
-
-	_, err = put.CloseAndRecv()
-	return err
+func (sc *StatusClient) PutValue(metric *sp.Metric) {
+	sc.putter <- metric
 }
 
 func (sc *StatusClient) GetValues() ([]*sp.Metric, error) {
@@ -77,4 +71,40 @@ func (sc *StatusClient) GetValues() ([]*sp.Metric, error) {
 		result = append(result, in.Metric...)
 	}
 	return result, nil
+}
+
+func (sc *StatusClient) Stop() {
+	sc.done <- true
+}
+
+func (sc *StatusClient) Start() {
+	go func() {
+		done := false
+		sc.logger.Infof("Starting status client")
+		for !done {
+			select {
+			case metric := <-sc.putter:
+				put, err := sc.client.PutStatus(sc.context)
+				if err != nil {
+					sc.logger.Warningf("Could not initialize the connection: %s", err)
+					continue
+				}
+				if err := put.Send(&sp.PutStatusRequest{
+					Metric: []*sp.Metric{metric},
+				}); err != nil {
+					sc.logger.Warningf("Error while sending the metrics: %s", err)
+					continue
+				}
+
+				_, err = put.CloseAndRecv()
+
+			case <-sc.done:
+				sc.logger.Infof("Shutting down status client")
+				close(sc.putter)
+				close(sc.done)
+				done = true
+			}
+		}
+		sc.logger.Infof("Status client stopped")
+	}()
 }
