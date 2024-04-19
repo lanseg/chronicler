@@ -19,7 +19,7 @@ go_proto_library(
 go_binary(
     name = "statusserver",
     srcs = [
-        "status.go",
+        "statusserver.go",
     ],
     deps = [
         ":status",

@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	logger = cm.NewLogger("main")
+	logger = cm.NewLogger("storageserver")
 )
 
 type Config struct {
@@ -21,12 +21,7 @@ type Config struct {
 }
 
 func main() {
-	cfg, err := cm.GetConfig[Config](os.Args[1:], "config")
-	if err != nil {
-		logger.Errorf("Could not load config: %v", err)
-		os.Exit(-1)
-	}
-
+	cfg := cm.OrExit(cm.GetConfig[Config](os.Args[1:], "config"))
 	logger.Infof("Config.StorageRoot: %s", *cfg.StorageRoot)
 	logger.Infof("Config.StorageServerPort: %s", *cfg.StorageServerPort)
 
