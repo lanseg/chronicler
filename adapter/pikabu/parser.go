@@ -195,6 +195,12 @@ func parseComment(n *almosthtml.Node, timeSrc TimeSource) (*rpb.Record, *rpb.Use
 }
 
 func parsePost(content string, timeSrc TimeSource) (*rpb.Response, error) {
+	defer func() {
+		if err := recover(); err != nil {
+			os.WriteFile("/tmp/error", []byte(content), 0666)
+			panic(err)
+		}
+	}()
 	resultRecords := []*rpb.Record{}
 	userById := map[string]*rpb.UserMetadata{}
 	commentById := map[string]*rpb.Source{}
@@ -216,13 +222,6 @@ func parsePost(content string, timeSrc TimeSource) (*rpb.Response, error) {
 	story.Source.ChannelId = storyId
 	resultRecords = append(resultRecords, story)
 	userById[author.Id] = author
-	defer func() {
-		if err := recover(); err != nil {
-			os.WriteFile("/tmp/error", []byte(content), 0666)
-			panic(err)
-		}
-	}()
-
 	allComments := stories.GetElementsByTagAndClass("div", "story-comments")
 	if len(allComments) > 0 {
 		for _, commentDiv := range allComments[0].GetElementsByTagAndClass("div", "comment") {

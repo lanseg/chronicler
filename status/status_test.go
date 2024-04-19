@@ -17,7 +17,7 @@ const (
 
 type testBed struct {
 	server   *statusServer
-	client   *StatusClient
+	client   StatusClient
 	tearDown func(tb testing.TB)
 }
 
@@ -27,7 +27,7 @@ func setupServer(tb testing.TB) (*testBed, error) {
 		return nil, err
 	}
 
-	client, err := conc.WaitForSomething(func() opt.Optional[*StatusClient] {
+	client, err := conc.WaitForSomething(func() opt.Optional[StatusClient] {
 		return opt.OfError(NewStatusClient(testAddr))
 	}).Get()
 	if err != nil {

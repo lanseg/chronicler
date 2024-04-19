@@ -38,7 +38,46 @@ func newStatusClient(addr string) (sp.StatusClient, error) {
 	return sp.NewStatusClient(conn), nil
 }
 
-type StatusClient struct {
+type StatusClient interface {
+	PutValue(metric *sp.Metric) error
+	GetValues() ([]*sp.Metric, error)
+	Start()
+	Stop()
+}
+
+type noopStatusClient struct {
+	StatusClient
+
+	logger *cm.Logger
+}
+
+func (nc *noopStatusClient) PutValue(metric *sp.Metric) error {
+	nc.logger.Infof("PutValue(%v)", metric)
+	return nil
+}
+
+func (nc *noopStatusClient) GetValues() ([]*sp.Metric, error) {
+	nc.logger.Infof("GetValues()")
+	return []*sp.Metric{}, nil
+}
+
+func (nc *noopStatusClient) Start() {
+	nc.logger.Infof("Start()")
+}
+
+func (nc *noopStatusClient) Stop() {
+	nc.logger.Infof("Stop()")
+}
+
+func NewNoopClient(_ string) (StatusClient, error) {
+	return &noopStatusClient{
+		logger: cm.NewLogger("NoopStatusClient"),
+	}, nil
+}
+
+type remoteStatusClient struct {
+	StatusClient
+
 	client  sp.StatusClient
 	context context.Context
 	logger  *cm.Logger
@@ -47,12 +86,12 @@ type StatusClient struct {
 	done   chan bool
 }
 
-func NewStatusClient(addr string) (*StatusClient, error) {
+func NewStatusClient(addr string) (StatusClient, error) {
 	client, err := newStatusClient(addr)
 	if err != nil {
 		return nil, err
 	}
-	return &StatusClient{
+	return &remoteStatusClient{
 		client:  client,
 		context: context.Background(),
 		putter:  make(chan *sp.Metric, 10),
@@ -61,11 +100,12 @@ func NewStatusClient(addr string) (*StatusClient, error) {
 	}, nil
 }
 
-func (sc *StatusClient) PutValue(metric *sp.Metric) {
+func (sc *remoteStatusClient) PutValue(metric *sp.Metric) error {
 	sc.putter <- metric
+	return nil
 }
 
-func (sc *StatusClient) GetValues() ([]*sp.Metric, error) {
+func (sc *remoteStatusClient) GetValues() ([]*sp.Metric, error) {
 	get, err := sc.client.GetStatus(sc.context, &sp.GetStatusRequest{})
 	if err != nil {
 		return nil, err
@@ -83,11 +123,11 @@ func (sc *StatusClient) GetValues() ([]*sp.Metric, error) {
 	return result, nil
 }
 
-func (sc *StatusClient) Stop() {
+func (sc *remoteStatusClient) Stop() {
 	sc.done <- true
 }
 
-func (sc *StatusClient) Start() {
+func (sc *remoteStatusClient) Start() {
 	go func() {
 		done := false
 		sc.logger.Infof("Starting status client")
