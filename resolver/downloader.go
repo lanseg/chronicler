@@ -1,10 +1,13 @@
 package resolver
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 
+	"chronicler/status"
+	sp "chronicler/status/status_go_proto"
 	"chronicler/storage"
 
 	cm "github.com/lanseg/golang-commons/common"
@@ -31,6 +34,7 @@ type httpDownloader struct {
 	Downloader
 
 	tasks      chan downloadTask
+	stats      status.StatusClient
 	storage    storage.Storage
 	httpClient *http.Client
 	logger     *cm.Logger
@@ -88,9 +92,15 @@ func (h *httpDownloader) downloadLoop() {
 				continue
 			}
 
+			metric := fmt.Sprintf("downloader_%s_%s", task.id, task.source)
+			h.stats.PutValue(&sp.Metric{
+				Name:  metric,
+				Value: &sp.Metric_StringValue{StringValue: "Downloading"},
+			})
 			resp, err := h.get(u.String())
 			if err != nil {
 				h.logger.Warningf("Cannot create get request for url %s: %s", u, err)
+				h.stats.PutValue(&sp.Metric{Name: metric})
 				continue
 			}
 
@@ -99,6 +109,7 @@ func (h *httpDownloader) downloadLoop() {
 			if err := h.storage.PutFile(task.id, task.source, src); err != nil {
 				h.logger.Warningf("Error while writing data from %s to %s: %s", u, task.id, err)
 			}
+			h.stats.PutValue(&sp.Metric{Name: metric})
 			src.Close()
 		}
 	})()
@@ -110,11 +121,12 @@ func (h *httpDownloader) ScheduleDownload(id string, source string) error {
 	return nil
 }
 
-func NewDownloader(httpClient *http.Client, storage storage.Storage) Downloader {
+func NewDownloader(httpClient *http.Client, storage storage.Storage, stats status.StatusClient) Downloader {
 	loader := &httpDownloader{
 		storage:    storage,
 		tasks:      make(chan downloadTask, downloadQueueSize),
 		httpClient: httpClient,
+		stats:      stats,
 		logger:     cm.NewLogger("downloader"),
 	}
 	loader.downloadLoop()

@@ -10,15 +10,12 @@ import (
 	"chronicler/status"
 )
 
-var (
-	logger = cm.NewLogger("storageserver")
-)
-
 type Config struct {
 	StatusServerPort *int `json:"statusServerPort"`
 }
 
 func main() {
+	logger := cm.NewLogger("statusserver")
 	cfg := cm.OrExit(cm.GetConfig[Config](os.Args[1:], "config"))
 	if cfg.StatusServerPort == nil {
 		logger.Warningf("No status server port configured ")

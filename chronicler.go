@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"sort"
 	"strings"
 	"sync"
 
@@ -11,6 +10,8 @@ import (
 	"chronicler/adapter"
 	rpb "chronicler/records/proto"
 	"chronicler/resolver"
+	"chronicler/status"
+	sp "chronicler/status/status_go_proto"
 	"chronicler/storage"
 )
 
@@ -24,8 +25,10 @@ var (
 )
 
 type ChroniclerStatus struct {
-	waiter   sync.WaitGroup
-	mux      sync.RWMutex
+	waiter sync.WaitGroup
+	mux    sync.RWMutex
+
+	stats    status.StatusClient
 	jobCount map[string]uint32
 }
 
@@ -35,6 +38,10 @@ func (cs *ChroniclerStatus) StartJob(jobName string) {
 
 	cs.waiter.Add(1)
 	cs.jobCount[jobName] += 1
+	cs.stats.PutValue(&sp.Metric{
+		Name:  jobName,
+		Value: &sp.Metric_IntValue{IntValue: int64(cs.jobCount[jobName])},
+	})
 }
 
 func (cs *ChroniclerStatus) StopJob(jobName string) {
@@ -43,6 +50,10 @@ func (cs *ChroniclerStatus) StopJob(jobName string) {
 
 	cs.waiter.Done()
 	cs.jobCount[jobName] -= 1
+	cs.stats.PutValue(&sp.Metric{
+		Name:  jobName,
+		Value: &sp.Metric_IntValue{IntValue: int64(cs.jobCount[jobName])},
+	})
 }
 
 func (cs *ChroniclerStatus) GetJobCount() map[string]uint32 {
@@ -91,13 +102,14 @@ type localChronicler struct {
 	messageSenders    map[rpb.SourceType]adapter.MessageSender
 }
 
-func NewLocalChronicler(resolver resolver.Resolver, storage storage.Storage) Chronicler {
+func NewLocalChronicler(resolver resolver.Resolver, storage storage.Storage, stats status.StatusClient) Chronicler {
 	return &localChronicler{
 		logger:   cm.NewLogger("chronicler"),
 		resolver: resolver,
 		storage:  storage,
 		status: &ChroniclerStatus{
 			jobCount: map[string]uint32{},
+			stats:    stats,
 		},
 
 		done:     make(chan bool),
@@ -252,12 +264,6 @@ func (ch *localChronicler) Start() {
 					}
 				}()
 			}
-			report := []string{}
-			for k, v := range ch.status.GetJobCount() {
-				report = append(report, fmt.Sprintf("%q: %2d", k, v))
-			}
-			sort.Strings(report)
-			ch.logger.Infof("Job count: %s", report)
 		}
 		ch.status.StopJob("main")
 		ch.closeChannels()

@@ -9,6 +9,8 @@ import (
 	"github.com/lanseg/golang-commons/optional"
 
 	rpb "chronicler/records/proto"
+	"chronicler/status"
+	sp "chronicler/status/status_go_proto"
 	"chronicler/storage"
 	"chronicler/webdriver"
 )
@@ -17,12 +19,13 @@ type Resolver interface {
 	Resolve(id string) error
 }
 
-func NewResolver(browser webdriver.Browser, storage storage.Storage) Resolver {
+func NewResolver(browser webdriver.Browser, storage storage.Storage, stats status.StatusClient) Resolver {
 	return &resolverImpl{
 		logger:     cm.NewLogger("Resolver"),
 		browser:    browser,
 		storage:    storage,
-		downloader: NewDownloader(&http.Client{}, storage),
+		stats:      stats,
+		downloader: NewDownloader(&http.Client{}, storage, stats),
 	}
 }
 
@@ -32,6 +35,7 @@ type resolverImpl struct {
 	logger     *cm.Logger
 	storage    storage.Storage
 	browser    webdriver.Browser
+	stats      status.StatusClient
 	downloader Downloader
 }
 
@@ -56,12 +60,17 @@ func (r *resolverImpl) Resolve(id string) error {
 		}
 
 		if rec.Source != nil && rec.Source.Url != "" {
+			r.stats.PutValue(&sp.Metric{
+				Name:  "webdriver.pageview",
+				Value: &sp.Metric_StringValue{StringValue: rec.Source.Url},
+			})
 			r.savePageView(rs.Id, rec.Source.Url)
 			rec.Files = append(rec.Files,
 				newFile("page_view_png", "pageview_page.png"),
 				newFile("page_view_pdf", "pageview_page.pdf"),
 				newFile("page_view_html", "pageview_page.html"),
 			)
+			r.stats.PutValue(&sp.Metric{Name: "webdriver.pageview"})
 		}
 	}
 	return r.storage.SaveRecordSet(rs)

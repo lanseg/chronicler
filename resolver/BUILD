@@ -9,7 +9,9 @@ go_library(
     importpath = "chronicler/resolver",
     visibility = ["//visibility:public"],
     deps = [
-        "//records:records_go_proto",
+        "//records:records_go_proto",        
+        "//status",
+        "//status:status_go_proto",
         "//storage",
         "//webdriver",
         "@golang-commons//collections",

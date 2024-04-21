@@ -14,6 +14,8 @@ go_binary(
         "//adapter/web",
         "//resolver",
         "//records:records_go_proto",
+        "//status",
+        "//status:status_go_proto",
         "//storage",
         "//storage/endpoint",
         "//storage/endpoint:storage_endpoint_go_proto",

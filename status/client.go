@@ -69,7 +69,7 @@ func (nc *noopStatusClient) Stop() {
 	nc.logger.Infof("Stop()")
 }
 
-func NewNoopClient(_ string) (StatusClient, error) {
+func NewNoopStatusClient(_ string) (StatusClient, error) {
 	return &noopStatusClient{
 		logger: cm.NewLogger("NoopStatusClient"),
 	}, nil
@@ -96,7 +96,7 @@ func NewStatusClient(addr string) (StatusClient, error) {
 		context: context.Background(),
 		putter:  make(chan *sp.Metric, 10),
 		done:    make(chan bool),
-		logger:  cm.NewLogger("RemoteStorage"),
+		logger:  cm.NewLogger("RemoteStatusClient"),
 	}, nil
 }
 

@@ -52,7 +52,7 @@ func (s *statusServer) GetStatus(in *sp.GetStatusRequest, out sp.Status_GetStatu
 }
 
 func (s *statusServer) PutStatus(out sp.Status_PutStatusServer) error {
-	s.logger.Debugf("PutStatusRequest")
+	s.logger.Debugf("PutStatusRequest receiver")
 	for {
 		result, err := out.Recv()
 		if err == io.EOF {
@@ -60,6 +60,7 @@ func (s *statusServer) PutStatus(out sp.Status_PutStatusServer) error {
 		} else if err != nil {
 			return err
 		}
+		s.logger.Debugf("PutStatusRequest: %v", result)
 		for _, r := range result.Metric {
 			if r.GetValue() == nil {
 				delete(s.metrics, r.Name)
@@ -83,7 +84,7 @@ func (s *statusServer) Start() error {
 		grpc.MaxSendMsgSize(maxMsgSize),
 		grpc.MaxRecvMsgSize(maxMsgSize))
 	sp.RegisterStatusServer(s.grpcServer, s)
-	s.logger.Infof("Storage server listening at %v", socket.Addr())
+	s.logger.Infof("Status server listening at %v", socket.Addr())
 
 	go (func() {
 		if err := s.grpcServer.Serve(socket); err != nil {

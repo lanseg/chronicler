@@ -18,6 +18,7 @@ import (
 	web_adapter "chronicler/adapter/web"
 	rpb "chronicler/records/proto"
 	"chronicler/resolver"
+	"chronicler/status"
 	ep "chronicler/storage/endpoint"
 	"chronicler/webdriver"
 )
@@ -32,6 +33,7 @@ type Config struct {
 	TelegramBotKey    *string `json:"telegramBotKey"`
 	StorageRoot       *string `json:"storageRoot"`
 	ScenarioLibrary   *string `json:"scenarioLibrary"`
+	StatusServerPort  *int    `json:"statusServerPort"`
 	StorageServerPort *int    `json:"storageServerPort"`
 }
 
@@ -61,16 +63,18 @@ func main() {
 
 	logger.Infof("Config.StorageRoot: %s", *cfg.StorageRoot)
 	logger.Infof("Config.StorageServerPort: %d", *cfg.StorageServerPort)
-	logger.Infof("Config.ScenarioLibry: %s", *cfg.ScenarioLibrary)
+	logger.Infof("Config.ScenarioLibrary: %s", *cfg.ScenarioLibrary)
 	logger.Infof("Config.TwitterApiKey: %d", len(*cfg.TwitterApiKey))
 	logger.Infof("Config.TelegramBotKey: %d", len(*cfg.TelegramBotKey))
 
+	stats := cm.OrExit(status.NewStatusClient(fmt.Sprintf("localhost:%d", *cfg.StatusServerPort)))
+	stats.Start()
+
 	storage := cm.OrExit(ep.NewRemoteStorage(fmt.Sprintf("localhost:%d", *cfg.StorageServerPort)))
-
 	webDriver := webdriver.NewBrowser(*cfg.ScenarioLibrary)
-	resolver := resolver.NewResolver(webDriver, storage)
+	resolver := resolver.NewResolver(webDriver, storage, stats)
 
-	ch := NewLocalChronicler(resolver, storage)
+	ch := NewLocalChronicler(resolver, storage, stats)
 	ch.AddAdapter(rpb.SourceType_TELEGRAM, tlg_adapter.NewTelegramAdapter(tgbot.NewBot(*cfg.TelegramBotKey)))
 	ch.AddAdapter(rpb.SourceType_TWITTER, twi_adapter.NewTwitterAdapter(twi_adapter.NewClient(*cfg.TwitterApiKey)))
 	ch.AddAdapter(rpb.SourceType_PIKABU, pkb_adapter.NewPikabuAdapter(webDriver))
