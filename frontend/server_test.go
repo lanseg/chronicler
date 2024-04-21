@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"testing"
 	"time"
+
+	"chronicler/status"
 )
 
 const (
@@ -24,7 +26,8 @@ func get(url string) ([]byte, error) {
 
 func TestFrontend(t *testing.T) {
 
-	server := NewServer(testingPort, "static", nil)
+	stats, _ := status.NewNoopStatusClient("")
+	server := NewServer(testingPort, "static", nil, stats)
 	go (func() {
 		if err := server.ListenAndServe(); err != nil {
 			t.Fatalf("Could not start a server: %s", err)

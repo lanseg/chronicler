@@ -7,12 +7,14 @@ import (
 	cm "github.com/lanseg/golang-commons/common"
 
 	"chronicler/frontend"
+	"chronicler/status"
 	sep "chronicler/storage/endpoint"
 )
 
 type FrontendConfig struct {
-	StaticRoot        *string `json:staticRoot`
-	FrontendPort      *int    `json:frontendPort`
+	StaticRoot        *string `json:"staticRoot"`
+	FrontendPort      *int    `json:"frontendPort"`
+	StatusServerPort  *int    `json:"statusServerPort"`
 	StorageServerPort *int    `json:"storageServerPort"`
 }
 
@@ -26,15 +28,19 @@ func main() {
 
 	logger.Infof("StaticRoot: %s", *cfg.StaticRoot)
 	logger.Infof("FrontendPort: %d", *cfg.FrontendPort)
+	logger.Infof("Config.StatusServerPort: %d", *cfg.StatusServerPort)
 	logger.Infof("StorageServerPort: %d", *cfg.StorageServerPort)
 
+	stats := cm.OrExit(status.NewStatusClient(fmt.Sprintf("localhost:%d", *cfg.StatusServerPort)))
+	stats.Start()
 	storage, err := sep.NewRemoteStorage(fmt.Sprintf("localhost:%d", *cfg.StorageServerPort))
 
 	if err != nil {
 		logger.Errorf("Could not connect to the storage: %v", err)
 		os.Exit(-1)
 	}
-	server := frontend.NewServer(*cfg.FrontendPort, *cfg.StaticRoot, storage)
+
+	server := frontend.NewServer(*cfg.FrontendPort, *cfg.StaticRoot, storage, stats)
 	if err := server.ListenAndServe(); err != nil {
 		logger.Errorf("Failed to start server: %s", err)
 	}

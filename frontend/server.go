@@ -15,6 +15,7 @@ import (
 
 	"chronicler/records"
 	rpb "chronicler/records/proto"
+	"chronicler/status"
 	"chronicler/storage"
 )
 
@@ -28,6 +29,7 @@ type WebServer struct {
 	data   storage.Storage
 	logger *cm.Logger
 
+	stats   status.StatusClient
 	sorting *rpb.Sorting
 }
 
@@ -136,10 +138,20 @@ func (ws *WebServer) handleRecord(p PathParams, w http.ResponseWriter, r *http.R
 	ws.responseFile(w, p["recordId"], filename)
 }
 
-func NewServer(port int, staticFiles string, storage storage.Storage) *http.Server {
+func (ws *WebServer) handleStatus(p PathParams, w http.ResponseWriter, r *http.Request) {
+	stats, err := ws.stats.GetValues()
+	if err != nil {
+		ws.Error(w, err.Error(), 500)
+		return
+	}
+	ws.writeJson(w, stats)
+}
+
+func NewServer(port int, staticFiles string, storage storage.Storage, stats status.StatusClient) *http.Server {
 	server := &WebServer{
 		logger: cm.NewLogger("frontend"),
 		data:   storage,
+		stats:  stats,
 	}
 
 	handler := &PathParamHandler{
@@ -149,6 +161,7 @@ func NewServer(port int, staticFiles string, storage storage.Storage) *http.Serv
 	handler.Handle("/chronicler/records/delete", server.handleDeleteRecord)
 	handler.Handle("/chronicler/records/{recordId}", server.handleRecord)
 	handler.Handle("/chronicler/records", server.handleRecordSetList)
+	handler.Handle("/chronicler/status", server.handleStatus)
 
 	return &http.Server{
 		Addr:    fmt.Sprintf(":%d", port),

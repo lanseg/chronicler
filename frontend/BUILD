@@ -12,6 +12,7 @@ go_library(
     deps = [
         "//records",
         "//records:records_go_proto",
+        "//status",
         "//storage",
         "//storage/endpoint",
         "//storage/endpoint:storage_endpoint_go_proto",
@@ -35,6 +36,7 @@ go_binary(
         ":server",
         "//records:records_go_proto",
         "//storage/endpoint",
+        "//status",
         "//util",
         "@golang-commons//common",
     ],

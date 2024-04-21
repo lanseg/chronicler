@@ -61,9 +61,10 @@ func ScheduleRepeatedSource(provider adapter.SourceProvider, engine rpb.WebEngin
 func main() {
 	cfg := cm.OrExit(cm.GetConfig[Config](os.Args[1:], "config"))
 
+	logger.Infof("Config.ScenarioLibrary: %s", *cfg.ScenarioLibrary)
+	logger.Infof("Config.StatusServerPort: %d", *cfg.StatusServerPort)
 	logger.Infof("Config.StorageRoot: %s", *cfg.StorageRoot)
 	logger.Infof("Config.StorageServerPort: %d", *cfg.StorageServerPort)
-	logger.Infof("Config.ScenarioLibrary: %s", *cfg.ScenarioLibrary)
 	logger.Infof("Config.TwitterApiKey: %d", len(*cfg.TwitterApiKey))
 	logger.Infof("Config.TelegramBotKey: %d", len(*cfg.TelegramBotKey))
 
