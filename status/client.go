@@ -51,8 +51,20 @@ func newStatusClient(addr string) (sp.StatusClient, error) {
 	return sp.NewStatusClient(conn), nil
 }
 
+/*
+int64 intValue = 2;
+double doubleValue = 3;
+string stringValue = 4;
+IntRange intRangeValue = 5;
+DoubleRange doubleRangeValue = 6;
+*/
 type StatusClient interface {
 	PutValue(metric *sp.Metric) error
+	PutInt(name string, value int64) error
+	PutDouble(name string, value float64) error
+	PutString(name string, value string) error
+	PutIntRange(name string, value int64, min int64, max int64) error
+	PutDoubleRange(name string, value float64, min float64, max float64) error
 	GetValues() ([]*sp.Metric, error)
 	Start()
 	Stop()
@@ -80,6 +92,26 @@ func (nc *noopStatusClient) Start() {
 
 func (nc *noopStatusClient) Stop() {
 	nc.logger.Infof("Stop()")
+}
+
+func (nc *noopStatusClient) PutInt(name string, value int64) error {
+	return nil
+}
+
+func (nc *noopStatusClient) PutDouble(name string, value float64) error {
+	return nil
+}
+
+func (nc *noopStatusClient) PutString(name string, value string) error {
+	return nil
+}
+
+func (nc *noopStatusClient) PutIntRange(name string, value int64, min int64, max int64) error {
+	return nil
+}
+
+func (nc *noopStatusClient) PutDoubleRange(name string, value float64, min float64, max float64) error {
+	return nil
 }
 
 func NewNoopStatusClient(_ string) (StatusClient, error) {
@@ -117,6 +149,53 @@ func NewStatusClient(addr string) (StatusClient, error) {
 func (sc *remoteStatusClient) PutValue(metric *sp.Metric) error {
 	sc.putqueue <- metric
 	return nil
+}
+
+func (nc *remoteStatusClient) PutInt(name string, value int64) error {
+	return nc.PutValue(&sp.Metric{
+		Name:  name,
+		Value: &sp.Metric_IntValue{IntValue: value},
+	})
+}
+
+func (nc *remoteStatusClient) PutDouble(name string, value float64) error {
+	return nc.PutValue(&sp.Metric{
+		Name:  name,
+		Value: &sp.Metric_DoubleValue{DoubleValue: value},
+	})
+}
+
+func (nc *remoteStatusClient) PutString(name string, value string) error {
+	return nc.PutValue(&sp.Metric{
+		Name:  name,
+		Value: &sp.Metric_StringValue{StringValue: value},
+	})
+}
+
+func (nc *remoteStatusClient) PutIntRange(name string, value int64, min int64, max int64) error {
+	return nc.PutValue(&sp.Metric{
+		Name: name,
+		Value: &sp.Metric_IntRangeValue{
+			IntRangeValue: &sp.IntRange{
+				Value:    value,
+				MinValue: min,
+				MaxValue: max,
+			},
+		},
+	})
+}
+
+func (nc *remoteStatusClient) PutDoubleRange(name string, value float64, min float64, max float64) error {
+	return nc.PutValue(&sp.Metric{
+		Name: name,
+		Value: &sp.Metric_DoubleRangeValue{
+			DoubleRangeValue: &sp.DoubleRange{
+				Value:    value,
+				MinValue: min,
+				MaxValue: max,
+			},
+		},
+	})
 }
 
 func (sc *remoteStatusClient) GetValues() ([]*sp.Metric, error) {

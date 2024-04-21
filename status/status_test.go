@@ -3,6 +3,7 @@ package status
 import (
 	"fmt"
 	"reflect"
+	"sort"
 	"testing"
 
 	conc "github.com/lanseg/golang-commons/concurrent"
@@ -44,6 +45,51 @@ func setupServer(tb testing.TB) (*testBed, error) {
 			server.Stop()
 		},
 	}, nil
+}
+
+func TestStatusPutShortcuts(t *testing.T) {
+	tb, err := setupServer(t)
+	if err != nil {
+		t.Errorf("Cannot initialize client and server: %s", err)
+	}
+	defer tb.tearDown(t)
+
+	tb.client.PutInt("int", 10)
+	tb.client.PutDouble("double", 3.1415)
+	tb.client.PutString("string", "string")
+	tb.client.PutIntRange("intrange", 10, -10, 100)
+	tb.client.PutDoubleRange("doublerange", 1.234, -0.5, 11.11)
+
+	want := []*sp.Metric{
+		{Name: "int", Value: &sp.Metric_IntValue{IntValue: int64(10)}},
+		{Name: "double", Value: &sp.Metric_DoubleValue{DoubleValue: float64(3.1415)}},
+		{Name: "string", Value: &sp.Metric_StringValue{StringValue: "string"}},
+		{Name: "intrange", Value: &sp.Metric_IntRangeValue{IntRangeValue: &sp.IntRange{
+			Value: int64(10), MinValue: int64(-10), MaxValue: int64(100)}}},
+		{Name: "doublerange", Value: &sp.Metric_DoubleRangeValue{DoubleRangeValue: &sp.DoubleRange{
+			Value: float64(1.234), MinValue: float64(-0.5), MaxValue: float64(11.11)}}},
+	}
+
+	if _, err := conc.WaitForSomething(func() opt.Optional[[]*sp.Metric] {
+		vals, err := tb.client.GetValues()
+		if err != nil {
+			return opt.OfError[[]*sp.Metric](nil, err)
+		}
+		sort.Slice(vals, func(i int, j int) bool {
+			return vals[i].Name < vals[j].Name
+		})
+		sort.Slice(want, func(i int, j int) bool {
+			return want[i].Name < want[j].Name
+		})
+		if !reflect.DeepEqual(want, vals) {
+			return opt.OfError[[]*sp.Metric](
+				nil, fmt.Errorf("Expected to get %v, but got %v", want, vals))
+		}
+		return opt.Of(vals)
+	}).Get(); err != nil {
+		t.Errorf("Could not read metrics from server: %s", err)
+		return
+	}
 }
 
 func TestStatus(t *testing.T) {
