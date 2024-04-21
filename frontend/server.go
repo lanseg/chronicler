@@ -58,6 +58,7 @@ func (ws *WebServer) writeJson(w http.ResponseWriter, data any) {
 		ws.Error(w, fmt.Sprintf("Marshalling error: %s", err.Error()), 500)
 		return
 	}
+	w.Header().Add("Content-Type", "application/json")
 	w.Write(bytes)
 }
 

@@ -16,7 +16,19 @@ import (
 )
 
 const (
-	maxMsgSize = 1024 * 1024
+	maxMsgSize  = 1024 * 1024
+	retryPolicy = `{
+		"methodConfig": [{
+		  "name": [{"service": "chronicler.status.Status"}],
+		  "waitForReady": true,
+		  "retryPolicy": {
+			  "MaxAttempts": 4,
+			  "InitialBackoff": ".01s",
+			  "MaxBackoff": ".01s",
+			  "BackoffMultiplier": 1.0,
+			  "RetryableStatusCodes": [ "UNAVAILABLE" ]
+		  }
+		}]}`
 )
 
 var kacp = keepalive.ClientParameters{
@@ -28,6 +40,7 @@ var kacp = keepalive.ClientParameters{
 func newStatusClient(addr string) (sp.StatusClient, error) {
 	conn, err := grpc.Dial(addr,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithDefaultServiceConfig(retryPolicy),
 		grpc.WithKeepaliveParams(kacp),
 		grpc.WithDefaultCallOptions(
 			grpc.MaxCallRecvMsgSize(maxMsgSize),
@@ -82,8 +95,9 @@ type remoteStatusClient struct {
 	context context.Context
 	logger  *cm.Logger
 
-	putter chan *sp.Metric
-	done   chan bool
+	put      sp.Status_PutStatusClient
+	putqueue chan *sp.Metric
+	done     chan bool
 }
 
 func NewStatusClient(addr string) (StatusClient, error) {
@@ -92,16 +106,16 @@ func NewStatusClient(addr string) (StatusClient, error) {
 		return nil, err
 	}
 	return &remoteStatusClient{
-		client:  client,
-		context: context.Background(),
-		putter:  make(chan *sp.Metric, 10),
-		done:    make(chan bool),
-		logger:  cm.NewLogger("RemoteStatusClient"),
+		client:   client,
+		context:  context.Background(),
+		putqueue: make(chan *sp.Metric, 10),
+		done:     make(chan bool),
+		logger:   cm.NewLogger("RemoteStatusClient"),
 	}, nil
 }
 
 func (sc *remoteStatusClient) PutValue(metric *sp.Metric) error {
-	sc.putter <- metric
+	sc.putqueue <- metric
 	return nil
 }
 
@@ -131,6 +145,7 @@ func (sc *remoteStatusClient) Start() {
 	go func() {
 		done := false
 		sc.logger.Infof("Starting status client")
+		var put sp.Status_PutStatusClient
 		put, err := sc.client.PutStatus(sc.context)
 		if err != nil {
 			sc.logger.Warningf("Could not initialize the connection: %s", err)
@@ -138,10 +153,17 @@ func (sc *remoteStatusClient) Start() {
 		}
 		for !done {
 			select {
-			case metric := <-sc.putter:
-				if err := put.Send(&sp.PutStatusRequest{
-					Metric: []*sp.Metric{metric},
-				}); err != nil {
+			case metric := <-sc.putqueue:
+				err := put.Send(&sp.PutStatusRequest{Metric: []*sp.Metric{metric}})
+				if err == io.EOF {
+					sc.logger.Warningf("Reopening status stream")
+					if put, err = sc.client.PutStatus(sc.context); err != nil {
+						sc.logger.Warningf("Error while reopening status stream")
+						continue
+					}
+					err = put.Send(&sp.PutStatusRequest{Metric: []*sp.Metric{metric}})
+				}
+				if err != nil {
 					sc.logger.Warningf("Error while sending the metrics: %s", err)
 					continue
 				}
@@ -151,7 +173,7 @@ func (sc *remoteStatusClient) Start() {
 		}
 		sc.logger.Infof("Shutting down status client")
 		_, err = put.CloseAndRecv()
-		close(sc.putter)
+		close(sc.putqueue)
 		close(sc.done)
 		sc.logger.Infof("Status client stopped")
 	}()

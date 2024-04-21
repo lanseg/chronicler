@@ -19,6 +19,7 @@ import (
 	rpb "chronicler/records/proto"
 	"chronicler/resolver"
 	"chronicler/status"
+	sp "chronicler/status/status_go_proto"
 	ep "chronicler/storage/endpoint"
 	"chronicler/webdriver"
 )
@@ -44,8 +45,12 @@ func initHttpClient() *http.Client {
 	}
 }
 
-func ScheduleRepeatedSource(provider adapter.SourceProvider, engine rpb.WebEngine, ch Chronicler, duration time.Duration) {
+func ScheduleRepeatedSource(stats status.StatusClient, name string, provider adapter.SourceProvider, engine rpb.WebEngine, ch Chronicler, duration time.Duration) {
 	conc.RunPeriodically(func() {
+		stats.PutValue(&sp.Metric{
+			Name:  fmt.Sprintf("%s.last_provide", name),
+			Value: &sp.Metric_IntValue{IntValue: int64(time.Now().Unix())},
+		})
 		for _, src := range provider.GetSources() {
 			ch.SubmitRequest(&rpb.Request{
 				Id: cm.UUID4(),
@@ -81,11 +86,15 @@ func main() {
 	ch.AddAdapter(rpb.SourceType_PIKABU, pkb_adapter.NewPikabuAdapter(webDriver))
 	ch.AddAdapter(rpb.SourceType_WEB, web_adapter.NewWebAdapter(nil, webDriver))
 
-	ScheduleRepeatedSource(pkb_adapter.NewFreshProvider(initHttpClient()), rpb.WebEngine_HTTP_PLAIN, ch, 2*time.Minute)
-	ScheduleRepeatedSource(pkb_adapter.NewHotProvider(initHttpClient()), rpb.WebEngine_WEBDRIVER, ch, 10*time.Minute)
-	ScheduleRepeatedSource(pkb_adapter.NewDisputedProvider(initHttpClient()), rpb.WebEngine_WEBDRIVER, ch, 15*time.Minute)
+	ScheduleRepeatedSource(stats, "pikabu_fresh", pkb_adapter.NewFreshProvider(initHttpClient()), rpb.WebEngine_HTTP_PLAIN, ch, 2*time.Minute)
+	ScheduleRepeatedSource(stats, "pikabu_hot", pkb_adapter.NewHotProvider(initHttpClient()), rpb.WebEngine_WEBDRIVER, ch, 10*time.Minute)
+	ScheduleRepeatedSource(stats, "pikabu_disputed", pkb_adapter.NewDisputedProvider(initHttpClient()), rpb.WebEngine_WEBDRIVER, ch, 15*time.Minute)
 
 	conc.RunPeriodically(func() {
+		stats.PutValue(&sp.Metric{
+			Name:  "Telegram.last_bot_check",
+			Value: &sp.Metric_IntValue{IntValue: int64(time.Now().Unix())},
+		})
 		ch.SubmitRequest(&rpb.Request{Target: &rpb.Source{Type: rpb.SourceType_TELEGRAM}})
 	}, nil, time.Minute)
 
