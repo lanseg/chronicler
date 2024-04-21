@@ -209,7 +209,10 @@ func parsePost(content string, timeSrc TimeSource) (*rpb.Response, error) {
 		title := n[0].InnerHTML()
 		if strings.Contains(title, "Страница удалена") || strings.Contains(title, "Страница не найдена") {
 			return nil, fmt.Errorf("Page was removed: %q", title)
+		} else if !strings.HasSuffix(title, "Пикабу") {
+			return nil, fmt.Errorf("Not pikabu")
 		}
+
 	}
 	storyId := ""
 	if arts := root.GetElementsByTags("article"); len(arts) != 0 {

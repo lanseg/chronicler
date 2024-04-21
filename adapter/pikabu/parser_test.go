@@ -77,6 +77,11 @@ func TestPikabuParser(t *testing.T) {
 			name: "pikabu comments still loading",
 			file: "pikabu_notloaded_11311749.html",
 		},
+		{
+			name:    "pikabu replaced by ads",
+			file:    "pikabu_not_pikabu.html",
+			wantErr: "Not pikabu",
+		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			data, err := os.ReadFile(filepath.Join("testdata", tc.file))
