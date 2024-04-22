@@ -11,7 +11,6 @@ import (
 	rpb "chronicler/records/proto"
 	"chronicler/resolver"
 	"chronicler/status"
-	sp "chronicler/status/status_go_proto"
 	"chronicler/storage"
 )
 
@@ -38,10 +37,7 @@ func (cs *ChroniclerStatus) StartJob(jobName string) {
 
 	cs.waiter.Add(1)
 	cs.jobCount[jobName] += 1
-	cs.stats.PutValue(&sp.Metric{
-		Name:  jobName,
-		Value: &sp.Metric_IntValue{IntValue: int64(cs.jobCount[jobName])},
-	})
+	cs.stats.PutInt(jobName, int64(cs.jobCount[jobName]))
 }
 
 func (cs *ChroniclerStatus) StopJob(jobName string) {
@@ -50,10 +46,7 @@ func (cs *ChroniclerStatus) StopJob(jobName string) {
 
 	cs.waiter.Done()
 	cs.jobCount[jobName] -= 1
-	cs.stats.PutValue(&sp.Metric{
-		Name:  jobName,
-		Value: &sp.Metric_IntValue{IntValue: int64(cs.jobCount[jobName])},
-	})
+	cs.stats.PutInt(jobName, int64(cs.jobCount[jobName]))
 }
 
 func (cs *ChroniclerStatus) GetJobCount() map[string]uint32 {
