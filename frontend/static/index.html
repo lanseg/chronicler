@@ -1,9 +1,10 @@
 <html>
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <link rel="stylesheet" href="/style.css?v=2" />
-        <script type="importmap">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/style.css?v=2" />
+    <script type="importmap">
             {
                 "imports": {
                     "api": "./modules/api.js",
@@ -13,267 +14,295 @@
                 }
             }
         </script>
-        <script type="module">
-            import { getRecordSets, getRecord, deleteRecordSets } from "api";
-            import { createRecord, createRecordSet, createRecordSetSummary } from "dom";
-            import { RecordListResponse, RecordSet } from "wrappers";
-            import { getBus } from "bus";
+    <script type="module">
+        import { getRecordSets, getRecord, deleteRecordSets, getStatus } from "api";
+        import { createRecord, createRecordSet, createRecordSetSummary } from "dom";
+        import { RecordListResponse, RecordSet } from "wrappers";
+        import { getBus } from "bus";
 
-            const params = new URLSearchParams(document.location.search);
-            const rcid = params.get("record_id");
-            const selectedRecordSets = new Set();
-            const filter = {
-                offset: 0,
-                size: 10,
-                query: "",
-            };
+        const params = new URLSearchParams(document.location.search);
+        const rcid = params.get("record_id");
+        const selectedRecordSets = new Set();
+        const filter = {
+            offset: 0,
+            size: 10,
+            query: "",
+        };
 
-            function loadRecordSets(offset, size, query) {
+        function loadRecordSets(offset, size, query) {
+            bus.publish("WorkStarted");
+            getRecordSets(offset, size, query)
+                .then((rsObj) => new RecordListResponse(rsObj))
+                .then(renderRecordSets)
+                .then(() => window.bus.publish("WorkEnded"))
+                .catch((err) => window.bus.publish("Error", err));
+        }
+
+        function renderRecordSets(data) {
+            const fragment = document.createDocumentFragment();
+            const records = document.querySelector(".records");
+            for (const rs of data.recordSets) {
+                const el = createRecordSet(rs, data.sourceMetadata);
+                const checker = el.querySelector("input");
+                checker.addEventListener("change", (e) => {
+                    bus.publish("RecordSetSelected", { id: rs.id, selected: checker.checked });
+                });
+                fragment.appendChild(el);
+            }
+            records.replaceChildren(fragment);
+        }
+
+        function renderRecord(cdata) {
+            const fragment = document.createDocumentFragment();
+            const records = document.querySelector(".records");
+            fragment.appendChild(createRecordSetSummary(cdata));
+            for (const record of cdata.records) {
+                fragment.appendChild(createRecord(rcid, record, cdata.sourceMetadata));
+            }
+            records.append(fragment);
+        }
+
+        function renderStatus(data) {
+            // menuitem notifications
+            const result = document.createDocumentFragment();
+            for (const stat of data) {
+                const el = document.createElement("div");
+                el.setAttribute("class", "menuitem notifications");
+                el.innerHTML = `${stat.name}: ${JSON.stringify(stat.Value)}`;
+                result.appendChild(el);
+            }
+            console.log(result);
+            document.querySelector(".menuitems.status").replaceChildren(result);
+        }
+
+        function showLoading() {
+            document.querySelector(".status .loader").style.display = "inline-block";
+        }
+
+        function hideLoading() {
+            document.querySelector(".status .loader").style.display = "none";
+        }
+
+        function showError() {
+            document.querySelector(".status .error").style.display = "inline-block";
+        }
+
+        function hideEror() {
+            document.querySelector(".status .error").style.display = "none";
+        }
+
+        function handleError(err) {
+            hideLoading();
+            showError();
+
+            const root = document.querySelector(".notifications");
+            root.innerHTML += `<div class="error">${err}</div>`;
+
+            console.log(err);
+        }
+
+        // Bus events
+        function recordSetsLoaded(rs) { }
+
+        function recordsLoaded(rs) { }
+
+        function onRecordsDeleted(records) {
+            for (const r of records) {
+                document.getElementById(r).parentElement.remove();
+                selectedRecordSets.delete(r);
+            }
+            updateDeleteBtn();
+        }
+
+        function onRecordSetSelected(rs) {
+            if (!rs.selected) {
+                selectedRecordSets.delete(rs.id);
+            } else {
+                selectedRecordSets.add(rs.id);
+            }
+            updateDeleteBtn();
+        }
+
+        function updateDeleteBtn() {
+            const deleteBtn = document.querySelector(".do_delete");
+            if (selectedRecordSets.size > 0) {
+                deleteBtn.style.display = "inline-block";
+            } else {
+                deleteBtn.style.display = "none";
+            }
+        }
+
+        function onWorkStarted(work) {
+            document.querySelector("body").classList.add("disabled");
+            showLoading();
+        }
+
+        function onWorkEnded(work) {
+            hideLoading();
+            document.querySelector("body").classList.remove("disabled");
+        }
+
+        function onError(err) {
+            hideLoading();
+            handleError(err);
+        }
+
+        function applyFilter(filter) {
+            filter.offset = (filter.offset || 0) < 0 ? 0 : filter.offset;
+            filter.query = filter.query || "";
+            filter.size = filter.size || 10;
+            loadRecordSets(filter.offset, filter.size, filter.query);
+            bus.publish("Filter.change", filter);
+        }
+
+        function onFilterChange(filter) {
+            window.history.replaceState(
+                {},
+                "",
+                `?offset=${filter.offset}&size=${filter.size}&query=${filter.query}`,
+            );
+            document.querySelector(".paging .page").innerHTML =
+                `${(filter.offset / filter.size) | 0}`;
+            document.querySelector(".footer .search input").value = filter.query;
+        }
+
+
+        window.onload = () => {
+            window.bus = getBus();
+
+            // Record events
+            bus.subscribe("RecordSetsLoaded", recordSetsLoaded);
+            bus.subscribe("RecordSetSelected", onRecordSetSelected);
+            bus.subscribe("RecordsLoaded", recordsLoaded);
+            bus.subscribe("RecordsDeleted", onRecordsDeleted);
+
+            // Background work
+            bus.subscribe("WorkStarted", onWorkStarted);
+            bus.subscribe("WorkEnded", onWorkEnded);
+
+            // Error events
+            bus.subscribe("Error", onError);
+
+            // Filter
+            bus.subscribe("Filter.change", onFilterChange);
+            document.querySelector(".paging .prev").addEventListener("click", () => {
+                filter.offset -= filter.size;
+                applyFilter(filter);
+            });
+            document.querySelector(".paging .next").addEventListener("click", () => {
+                filter.offset += filter.size;
+                applyFilter(filter);
+            });
+
+            document.querySelector("#recordId .search-input").value = rcid;
+            document.querySelector("#recordId button").addEventListener("click", () => {
+                const rid = document.querySelector("#recordId .search-input").value;
+                window.location.href = "?record_id=" + rid;
+            });
+
+            if (params.get("record_id")) {
+                getRecord(params.get("record_id"))
+                    .then((data) => new RecordSet(data))
+                    .then(renderRecord)
+                    .then(() => bus.publish("WorkEnded"));
+            } else {
+                const params = new URLSearchParams(window.location.search);
+                filter.offset = parseInt(params.get("offset") || "0");
+                filter.size = parseInt(params.get("size") || "10");
+                filter.query = params.get("query");
+                applyFilter(filter);
+            }
+
+            const statusbox = document.querySelector(".menuitems.status");
+            const observer = new IntersectionObserver((entries, obs) => {
+                entries.forEach(e => {
+                    if (e.intersectionRatio <= 0) {
+                        return
+                    }
+                    getStatus().then(renderStatus);
+                });
+            });
+            observer.observe(statusbox);
+
+            document
+                .querySelector(".footer .search-input")
+                .addEventListener("keypress", (e) => {
+                    if (event.key == "Enter") {
+                        filter.query = document.querySelector(".footer .search input").value;
+                        applyFilter(filter);
+                    }
+                });
+
+            document.querySelector(".do_delete").addEventListener("click", () => {
                 bus.publish("WorkStarted");
-                getRecordSets(offset, size, query)
-                    .then((rsObj) => new RecordListResponse(rsObj))
-                    .then(renderRecordSets)
-                    .then(() => window.bus.publish("WorkEnded"))
-                    .catch((err) => window.bus.publish("Error", err));
-            }
 
-            function renderRecordSets(data) {
-                const fragment = document.createDocumentFragment();
-                const records = document.querySelector(".records");
-                for (const rs of data.recordSets) {
-                    const el = createRecordSet(rs, data.sourceMetadata);
-                    const checker = el.querySelector("input");
-                    checker.addEventListener("change", (e) => {
-                        bus.publish("RecordSetSelected", { id: rs.id, selected: checker.checked });
-                    });
-                    fragment.appendChild(el);
-                }
-                records.replaceChildren(fragment);
-            }
+                const toDelete = [
+                    ...document.querySelectorAll(".selection_marker:checked"),
+                ].map((c) => c.dataset["record"]);
 
-            function renderRecord(cdata) {
-                const fragment = document.createDocumentFragment();
-                const records = document.querySelector(".records");
-                fragment.appendChild(createRecordSetSummary(cdata));
-                for (const record of cdata.records) {
-                    fragment.appendChild(createRecord(rcid, record, cdata.sourceMetadata));
-                }
-                records.append(fragment);
-            }
+                deleteRecordSets(toDelete)
+                    .then((records) => records.filter((r) => r.Deleted).map((r) => r.Id))
+                    .then((ids) => bus.publish("RecordsDeleted", ids))
+                    .then(() => bus.publish("WorkEnded"))
+                    .catch(handleError);
+            });
+        };
+    </script>
+</head>
 
-            function showLoading() {
-                document.querySelector(".status .loader").style.display = "inline-block";
-            }
-
-            function hideLoading() {
-                document.querySelector(".status .loader").style.display = "none";
-            }
-
-            function showError() {
-                document.querySelector(".status .error").style.display = "inline-block";
-            }
-
-            function hideEror() {
-                document.querySelector(".status .error").style.display = "none";
-            }
-
-            function handleError(err) {
-                hideLoading();
-                showError();
-
-                const root = document.querySelector(".notifications");
-                root.innerHTML += `<div class="error">${err}</div>`;
-
-                console.log(err);
-            }
-
-            // Bus events
-            function recordSetsLoaded(rs) {}
-
-            function recordsLoaded(rs) {}
-
-            function onRecordsDeleted(records) {
-                for (const r of records) {
-                    document.getElementById(r).parentElement.remove();
-                    selectedRecordSets.delete(r);
-                }
-                updateDeleteBtn();
-            }
-
-            function onRecordSetSelected(rs) {
-                if (!rs.selected) {
-                    selectedRecordSets.delete(rs.id);
-                } else {
-                    selectedRecordSets.add(rs.id);
-                }
-                updateDeleteBtn();
-            }
-
-            function updateDeleteBtn() {
-                const deleteBtn = document.querySelector(".do_delete");
-                if (selectedRecordSets.size > 0) {
-                    deleteBtn.style.display = "inline-block";
-                } else {
-                    deleteBtn.style.display = "none";
-                }
-            }
-
-            function onWorkStarted(work) {
-                document.querySelector("body").classList.add("disabled");
-                showLoading();
-            }
-
-            function onWorkEnded(work) {
-                hideLoading();
-                document.querySelector("body").classList.remove("disabled");
-            }
-
-            function onError(err) {
-                hideLoading();
-                handleError(err);
-            }
-
-            function applyFilter(filter) {
-                filter.offset = (filter.offset || 0) < 0 ? 0 : filter.offset;
-                filter.query = filter.query || "";
-                filter.size = filter.size || 10;
-                loadRecordSets(filter.offset, filter.size, filter.query);
-                bus.publish("Filter.change", filter);
-            }
-
-            function onFilterChange(filter) {
-                window.history.replaceState(
-                    {},
-                    "",
-                    `?offset=${filter.offset}&size=${filter.size}&query=${filter.query}`,
-                );
-                document.querySelector(".paging .page").innerHTML =
-                    `${(filter.offset / filter.size) | 0}`;
-                document.querySelector(".footer .search input").value = filter.query;
-            }
-
-            window.onload = () => {
-                window.bus = getBus();
-
-                // Record events
-                bus.subscribe("RecordSetsLoaded", recordSetsLoaded);
-                bus.subscribe("RecordSetSelected", onRecordSetSelected);
-                bus.subscribe("RecordsLoaded", recordsLoaded);
-                bus.subscribe("RecordsDeleted", onRecordsDeleted);
-
-                // Background work
-                bus.subscribe("WorkStarted", onWorkStarted);
-                bus.subscribe("WorkEnded", onWorkEnded);
-
-                // Error events
-                bus.subscribe("Error", onError);
-
-                // Filter
-                bus.subscribe("Filter.change", onFilterChange);
-                document.querySelector(".paging .prev").addEventListener("click", () => {
-                    filter.offset -= filter.size;
-                    applyFilter(filter);
-                });
-                document.querySelector(".paging .next").addEventListener("click", () => {
-                    filter.offset += filter.size;
-                    applyFilter(filter);
-                });
-
-                document.querySelector("#recordId .search-input").value = rcid;
-                document.querySelector("#recordId button").addEventListener("click", () => {
-                    const rid = document.querySelector("#recordId .search-input").value;
-                    window.location.href = "?record_id=" + rid;
-                });
-
-                if (params.get("record_id")) {
-                    getRecord(params.get("record_id"))
-                        .then((data) => new RecordSet(data))
-                        .then(renderRecord)
-                        .then(() => bus.publish("WorkEnded"));
-                } else {
-                    const params = new URLSearchParams(window.location.search);
-                    filter.offset = parseInt(params.get("offset") || "0");
-                    filter.size = parseInt(params.get("size") || "10");
-                    filter.query = params.get("query");
-                    applyFilter(filter);
-                }
-
-                document
-                    .querySelector(".footer .search-input")
-                    .addEventListener("keypress", (e) => {
-                        if (event.key == "Enter") {
-                            filter.query = document.querySelector(".footer .search input").value;
-                            applyFilter(filter);
-                        }
-                    });
-
-                document.querySelector(".do_delete").addEventListener("click", () => {
-                    bus.publish("WorkStarted");
-
-                    const toDelete = [
-                        ...document.querySelectorAll(".selection_marker:checked"),
-                    ].map((c) => c.dataset["record"]);
-
-                    deleteRecordSets(toDelete)
-                        .then((records) => records.filter((r) => r.Deleted).map((r) => r.Id))
-                        .then((ids) => bus.publish("RecordsDeleted", ids))
-                        .then(() => bus.publish("WorkEnded"))
-                        .catch(handleError);
-                });
-            };
-        </script>
-    </head>
-
-    <body>
-        <nav class="topheader">
-            <div class="bar">
-                <div class="title">
-                    <a href="/">Chronicler</a>
+<body>
+    <nav class="topheader">
+        <div class="bar">
+            <div class="title">
+                <a href="/">Chronicler</a>
+            </div>
+            <label for="statusbar_check">
+                <div class="status">
+                    <div class="info"></div>
+                    <div class="loader"></div>
+                    <div class="error"></div>
                 </div>
-                <label for="statusbar_check">
-                    <div class="status">
-                        <div class="info"></div>
-                        <div class="loader"></div>
-                        <div class="error"></div>
+            </label>
+            <div class="menu">
+                <label for="menuitems_check">
+                    <div class="hamburger-lines bar_button">
+                        <span class="line"></span>
+                        <span class="line"></span>
+                        <span class="line"></span>
                     </div>
                 </label>
-                <div class="menu">
-                    <label for="menuitems_check">
-                        <div class="hamburger-lines bar_button">
-                            <span class="line"></span>
-                            <span class="line"></span>
-                            <span class="line"></span>
-                        </div>
-                    </label>
-                </div>
-            </div>
-
-            <input type="checkbox" id="menuitems_check" class="toggler_check" />
-            <div class="menuitems">
-                <div class="menuitem">
-                    <div id="recordId" class="controls">
-                        <input type="text" placeholder="Post id" class="search-input" />
-                        <button>Open</button>
-                    </div>
-                </div>
-            </div>
-
-            <input type="checkbox" id="statusbar_check" class="toggler_check" />
-            <div class="menuitems">
-                <div class="menuitem notifications"></div>
-            </div>
-        </nav>
-        <div class="records"></div>
-        <div class="footer bar">
-            <div class="bar_button do_delete">Delete</div>
-            <div class="paging">
-                <div class="prev bar_button">←</div>
-                <div class="page bar_button">0</div>
-                <div class="next bar_button">→</div>
-            </div>
-            <div class="search">
-                <input type="text" placeholder="Something" class="search-input" />
             </div>
         </div>
-    </body>
+
+        <input type="checkbox" id="menuitems_check" class="toggler_check" />
+        <div class="menuitems">
+            <div class="menuitem">
+                <div id="recordId" class="controls">
+                    <input type="text" placeholder="Post id" class="search-input" />
+                    <button>Open</button>
+                </div>
+            </div>
+        </div>
+
+        <input type="checkbox" id="statusbar_check" class="toggler_check" />
+        <div class="menuitems status">
+            <div class="menuitem notifications">1</div>
+            <div class="menuitem notifications">2</div>
+            <div class="menuitem notifications">3</div>
+        </div>
+    </nav>
+    <div class="records"></div>
+    <div class="footer bar">
+        <div class="bar_button do_delete">Delete</div>
+        <div class="paging">
+            <div class="prev bar_button">←</div>
+            <div class="page bar_button">0</div>
+            <div class="next bar_button">→</div>
+        </div>
+        <div class="search">
+            <input type="text" placeholder="Something" class="search-input" />
+        </div>
+    </div>
+</body>
+
 </html>

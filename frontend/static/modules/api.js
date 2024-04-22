@@ -19,3 +19,9 @@ export async function deleteRecordSets(ids) {
         .then((response) => response.text())
         .then((text) => JSON.parse(text));
 }
+
+export async function getStatus() {
+    return fetch("chronicler/status")
+    .then((response) => response.text())
+    .then((text) => JSON.parse(text));
+}
