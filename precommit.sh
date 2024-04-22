@@ -2,7 +2,8 @@
 set -eio pipefail
 
 find -name BUILD -print -exec buildifier {} \;
-find -iname '*go' -print \
+find -iname '*go' -not -path './chronicler_storage/*' \
+  -print \
   -exec gofmt -s -w {} \; \
   -exec goimports -l -w {} \;
 
