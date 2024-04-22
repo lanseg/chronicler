@@ -256,3 +256,34 @@ export function createRecordSetSummary(rs) {
     el.appendChild(renderFileList(rs.id, rs.allFiles));
     return el;
 }
+
+/*
+        int64 intValue = 2;
+        double doubleValue = 3;
+        string stringValue = 4;
+        IntRange intRangeValue = 5;
+        DoubleRange doubleRangeValue = 6;
+        DateTime dateTimeValue = 7;
+*/
+export function createStatus(metric) {
+    const el = document.createElement("div");
+    let value = "";
+    el.setAttribute("class", "menuitem");
+    if (metric.Value.hasOwnProperty("IntValue")) {
+        value = metric.Value.IntValue;
+    } else if (metric.Value.hasOwnProperty("DoubleValue")) {
+        value = metric.Value.DoubleValue;
+    } else if (metric.Value.hasOwnProperty("IntRangeValue")) {
+        value = metric.Value.IntRangeValue;
+    } else if (metric.Value.hasOwnProperty("DoubleRangeValue")) {
+        value = metric.Value.DoubleRangeValue;
+    } else if (metric.Value.hasOwnProperty("DateTimeValue")) {
+        value = new Date(metric.Value.DateTimeValue.timestamp).toLocaleString("ru-RU");
+    } else {
+        value = JSON.stringify(metric.Value);
+    }
+    el.innerHTML =
+    `<div class="statname">${metric.name}</div>` +
+    `<div class="statvalue">${value}</div>`;    
+    return el;
+}

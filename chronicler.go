@@ -37,7 +37,7 @@ func (cs *ChroniclerStatus) StartJob(jobName string) {
 
 	cs.waiter.Add(1)
 	cs.jobCount[jobName] += 1
-	cs.stats.PutInt(jobName, int64(cs.jobCount[jobName]))
+	cs.stats.PutInt(fmt.Sprintf("jobs.%s", jobName), int64(cs.jobCount[jobName]))
 }
 
 func (cs *ChroniclerStatus) StopJob(jobName string) {

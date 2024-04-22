@@ -16,7 +16,7 @@
         </script>
     <script type="module">
         import { getRecordSets, getRecord, deleteRecordSets, getStatus } from "api";
-        import { createRecord, createRecordSet, createRecordSetSummary } from "dom";
+        import { createRecord, createRecordSet, createRecordSetSummary, createStatus } from "dom";
         import { RecordListResponse, RecordSet } from "wrappers";
         import { getBus } from "bus";
 
@@ -65,20 +65,13 @@
         function renderStatus(data) {
             // menuitem notifications
             const result = document.createDocumentFragment();
-            for (const stat of data) {
+            if (data.length == 0) {
                 const el = document.createElement("div");
-                el.setAttribute("class", "menuitem");
-                if (stat.Value.hasOwnProperty("DateTimeValue")) {
-                    const asDate = stat.Value.DateTimeValue;
-                    el.innerHTML = `<div class="statname">${stat.name}</div>` +
-                        `<div class="statvalue">${new Date(asDate.timestamp).toLocaleString('ru-RU')}</div>`;
-                } else {
-                    el.innerHTML = `<div class="statname">${stat.name}</div>` +
-                        `<div class="statvalue">${JSON.stringify(stat.Value)}</div>`;
-                }
-                result.appendChild(el);
+                el.innerText = "Nothing here...";
             }
-            console.log(result);
+            for (const stat of data) {
+                result.appendChild(createStatus(stat));
+            }
             document.querySelector(".menuitems.status").replaceChildren(result);
         }
 
