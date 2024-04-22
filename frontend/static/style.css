@@ -90,8 +90,14 @@
     color: white;
 }
 
-.topheader .menuitem.notifications {
+.topheader .status {
+    font-family: sans-serif;
+}
+
+.topheader .status .menuitem {
     padding: 8px;
+    display: grid;
+    grid-template-columns: 50% auto;
 }
 
 .topheader .menuitem a {

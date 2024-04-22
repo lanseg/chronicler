@@ -19,7 +19,6 @@ import (
 	rpb "chronicler/records/proto"
 	"chronicler/resolver"
 	"chronicler/status"
-	sp "chronicler/status/status_go_proto"
 	ep "chronicler/storage/endpoint"
 	"chronicler/webdriver"
 )
@@ -47,10 +46,7 @@ func initHttpClient() *http.Client {
 
 func ScheduleRepeatedSource(stats status.StatusClient, name string, provider adapter.SourceProvider, engine rpb.WebEngine, ch Chronicler, duration time.Duration) {
 	conc.RunPeriodically(func() {
-		stats.PutValue(&sp.Metric{
-			Name:  fmt.Sprintf("%s.last_provide", name),
-			Value: &sp.Metric_IntValue{IntValue: int64(time.Now().Unix())},
-		})
+		stats.PutDateTime(fmt.Sprintf("%s.last_provide", name), time.Now())
 		for _, src := range provider.GetSources() {
 			ch.SubmitRequest(&rpb.Request{
 				Id: cm.UUID4(),
@@ -91,10 +87,7 @@ func main() {
 	ScheduleRepeatedSource(stats, "pikabu_disputed", pkb_adapter.NewDisputedProvider(initHttpClient()), rpb.WebEngine_WEBDRIVER, ch, 15*time.Minute)
 
 	conc.RunPeriodically(func() {
-		stats.PutValue(&sp.Metric{
-			Name:  "Telegram.last_bot_check",
-			Value: &sp.Metric_IntValue{IntValue: int64(time.Now().Unix())},
-		})
+		stats.PutDateTime("telegram.last_bot_check", time.Now())
 		ch.SubmitRequest(&rpb.Request{Target: &rpb.Source{Type: rpb.SourceType_TELEGRAM}})
 	}, nil, time.Minute)
 
