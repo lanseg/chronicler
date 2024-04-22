@@ -51,13 +51,6 @@ func newStatusClient(addr string) (sp.StatusClient, error) {
 	return sp.NewStatusClient(conn), nil
 }
 
-/*
-int64 intValue = 2;
-double doubleValue = 3;
-string stringValue = 4;
-IntRange intRangeValue = 5;
-DoubleRange doubleRangeValue = 6;
-*/
 type StatusClient interface {
 	PutValue(metric *sp.Metric) error
 	PutInt(name string, value int64) error
@@ -65,6 +58,7 @@ type StatusClient interface {
 	PutString(name string, value string) error
 	PutIntRange(name string, value int64, min int64, max int64) error
 	PutDoubleRange(name string, value float64, min float64, max float64) error
+	DeleteMetric(name string) error
 	GetValues() ([]*sp.Metric, error)
 	Start()
 	Stop()
@@ -196,6 +190,10 @@ func (nc *remoteStatusClient) PutDoubleRange(name string, value float64, min flo
 			},
 		},
 	})
+}
+
+func (nc *remoteStatusClient) DeleteMetric(name string) error {
+	return nc.PutValue((&sp.Metric{Name: name}))
 }
 
 func (sc *remoteStatusClient) GetValues() ([]*sp.Metric, error) {

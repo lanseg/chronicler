@@ -22,6 +22,26 @@ type testBed struct {
 	tearDown func(tb testing.TB)
 }
 
+func (tb *testBed) WaitForValues(want []*sp.Metric) opt.Optional[[]*sp.Metric] {
+	return conc.WaitForSomething(func() opt.Optional[[]*sp.Metric] {
+		vals, err := tb.client.GetValues()
+		if err != nil {
+			return opt.OfError[[]*sp.Metric](nil, err)
+		}
+		sort.Slice(vals, func(i int, j int) bool {
+			return vals[i].Name < vals[j].Name
+		})
+		sort.Slice(want, func(i int, j int) bool {
+			return want[i].Name < want[j].Name
+		})
+		if !reflect.DeepEqual(want, vals) {
+			return opt.OfError[[]*sp.Metric](
+				nil, fmt.Errorf("Expected to get %v, but got %v", want, vals))
+		}
+		return opt.Of(vals)
+	})
+}
+
 func setupServer(tb testing.TB) (*testBed, error) {
 	server := NewStatusServer(testAddr)
 	if err := server.Start(); err != nil {
@@ -70,23 +90,21 @@ func TestStatusPutShortcuts(t *testing.T) {
 			Value: float64(1.234), MinValue: float64(-0.5), MaxValue: float64(11.11)}}},
 	}
 
-	if _, err := conc.WaitForSomething(func() opt.Optional[[]*sp.Metric] {
-		vals, err := tb.client.GetValues()
-		if err != nil {
-			return opt.OfError[[]*sp.Metric](nil, err)
-		}
-		sort.Slice(vals, func(i int, j int) bool {
-			return vals[i].Name < vals[j].Name
-		})
-		sort.Slice(want, func(i int, j int) bool {
-			return want[i].Name < want[j].Name
-		})
-		if !reflect.DeepEqual(want, vals) {
-			return opt.OfError[[]*sp.Metric](
-				nil, fmt.Errorf("Expected to get %v, but got %v", want, vals))
-		}
-		return opt.Of(vals)
-	}).Get(); err != nil {
+	if _, err := tb.WaitForValues(want).Get(); err != nil {
+		t.Errorf("Could not read metrics from server: %s", err)
+		return
+	}
+
+	want = []*sp.Metric{
+		{Name: "int", Value: &sp.Metric_IntValue{IntValue: int64(10)}},
+		{Name: "doublerange", Value: &sp.Metric_DoubleRangeValue{DoubleRangeValue: &sp.DoubleRange{
+			Value: float64(1.234), MinValue: float64(-0.5), MaxValue: float64(11.11)}}},
+	}
+	tb.client.DeleteMetric("double")
+	tb.client.DeleteMetric("string")
+	tb.client.DeleteMetric("intrange")
+
+	if _, err := tb.WaitForValues(want).Get(); err != nil {
 		t.Errorf("Could not read metrics from server: %s", err)
 		return
 	}
@@ -169,17 +187,7 @@ func TestStatus(t *testing.T) {
 				tb.client.PutValue(v)
 			}
 
-			if _, err := conc.WaitForSomething(func() opt.Optional[[]*sp.Metric] {
-				vals, err := tb.client.GetValues()
-				if err != nil {
-					return opt.OfError[[]*sp.Metric](nil, err)
-				}
-				if !reflect.DeepEqual(tc.want, vals) {
-					return opt.OfError[[]*sp.Metric](
-						nil, fmt.Errorf("Expected to get %v, but got %v", tc.want, vals))
-				}
-				return opt.Of(vals)
-			}).Get(); err != nil {
+			if _, err := tb.WaitForValues(tc.want).Get(); err != nil {
 				t.Errorf("Could not read metrics from server: %s", err)
 				return
 			}
