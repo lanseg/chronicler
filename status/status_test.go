@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"sort"
 	"testing"
+	"time"
 
 	conc "github.com/lanseg/golang-commons/concurrent"
 	opt "github.com/lanseg/golang-commons/optional"
@@ -79,6 +80,8 @@ func TestStatusPutShortcuts(t *testing.T) {
 	tb.client.PutString("string", "string")
 	tb.client.PutIntRange("intrange", 10, -10, 100)
 	tb.client.PutDoubleRange("doublerange", 1.234, -0.5, 11.11)
+	sometime, _ := time.Parse(time.RFC3339, "2024-01-02T15:04:05+07:00")
+	tb.client.PutDateTime("datetime", sometime)
 
 	want := []*sp.Metric{
 		{Name: "int", Value: &sp.Metric_IntValue{IntValue: int64(10)}},
@@ -88,6 +91,8 @@ func TestStatusPutShortcuts(t *testing.T) {
 			Value: int64(10), MinValue: int64(-10), MaxValue: int64(100)}}},
 		{Name: "doublerange", Value: &sp.Metric_DoubleRangeValue{DoubleRangeValue: &sp.DoubleRange{
 			Value: float64(1.234), MinValue: float64(-0.5), MaxValue: float64(11.11)}}},
+		{Name: "datetime", Value: &sp.Metric_DateTimeValue{DateTimeValue: &sp.DateTime{
+			Timestamp: int64(1704182645000), Offset: int64(25200)}}},
 	}
 
 	if _, err := tb.WaitForValues(want).Get(); err != nil {
@@ -103,6 +108,7 @@ func TestStatusPutShortcuts(t *testing.T) {
 	tb.client.DeleteMetric("double")
 	tb.client.DeleteMetric("string")
 	tb.client.DeleteMetric("intrange")
+	tb.client.DeleteMetric("datetime")
 
 	if _, err := tb.WaitForValues(want).Get(); err != nil {
 		t.Errorf("Could not read metrics from server: %s", err)
@@ -163,6 +169,8 @@ func TestStatus(t *testing.T) {
 					MaxValue: float64(123.456),
 					Value:    float64(0.5),
 				}}},
+				{Name: "datetime", Value: &sp.Metric_DateTimeValue{DateTimeValue: &sp.DateTime{
+					Timestamp: int64(10005000), Offset: int64(123)}}},
 			},
 			want: []*sp.Metric{
 				{Name: "metric", Value: &sp.Metric_IntValue{IntValue: int64(10)}},
@@ -178,6 +186,8 @@ func TestStatus(t *testing.T) {
 					MaxValue: float64(123.456),
 					Value:    float64(0.5),
 				}}},
+				{Name: "datetime", Value: &sp.Metric_DateTimeValue{DateTimeValue: &sp.DateTime{
+					Timestamp: int64(10005000), Offset: int64(123)}}},
 			},
 		},
 	} {

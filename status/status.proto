@@ -16,6 +16,12 @@ message DoubleRange {
     double value = 3;
 }
 
+message DateTime {
+    // Values in Unix seconds
+    int64 timestamp = 1;
+    int64 offset = 2;
+}
+
 message Metric {
 
     string name = 1;
@@ -26,6 +32,7 @@ message Metric {
         string stringValue = 4;
         IntRange intRangeValue = 5;
         DoubleRange doubleRangeValue = 6;
+        DateTime dateTimeValue = 7;
     }
 }
 

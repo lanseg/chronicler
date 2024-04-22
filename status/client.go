@@ -58,6 +58,7 @@ type StatusClient interface {
 	PutString(name string, value string) error
 	PutIntRange(name string, value int64, min int64, max int64) error
 	PutDoubleRange(name string, value float64, min float64, max float64) error
+	PutDateTime(name string, value time.Time) error
 	DeleteMetric(name string) error
 	GetValues() ([]*sp.Metric, error)
 	Start()
@@ -105,6 +106,10 @@ func (nc *noopStatusClient) PutIntRange(name string, value int64, min int64, max
 }
 
 func (nc *noopStatusClient) PutDoubleRange(name string, value float64, min float64, max float64) error {
+	return nil
+}
+
+func (nc *noopStatusClient) PutDateTime(name string, value time.Time) error {
 	return nil
 }
 
@@ -187,6 +192,19 @@ func (nc *remoteStatusClient) PutDoubleRange(name string, value float64, min flo
 				Value:    value,
 				MinValue: min,
 				MaxValue: max,
+			},
+		},
+	})
+}
+
+func (nc *remoteStatusClient) PutDateTime(name string, value time.Time) error {
+	_, offset := value.Zone()
+	return nc.PutValue(&sp.Metric{
+		Name: name,
+		Value: &sp.Metric_DateTimeValue{
+			DateTimeValue: &sp.DateTime{
+				Timestamp: value.UnixMilli(),
+				Offset:    int64(offset),
 			},
 		},
 	})
