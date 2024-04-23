@@ -25,13 +25,18 @@ go_library(
     ],
 )
 
-go_binary(
-    name = "frontend",
-    srcs = ["main.go"],
-    data = glob([
+filegroup(
+    name="static_files",
+    srcs = glob([
         "static/*",
         "static/modules/*",
     ]),
+)
+
+go_binary(
+    name = "frontendserver",
+    srcs = ["main.go"],
+    data = [":static_files"],
     deps = [
         ":server",
         "//records:records_go_proto",

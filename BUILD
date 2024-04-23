@@ -28,3 +28,26 @@ go_binary(
         "@tgbot//:telegram_bot",
     ],
 )
+
+genrule(
+    name = "package",
+    srcs = [
+        ":main",
+        "//scenarios:scenarios",
+        "//frontend:frontendserver",
+        "//frontend:static_files",
+        "//storage/endpoint:storageserver",
+        "//status:statusserver"
+    ],
+    outs = ["chronicler.tar.gz"],
+    cmd = """
+        tar -chzvf $@ \
+          --transform 's/bazel-out.*_\\///g' \
+          $(location :main) \
+          $(locations //scenarios:scenarios) \
+          $(location //frontend:frontendserver) \
+          $(location //storage/endpoint:storageserver) \
+          $(location //status:statusserver) \
+          $(locations //frontend:static_files)
+    """,
+)

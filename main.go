@@ -73,6 +73,7 @@ func main() {
 	stats.Start()
 
 	storage := cm.OrExit(ep.NewRemoteStorage(fmt.Sprintf("localhost:%d", *cfg.StorageServerPort)))
+
 	webDriver := webdriver.NewBrowser(*cfg.ScenarioLibrary)
 	resolver := resolver.NewResolver(webDriver, storage, stats)
 

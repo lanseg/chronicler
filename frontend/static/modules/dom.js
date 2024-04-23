@@ -257,14 +257,6 @@ export function createRecordSetSummary(rs) {
     return el;
 }
 
-/*
-        int64 intValue = 2;
-        double doubleValue = 3;
-        string stringValue = 4;
-        IntRange intRangeValue = 5;
-        DoubleRange doubleRangeValue = 6;
-        DateTime dateTimeValue = 7;
-*/
 export function createStatus(metric) {
     const el = document.createElement("div");
     let value = "";
@@ -283,7 +275,6 @@ export function createStatus(metric) {
         value = JSON.stringify(metric.Value);
     }
     el.innerHTML =
-    `<div class="statname">${metric.name}</div>` +
-    `<div class="statvalue">${value}</div>`;    
+        `<div class="statname">${metric.name}</div>` + `<div class="statvalue">${value}</div>`;
     return el;
 }
