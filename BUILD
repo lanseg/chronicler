@@ -4,7 +4,6 @@ go_binary(
     name = "main",
     srcs = [
         "main.go",
-        "chronicler.go",
     ],
     deps = [
         "//adapter",
@@ -12,6 +11,7 @@ go_binary(
         "//adapter/telegram",
         "//adapter/twitter",
         "//adapter/web",
+        "//chronicler",
         "//resolver",
         "//records:records_go_proto",
         "//status",

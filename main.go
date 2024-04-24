@@ -16,6 +16,7 @@ import (
 	tlg_adapter "chronicler/adapter/telegram"
 	twi_adapter "chronicler/adapter/twitter"
 	web_adapter "chronicler/adapter/web"
+	"chronicler/chronicler"
 	rpb "chronicler/records/proto"
 	"chronicler/resolver"
 	"chronicler/status"
@@ -44,7 +45,7 @@ func initHttpClient() *http.Client {
 	}
 }
 
-func ScheduleRepeatedSource(stats status.StatusClient, name string, provider adapter.SourceProvider, engine rpb.WebEngine, ch Chronicler, duration time.Duration) {
+func ScheduleRepeatedSource(stats status.StatusClient, name string, provider adapter.SourceProvider, engine rpb.WebEngine, ch chronicler.Chronicler, duration time.Duration) {
 	conc.RunPeriodically(func() {
 		stats.PutDateTime(fmt.Sprintf("%s.last_provide", name), time.Now())
 		for _, src := range provider.GetSources() {
@@ -77,7 +78,7 @@ func main() {
 	webDriver := webdriver.NewBrowser(*cfg.ScenarioLibrary)
 	resolver := resolver.NewResolver(webDriver, storage, stats)
 
-	ch := NewLocalChronicler(resolver, storage, stats)
+	ch := chronicler.NewLocalChronicler(resolver, storage, stats)
 	ch.AddAdapter(rpb.SourceType_TELEGRAM, tlg_adapter.NewTelegramAdapter(tgbot.NewBot(*cfg.TelegramBotKey)))
 	ch.AddAdapter(rpb.SourceType_TWITTER, twi_adapter.NewTwitterAdapter(twi_adapter.NewClient(*cfg.TwitterApiKey)))
 	ch.AddAdapter(rpb.SourceType_PIKABU, pkb_adapter.NewPikabuAdapter(webDriver))
