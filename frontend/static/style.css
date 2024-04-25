@@ -24,6 +24,9 @@
     min-width: 32px;
     border: solid 1px #2f2f2f;
     border-radius: 4px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .bar_button:active {
