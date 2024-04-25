@@ -4,7 +4,8 @@ go_library(
     name = "resolver",
     srcs = [
         "resolver.go",
-        "downloader.go"
+        "downloader.go",
+        "httpdownloader.go",
     ],
     importpath = "chronicler/resolver",
     visibility = ["//visibility:public"],

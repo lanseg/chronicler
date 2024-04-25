@@ -24,7 +24,7 @@ func NewResolver(browser webdriver.Browser, storage storage.Storage, stats statu
 		browser:    browser,
 		storage:    storage,
 		stats:      stats,
-		downloader: NewDownloader(&http.Client{}, storage, stats),
+		downloader: NewHttpDownloader(&http.Client{}, storage, stats),
 	}
 }
 
