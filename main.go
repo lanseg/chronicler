@@ -31,6 +31,7 @@ var (
 
 type Config struct {
 	TwitterApiKey     *string `json:"twitterApiKey"`
+	TelegramApiUrl    *string `json:"telegramApiUrl"`
 	TelegramBotKey    *string `json:"telegramBotKey"`
 	StorageRoot       *string `json:"storageRoot"`
 	ScenarioLibrary   *string `json:"scenarioLibrary"`
@@ -68,6 +69,7 @@ func main() {
 	logger.Infof("Config.StorageRoot: %s", *cfg.StorageRoot)
 	logger.Infof("Config.StorageServerPort: %d", *cfg.StorageServerPort)
 	logger.Infof("Config.TwitterApiKey: %d", len(*cfg.TwitterApiKey))
+	logger.Infof("Config.TelegramApiUrl: %s", *cfg.TelegramApiUrl)
 	logger.Infof("Config.TelegramBotKey: %d", len(*cfg.TelegramBotKey))
 
 	stats := cm.OrExit(status.NewStatusClient(fmt.Sprintf("localhost:%d", *cfg.StatusServerPort)))
@@ -78,8 +80,9 @@ func main() {
 	webDriver := webdriver.NewBrowser(*cfg.ScenarioLibrary)
 	resolver := resolver.NewResolver(webDriver, storage, stats)
 
+	bot := cm.OrExit(tgbot.NewCustomBot(*cfg.TelegramApiUrl, *cfg.TelegramBotKey))
 	ch := chronicler.NewLocalChronicler(resolver, storage, stats)
-	ch.AddAdapter(rpb.SourceType_TELEGRAM, tlg_adapter.NewTelegramAdapter(tgbot.NewBot(*cfg.TelegramBotKey)))
+	ch.AddAdapter(rpb.SourceType_TELEGRAM, tlg_adapter.NewTelegramAdapter(bot))
 	ch.AddAdapter(rpb.SourceType_TWITTER, twi_adapter.NewTwitterAdapter(twi_adapter.NewClient(*cfg.TwitterApiKey)))
 	ch.AddAdapter(rpb.SourceType_PIKABU, pkb_adapter.NewPikabuAdapter(webDriver))
 	ch.AddAdapter(rpb.SourceType_WEB, web_adapter.NewWebAdapter(nil, webDriver))

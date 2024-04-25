@@ -3,6 +3,7 @@ package telegram
 import (
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"os"
 	"path/filepath"
 	"testing"
@@ -49,8 +50,9 @@ func (b *fakeBot) Query(methodName string, body interface{}) ([]byte, error) {
 	return []byte("{\"ok\": true}"), nil
 }
 
-func (b *fakeBot) ResolveUrl(path string) string {
-	return fmt.Sprintf("https://telegram/url/%s", path)
+func (b *fakeBot) ResolveFileUrl(fname string) *url.URL {
+	u, _ := url.Parse(fmt.Sprintf("https://telegram/url/%s", fname))
+	return u
 }
 
 func NewFakeBot(datafile string) tgbot.TelegramBot {

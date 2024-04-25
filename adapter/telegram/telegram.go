@@ -46,7 +46,7 @@ func (ts *telegramAdapter) resolveFileUrls(rs *rpb.RecordSet) {
 				ts.logger.Errorf("Cannot get actual file url for %s: %s", file.FileId, err)
 				continue
 			}
-			file.FileUrl = ts.bot.ResolveUrl(fileURL.Result.FilePath)
+			file.FileUrl = ts.bot.ResolveFileUrl(fileURL.Result.FilePath).String()
 		}
 	}
 }
