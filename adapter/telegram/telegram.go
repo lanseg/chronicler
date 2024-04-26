@@ -2,6 +2,7 @@ package telegram
 
 import (
 	"fmt"
+	"net/url"
 	"sort"
 	"strconv"
 	"strings"
@@ -20,18 +21,20 @@ import (
 type telegramAdapter struct {
 	adapter.Adapter
 
-	logger *cm.Logger
-	bot    tgbot.TelegramBot
-	api    *tgbot.TelegramApi
-	cursor int64
+	logger        *cm.Logger
+	bot           tgbot.TelegramBot
+	storagePrefix *url.URL
+	api           *tgbot.TelegramApi
+	cursor        int64
 }
 
-func NewTelegramAdapter(bot tgbot.TelegramBot) adapter.Adapter {
+func NewTelegramAdapter(bot tgbot.TelegramBot, storagePrefix *url.URL) adapter.Adapter {
 	return &telegramAdapter{
-		logger: cm.NewLogger("Telegramadapter.Adapter"),
-		bot:    bot,
-		api:    tgbot.NewTelegramApi(bot),
-		cursor: 0,
+		logger:        cm.NewLogger("Telegramadapter.Adapter"),
+		bot:           bot,
+		api:           tgbot.NewTelegramApi(bot),
+		storagePrefix: storagePrefix,
+		cursor:        0,
 	}
 }
 
@@ -46,7 +49,11 @@ func (ts *telegramAdapter) resolveFileUrls(rs *rpb.RecordSet) {
 				ts.logger.Errorf("Cannot get actual file url for %s: %s", file.FileId, err)
 				continue
 			}
-			file.FileUrl = ts.bot.ResolveFileUrl(fileURL.Result.FilePath).String()
+
+			ts.logger.Debugf("Resolved file path to %s", fileURL.Result.FilePath)
+			actualUrl := ts.storagePrefix.JoinPath(fileURL.Result.FilePath)
+			ts.logger.Infof("Resolved file url for %s: %s", file.FileId, actualUrl.String())
+			file.FileUrl = actualUrl.String()
 		}
 	}
 }

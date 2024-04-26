@@ -1,10 +1,12 @@
 package resolver
 
 import (
+	"bufio"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
+	"os"
 
 	cm "github.com/lanseg/golang-commons/common"
 
@@ -84,15 +86,38 @@ func (h *httpDownloader) downloadLoop() {
 
 			metric := fmt.Sprintf("downloader.%s", cm.UUID4())
 			h.stats.PutString(metric, u.String())
-			resp, err := h.get(u.String())
-			if err != nil {
-				h.logger.Warningf("Cannot create get request for url %s: %s", u, err)
-				h.stats.DeleteMetric(metric)
-				continue
+
+			var src io.ReadCloser
+			size := int64(0)
+			if u.Scheme == "file" {
+				u.Scheme = ""
+				file, err := os.Open(u.String())
+				if err != nil {
+					h.logger.Warningf("Cannot open local file %s: %s", u, err)
+					h.stats.DeleteMetric(metric)
+					continue
+				}
+
+				stat, err := file.Stat()
+				if err != nil {
+					h.logger.Warningf("Cannot get stats for file %s: %s", u, err)
+					h.stats.DeleteMetric(metric)
+					continue
+				}
+				size = stat.Size()
+				src = io.NopCloser(bufio.NewReader(file))
+			} else {
+				resp, err := h.get(u.String())
+				if err != nil {
+					h.logger.Warningf("Cannot create get request for url %s: %s", u, err)
+					h.stats.DeleteMetric(metric)
+					continue
+				}
+				src = resp.Body
+				size = resp.ContentLength
 			}
 
-			src := resp.Body
-			h.logger.Debugf("Content size is: %d", resp.ContentLength)
+			h.logger.Debugf("Content size is: %d", size)
 			if err := h.storage.PutFile(task.id, task.source, src); err != nil {
 				h.logger.Warningf("Error while writing data from %s to %s: %s", u, task.id, err)
 			}

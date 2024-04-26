@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/cookiejar"
+	"net/url"
 	"os"
 	"time"
 
@@ -30,13 +31,14 @@ var (
 )
 
 type Config struct {
-	TwitterApiKey     *string `json:"twitterApiKey"`
-	TelegramApiUrl    *string `json:"telegramApiUrl"`
-	TelegramBotKey    *string `json:"telegramBotKey"`
-	StorageRoot       *string `json:"storageRoot"`
-	ScenarioLibrary   *string `json:"scenarioLibrary"`
-	StatusServerPort  *int    `json:"statusServerPort"`
-	StorageServerPort *int    `json:"storageServerPort"`
+	TwitterApiKey      *string `json:"twitterApiKey"`
+	TelegramApiUrl     *string `json:"telegramApiUrl"`
+	TelegramBotKey     *string `json:"telegramBotKey"`
+	TelegramFilePrefix *string `json:"telegramFilePrefix"`
+	StorageRoot        *string `json:"storageRoot"`
+	ScenarioLibrary    *string `json:"scenarioLibrary"`
+	StatusServerPort   *int    `json:"statusServerPort"`
+	StorageServerPort  *int    `json:"storageServerPort"`
 }
 
 func initHttpClient() *http.Client {
@@ -71,6 +73,7 @@ func main() {
 	logger.Infof("Config.TwitterApiKey: %d", len(*cfg.TwitterApiKey))
 	logger.Infof("Config.TelegramApiUrl: %s", *cfg.TelegramApiUrl)
 	logger.Infof("Config.TelegramBotKey: %d", len(*cfg.TelegramBotKey))
+	logger.Infof("Config.TelegramFilePrefix: %s", *cfg.TelegramFilePrefix)
 
 	stats := cm.OrExit(status.NewStatusClient(fmt.Sprintf("localhost:%d", *cfg.StatusServerPort)))
 	stats.Start()
@@ -81,15 +84,17 @@ func main() {
 	resolver := resolver.NewResolver(webDriver, storage, stats)
 
 	bot := cm.OrExit(tgbot.NewCustomBot(*cfg.TelegramApiUrl, *cfg.TelegramBotKey))
+	tgFilePrefix := cm.OrExit(url.Parse(*cfg.TelegramFilePrefix))
+
 	ch := chronicler.NewLocalChronicler(resolver, storage, stats)
-	ch.AddAdapter(rpb.SourceType_TELEGRAM, tlg_adapter.NewTelegramAdapter(bot))
+	ch.AddAdapter(rpb.SourceType_TELEGRAM, tlg_adapter.NewTelegramAdapter(bot, tgFilePrefix))
 	ch.AddAdapter(rpb.SourceType_TWITTER, twi_adapter.NewTwitterAdapter(twi_adapter.NewClient(*cfg.TwitterApiKey)))
 	ch.AddAdapter(rpb.SourceType_PIKABU, pkb_adapter.NewPikabuAdapter(webDriver))
 	ch.AddAdapter(rpb.SourceType_WEB, web_adapter.NewWebAdapter(nil, webDriver))
 
-	ScheduleRepeatedSource(stats, "pikabu_fresh", pkb_adapter.NewFreshProvider(initHttpClient()), rpb.WebEngine_HTTP_PLAIN, ch, 2*time.Minute)
-	ScheduleRepeatedSource(stats, "pikabu_hot", pkb_adapter.NewHotProvider(initHttpClient()), rpb.WebEngine_WEBDRIVER, ch, 10*time.Minute)
-	ScheduleRepeatedSource(stats, "pikabu_disputed", pkb_adapter.NewDisputedProvider(initHttpClient()), rpb.WebEngine_WEBDRIVER, ch, 15*time.Minute)
+	//  ScheduleRepeatedSource(stats, "pikabu_fresh", pkb_adapter.NewFreshProvider(initHttpClient()), rpb.WebEngine_HTTP_PLAIN, ch, 2*time.Minute)
+	// 	ScheduleRepeatedSource(stats, "pikabu_hot", pkb_adapter.NewHotProvider(initHttpClient()), rpb.WebEngine_WEBDRIVER, ch, 10*time.Minute)
+	// 	ScheduleRepeatedSource(stats, "pikabu_disputed", pkb_adapter.NewDisputedProvider(initHttpClient()), rpb.WebEngine_WEBDRIVER, ch, 15*time.Minute)
 
 	conc.RunPeriodically(func() {
 		stats.PutDateTime("telegram.last_bot_check", time.Now())

@@ -77,7 +77,8 @@ func TestRequestResponse(t *testing.T) {
 		},
 	} {
 		t.Run(tc.desc, func(t *testing.T) {
-			tg := NewTelegramAdapter(NewFakeBot(tc.responseFile))
+			url, _ := url.Parse("https://telegram/url/")
+			tg := NewTelegramAdapter(NewFakeBot(tc.responseFile), url)
 			ups := tg.GetResponse(&rpb.Request{Id: testingUuid})[0].Result[0]
 			ups.Id = testingUuid
 			for _, r := range ups.Records {
