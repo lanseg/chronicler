@@ -92,9 +92,9 @@ func main() {
 	ch.AddAdapter(rpb.SourceType_PIKABU, pkb_adapter.NewPikabuAdapter(webDriver))
 	ch.AddAdapter(rpb.SourceType_WEB, web_adapter.NewWebAdapter(nil, webDriver))
 
-	//  ScheduleRepeatedSource(stats, "pikabu_fresh", pkb_adapter.NewFreshProvider(initHttpClient()), rpb.WebEngine_HTTP_PLAIN, ch, 2*time.Minute)
-	// 	ScheduleRepeatedSource(stats, "pikabu_hot", pkb_adapter.NewHotProvider(initHttpClient()), rpb.WebEngine_WEBDRIVER, ch, 10*time.Minute)
-	// 	ScheduleRepeatedSource(stats, "pikabu_disputed", pkb_adapter.NewDisputedProvider(initHttpClient()), rpb.WebEngine_WEBDRIVER, ch, 15*time.Minute)
+    ScheduleRepeatedSource(stats, "pikabu_fresh", pkb_adapter.NewFreshProvider(initHttpClient()), rpb.WebEngine_HTTP_PLAIN, ch, 2*time.Minute)
+	ScheduleRepeatedSource(stats, "pikabu_hot", pkb_adapter.NewHotProvider(initHttpClient()), rpb.WebEngine_WEBDRIVER, ch, 10*time.Minute)
+	ScheduleRepeatedSource(stats, "pikabu_disputed", pkb_adapter.NewDisputedProvider(initHttpClient()), rpb.WebEngine_WEBDRIVER, ch, 15*time.Minute)
 
 	conc.RunPeriodically(func() {
 		stats.PutDateTime("telegram.last_bot_check", time.Now())
