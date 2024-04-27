@@ -1,10 +1,8 @@
 package chronicler
 
-import (
-	"testing"
-)
+import "testing"
 
-func TestChronicler(t *testing.T) {
+func TestScheduler(t *testing.T) {
 	for _, tc := range []struct {
 		name string
 	}{} {

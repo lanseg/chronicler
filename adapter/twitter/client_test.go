@@ -3,8 +3,8 @@ package twitter
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
+	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -44,7 +44,7 @@ func NewFakeClient(responses ...string) Client {
 }
 
 func readFile(t *testing.T, file string) string {
-	result, err := ioutil.ReadFile(filepath.Join("testdata", file))
+	result, err := os.ReadFile(filepath.Join("testdata", file))
 	if err != nil {
 		t.Errorf("Cannot read test data from %s: %s", file, err)
 		return ""

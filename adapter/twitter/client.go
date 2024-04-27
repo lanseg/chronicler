@@ -3,7 +3,7 @@ package twitter
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"strings"
@@ -235,7 +235,7 @@ func (c *ClientImpl) performRequest(url url.URL) optional.Optional[[]byte] {
 		}),
 		func(resp *http.Response) ([]byte, error) {
 			defer resp.Body.Close()
-			result, err := ioutil.ReadAll(resp.Body)
+			result, err := io.ReadAll(resp.Body)
 			return result, err
 		})
 }

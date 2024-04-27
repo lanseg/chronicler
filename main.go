@@ -59,19 +59,16 @@ func main() {
 	logger.Infof("Config.TelegramBotKey: %d", len(*cfg.TelegramBotKey))
 	logger.Infof("Config.TelegramFilePrefix: %s", *cfg.TelegramFilePrefix)
 
+	bot := cm.OrExit(tgbot.NewCustomBot(*cfg.TelegramApiUrl, *cfg.TelegramBotKey))
+	storage := cm.OrExit(ep.NewRemoteStorage(fmt.Sprintf("localhost:%d", *cfg.StorageServerPort)))
 	stats := cm.OrExit(status.NewStatusClient(fmt.Sprintf("localhost:%d", *cfg.StatusServerPort)))
 	stats.Start()
-
-	storage := cm.OrExit(ep.NewRemoteStorage(fmt.Sprintf("localhost:%d", *cfg.StorageServerPort)))
 
 	webDriver := webdriver.NewBrowser(*cfg.ScenarioLibrary)
 	resolver := resolver.NewResolver(webDriver, storage, stats)
 
-	bot := cm.OrExit(tgbot.NewCustomBot(*cfg.TelegramApiUrl, *cfg.TelegramBotKey))
-	tgFilePrefix := cm.OrExit(url.Parse(*cfg.TelegramFilePrefix))
-
 	ch := chronicler.NewLocalChronicler(resolver, storage, stats)
-	ch.AddAdapter(rpb.SourceType_TELEGRAM, tlg_adapter.NewTelegramAdapter(bot, tgFilePrefix))
+	ch.AddAdapter(rpb.SourceType_TELEGRAM, tlg_adapter.NewTelegramAdapter(bot, cm.OrExit(url.Parse(*cfg.TelegramFilePrefix))))
 	ch.AddAdapter(rpb.SourceType_TWITTER, twi_adapter.NewTwitterAdapter(twi_adapter.NewClient(*cfg.TwitterApiKey)))
 	ch.AddAdapter(rpb.SourceType_PIKABU, pkb_adapter.NewPikabuAdapter(webDriver))
 	ch.AddAdapter(rpb.SourceType_WEB, web_adapter.NewWebAdapter(nil, webDriver))
