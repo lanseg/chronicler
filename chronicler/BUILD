@@ -6,6 +6,7 @@ go_library(
     name = "chronicler",
     srcs = [
         "chronicler.go",
+        "scheduler.go",
     ],
     importpath = "chronicler/chronicler",
     deps = [
@@ -17,6 +18,7 @@ go_library(
         "//storage/endpoint",
         "//storage/endpoint:storage_endpoint_go_proto",
         "@golang-commons//common",
+        "@golang-commons//concurrent",
     ],
 )
 
@@ -25,6 +27,7 @@ go_test(
     size = "small",
     srcs = [
         "chronicler_test.go",
+        "scheduler_test.go",
     ],
     embed = [
         ":chronicler",

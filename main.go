@@ -12,7 +12,6 @@ import (
 	conc "github.com/lanseg/golang-commons/concurrent"
 	tgbot "github.com/lanseg/tgbot"
 
-	"chronicler/adapter"
 	pkb_adapter "chronicler/adapter/pikabu"
 	tlg_adapter "chronicler/adapter/telegram"
 	twi_adapter "chronicler/adapter/twitter"
@@ -48,21 +47,6 @@ func initHttpClient() *http.Client {
 	}
 }
 
-func ScheduleRepeatedSource(stats status.StatusClient, name string, provider adapter.SourceProvider, engine rpb.WebEngine, ch chronicler.Chronicler, duration time.Duration) {
-	conc.RunPeriodically(func() {
-		stats.PutDateTime(fmt.Sprintf("%s.last_provide", name), time.Now())
-		for _, src := range provider.GetSources() {
-			ch.SubmitRequest(&rpb.Request{
-				Id: cm.UUID4(),
-				Config: &rpb.RequestConfig{
-					Engine: engine,
-				},
-				Target: src,
-			})
-		}
-	}, nil, duration)
-}
-
 func main() {
 	cfg := cm.OrExit(cm.GetConfig[Config](os.Args[1:], "config"))
 
@@ -92,9 +76,9 @@ func main() {
 	ch.AddAdapter(rpb.SourceType_PIKABU, pkb_adapter.NewPikabuAdapter(webDriver))
 	ch.AddAdapter(rpb.SourceType_WEB, web_adapter.NewWebAdapter(nil, webDriver))
 
-    ScheduleRepeatedSource(stats, "pikabu_fresh", pkb_adapter.NewFreshProvider(initHttpClient()), rpb.WebEngine_HTTP_PLAIN, ch, 2*time.Minute)
-	ScheduleRepeatedSource(stats, "pikabu_hot", pkb_adapter.NewHotProvider(initHttpClient()), rpb.WebEngine_WEBDRIVER, ch, 10*time.Minute)
-	ScheduleRepeatedSource(stats, "pikabu_disputed", pkb_adapter.NewDisputedProvider(initHttpClient()), rpb.WebEngine_WEBDRIVER, ch, 15*time.Minute)
+	chronicler.ScheduleRepeatedSource(stats, "pikabu.fresh", pkb_adapter.NewFreshProvider(initHttpClient()), rpb.WebEngine_HTTP_PLAIN, ch, 2*time.Minute)
+	chronicler.ScheduleRepeatedSource(stats, "pikabu.hot", pkb_adapter.NewHotProvider(initHttpClient()), rpb.WebEngine_WEBDRIVER, ch, 10*time.Minute)
+	chronicler.ScheduleRepeatedSource(stats, "pikabu.disputed", pkb_adapter.NewDisputedProvider(initHttpClient()), rpb.WebEngine_WEBDRIVER, ch, 15*time.Minute)
 
 	conc.RunPeriodically(func() {
 		stats.PutDateTime("telegram.last_bot_check", time.Now())
