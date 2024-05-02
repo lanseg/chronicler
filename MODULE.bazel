@@ -1,39 +1,55 @@
-module (name = "chronicler", repo_name = "org_lanseg_chronicler", version = "0.1")
+module(
+    name = "chronicler",
+    version = "0.1",
+    repo_name = "org_lanseg_chronicler",
+)
 
-bazel_dep(name = "gazelle", version = "0.35.0")
-bazel_dep(name = "rules_go", version = "0.44.0")
-bazel_dep(name = "protobuf", version = "21.7")
+bazel_dep(name = "gazelle", version = "0.36.0")
+bazel_dep(name = "rules_go", version = "0.47.0")
+bazel_dep(name = "protobuf", version = "26.0.bcr.1")
 bazel_dep(name = "golang-commons", version = "0.1")
 bazel_dep(name = "tgbot", version = "0.1")
 
 git_override(
-  module_name = "golang-commons", 
-  remote = "https://github.com/lanseg/golang-commons.git", 
-  commit = "origin/main"
+    module_name = "golang-commons",
+    commit = "origin/main",
+    remote = "https://github.com/lanseg/golang-commons.git",
 )
 
 git_override(
-  module_name = "tgbot", 
-  remote = "https://github.com/lanseg/tgbot.git", 
-  commit = "origin/main"
+    module_name = "tgbot",
+    commit = "origin/main",
+    remote = "https://github.com/lanseg/tgbot.git",
 )
+
+go_sdk = use_extension("@rules_go//go:extensions.bzl", "go_sdk")
+go_sdk.download(version = "1.22.2")
 
 go_deps = use_extension("@gazelle//:extensions.bzl", "go_deps")
-
 go_deps.module(
-  path = "google.golang.org/grpc",
-  version = "v1.61.0",
-  sum = "h1:TOvOcuXn30kRao+gfcvsebNEa5iZIiLkisYEkf7R7o0=",
+    path = "google.golang.org/grpc/cmd/protoc-gen-go-grpc",
+    sum = "h1:rNBFJjBCOgVr9pWD7rs/knKL4FRTKgpZmsRfV214zcA=",
+    version = "v1.3.0",
 )
-
 go_deps.module(
-  path = "golang.org/x/text",
-  version = "v0.14.0",
-  sum = "h1:ScX5w1eTa3QqT8oi6+ziP7dTV1S2+ALU0bI+0zXKWiQ=",
+    path = "google.golang.org/grpc",
+    sum = "h1:MUeiw1B2maTVZthpU5xvASfTh3LDbxHd6IJ6QQVU+xM=",
+    version = "v1.63.2",
 )
-
+go_deps.module(
+    path = "golang.org/x/text",
+    sum = "h1:ScX5w1eTa3QqT8oi6+ziP7dTV1S2+ALU0bI+0zXKWiQ=",
+    version = "v0.14.0",
+)
+go_deps.module(
+    path = "google.golang.org/genproto/googleapis/rpc",
+    sum = "h1:DujSIu+2tC9Ht0aPNA7jgj23Iq8Ewi5sgkQ++wdvonE=",
+    version = "v0.0.0-20240429193739-8cf5692501f6",
+)
 use_repo(
-  go_deps,
-  "org_golang_google_grpc",
-  "org_golang_x_text",
+    go_deps,
+    "org_golang_google_genproto_googleapis_rpc",
+    "org_golang_google_grpc",
+    "org_golang_google_grpc_cmd_protoc_gen_go_grpc",
+    "org_golang_x_text",
 )
