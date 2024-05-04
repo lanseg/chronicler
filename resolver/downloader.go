@@ -10,7 +10,7 @@ type downloadTask struct {
 }
 
 type Downloader interface {
-	ScheduleDownload(id string, source string) error
+	Download(id string, source string) error
 }
 
 type noopDownloader struct {
@@ -19,7 +19,7 @@ type noopDownloader struct {
 	logger *cm.Logger
 }
 
-func (nd *noopDownloader) ScheduleDownload(source string, target string) error {
+func (nd *noopDownloader) Download(source string, target string) error {
 	nd.logger.Infof("Asked to download %s to %s, but doing nothing.", source, target)
 	return nil
 }

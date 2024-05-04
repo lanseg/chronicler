@@ -4,8 +4,10 @@ import (
 	"bytes"
 	"encoding/base64"
 	"net/http"
+	"sync/atomic"
 
 	cm "github.com/lanseg/golang-commons/common"
+	conc "github.com/lanseg/golang-commons/concurrent"
 	"github.com/lanseg/golang-commons/optional"
 
 	rpb "chronicler/records/proto"
@@ -14,28 +16,34 @@ import (
 	"chronicler/webdriver"
 )
 
+const (
+	workerCount = 10
+)
+
 type Resolver interface {
 	Resolve(id string) error
-}
-
-func NewResolver(browser webdriver.Browser, storage storage.Storage, stats status.StatusClient) Resolver {
-	return &resolverImpl{
-		logger:     cm.NewLogger("Resolver"),
-		browser:    browser,
-		storage:    storage,
-		stats:      stats,
-		downloader: NewHttpDownloader(&http.Client{}, storage, stats),
-	}
 }
 
 type resolverImpl struct {
 	Resolver
 
-	logger     *cm.Logger
-	storage    storage.Storage
-	browser    webdriver.Browser
-	stats      status.StatusClient
-	downloader Downloader
+	activeWorkers *atomic.Uint32
+	browser       webdriver.Browser
+	logger        *cm.Logger
+	pool          conc.Executor
+	stats         status.StatusClient
+	storage       storage.Storage
+}
+
+func NewResolver(browser webdriver.Browser, storage storage.Storage, stats status.StatusClient) Resolver {
+	return &resolverImpl{
+		activeWorkers: &atomic.Uint32{},
+		browser:       browser,
+		logger:        cm.NewLogger("Resolver"),
+		pool:          cm.OrExit(conc.NewPoolExecutor(workerCount)),
+		stats:         stats,
+		storage:       storage,
+	}
 }
 
 func newFile(id string, name string) *rpb.File {
@@ -45,6 +53,10 @@ func newFile(id string, name string) *rpb.File {
 	}
 }
 
+func (r *resolverImpl) addWorkerCount(i uint32) {
+	r.stats.PutInt("resolver.workers.active", int64(r.activeWorkers.Add(i)))
+}
+
 func (r *resolverImpl) Resolve(id string) error {
 	rs, err := r.storage.GetRecordSet(id).Get()
 	if err != nil {
@@ -52,21 +64,30 @@ func (r *resolverImpl) Resolve(id string) error {
 	}
 	for _, rec := range rs.Records {
 		for _, file := range rec.GetFiles() {
-			r.logger.Infof("Started downloading %s", file)
-			if err := r.downloader.ScheduleDownload(rs.Id, file.FileUrl); err != nil {
-				r.logger.Warningf("Could not download file %s", file)
-			}
+			r.pool.Execute(func() {
+				r.addWorkerCount(uint32(1))
+				downloader := NewHttpDownloader(&http.Client{}, r.storage, r.stats)
+				r.logger.Infof("Started downloading %s", file)
+				if err := downloader.Download(rs.Id, file.FileUrl); err != nil {
+					r.logger.Warningf("Could not download file %s", file)
+				}
+				r.addWorkerCount(^uint32(0))
+			})
 		}
 
 		if rec.Source != nil && rec.Source.Url != "" {
-			r.stats.PutString("webdriver.pageview", rec.Source.Url)
-			r.savePageView(rs.Id, rec.Source.Url)
-			rec.Files = append(rec.Files,
-				newFile("page_view_png", "pageview_page.png"),
-				newFile("page_view_pdf", "pageview_page.pdf"),
-				newFile("page_view_html", "pageview_page.html"),
-			)
-			r.stats.DeleteMetric("webdriver.pageview")
+			r.pool.Execute(func() {
+				r.addWorkerCount(uint32(1))
+				r.stats.PutString("resolver.webdriver.pageview", rec.Source.Url)
+				r.savePageView(rs.Id, rec.Source.Url)
+				rec.Files = append(rec.Files,
+					newFile("page_view_png", "pageview_page.png"),
+					newFile("page_view_pdf", "pageview_page.pdf"),
+					newFile("page_view_html", "pageview_page.html"),
+				)
+				r.stats.DeleteMetric("resolver.webdriver.pageview")
+				r.addWorkerCount(^uint32(0))
+			})
 		}
 	}
 	return r.storage.SaveRecordSet(rs)

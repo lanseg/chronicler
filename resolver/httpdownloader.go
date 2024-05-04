@@ -25,7 +25,6 @@ const (
 type httpDownloader struct {
 	Downloader
 
-	tasks      chan downloadTask
 	stats      status.StatusClient
 	storage    storage.Storage
 	httpClient *http.Client
@@ -72,75 +71,56 @@ func (h *httpDownloader) get(link string) (*http.Response, error) {
 	return h.httpClient.Do(req)
 }
 
-func (h *httpDownloader) downloadLoop() {
+func (h *httpDownloader) Download(id string, source string) error {
 	h.logger.Infof("Starting downloader loop")
-	go (func() {
-		for {
-			task := <-h.tasks
-			h.logger.Debugf("Started downloading %q to %q", task.source, task.id)
-			u, err := url.Parse(task.source)
-			if err != nil {
-				h.logger.Warningf("Incorrect source url %s: %s", task.source, err)
-				continue
-			}
+	h.logger.Debugf("Started downloading %q to %q", source, id)
+	u, err := url.Parse(source)
+	if err != nil {
+		return err
+	}
 
-			metric := fmt.Sprintf("downloader.%s", cm.UUID4())
-			h.stats.PutString(metric, u.String())
+	metric := fmt.Sprintf("downloader.%s", cm.UUID4())
+	h.stats.PutString(metric, u.String())
+	defer h.stats.DeleteMetric(metric)
 
-			var src io.ReadCloser
-			size := int64(0)
-			if u.Scheme == "file" {
-				u.Scheme = ""
-				file, err := os.Open(u.String())
-				if err != nil {
-					h.logger.Warningf("Cannot open local file %s: %s", u, err)
-					h.stats.DeleteMetric(metric)
-					continue
-				}
-
-				stat, err := file.Stat()
-				if err != nil {
-					h.logger.Warningf("Cannot get stats for file %s: %s", u, err)
-					h.stats.DeleteMetric(metric)
-					continue
-				}
-				size = stat.Size()
-				src = io.NopCloser(bufio.NewReader(file))
-			} else {
-				resp, err := h.get(u.String())
-				if err != nil {
-					h.logger.Warningf("Cannot create get request for url %s: %s", u, err)
-					h.stats.DeleteMetric(metric)
-					continue
-				}
-				src = resp.Body
-				size = resp.ContentLength
-			}
-
-			h.logger.Debugf("Content size is: %d", size)
-			if err := h.storage.PutFile(task.id, task.source, src); err != nil {
-				h.logger.Warningf("Error while writing data from %s to %s: %s", u, task.id, err)
-			}
-			h.stats.DeleteMetric(metric)
-			src.Close()
+	var src io.ReadCloser
+	size := int64(0)
+	if u.Scheme == "file" {
+		u.Scheme = ""
+		file, err := os.Open(u.String())
+		if err != nil {
+			return err
 		}
-	})()
-}
 
-func (h *httpDownloader) ScheduleDownload(id string, source string) error {
-	h.tasks <- downloadTask{id, source}
-	h.logger.Infof("Scheduled new download %q to %q", source, id)
+		stat, err := file.Stat()
+		if err != nil {
+			return err
+		}
+		size = stat.Size()
+		src = io.NopCloser(bufio.NewReader(file))
+		defer src.Close()
+	} else {
+		resp, err := h.get(u.String())
+		if err != nil {
+			return err
+		}
+		src = resp.Body
+		size = resp.ContentLength
+		defer src.Close()
+	}
+
+	h.logger.Debugf("Content size is: %d", size)
+	if err := h.storage.PutFile(id, source, src); err != nil {
+		return err
+	}
 	return nil
 }
 
 func NewHttpDownloader(httpClient *http.Client, storage storage.Storage, stats status.StatusClient) Downloader {
-	loader := &httpDownloader{
+	return &httpDownloader{
 		storage:    storage,
-		tasks:      make(chan downloadTask, downloadQueueSize),
 		httpClient: httpClient,
 		stats:      stats,
 		logger:     cm.NewLogger("downloader"),
 	}
-	loader.downloadLoop()
-	return loader
 }
