@@ -58,13 +58,23 @@ func (r *Runner) Execute(command string, args []string) {
 	r.done <- nil
 }
 
-func DownloadYoutube(video string, targetDir string) error {
+func Ytdlp(video string, targetDir string) error {
 	r := NewRunner()
 	go r.Execute("yt-dlp", []string{
 		"-ciw",
 		"-o",
 		filepath.Join(targetDir, "%(playlist)s.%(title)s.%(ext)s"),
 		"-v", video,
+	})
+	return <-r.done
+}
+
+func Script(script string, src string, target string) error {
+	r := NewRunner()
+	go r.Execute("bash", []string{
+		script,
+		src,
+		target,
 	})
 	return <-r.done
 }

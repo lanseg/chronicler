@@ -75,20 +75,22 @@ func (r *resolverImpl) Resolve(id string) error {
 			})
 		}
 
-		if rec.Source != nil && rec.Source.Url != "" {
-			r.pool.Execute(func() {
-				r.addWorkerCount(uint32(1))
-				r.stats.PutString("resolver.webdriver.pageview", rec.Source.Url)
-				r.savePageView(rs.Id, rec.Source.Url)
-				rec.Files = append(rec.Files,
-					newFile("page_view_png", "pageview_page.png"),
-					newFile("page_view_pdf", "pageview_page.pdf"),
-					newFile("page_view_html", "pageview_page.html"),
-				)
-				r.stats.DeleteMetric("resolver.webdriver.pageview")
-				r.addWorkerCount(^uint32(0))
-			})
+		if rec.Source == nil || rec.Source.Url == "" {
+			continue
 		}
+
+		r.pool.Execute(func() {
+			r.addWorkerCount(uint32(1))
+			r.stats.PutString("resolver.webdriver.pageview", rec.Source.Url)
+			r.savePageView(rs.Id, rec.Source.Url)
+			rec.Files = append(rec.Files,
+				newFile("page_view_png", "pageview_page.png"),
+				newFile("page_view_pdf", "pageview_page.pdf"),
+				newFile("page_view_html", "pageview_page.html"),
+			)
+			r.stats.DeleteMetric("resolver.webdriver.pageview")
+			r.addWorkerCount(^uint32(0))
+		})
 	}
 	return r.storage.SaveRecordSet(rs)
 }
