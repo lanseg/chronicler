@@ -6,7 +6,6 @@ go_library(
     name = "storage",
     srcs = [
         "localstorage.go",
-        "overlay.go",
         "storage.go",
     ],
     importpath = "chronicler/storage",
@@ -14,6 +13,7 @@ go_library(
         "//records",
         "//records:records_go_proto",
         "//util",
+        "@golang-commons//almostio",
         "@golang-commons//collections",
         "@golang-commons//common",
         "@golang-commons//optional",
@@ -25,7 +25,6 @@ go_test(
     size = "small",
     srcs = [
         "localstorage_test.go",
-        "overlay_test.go",
     ],
     embed = [
         ":storage",
