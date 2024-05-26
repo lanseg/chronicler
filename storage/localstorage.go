@@ -20,27 +20,25 @@ import (
 type localStorage struct {
 	Storage
 
-	ovlmux   sync.Mutex
-	overlays map[string]aio.Overlay
-
-	recordCache *sync.Map
+	ovlmux      sync.Mutex
+	overlays    sync.Map
+	recordCache sync.Map
 
 	logger *cm.Logger
 	root   string
 }
 
 func (s *localStorage) getOverlay(id string) aio.Overlay {
-	s.ovlmux.Lock()
-	defer s.ovlmux.Unlock()
-	if ovl, ok := s.overlays[id]; ok {
+	result, _ := s.overlays.LoadOrStore(id, func() aio.Overlay {
+		ovl, err := aio.NewLocalOverlay(
+			filepath.Join(s.root, id),
+			aio.NewJsonMarshal[aio.OverlayMetadata]())
+		if err != nil {
+			s.logger.Warningf("Cannot open overlay for %s: %s", id, err)
+		}
 		return ovl
-	}
-	ovl, err := aio.NewLocalOverlay(filepath.Join(s.root, id), aio.NewJsonMarshal[aio.OverlayMetadata]())
-	if err != nil {
-		s.logger.Warningf("Cannot open overlay for %s: %s", id, err)
-	}
-	s.overlays[id] = ovl
-	return ovl
+	}())
+	return result.(aio.Overlay)
 }
 
 func (s *localStorage) GetRecordSet(id string) opt.Optional[*rpb.RecordSet] {
@@ -163,8 +161,8 @@ func NewLocalStorage(root string) Storage {
 	ls := &localStorage{
 		root:        root,
 		logger:      log,
-		recordCache: &sync.Map{},
-		overlays:    map[string]aio.Overlay{},
+		recordCache: sync.Map{},
+		overlays:    sync.Map{},
 	}
 	ls.refreshCache()
 	return ls
