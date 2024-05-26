@@ -10,7 +10,6 @@ import (
 	"sync"
 
 	aio "github.com/lanseg/golang-commons/almostio"
-	col "github.com/lanseg/golang-commons/collections"
 	cm "github.com/lanseg/golang-commons/common"
 	opt "github.com/lanseg/golang-commons/optional"
 
@@ -21,9 +20,8 @@ import (
 type localStorage struct {
 	Storage
 
-	ovlmux  sync.Mutex
-	ovlid   string
-	overlay aio.Overlay
+	ovlmux   sync.Mutex
+	overlays map[string]aio.Overlay
 
 	recordCache *sync.Map
 
@@ -34,13 +32,15 @@ type localStorage struct {
 func (s *localStorage) getOverlay(id string) aio.Overlay {
 	s.ovlmux.Lock()
 	defer s.ovlmux.Unlock()
-	if s.overlay == nil || s.ovlid != id {
-		ovl, _ := aio.NewLocalOverlay(
-			filepath.Join(s.root, id),
-			aio.NewJsonMarshal[aio.OverlayMetadata]())
-		s.overlay = ovl
+	if ovl, ok := s.overlays[id]; ok {
+		return ovl
 	}
-	return s.overlay
+	ovl, err := aio.NewLocalOverlay(filepath.Join(s.root, id), aio.NewJsonMarshal[aio.OverlayMetadata]())
+	if err != nil {
+		s.logger.Warningf("Cannot open overlay for %s: %s", id, err)
+	}
+	s.overlays[id] = ovl
+	return ovl
 }
 
 func (s *localStorage) GetRecordSet(id string) opt.Optional[*rpb.RecordSet] {
@@ -148,16 +148,12 @@ func (s *localStorage) writeRecordSet(rs *rpb.RecordSet) error {
 
 func (s *localStorage) refreshCache() {
 	s.logger.Infof("Refreshing cache")
-	recordCache := map[string]*rpb.RecordSet{}
 	s.getAllRecords().IfPresent(func(allRecords []*rpb.RecordSet) {
 		s.logger.Infof("Found %d records", len(allRecords))
-		for k, v := range col.GroupBy(allRecords, func(rs *rpb.RecordSet) string {
-			return rs.Id
-		}) {
-			recordCache[k] = v[0]
+		for _, r := range allRecords {
+			s.recordCache.Store(r.Id, r)
 		}
 	})
-
 }
 
 func NewLocalStorage(root string) Storage {
@@ -168,6 +164,7 @@ func NewLocalStorage(root string) Storage {
 		root:        root,
 		logger:      log,
 		recordCache: &sync.Map{},
+		overlays:    map[string]aio.Overlay{},
 	}
 	ls.refreshCache()
 	return ls
