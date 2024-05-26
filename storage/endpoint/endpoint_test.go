@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"io"
 	"reflect"
+	"sync"
 	"testing"
+	"time"
 
 	"github.com/lanseg/golang-commons/concurrent"
 	"github.com/lanseg/golang-commons/optional"
@@ -113,6 +115,39 @@ func setupServer(tb testing.TB) (*testBed, error) {
 			server.Stop()
 		},
 	}, nil
+}
+
+func TestHealth(t *testing.T) {
+	t.Run("Start client before server", func(t *testing.T) {
+		server := NewStorageServer(testAddr, &FakeStorage{fileData: map[string][]byte{}})
+
+		mu := sync.Mutex{}
+		mu.Lock()
+
+		go func() {
+			defer mu.Unlock()
+			client, err := newEndpointClient(testAddr)
+			if err != nil {
+				t.Errorf("Cannot init client: %s", err)
+				t.FailNow()
+			}
+			if _, err := client.Get(context.Background(), &ep.GetRequest{}); err != nil {
+				t.Errorf("Failed when querying server: %s", err)
+				server.Stop()
+				t.FailNow()
+			}
+			server.Stop()
+		}()
+
+		time.Sleep(5 * time.Second)
+		if err := server.Start(); err != nil {
+			t.Errorf("Cannot start server: %s", err)
+			t.FailNow()
+		}
+
+		mu.Lock()
+		server.Stop()
+	})
 }
 
 func TestStorage(t *testing.T) {

@@ -9,7 +9,11 @@ import (
 	cm "github.com/lanseg/golang-commons/common"
 	"google.golang.org/grpc"
 	_ "google.golang.org/grpc/encoding/gzip" // Install the gzip compressor
+	"google.golang.org/grpc/health"
+	healthgrpc "google.golang.org/grpc/health/grpc_health_v1"
+	healthpb "google.golang.org/grpc/health/grpc_health_v1" // Separating proto for readability
 
+	// Separating proto for readability
 	rpb "chronicler/records/proto"
 	"chronicler/storage"
 	ep "chronicler/storage/endpoint_go_proto"
@@ -23,7 +27,9 @@ const (
 type storageServer struct {
 	ep.UnimplementedStorageServer
 
-	grpcServer  *grpc.Server
+	grpcServer   *grpc.Server
+	healthServer *health.Server
+
 	address     string
 	baseStorage storage.Storage
 	logger      *cm.Logger
@@ -135,10 +141,15 @@ func (s *storageServer) Start() error {
 		return err
 	}
 
+	s.healthServer = health.NewServer()
+	s.healthServer.SetServingStatus("", healthpb.HealthCheckResponse_SERVING)
+
 	s.grpcServer = grpc.NewServer(
 		grpc.MaxSendMsgSize(maxMsgSize),
 		grpc.MaxRecvMsgSize(maxMsgSize))
 	ep.RegisterStorageServer(s.grpcServer, s)
+	healthgrpc.RegisterHealthServer(s.grpcServer, s.healthServer)
+
 	s.logger.Infof("Storage server listening at %v", socket.Addr())
 
 	go (func() {
@@ -152,8 +163,12 @@ func (s *storageServer) Start() error {
 
 func (s *storageServer) Stop() {
 	s.logger.Infof("Stopping server gracefully")
-	s.grpcServer.GracefulStop()
-	s.logger.Infof("Server stopped")
+	if s.grpcServer != nil {
+		s.grpcServer.GracefulStop()
+		s.logger.Infof("Server stopped")
+	} else {
+		s.logger.Infof("Server already stopped")
+	}
 }
 
 func NewStorageServer(address string, str storage.Storage) *storageServer {

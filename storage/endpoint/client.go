@@ -8,9 +8,11 @@ import (
 
 	cm "github.com/lanseg/golang-commons/common"
 	"github.com/lanseg/golang-commons/optional"
+
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/encoding/gzip"
+	_ "google.golang.org/grpc/health"
 
 	rpb "chronicler/records/proto"
 	"chronicler/storage"
@@ -20,9 +22,15 @@ import (
 func newEndpointClient(addr string) (ep.StorageClient, error) {
 	conn, err := grpc.Dial(addr,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithBlock(),
 		grpc.WithDefaultCallOptions(
 			grpc.MaxCallRecvMsgSize(maxMsgSize),
-			grpc.UseCompressor(gzip.Name)))
+			grpc.UseCompressor(gzip.Name)),
+		grpc.WithDefaultServiceConfig(`{
+			"healthCheckConfig": {
+				"serviceName": ""
+			}
+		}`))
 	if err != nil {
 		return nil, err
 	}
