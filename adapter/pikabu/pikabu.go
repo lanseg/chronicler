@@ -79,37 +79,39 @@ func (p *pikabuAdapter) getContentWebdriver(storyId string) string {
 	return content
 }
 
-func (p *pikabuAdapter) getContentHttpPlain(storyId string) string {
+func (p *pikabuAdapter) getContentHttpPlain(storyId string) (string, error) {
 	response, err := http.Get(fmt.Sprintf("https://pikabu.ru/story/_%s", storyId))
 	if err != nil {
-		p.logger.Warningf("Error while making plain http request: %s", err)
-		return ""
+		return "", fmt.Errorf("Error while making plain http request: %s", err)
 	}
 	data, err := io.ReadAll(response.Body)
 	if err != nil {
-		p.logger.Warningf("Error while reading http data: %s", err)
-		return ""
+		return "", fmt.Errorf("Error while reading http data: %s", err)
 	}
 	dataUtf, err := charmap.Windows1251.NewDecoder().Bytes(data)
 	if err != nil {
-		p.logger.Warningf("Error while decoding http data: %s", err)
-		return ""
+		return "", fmt.Errorf("Error while decoding http data: %s", err)
 	}
-	return string(dataUtf)
+	return string(dataUtf), nil
 }
 
 func (p *pikabuAdapter) GetResponse(rq *rpb.Request) []*rpb.Response {
 	p.logger.Debugf("Got new request: %s", rq)
 
 	content := ""
+	var err error
 	if rq.Config != nil && rq.Config.Engine == rpb.WebEngine_HTTP_PLAIN {
 		p.logger.Debugf("Using plain http client to get the content")
-		content = p.getContentHttpPlain(rq.Target.ChannelId)
+		content, err = p.getContentHttpPlain(rq.Target.ChannelId)
 	} else {
 		p.logger.Debugf("Using webdriver to get the content")
 		content = p.getContentWebdriver(rq.Target.ChannelId)
 	}
 
+	if err != nil {
+		p.logger.Warningf("Error while reading page content: %s", err)
+		return []*rpb.Response{}
+	}
 	p.logger.Infof("Loaded page content, got string of %d: %s", len(content), cm.Ellipsis(content, 100, true))
 	resp, err := parsePost(content, time.Now)
 
