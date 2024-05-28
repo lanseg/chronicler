@@ -58,10 +58,10 @@ func (s *localStorage) GetFile(id string, filename string) opt.Optional[io.ReadC
 func (s *localStorage) PutFile(id string, filename string, src io.Reader) error {
 	s.logger.Infof("PutFile %s/%s", id, filename)
 	wc, err := s.getOverlay(id).OpenWrite(filename)
-	defer wc.Close()
 	if err != nil {
 		return err
 	}
+	defer wc.Close()
 	_, err = io.Copy(wc, src)
 	return err
 }
