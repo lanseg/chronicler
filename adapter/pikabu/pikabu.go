@@ -108,11 +108,12 @@ func (p *pikabuAdapter) GetResponse(rq *rpb.Request) []*rpb.Response {
 		content = p.getContentWebdriver(rq.Target.ChannelId)
 	}
 
-	if err != nil {
-		p.logger.Warningf("Error while reading page content: %s", err)
+	if err != nil || len(content) == 0 {
+		p.logger.Warningf("Error while reading page content of length %d: %s", len(content), err)
 		return []*rpb.Response{}
 	}
-	p.logger.Infof("Loaded page content, got string of %d: %s", len(content), cm.Ellipsis(content, 100, true))
+	p.logger.Infof("Loaded page content for %s, got string of %d: %s",
+		rq.Target.ChannelId, len(content), cm.Ellipsis(content, 100, true))
 	resp, err := parsePost(content, time.Now)
 
 	if resp == nil || err != nil {
