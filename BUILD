@@ -1,3 +1,5 @@
+package(default_visibility = ["//visibility:public"])
+
 load("@rules_go//go:def.bzl", "go_binary")
 
 go_binary(
