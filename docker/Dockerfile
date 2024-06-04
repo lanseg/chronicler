@@ -1,6 +1,6 @@
 FROM alpine:latest
 WORKDIR chronicler
-COPY telegram-bot-api .
+COPY chronicler/telegram-bot-api .
 COPY chronicler/frontend .
 COPY chronicler/frontendserver .
 COPY chronicler/main .
