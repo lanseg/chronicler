@@ -22,4 +22,5 @@ echo "Config path: $configPath"
 echo "Api id: $telegramBotApiId"
 echo "Api hash: $telegramBotApiHash"
 
+mkdir -p /tmp/telegram/{files,temp}
 ./telegram-bot-api --api-id=$telegramBotApiId --api-hash=$telegramBotApiHash  --dir=/tmp/telegram/files --temp-dir=/tmp/telegram/temp  --local -l log

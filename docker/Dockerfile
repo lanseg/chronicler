@@ -1,4 +1,4 @@
-FROM alpine:latest
+FROM archlinux:latest
 WORKDIR chronicler
 COPY chronicler/telegram-bot-api .
 COPY chronicler/frontend .
@@ -9,6 +9,5 @@ COPY chronicler/statusserver .
 COPY chronicler/storageserver .
 COPY entrypoint.sh .
 COPY telegram .
-RUN ["apk", "add", "libc6-compat", "bash"]
 EXPOSE 1235
 ENTRYPOINT ["bash", "entrypoint.sh"]

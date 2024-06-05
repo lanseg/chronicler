@@ -1,1 +1,2 @@
 docker volume create chronicler
+docker run --mount type=bind,source=/home/lans/devel/chronist,target=/storage lanseg/chronicler telegram /storage/config.json
