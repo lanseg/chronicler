@@ -13,11 +13,17 @@ esac
 mkdir -p logs
 if [[ "$runcmd" == "all" ]]
 then
-  ./telegram --config=$configPath 2>&1 > logs/telegram &
-  ./statusserver --config=$configPath 2>&1 > logs/status &
-  ./storageserver --config=$configPath 2>&1 > logs/storage &
-  ./frontendserver --config=$configPath 2>&1 > logs/frontend &
-  ./main --config=$configPath 2>&1 > logs/main &
+   echo "Starting telegram"
+  ./telegram --config=$configPath 2>&1 | tee logs/telegram &
+  echo "Starting statusserver"
+  ./statusserver --config=$configPath 2>&1 | tee logs/status &
+  echo "Starting storageserver"
+  ./storageserver --config=$configPath 2>&1 | tee logs/storage &
+  echo "Starting frontendserver"
+  ./frontendserver --config=$configPath 2>&1 | tee logs/frontend &
+  echo "Starting main"
+  ./main --config=$configPath 2>&1 | tee logs/main 
 else
+  echo "Starting only $runcmd"
   ./$runcmd --config=$configPath 2>&1 | tee logs/$runcmd
 fi

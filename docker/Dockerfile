@@ -10,4 +10,5 @@ COPY chronicler/storageserver .
 COPY entrypoint.sh .
 COPY telegram .
 EXPOSE 1235
+RUN ["pacman", "-Suy", "--noconfirm", "firefox"]
 ENTRYPOINT ["bash", "entrypoint.sh"]
