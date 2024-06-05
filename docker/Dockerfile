@@ -8,6 +8,7 @@ COPY chronicler/scenarios .
 COPY chronicler/statusserver .
 COPY chronicler/storageserver .
 COPY entrypoint.sh .
+COPY telegram .
 RUN ["apk", "add", "libc6-compat", "bash"]
 EXPOSE 1235
 ENTRYPOINT ["bash", "entrypoint.sh"]

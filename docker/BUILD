@@ -4,7 +4,8 @@ filegroup(
     name="docker_files",
     srcs = [
         "Dockerfile",
-        "entrypoint.sh"
+        "entrypoint.sh",
+        "telegram"
     ],
 )
 

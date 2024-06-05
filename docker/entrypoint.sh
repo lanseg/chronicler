@@ -1,10 +1,11 @@
 #!/bin/sh
 set -euo pipefail
 
-runcmd=""
-case "$@" in
-  "frontendserver"|"main"|"statusserver"|"storageserver"|"all")
-    runcmd="$@"
+runcmd="$1"
+configPath="$2"
+case "$runcmd" in
+  "frontendserver"|"main"|"statusserver"|"storageserver"|"telegram"|"all")
+    echo "Command: $runcmd"
     ;;
   *) echo "Unknown binary to run: \"$@\""; exit 1;;
 esac
@@ -12,10 +13,11 @@ esac
 mkdir -p logs
 if [[ "$runcmd" == "all" ]]
 then
-  ./statusserver --config=./config.json 2>&1 > logs/status &
-  ./storageserver --config=./config.json 2>&1 > logs/storage &
-  ./frontendserver --config=./config.json 2>&1 > logs/frontend &
-  ./main --config=./config.json 2>&1 > logs/main &
+  ./telegram --config=$configPath 2>&1 > logs/telegram &
+  ./statusserver --config=$configPath 2>&1 > logs/status &
+  ./storageserver --config=$configPath 2>&1 > logs/storage &
+  ./frontendserver --config=$configPath 2>&1 > logs/frontend &
+  ./main --config=$configPath 2>&1 > logs/main &
 else
-  ./$runcmd --config=./config.json 2>&1 | tee logs/$runcmd
+  ./$runcmd --config=$configPath 2>&1 | tee logs/$runcmd
 fi
