@@ -1,3 +1,13 @@
-docker volume create chronicler
-docker run --mount type=bind,source=/home/lans/devel/chronist,target=/storage lanseg/chronicler telegram /storage/config.json
-docker run --mount type=bind,source=/home/lans/devel/chronist,target=/storage -p 1235:1235 lanseg/chronicler all /storage/config-docker.json
+#!/bin/bash
+docker import chronicler-docker.tar \
+  --change "WORKDIR chronicler" \
+  --change "ENTRYPOINT [\"bash\", \"entrypoint.sh\"]" \
+  --change "EXPOSE 1235" \
+  lanseg/chronicler
+
+#!/bin/bash
+set -euo pipefail
+docker run \
+  --mount type=bind,source="`pwd`",target=/storage \
+  -p 1235:1235 lanseg/chronicler \
+  all /storage/config-docker.json

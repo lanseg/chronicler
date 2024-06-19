@@ -11,4 +11,5 @@ COPY entrypoint.sh .
 COPY telegram .
 EXPOSE 1235
 RUN ["pacman", "-Suy", "--noconfirm", "firefox"]
+RUN ["rm", "-rfv", "/var/pacman/cache"]
 ENTRYPOINT ["bash", "entrypoint.sh"]
