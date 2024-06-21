@@ -88,6 +88,7 @@ func (r *resolverImpl) Resolve(id string) error {
 				newFile("page_view_pdf", "pageview_page.pdf"),
 				newFile("page_view_html", "pageview_page.html"),
 			)
+			r.storage.SaveRecordSet(rs)
 			r.stats.DeleteMetric("resolver.webdriver.pageview")
 			r.addWorkerCount(^uint32(0))
 		})

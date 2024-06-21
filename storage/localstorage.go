@@ -107,6 +107,8 @@ func (s *localStorage) SaveRecordSet(newSet *rpb.RecordSet) error {
 	if newSet.Id == "" {
 		return fmt.Errorf("Record without an id")
 	}
+	s.ovlmux.Lock()
+	defer s.ovlmux.Unlock()
 	return s.writeRecordSet(
 		records.MergeRecordSets(
 			s.GetRecordSet(newSet.Id).OrElse(&rpb.RecordSet{}),
