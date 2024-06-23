@@ -1,6 +1,7 @@
 package telegram
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/url"
 	"sort"
@@ -92,6 +93,9 @@ func (ts *telegramAdapter) GetResponse(request *rpb.Request) []*rpb.Response {
 	if len(updates) == 0 {
 		return []*rpb.Response{}
 	}
+
+	fmt.Printf("\n\n%s\n\n", string(cm.OrExit(json.Marshal(updates))))
+
 	records := groupRecords(updates)
 	ts.logger.Infof("%d new updates grouped into %d record sets.", len(updates), len(records))
 
@@ -198,6 +202,18 @@ func voiceToFile(voice *tgbot.Voice) *rpb.File {
 	}
 }
 
+func documentToFile(doc *tgbot.Document) *rpb.File {
+	return &rpb.File{
+		FileId: doc.FileID,
+	}
+}
+
+func videoNoteToFile(note *tgbot.VideoNote) *rpb.File {
+	return &rpb.File{
+		FileId: note.FileID,
+	}
+}
+
 func entitiesToLinks(ets []*tgbot.MessageEntity) []string {
 	result := []string{}
 	for _, e := range ets {
@@ -273,6 +289,14 @@ func updateToRecords(upds []*tgbot.Update) (*rpb.Record, []*rpb.UserMetadata) {
 
 		if msg.Voice != nil {
 			result.Files = append(result.Files, voiceToFile(msg.Voice))
+		}
+
+		if msg.Document != nil {
+			result.Files = append(result.Files, documentToFile(msg.Document))
+		}
+
+		if msg.VideoNote != nil {
+			result.Files = append(result.Files, videoNoteToFile(msg.VideoNote))
 		}
 
 		if msg.Entities != nil {

@@ -75,6 +75,11 @@ func TestRequestResponse(t *testing.T) {
 			responseFile: "telegram_multiple_updates.json",
 			resultFile:   "telegram_multiple_updates_record.json",
 		},
+		{
+			desc:         "Update with file",
+			responseFile: "telegram_update_with_doc.json",
+			resultFile:   "telegram_update_with_doc_record.json",
+		},
 	} {
 		t.Run(tc.desc, func(t *testing.T) {
 			url, _ := url.Parse("https://telegram/url/")
