@@ -1,7 +1,6 @@
 package telegram
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/url"
 	"sort"
@@ -93,8 +92,6 @@ func (ts *telegramAdapter) GetResponse(request *rpb.Request) []*rpb.Response {
 	if len(updates) == 0 {
 		return []*rpb.Response{}
 	}
-
-	fmt.Printf("\n\n%s\n\n", string(cm.OrExit(json.Marshal(updates))))
 
 	records := groupRecords(updates)
 	ts.logger.Infof("%d new updates grouped into %d record sets.", len(updates), len(records))

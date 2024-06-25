@@ -275,29 +275,26 @@
 }
 
 /* --- section gallery --- */
-.record .section .gallery {
+.record .section .files {
+    margin: 4px;
     width: 100%;
     display: flex;
     flex-wrap: wrap;
 }
 
-.record .section .gallery .image {
+.record .section .files .image {
     max-width: 300px;
     margin: 4px;
     width: 100%;
 }
 
-.record .section .gallery .image img {
+.record .section .files .image img {
     width: 100%;
 }
 
-.record .section .gallery video {
+.record .section .files video {
     max-width: 320px;
     max-height: 240px;
-    margin: 4px;
-}
-
-.record .section .files {
     margin: 4px;
 }
 

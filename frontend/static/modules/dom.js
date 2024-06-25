@@ -36,120 +36,115 @@ function formatSource(source) {
     return source.channelId;
 }
 
-function createElement(name, attributes) {
+// DOM manipulation
+function createElement(name, attributes, content) {
     const el = document.createElement(name);
     Object.entries(attributes ?? {}).map((obj) => {
         el.setAttribute(obj[0], obj[1]);
     });
+    if (typeof content === "string" || content instanceof String) {
+        el.innerHTML = content;
+    } else if (content && content.nodeType) {
+        el.appendChild(content);
+    }
     return el;
 }
 
+// Common elements
 var _togglerCounter = 0;
-
-function createRecordSection(recordId, title) {
-    const togglerId = `${recordId}_toggler${_togglerCounter}`;
-    const element = createElement("div", { class: "section" });
-    element.innerHTML += `
-    <input class="toggler" type="checkbox" id="${togglerId}" />     
-    <div class="header">
-      <label class="toggler" for="${togglerId}">
-        <div class="title">
-          <span class="toggler_status"></span>${title}
-        </div>
+function createExpander(header, content) {
+    const togglerId = `_toggler${_togglerCounter}`;
+    const element = createElement(
+        "div",
+        { class: "section" },
+        `<input class="toggler" type="checkbox" id="${togglerId}" />     
+        <div class="header">
+        <label class="toggler" for="${togglerId}">
+        <div class="title"><span class="toggler_status"></span></div>
       </label>
     </div>
-    <div class="content">
-    </div>
-    `;
+    <div class="content"></div>`,
+    );
+
+    const head = element.querySelector("div.header .title");
+    const body = element.querySelector("div.content");
+    if (header) {
+        head.appendChild(header);
+    }
+    if (content) {
+        body.appendChild(content);
+    }
     _togglerCounter++;
     return element;
 }
 
-function createAudioPlaylist(recordId, audios) {
-    if (audios.length === 0) {
-        return document.createDocumentFragment();
-    }
-    const sectionEl = createRecordSection(recordId, `Audio ${audios.length}`);
-    const section = sectionEl.querySelector(".content");
-    const galleryEl = createElement("div", { class: "files" });
-
-    for (const file of audios) {
-        galleryEl.innerHTML += `
-                        <figure>
-                          <figcaption>${file.name}</figcaption>
-                          <audio controls>
-                            <source src="/chronicler/records/${recordId}?file=${encodeURIComponent(
-                                file.fileUrl,
-                            )}" >
-                          </audio>
-                        </figure>`;
-    }
-    section.appendChild(galleryEl);
-    return sectionEl;
+// File elements
+function createRecordSection(title) {
+    return createExpander(
+        createElement("span", {}, title),
+        createElement("div", { class: "content" }),
+    );
 }
 
-function createVideoPlaylist(recordId, videos) {
-    if (videos.length === 0) {
-        return document.createDocumentFragment();
-    }
-    const sectionEl = createRecordSection(recordId, `Video (${videos.length})`);
-    const section = sectionEl.querySelector(".content");
-    const galleryEl = createElement("div", { class: "gallery" });
-
-    for (const file of videos) {
-        galleryEl.innerHTML += `
-                        <figure>
-                          <figcaption>${file.name}</figcaption>
-                          <video controls>
-                            <source src="/chronicler/records/${recordId}?file=${encodeURIComponent(
-                                file.fileUrl,
-                            )}" >
-                          </video>
-                        </figure>`;
-    }
-    section.appendChild(galleryEl);
-    return sectionEl;
+function createAudioElement(title, url) {
+    return createElement(
+        "figure",
+        {},
+        `
+        <figcaption>${title}</figcaption>
+        <audio controls>
+        <source src="${url}" >
+        </audio>        
+    `,
+    );
 }
 
-function createGallery(recordId, images) {
-    if (images.length === 0) {
-        return document.createDocumentFragment();
-    }
-    const sectionEl = createRecordSection(recordId, `Images (${images.length})`);
-    const section = sectionEl.querySelector(".content");
-    const galleryEl = createElement("div", { class: "gallery" });
+function createVideoElement(title, url) {
+    return createElement(
+        "figure",
+        {},
+        `
+        <figcaption>${title}</figcaption>
+        <video controls>
+        <source src="${url}" >
+        </audio>        
+    `,
+    );
+}
 
-    for (const file of images) {
-        galleryEl.innerHTML += `<div class="image">
-                          <a href="/chronicler/records/${recordId}?file=${encodeURIComponent(
-                              file.fileUrl,
-                          )}">
-                          <img src="/chronicler/records/${recordId}?file=${encodeURIComponent(
-                              file.fileUrl,
-                          )}" />
+function createImageElement(title, url) {
+    return createElement(
+        "div",
+        { class: "image" },
+        `
+                          <a href="${url}">
+                          <img src="${url}" alt=${title}/>
                           </a>
-                      </div>`;
-    }
-    section.appendChild(galleryEl);
-    return sectionEl;
+    `,
+    );
 }
 
-function createFileList(recordId, title, files) {
+function createFileElement(title, url) {
+    return createElement("div", { class: "file" }, `<a href="${url}">${title}</a>`);
+}
+
+function createList(title, recordId, files, elFunc) {
     if (files.length === 0) {
         return document.createDocumentFragment();
     }
-    const sectionEl = createRecordSection(recordId, `${title} (${files.length})`);
+    const sectionEl = createRecordSection(`${title} (${files.length})`);
     const section = sectionEl.querySelector(".content");
-    const setEl = createElement("div", { class: "files" });
+    const galleryEl = createElement("div", { class: "files" });
 
     for (const file of files) {
-        setEl.innerHTML += `<div class="file">
-                     <a href="/chronicler/records/${recordId}?file=${encodeURIComponent(
-                         file.fileUrl,
-                     )}">${file.name}</a>
-                 </div>`;
+        galleryEl.appendChild(
+            elFunc(
+                file.name,
+                `/chronicler/records/${recordId}?file=${encodeURIComponent(file.fileUrl)}`,
+            ),
+        );
     }
-    section.appendChild(setEl);
+    section.appendChild(galleryEl);
     return sectionEl;
 }
 
@@ -213,6 +208,14 @@ export function createRecord(rsId, record, metadata) {
         </div>
         <div class='content'>${text}</div>`;
     recordEl.appendChild(renderFileList(rsId, record.files));
+    recordEl.appendChild(
+        createList(
+            "Links",
+            rsId,
+            record.links.map((l) => ({ fileUrl: l, name: l })),
+            createFileElement,
+        ),
+    );
     return recordEl;
 }
 
@@ -223,37 +226,51 @@ function renderFileList(rsId, files) {
         return a.name.localeCompare(b.name);
     });
     result.appendChild(
-        createGallery(
+        createList(
+            "Images",
             rsId,
             files.filter((f) => f.isImage),
+            createImageElement,
         ),
     );
     result.appendChild(
-        createAudioPlaylist(
+        createList(
+            "Audios",
             rsId,
             files.filter((f) => f.isAudio),
+            createAudioElement,
         ),
     );
     result.appendChild(
-        createVideoPlaylist(
+        createList(
+            "Videos",
             rsId,
             files.filter((f) => f.isVideo),
+            createVideoElement,
         ),
     );
     result.appendChild(
-        createFileList(
-            rsId,
+        createList(
             "Documents",
+            rsId,
             files.filter((f) => f.isDocument),
+            createFileElement,
         ),
     );
-    result.appendChild(createFileList(rsId, "All files", files));
     return result;
 }
 
 export function createRecordSetSummary(rs) {
     const el = createElement("div", { class: "summary record" });
     el.appendChild(renderFileList(rs.id, rs.allFiles));
+    el.appendChild(
+        createList(
+            "All links",
+            rs.id,
+            rs.allLinks.map((l) => ({ fileUrl: l, name: l })),
+            createFileElement,
+        ),
+    );
     return el;
 }
 

@@ -147,10 +147,20 @@ export class Record {
         this.source = source;
         this.parent = parent;
 
+        const allLinks = new Set();
+        for (const link of recordObj["links"] ?? []) {
+            allLinks.add(link);
+        }
+
         this._allFiles = [];
         for (const file of recordObj["files"] ?? []) {
-            this._allFiles.push(new File(file));
+            const fObj = new File(file);
+            this._allFiles.push(fObj);
+            if (fObj.fileUrl != "") {
+                allLinks.add(fObj.fileUrl);
+            }
         }
+        this._allLinks = [...allLinks.values()].sort();
     }
 
     get textContent() {
@@ -159,6 +169,10 @@ export class Record {
 
     get files() {
         return this._allFiles;
+    }
+
+    get links() {
+        return this._allLinks;
     }
 }
 
@@ -177,6 +191,7 @@ export class RecordSet {
         this._recordSetObj = recordSetObj;
         this._recordById = new Map();
         this.allFiles = [];
+        this.allLinks = [];
         this.sourceMetadata = new Map();
         this.records = [];
 
@@ -195,6 +210,7 @@ export class RecordSet {
             const newRecord = new Record(record, source, parent);
             this.records.push(newRecord);
             this.allFiles.push(...newRecord.files);
+            this.allLinks.push(...newRecord.links);
             this._recordById.set(source.id, newRecord);
         }
 
