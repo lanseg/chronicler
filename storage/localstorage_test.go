@@ -71,8 +71,9 @@ type FileDef struct {
 func TestPutFile(t *testing.T) {
 	rsId1 := cm.UUID4()
 	for _, tc := range []struct {
-		name  string
-		toPut []*FileDef
+		name          string
+		toPut         []*FileDef
+		wantRecordSet *rpb.RecordSet
 	}{
 		{
 			name: "Put single file",
@@ -85,11 +86,39 @@ func TestPutFile(t *testing.T) {
 				{rsId1, "filename", []byte("Hello there")},
 				{rsId1, "filename2", []byte("Hello world")},
 			},
+			wantRecordSet: &rpb.RecordSet{
+				Id: rsId1,
+				Records: []*rpb.Record{
+					{
+						Files: []*rpb.File{
+							{
+								FileUrl: "filename",
+								Metadata: &rpb.FileMetadata{
+									Mimetype: "text/plain; charset=utf-8",
+									Checksum: "sha256/4e47826698bb4630fb4451010062fadbf85d61427cbdfaed7ad0f23f239bed89",
+								},
+							},
+						},
+					},
+				},
+			},
 		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			s := NewLocalStorage(t.TempDir())
-			if saveError := s.SaveRecordSet(&rpb.RecordSet{Id: rsId1}); saveError != nil {
+			sampleRs := &rpb.RecordSet{
+				Id: rsId1,
+				Records: []*rpb.Record{
+					{
+						Files: []*rpb.File{
+							{
+								FileUrl: "filename",
+							},
+						},
+					},
+				},
+			}
+			if saveError := s.SaveRecordSet(sampleRs); saveError != nil {
 				t.Errorf("Error while saving a request: %s", saveError)
 			}
 
@@ -108,6 +137,15 @@ func TestPutFile(t *testing.T) {
 				if err != nil || !reflect.DeepEqual(fd.data, got) {
 					t.Errorf("Expected GetFile(%s, %s) to return (%s, nil), but got (%s, %s)",
 						fd.rsId, fd.name, fd.data, got, err)
+				}
+
+				if tc.wantRecordSet != nil {
+					rs, err := s.GetRecordSet(rsId1).Get()
+					if err != nil || !reflect.DeepEqual(tc.wantRecordSet, rs) {
+						t.Errorf("Expected GetRecordSet(%s) to return (%s, nil), but got (%s, %s)",
+							rsId1, tc.wantRecordSet, rs, err,
+						)
+					}
 				}
 			}
 		})

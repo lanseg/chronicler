@@ -67,10 +67,11 @@ func (r *resolverImpl) Resolve(id string) error {
 			r.pool.Execute(func() {
 				r.addWorkerCount(uint32(1))
 				downloader := NewHttpDownloader(&http.Client{}, r.storage, r.stats)
-				r.logger.Infof("Started downloading %s", file)
+				r.logger.Debugf("Started downloading %s", file)
 				if err := downloader.Download(rs.Id, file.FileUrl); err != nil {
 					r.logger.Warningf("Could not download file %s", file)
 				}
+				r.logger.Debugf("Done downloading %s", file)
 				r.addWorkerCount(^uint32(0))
 			})
 		}
@@ -81,6 +82,7 @@ func (r *resolverImpl) Resolve(id string) error {
 
 		r.pool.Execute(func() {
 			r.addWorkerCount(uint32(1))
+			r.logger.Debugf("Started page rendering to file %s", rec.Source.Url)
 			r.stats.PutString("resolver.webdriver.pageview", rec.Source.Url)
 			r.savePageView(rs.Id, rec.Source.Url)
 			rec.Files = append(rec.Files,
@@ -90,6 +92,7 @@ func (r *resolverImpl) Resolve(id string) error {
 			)
 			r.storage.SaveRecordSet(rs)
 			r.stats.DeleteMetric("resolver.webdriver.pageview")
+			r.logger.Debugf("Done page rendering to file %s", rec.Source.Url)
 			r.addWorkerCount(^uint32(0))
 		})
 	}

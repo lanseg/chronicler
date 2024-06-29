@@ -10,6 +10,7 @@ import (
 	"sync"
 
 	aio "github.com/lanseg/golang-commons/almostio"
+	col "github.com/lanseg/golang-commons/collections"
 	cm "github.com/lanseg/golang-commons/common"
 	opt "github.com/lanseg/golang-commons/optional"
 
@@ -41,13 +42,42 @@ func (s *localStorage) getOverlay(id string) aio.Overlay {
 	return result.(aio.Overlay)
 }
 
+func (s *localStorage) attachMetadata(rs *rpb.RecordSet) *rpb.RecordSet {
+	fileNames := map[string]*aio.FileMetadata{}
+	for _, r := range rs.GetRecords() {
+		for _, f := range r.GetFiles() {
+			fileNames[f.GetFileUrl()] = nil
+		}
+	}
+	ovl := s.getOverlay(rs.GetId())
+	for _, md := range ovl.GetMetadata(col.Keys(fileNames)) {
+		if md == nil {
+			continue
+		}
+		fileNames[md.Name] = md
+	}
+	for _, r := range rs.GetRecords() {
+		for _, f := range r.GetFiles() {
+			if md := fileNames[f.GetFileUrl()]; md != nil {
+				if f.Metadata == nil {
+					f.Metadata = &rpb.FileMetadata{}
+				}
+				f.Metadata.Checksum = fmt.Sprintf("sha256/%s", md.Sha256)
+				f.Metadata.Mimetype = md.Mime
+			}
+		}
+	}
+	return rs
+}
+
 func (s *localStorage) GetRecordSet(id string) opt.Optional[*rpb.RecordSet] {
-	return opt.MapErr(
-		opt.MapErr(s.GetFile(id, recordsetFileName), func(r io.ReadCloser) ([]byte, error) {
-			defer r.Close()
-			return io.ReadAll(r)
-		}),
-		cm.FromJson[rpb.RecordSet])
+	return opt.Map(
+		opt.MapErr(
+			opt.MapErr(s.GetFile(id, recordsetFileName), func(r io.ReadCloser) ([]byte, error) {
+				defer r.Close()
+				return io.ReadAll(r)
+			}),
+			cm.FromJson[rpb.RecordSet]), s.attachMetadata)
 }
 
 func (s *localStorage) GetFile(id string, filename string) opt.Optional[io.ReadCloser] {
