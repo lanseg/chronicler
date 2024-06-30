@@ -26,17 +26,16 @@ enum WebEngine {
 }
 
 message FileMetadata {
-    string mimetype = 1;
-    uint64 size     = 2;
-    string checksum = 3;
+    string name     = 1;
+    string mimetype = 2;
+    uint64 size     = 3;
+    string checksum = 4;
 }
 
 message File {
   string file_id   = 1;
   string file_url  = 2;
   string local_url = 3;
-
-  FileMetadata metadata = 4;
 }
 
 message Source {
@@ -69,6 +68,7 @@ message RecordSet {
   string id                          = 1;
   repeated Record records            = 3;
   repeated UserMetadata userMetadata = 4;
+  repeated FileMetadata fileMetadata = 5;
 }
 
 message RecordSetPreview {

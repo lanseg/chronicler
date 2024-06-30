@@ -90,15 +90,14 @@ func TestPutFile(t *testing.T) {
 				Id: rsId1,
 				Records: []*rpb.Record{
 					{
-						Files: []*rpb.File{
-							{
-								FileUrl: "filename",
-								Metadata: &rpb.FileMetadata{
-									Mimetype: "text/plain; charset=utf-8",
-									Checksum: "sha256/4e47826698bb4630fb4451010062fadbf85d61427cbdfaed7ad0f23f239bed89",
-								},
-							},
-						},
+						Files: []*rpb.File{{FileUrl: "filename"}},
+					},
+				},
+				FileMetadata: []*rpb.FileMetadata{
+					{
+						Name:     "filename",
+						Mimetype: "text/plain; charset=utf-8",
+						Checksum: "sha256/4e47826698bb4630fb4451010062fadbf85d61427cbdfaed7ad0f23f239bed89",
 					},
 				},
 			},
@@ -110,11 +109,7 @@ func TestPutFile(t *testing.T) {
 				Id: rsId1,
 				Records: []*rpb.Record{
 					{
-						Files: []*rpb.File{
-							{
-								FileUrl: "filename",
-							},
-						},
+						Files: []*rpb.File{{FileUrl: "filename"}},
 					},
 				},
 			}

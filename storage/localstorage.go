@@ -56,16 +56,16 @@ func (s *localStorage) attachMetadata(rs *rpb.RecordSet) *rpb.RecordSet {
 		}
 		fileNames[md.Name] = md
 	}
-	for _, r := range rs.GetRecords() {
-		for _, f := range r.GetFiles() {
-			if md := fileNames[f.GetFileUrl()]; md != nil {
-				if f.Metadata == nil {
-					f.Metadata = &rpb.FileMetadata{}
-				}
-				f.Metadata.Checksum = fmt.Sprintf("sha256/%s", md.Sha256)
-				f.Metadata.Mimetype = md.Mime
-			}
+	rs.FileMetadata = []*rpb.FileMetadata{}
+	for name, meta := range fileNames {
+		if meta == nil {
+			continue
 		}
+		rs.FileMetadata = append(rs.FileMetadata, &rpb.FileMetadata{
+			Name:     name,
+			Mimetype: meta.Mime,
+			Checksum: fmt.Sprintf("sha256/%s", meta.Sha256),
+		})
 	}
 	return rs
 }
