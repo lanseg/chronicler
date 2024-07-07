@@ -174,7 +174,7 @@ export function createRecordSet(rs, metadata) {
         </div>
         <span class="datetime">${formatDateTime(rs.rootRecord.time)}</span>
         <a href="?record_id=${rs.id}">${rs.recordCount}</a>
-        <a href="/chronicler/records/${rs.id}?file=record.json">json<a>
+        <a href="/chronicler/records/${rs.id}">json<a>
       </div>
       <div class="content">${text}</div>
     </div>

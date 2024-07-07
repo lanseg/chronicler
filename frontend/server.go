@@ -132,11 +132,17 @@ func (ws *WebServer) handleDeleteRecord(p PathParams, w http.ResponseWriter, r *
 func (ws *WebServer) handleRecord(p PathParams, w http.ResponseWriter, r *http.Request) {
 	ws.logger.Infof("Request [api]: %s", p)
 	queryParams := r.URL.Query()
-	filename := "record.json"
 	if queryParams["file"] != nil {
-		filename = queryParams.Get("file")
+		ws.responseFile(w, p["recordId"], queryParams.Get("file"))
+		return
 	}
-	ws.responseFile(w, p["recordId"], filename)
+	ws.data.GetRecordSet(p["recordId"]).
+		IfPresent(func(rs *rpb.RecordSet) {
+			ws.writeJson(w, rs)
+		}).
+		IfNothing(func() {
+			ws.Error(w, fmt.Sprintf("No record with id %q", p["recordId"]), 500)
+		})
 }
 
 func (ws *WebServer) handleStatus(p PathParams, w http.ResponseWriter, r *http.Request) {
