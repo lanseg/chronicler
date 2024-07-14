@@ -11,8 +11,8 @@ go_library(
     importpath = "chronicler/chronicler",
     deps = [
         "//adapter",
-        "//resolver",
         "//records:records_go_proto",
+        "//resolver",
         "//status",
         "//storage",
         "//storage/endpoint",

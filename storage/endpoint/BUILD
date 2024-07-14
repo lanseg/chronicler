@@ -50,10 +50,10 @@ go_library(
         "@golang-commons//common",
         "@golang-commons//optional",
         "@org_golang_google_grpc//:grpc",
-        "@org_golang_google_grpc//health",
-        "@org_golang_google_grpc//health/grpc_health_v1",
         "@org_golang_google_grpc//credentials/insecure",
         "@org_golang_google_grpc//encoding/gzip",
+        "@org_golang_google_grpc//health",
+        "@org_golang_google_grpc//health/grpc_health_v1",
     ],
 )
 

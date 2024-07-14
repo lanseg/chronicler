@@ -5,8 +5,8 @@ load("@rules_go//go:def.bzl", "go_library", "go_test")
 go_library(
     name = "pikabu",
     srcs = [
-        "pikabu.go",
         "parser.go",
+        "pikabu.go",
         "sourceprovider.go",
     ],
     importpath = "chronicler/adapter/pikabu",
@@ -15,10 +15,10 @@ go_library(
         "//records",
         "//records:records_go_proto",
         "//webdriver",
-        "@org_golang_x_text//encoding/charmap",
         "@golang-commons//almosthtml",
         "@golang-commons//collections",
         "@golang-commons//common",
+        "@org_golang_x_text//encoding/charmap",
     ],
 )
 

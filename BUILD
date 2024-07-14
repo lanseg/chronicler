@@ -14,8 +14,8 @@ go_binary(
         "//adapter/twitter",
         "//adapter/web",
         "//chronicler",
-        "//resolver",
         "//records:records_go_proto",
+        "//resolver",
         "//status",
         "//status:status_go_proto",
         "//storage",
@@ -35,7 +35,7 @@ genrule(
     name = "package",
     srcs = [
         ":main",
-        "//scenarios:scenarios",
+        "//scenarios",
         "//frontend:frontendserver",
         "//frontend:static_files",
         "//storage/endpoint:storageserver",

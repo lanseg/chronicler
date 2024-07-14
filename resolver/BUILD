@@ -3,14 +3,14 @@ load("@rules_go//go:def.bzl", "go_library", "go_test")
 go_library(
     name = "resolver",
     srcs = [
-        "resolver.go",
         "downloader.go",
         "httpdownloader.go",
+        "resolver.go",
     ],
     importpath = "chronicler/resolver",
     visibility = ["//visibility:public"],
     deps = [
-        "//records:records_go_proto",        
+        "//records:records_go_proto",
         "//status",
         "//status:status_go_proto",
         "//storage",
@@ -21,6 +21,7 @@ go_library(
         "@golang-commons//optional",
     ],
 )
+
 go_test(
     name = "resolver_test",
     size = "small",

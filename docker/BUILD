@@ -1,14 +1,13 @@
 package(default_visibility = ["//visibility:public"])
 
 filegroup(
-    name="docker_files",
+    name = "docker_files",
     srcs = [
         "Dockerfile",
         "entrypoint.sh",
-        "telegram"
+        "telegram",
     ],
 )
-
 
 genrule(
     name = "docker",

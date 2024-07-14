@@ -26,7 +26,7 @@ go_library(
 )
 
 filegroup(
-    name="static_files",
+    name = "static_files",
     srcs = glob([
         "static/*",
         "static/modules/*",
@@ -40,8 +40,8 @@ go_binary(
     deps = [
         ":server",
         "//records:records_go_proto",
-        "//storage/endpoint",
         "//status",
+        "//storage/endpoint",
         "//util",
         "@golang-commons//common",
     ],
