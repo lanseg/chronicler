@@ -37,6 +37,7 @@ type Config struct {
 	ScenarioLibrary    *string `json:"scenarioLibrary"`
 	StatusServer       *string `json:"statusServer"`
 	StorageServer      *string `json:"storageServer"`
+	WebdriverServer    *string `json:"webdriverServer"`
 }
 
 func initHttpClient() *http.Client {
@@ -63,7 +64,7 @@ func main() {
 	stats := cm.OrExit(status.NewStatusClient(*cfg.StatusServer))
 	stats.Start()
 
-	webDriver := webdriver.NewBrowser(*cfg.ScenarioLibrary)
+	webDriver := webdriver.NewBrowser(*cfg.WebdriverServer, *cfg.ScenarioLibrary)
 	resolver := resolver.NewResolver(webDriver, storage, stats)
 
 	ch := chronicler.NewLocalChronicler(resolver, storage, stats)

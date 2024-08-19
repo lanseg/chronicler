@@ -193,12 +193,12 @@ func (m *Marionette) Close() {
 	m.logger.Infof("Disconnected")
 }
 
-func connectMarionette(host string, port int) optional.Optional[WebDriver] {
+func connectMarionette(server string) optional.Optional[WebDriver] {
 	return optional.Map(
-		optional.OfError[net.Conn](net.Dial("tcp", fmt.Sprintf("%s:%d", host, port))),
+		optional.OfError[net.Conn](net.Dial("tcp", server)),
 		func(c net.Conn) WebDriver {
 			logger := cm.NewLogger("Marionette")
-			logger.Infof("Connected to Marionette at %s:%s", host, port)
+			logger.Infof("Connected to Marionette at %s", server)
 			marionette := &Marionette{
 				messageCounter:  1,
 				logger:          logger,

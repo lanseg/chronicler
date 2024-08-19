@@ -10,8 +10,6 @@ import (
 
 const (
 	browserProfileFolder = "/tmp/tmp.QTFqrzeJX4/"
-	webdriverPort        = 2828
-	webdriverAddress     = "127.0.0.1"
 )
 
 type Browser interface {
@@ -32,6 +30,8 @@ func (fwd *fakeBrowser) RunSession(do func(driver WebDriver)) error {
 type browserImpl struct {
 	Browser
 
+	server string
+
 	logger    *cm.Logger
 	scenarios ScenarioLibrary
 	driver    WebDriver
@@ -42,17 +42,14 @@ func (wd *browserImpl) initIfNeeded() error {
 	if wd.driver != nil {
 		return nil
 	}
-
-	driver, err := connectMarionette(webdriverAddress, webdriverPort).Get()
+	driver, err := connectMarionette(wd.server).Get()
 	if err == nil {
 		driver.NewSession()
 		wd.driver = NewScenarioWebdriver(driver, wd.scenarios)
 		return nil
 	}
-
-	startFirefox(webdriverPort, browserProfileFolder)
 	driver, err = concurrent.WaitForSomething(func() optional.Optional[WebDriver] {
-		return connectMarionette(webdriverAddress, webdriverPort)
+		return connectMarionette(wd.server)
 	}).Get()
 	if err != nil {
 		return err
@@ -82,7 +79,7 @@ func NewFakeBrowser(driver WebDriver) Browser {
 	}
 }
 
-func NewBrowser(scenarios string) Browser {
+func NewBrowser(webdriverServer string, scenarios string) Browser {
 	logger := cm.NewLogger("Browser")
 	sc, err := LoadScenarios(scenarios)
 	if err != nil {
@@ -90,6 +87,7 @@ func NewBrowser(scenarios string) Browser {
 	}
 
 	return &browserImpl{
+		server:    webdriverServer,
 		scenarios: sc,
 		logger:    cm.NewLogger("Browser"),
 	}
