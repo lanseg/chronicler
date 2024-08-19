@@ -22,7 +22,7 @@ func main() {
 		os.Exit(-1)
 	}
 	logger.Infof("Config.StatusServerPort: %d", *cfg.StatusServerPort)
-	srv := status.NewStatusServer(fmt.Sprintf("localhost:%d", *cfg.StatusServerPort))
+	srv := status.NewStatusServer(fmt.Sprintf("0.0.0.0:%d", *cfg.StatusServerPort))
 	srv.Start()
 	wg := sync.WaitGroup{}
 	wg.Add(1)

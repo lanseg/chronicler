@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
@@ -36,8 +35,8 @@ type Config struct {
 	TelegramFilePrefix *string `json:"telegramFilePrefix"`
 	StorageRoot        *string `json:"storageRoot"`
 	ScenarioLibrary    *string `json:"scenarioLibrary"`
-	StatusServerPort   *int    `json:"statusServerPort"`
-	StorageServerPort  *int    `json:"storageServerPort"`
+	StatusServer       *string `json:"statusServer"`
+	StorageServer      *string `json:"storageServer"`
 }
 
 func initHttpClient() *http.Client {
@@ -51,17 +50,17 @@ func main() {
 	cfg := cm.OrExit(cm.GetConfig[Config](os.Args[1:], "config"))
 
 	logger.Infof("Config.ScenarioLibrary: %s", *cfg.ScenarioLibrary)
-	logger.Infof("Config.StatusServerPort: %d", *cfg.StatusServerPort)
+	logger.Infof("Config.StatusServer: %s", *cfg.StatusServer)
 	logger.Infof("Config.StorageRoot: %s", *cfg.StorageRoot)
-	logger.Infof("Config.StorageServerPort: %d", *cfg.StorageServerPort)
+	logger.Infof("Config.StorageServer: %s", *cfg.StorageServer)
 	logger.Infof("Config.TwitterApiKey: %d", len(*cfg.TwitterApiKey))
 	logger.Infof("Config.TelegramApiUrl: %s", *cfg.TelegramApiUrl)
 	logger.Infof("Config.TelegramBotKey: %d", len(*cfg.TelegramBotKey))
 	logger.Infof("Config.TelegramFilePrefix: %s", *cfg.TelegramFilePrefix)
 
 	bot := cm.OrExit(tgbot.NewCustomBot(*cfg.TelegramApiUrl, *cfg.TelegramBotKey))
-	storage := cm.OrExit(ep.NewRemoteStorage(fmt.Sprintf("localhost:%d", *cfg.StorageServerPort)))
-	stats := cm.OrExit(status.NewStatusClient(fmt.Sprintf("localhost:%d", *cfg.StatusServerPort)))
+	storage := cm.OrExit(ep.NewRemoteStorage(*cfg.StorageServer))
+	stats := cm.OrExit(status.NewStatusClient(*cfg.StatusServer))
 	stats.Start()
 
 	webDriver := webdriver.NewBrowser(*cfg.ScenarioLibrary)

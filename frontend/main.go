@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 
 	cm "github.com/lanseg/golang-commons/common"
@@ -12,10 +11,10 @@ import (
 )
 
 type FrontendConfig struct {
-	StaticRoot        *string `json:"staticRoot"`
-	FrontendPort      *int    `json:"frontendPort"`
-	StatusServerPort  *int    `json:"statusServerPort"`
-	StorageServerPort *int    `json:"storageServerPort"`
+	StaticRoot    *string `json:"staticRoot"`
+	FrontendPort  *int    `json:"frontendPort"`
+	StatusServer  *string `json:"statusServer"`
+	StorageServer *string `json:"storageServer"`
 }
 
 func main() {
@@ -28,12 +27,12 @@ func main() {
 
 	logger.Infof("StaticRoot: %s", *cfg.StaticRoot)
 	logger.Infof("FrontendPort: %d", *cfg.FrontendPort)
-	logger.Infof("Config.StatusServerPort: %d", *cfg.StatusServerPort)
-	logger.Infof("StorageServerPort: %d", *cfg.StorageServerPort)
+	logger.Infof("Config.StatusServer: %s", *cfg.StatusServer)
+	logger.Infof("StorageServer: %d", *cfg.StorageServer)
 
-	stats := cm.OrExit(status.NewStatusClient(fmt.Sprintf("localhost:%d", *cfg.StatusServerPort)))
+	stats := cm.OrExit(status.NewStatusClient(*cfg.StatusServer))
 	stats.Start()
-	storage, err := sep.NewRemoteStorage(fmt.Sprintf("localhost:%d", *cfg.StorageServerPort))
+	storage, err := sep.NewRemoteStorage(*cfg.StorageServer)
 
 	if err != nil {
 		logger.Errorf("Could not connect to the storage: %v", err)
