@@ -40,11 +40,9 @@ genrule(
         "//frontend:static_files",
         "//storage/endpoint:storageserver",
         "//status:statusserver",
-        "//third_party/telegram:telegram-bot-api",
     ],
     outs = ["chronicler.tar.gz"],
     cmd = """
-        cp $(locations //third_party/telegram:telegram-bot-api) ./
         tar -chzvf $@ \
           --transform 's/bazel-out.*_\\///g' \
           $(location :main) \
@@ -53,6 +51,5 @@ genrule(
           $(location //storage/endpoint:storageserver) \
           $(location //status:statusserver) \
           $(locations //frontend:static_files) \
-          ./telegram-bot-api
     """,
 )

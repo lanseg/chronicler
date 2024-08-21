@@ -3,3 +3,4 @@ chronicler_storage
 config.json
 deploy.sh
 out*
+docker/chronicler

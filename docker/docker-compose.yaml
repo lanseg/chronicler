@@ -1,0 +1,68 @@
+volumes:
+  config:
+  storage:
+  logs:
+
+services:
+    # Independent services
+    webdriver:
+        build: webdriver
+        environment:
+            - WEBDRIVER_PORT=${WEBDRIVER_PORT}
+            - ALLOWED_HOSTS=${ALLOWED_HOSTS}
+    telegram:
+        image: lanseg/telegram-bot-api
+        environment:
+            - API_ID=${API_ID}
+            - API_HASH=${API_HASH}
+ 
+    # Chronicler serivces
+    status:
+        build: status
+        environment:
+            - STATUSSERVER_PORT=${STATUSSERVER_PORT}
+    storage:
+        build: storage
+        environment:
+            - STATUSSERVER=${STATUSSERVER_HOST}:${STATUSSERVER_PORT}
+            - STORAGESERVER_PORT=${STORAGESERVER_PORT}
+            - STORAGE_ROOT=${STORAGE_ROOT}
+        volumes:
+            - storage:/chronicler/storage/data/
+        depends_on:
+            status: 
+                condition: service_started
+    resolver:
+        build: resolver
+        environment:
+            - TWITTER_API_KEY=${TWITTER_API_KEY}
+            - TELEGRAM_API_URL=${TELEGRAM_HOST}:${TELEGRAM_PORT}
+            - TELEGRAM_BOT_KEY=${TELEGRAM_BOT_KEY}
+            - TELEGRAM_FILE_PREFIX=${TELEGRAM_FILE_PREFIX}
+            - SCENARIO_LIBRARY=${SCENARIO_LIBRARY}
+            - STATUSSERVER=${STATUSSERVER_HOST}:${STATUSSERVER_PORT}
+            - STORAGESERVER=${STORAGESERVER_HOST}:${STORAGESERVER_PORT}
+            - STORAGE_ROOT=${STORAGE_ROOT}
+            - WEBDRIVER_SERVER=${WEBDRIVER_HOST}:${WEBDRIVER_PORT}
+        depends_on:
+            status:
+                condition: service_started
+            storage:
+                condition: service_started
+            webdriver:
+                condition: service_started
+    frontend:
+        build: frontend
+        environment:
+            - FRONTEND_PORT=${FRONTEND_PORT}
+            - STATUSSERVER=${STATUSSERVER_HOST}:${STATUSSERVER_PORT}
+            - STORAGESERVER=${STORAGESERVER_HOST}:${STORAGESERVER_PORT}
+        depends_on:
+            status:
+                condition: service_started
+            storage:
+                condition: service_started
+        ports:
+            - 8080:8080
+        volumes:
+            - logs:/chronicler/logs

@@ -3,9 +3,13 @@ package(default_visibility = ["//visibility:public"])
 filegroup(
     name = "docker_files",
     srcs = [
-        "Dockerfile",
-        "entrypoint.sh",
-        "telegram",
+        "default.env",
+        "docker-compose.yaml",
+        "frontend",
+        "resolver",
+        "status",
+        "storage",
+        "webdriver",
     ],
 )
 
@@ -17,12 +21,23 @@ genrule(
     ],
     outs = ["chronicler-docker.tar"],
     cmd = """
-        mkdir chronicler
-        tar -xvf $(locations //:package) -C chronicler
-        cp -v $(locations :docker_files) ./
+        set -x
+        mkdir chronicler chronicler-docker
 
-        mkdir  docker-tmp
-        export HOME=`pwd`/docker-tmp
-        docker build --compress -t lanseg/chronicler --no-cache --output type=tar,dest=$(OUTS) .
+        tar -chzvf dockerfiles.tar \
+            --transform 's/bazel-out.*_\\///g' \
+            $(locations :docker_files) \
+
+
+        tar -xvf dockerfiles.tar --strip-components=1 -C ./chronicler-docker/
+        tar -xvf $(locations //:package) -C ./chronicler/
+        cp -v chronicler/main chronicler-docker/resolver/resolver
+        cp -rv chronicler/scenarios chronicler-docker/resolver/scenarios   
+        cp -v chronicler/frontendserver chronicler-docker/frontend/server
+        cp -rv chronicler/frontend/static chronicler-docker/frontend/static
+        cp -v chronicler/storageserver chronicler-docker/storage/server
+        cp -v chronicler/statusserver chronicler-docker/status/server
+
+        tar -czvf $(OUTS) chronicler-docker 
     """,
 )
