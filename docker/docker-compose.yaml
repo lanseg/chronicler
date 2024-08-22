@@ -1,7 +1,7 @@
 volumes:
-  config:
+  telegram_files:
   storage:
-  logs:
+  
 
 services:
     # Independent services
@@ -15,7 +15,9 @@ services:
         environment:
             - API_ID=${API_ID}
             - API_HASH=${API_HASH}
- 
+        volumes:
+            - telegram_files:/telegram-bot-api/files
+
     # Chronicler serivces
     status:
         build: status
@@ -44,6 +46,8 @@ services:
             - STORAGESERVER=${STORAGESERVER_HOST}:${STORAGESERVER_PORT}
             - STORAGE_ROOT=${STORAGE_ROOT}
             - WEBDRIVER_SERVER=${WEBDRIVER_HOST}:${WEBDRIVER_PORT}
+        volumes:
+            - telegram_files:/telegram-bot-api/files
         depends_on:
             status:
                 condition: service_started
@@ -64,5 +68,3 @@ services:
                 condition: service_started
         ports:
             - 8080:8080
-        volumes:
-            - logs:/chronicler/logs

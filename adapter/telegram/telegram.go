@@ -10,7 +10,6 @@ import (
 
 	col "github.com/lanseg/golang-commons/collections"
 	cm "github.com/lanseg/golang-commons/common"
-	"github.com/lanseg/golang-commons/optional"
 	"github.com/lanseg/tgbot"
 
 	"chronicler/adapter"
@@ -59,16 +58,18 @@ func (ts *telegramAdapter) resolveFileUrls(rs *rpb.RecordSet) {
 }
 
 func (ts *telegramAdapter) getUpdates() []*tgbot.Update {
-	return optional.OfError(
-		ts.api.GetUpdates(
+	result, err := ts.api.GetUpdates(
 			&tgbot.GetUpdatesRequest{
 				Limit:          100,
 				Offset:         ts.cursor,
 				Timeout:        100,
 				AllowedUpdates: []string{},
-			})).
-		OrElse(&tgbot.GetUpdatesResponse{Result: []*tgbot.Update{}}).
-		Result
+			})
+    if err != nil {
+        ts.logger.Errorf("Error: %s", err)
+        return []*tgbot.Update{}
+    }
+    return result.Result
 }
 
 func (ts *telegramAdapter) waitForUpdate() []*tgbot.Update {

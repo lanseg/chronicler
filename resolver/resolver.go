@@ -66,6 +66,12 @@ func (r *resolverImpl) Resolve(id string) error {
 		for _, file := range rec.GetFiles() {
 			r.pool.Execute(func() {
 				r.addWorkerCount(uint32(1))
+                if file.FileUrl == "" {
+                    r.logger.Warningf("No URL for file %s", file)
+                    r.addWorkerCount(^uint32(0))
+                    return
+                }
+
 				downloader := NewHttpDownloader(&http.Client{}, r.storage, r.stats)
 				r.logger.Debugf("Started downloading %s", file)
 				if err := downloader.Download(rs.Id, file.FileUrl); err != nil {
