@@ -40,7 +40,8 @@ func (wd *scenarioWebdriver) runScenario(script string) {
 	}, 120)
 }
 
-func (wd *scenarioWebdriver) NewSession() {
+func (wd *scenarioWebdriver) NewSession() optional.Optional[string] {
+	return optional.Nothing[string]{}
 }
 
 func (wd *scenarioWebdriver) Navigate(url string) {

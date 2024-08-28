@@ -59,17 +59,17 @@ func (ts *telegramAdapter) resolveFileUrls(rs *rpb.RecordSet) {
 
 func (ts *telegramAdapter) getUpdates() []*tgbot.Update {
 	result, err := ts.api.GetUpdates(
-			&tgbot.GetUpdatesRequest{
-				Limit:          100,
-				Offset:         ts.cursor,
-				Timeout:        100,
-				AllowedUpdates: []string{},
-			})
-    if err != nil {
-        ts.logger.Errorf("Error: %s", err)
-        return []*tgbot.Update{}
-    }
-    return result.Result
+		&tgbot.GetUpdatesRequest{
+			Limit:          100,
+			Offset:         ts.cursor,
+			Timeout:        100,
+			AllowedUpdates: []string{},
+		})
+	if err != nil {
+		ts.logger.Errorf("Error: %s", err)
+		return []*tgbot.Update{}
+	}
+	return result.Result
 }
 
 func (ts *telegramAdapter) waitForUpdate() []*tgbot.Update {

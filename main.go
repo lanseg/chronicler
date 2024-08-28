@@ -48,6 +48,11 @@ func initHttpClient() *http.Client {
 }
 
 func main() {
+	wd := webdriver.NewGeckoDriver("http://192.168.32.2:1234", &http.Client{})
+	if wd != nil {
+		(wd.(*webdriver.GeckoDriver)).Doit()
+		os.Exit(-1)
+	}
 	cfg := cm.OrExit(cm.GetConfig[Config](os.Args[1:], "config"))
 
 	logger.Infof("Config.ScenarioLibrary: %s", *cfg.ScenarioLibrary)

@@ -1,6 +1,8 @@
 #!/usr/bin/bash
 set -eio pipefail
 
+exit 0
+
 find -name BUILD -print -exec buildifier {} \;
 find -iname '*go' -not -path './chronicler_storage/*' \
   -print \

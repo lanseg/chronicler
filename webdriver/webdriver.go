@@ -12,7 +12,7 @@ const (
 )
 
 type WebDriver interface {
-	NewSession()
+	NewSession() optional.Optional[string]
 
 	Navigate(string)
 	GetPageSource() optional.Optional[string]

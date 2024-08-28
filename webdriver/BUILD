@@ -1,13 +1,18 @@
 package(default_visibility = ["//visibility:public"])
 
-load("@rules_go//go:def.bzl", "go_library", "go_test")
+load("@rules_go//go:def.bzl", "go_binary", "go_library", "go_test")
+
+go_binary(
+    name = "main",
+    srcs = ["main.go"],
+    deps = [":webdriver"],
+)
 
 go_library(
     name = "webdriver",
     srcs = [
-        "browser.go",
-        "firefox.go",
-        "marionette.go",
+        "geckodriver.go",
+        "requestbuilder.go",
         "scenario_webdriver.go",
         "scenarios.go",
         "webdriver.go",
