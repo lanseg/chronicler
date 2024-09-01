@@ -10,6 +10,7 @@ services:
         environment:
             - WEBDRIVER_PORT=${WEBDRIVER_PORT}
             - ALLOWED_HOSTS=${ALLOWED_HOSTS}
+            - MOZ_HEADLESS="1"
     telegram:
         image: lanseg/telegram-bot-api
         environment:
@@ -38,14 +39,14 @@ services:
         build: resolver
         environment:
             - TWITTER_API_KEY=${TWITTER_API_KEY}
-            - TELEGRAM_API_URL=${TELEGRAM_HOST}:${TELEGRAM_PORT}
+            - TELEGRAM_API_URL=http://${TELEGRAM_HOST}:${TELEGRAM_PORT}
             - TELEGRAM_BOT_KEY=${TELEGRAM_BOT_KEY}
             - TELEGRAM_FILE_PREFIX=${TELEGRAM_FILE_PREFIX}
             - SCENARIO_LIBRARY=${SCENARIO_LIBRARY}
             - STATUSSERVER=${STATUSSERVER_HOST}:${STATUSSERVER_PORT}
             - STORAGESERVER=${STORAGESERVER_HOST}:${STORAGESERVER_PORT}
             - STORAGE_ROOT=${STORAGE_ROOT}
-            - WEBDRIVER_SERVER=${WEBDRIVER_HOST}:${WEBDRIVER_PORT}
+            - WEBDRIVER_SERVER=http://${WEBDRIVER_HOST}:${WEBDRIVER_PORT}
         volumes:
             - telegram_files:/telegram-bot-api/files
         depends_on:

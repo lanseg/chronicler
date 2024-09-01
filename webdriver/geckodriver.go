@@ -48,7 +48,7 @@ func (gd *GeckoDriver) command(command string) string {
 }
 
 func (gd *GeckoDriver) NewSession() opt.Optional[string] {
-	return opt.MapErr(
+	result := opt.MapErr(
 		opt.OfError(NewTypedRequestBuilder[Response[*Session]](gd.url+"/session").
 			WithMethod("POST").
 			WithJsonBody(&CreateSession{}).
@@ -60,6 +60,10 @@ func (gd *GeckoDriver) NewSession() opt.Optional[string] {
 			gd.session = r.Value
 			return r.Value.SessionId, nil
 		})
+	result.IfError(func(err error) {
+		gd.logger.Errorf("Got an error, oops: %s", err)
+	})
+	return result
 }
 
 func (gd *GeckoDriver) Navigate(url string) {
@@ -118,30 +122,28 @@ func (gd *GeckoDriver) ExecuteScript(script string) opt.Optional[string] {
 	), getValue)
 }
 
+func ddump(prefix string) func(string) {
+	return func(s string) {
+		if len(s) > 20 {
+			fmt.Printf("%s: %s...\n", prefix, s[:20])
+		} else {
+			fmt.Printf("%s: %s\n", prefix, s)
+		}
+	}
+}
+
 func (gd *GeckoDriver) Doit() {
-	gd.NewSession().If(func(s string) {
-		fmt.Printf("SESSION: %s\n", s)
-	}, func(e error) {
+	gd.NewSession().If(ddump("NEWSESSION"), func(e error) {
 		fmt.Printf("ERR: %s\n", e)
 		os.Exit(-1)
 	}, nil)
 	gd.Navigate("https://google.com")
-	gd.GetCurrentURL().IfPresent(func(s string) {
-		fmt.Printf("CURRENT URL: %s\n", s)
-	})
-	gd.GetPageSource().IfPresent(func(s string) {
-		fmt.Printf("PAGE CONTENTS: %s...\n", s[:100])
-	})
-	gd.Print().IfPresent(func(s string) {
-		fmt.Printf("PRINT %s...\n", s[:100])
-	})
-	gd.TakeScreenshot().IfPresent(func(s string) {
-		fmt.Printf("SCREENSHOT %s...\n", s[:100])
-	})
+	gd.GetCurrentURL().IfPresent(ddump("URL"))
+	gd.GetPageSource().IfPresent(ddump("PAGE"))
+	gd.Print().IfPresent(ddump("PRINT"))
+	gd.TakeScreenshot().IfPresent(ddump("SCREEN"))
 	gd.ExecuteScript("return 'hello world';").If(
-		func(s string) {
-			fmt.Printf("SCRIPT: %s\n", s)
-		}, func(e error) {
+		ddump("SCRIPT"), func(e error) {
 			fmt.Printf("ERROR: %s\n", e)
 		}, nil)
 }

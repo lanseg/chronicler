@@ -27,7 +27,10 @@ type NoopWebdriver struct {
 	WebDriver
 }
 
-func (*NoopWebdriver) NewSession()     {}
+func (*NoopWebdriver) NewSession() optional.Optional[string] {
+	return optional.Of("Session id")
+}
+
 func (*NoopWebdriver) Navigate(string) {}
 func (*NoopWebdriver) GetPageSource() optional.Optional[string] {
 	return optional.Of("")
