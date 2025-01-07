@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+option go_package = "chronicler/proto";
+
+package chronicler;
+
+// Common types
+message Timestamp {
+  int64 seconds = 1;
+  int32 nanos = 2;
+}
+
+// Blob with type information. Contains a text representation if possible.
+message Content {
+    bytes raw = 1;
+    string text = 2;
+    string mime = 3;
+}
+
+// Creator of an entity: User, Tool, Service, etc.
+message Generator {
+    string id = 1;   
+    string name = 2;
+}
+
+// Some data with relation and authoring
+message Object {
+   string id = 1;
+   string parent = 2;
+   string createdAt = 3;
+
+   repeated Generator generator = 4;
+   repeated Content content = 5;
+}
