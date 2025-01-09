@@ -10,9 +10,15 @@ message Timestamp {
   int32 nanos = 2;
 }
 
-// Blob with type information. Contains a text representation if possible.
+message Attachment {
+   repeated string link = 1;
+   uint32 size = 2;
+   repeated string checksum = 3;
+   string mime = 4;
+}
+
+// Text content with information, contains type information if possible
 message Content {
-    bytes raw = 1;
     string text = 2;
     string mime = 3;
 }
@@ -31,4 +37,5 @@ message Object {
 
    repeated Generator generator = 4;
    repeated Content content = 5;
+   repeated Attachment attachment = 6;
 }

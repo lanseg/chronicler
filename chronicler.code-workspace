@@ -1,0 +1,20 @@
+{
+    "folders": [
+        {
+            "path": "."
+        }
+    ],
+    "settings": {
+        "search.exclude": {
+            "old": true
+        },
+        "files.exclude": {
+            "old": true
+        },
+        "editor.formatOnSave": true,
+        "makefile.configureOnOpen": false,
+        "cSpell.words": [
+            "protoc"
+        ]
+    }
+}

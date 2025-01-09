@@ -1,15 +1,10 @@
 SHELL = /bin/sh
-GO_OUT = "out/go"
+GO_OUT = "./"
 
 protoc-go: objects.proto
-	mkdir -p $(GO_OUT)
-	protoc -I=. --go_out=$(GO_OUT) objects.proto	    
+	protoc -I=. --go_out=$(GO_OUT) --go_opt=paths=source_relative objects.proto
 
-protoc: protoc-go
-
-install: protoc
-	mkdir -p $(DESTDIR)/
-	cp -rfv $(GO_OUT)/* $(DESTDIR)/
+all: protoc-go
 
 clean:
-	rm -rfv $(GO_OUT)
+	rm -rfv objects.pb.go
