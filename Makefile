@@ -11,6 +11,10 @@ build: deps go.mod
 	go mod tidy
 	go build -o main main.go
 
+test: build
+	go vet
+	go test ./...
+
 run: build
 	./main
 

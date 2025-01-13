@@ -4,3 +4,8 @@ config.json
 deploy.sh
 out*
 docker/chronicler
+go.mod
+go.sum
+main
+proto/objects.pb.go
+demo

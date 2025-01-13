@@ -10,8 +10,14 @@ message Timestamp {
   int32 nanos = 2;
 }
 
+message Tag {
+  string name = 1;
+  string url = 2;
+}
+
+// Object types
 message Attachment {
-  repeated string link = 1;
+  repeated string url = 1;
   uint32 size = 2;
   repeated string checksum = 3;
   string mime = 4;
@@ -35,7 +41,8 @@ message Object {
   string parent = 2;
   Timestamp createdAt = 3;
 
-  repeated Generator generator = 4;
-  repeated Content content = 5;
-  repeated Attachment attachment = 6;
+  repeated Tag tag = 4;
+  repeated Generator generator = 5;
+  repeated Content content = 6;
+  repeated Attachment attachment = 7;
 }

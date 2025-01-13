@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -12,15 +11,19 @@ import (
 	"golang.org/x/net/html"
 	"golang.org/x/text/encoding/charmap"
 
+	"chronicler/parser"
 	opb "chronicler/proto"
 )
 
 const (
+	InError          = -1
 	InDocument       = 0
 	InArticle        = 1
 	InArticleTitle   = 2
-	InComment        = 3
-	InCommentContent = 4
+	InArticleContent = 3
+	InArticleTags    = 4
+	InComment        = 5
+	InCommentContent = 6
 )
 
 func toTimestamp(s string) (*opb.Timestamp, error) {
@@ -43,72 +46,36 @@ func attrMap(token *html.Token) map[string]string {
 	return result
 }
 
-func hasClass(token *html.Token, class string) bool {
-	for _, attr := range token.Attr {
-		if attr.Key == "class" && slices.Contains(strings.Split(attr.Val, " "), class) {
-			return true
-		}
-	}
-	return false
-}
-
 func getAttachment(token *html.Token) *opb.Attachment {
 	if token.Type != html.StartTagToken && token.Type != html.SelfClosingTagToken {
 		return nil
 	}
 	attrs := attrMap(token)
-	links := []string{}
-	if attrs["href"] != "" {
-		links = append(links, attrs["href"])
+	urls := []string{}
+	for _, attr := range []string{"href", "src", "data-src"} {
+		if attrs[attr] != "" {
+			urls = append(urls, attrs[attr])
+		}
 	}
-	if attrs["src"] != "" {
-		links = append(links, attrs["src"])
-	}
-	if attrs["data-src"] != "" {
-		links = append(links, attrs["data-src"])
-	}
-	if len(links) == 0 {
+	if len(urls) == 0 {
 		return nil
 	}
-	return &opb.Attachment{
-		Link: links,
-	}
+	return &opb.Attachment{Url: urls}
 }
 
 type PikabuParserSM struct {
-	tokenizer *html.Tokenizer
-	token     *html.Token
-	attrs     map[string]string
-	state     int
+	parser.HtmlParser
+
+	count  int
+	state  int
+	states map[int]func()
 
 	article *opb.Object
 	comment []*opb.Object
 }
 
-func (psm *PikabuParserSM) nextToken() bool {
-	if tokenType := psm.tokenizer.Next(); tokenType == html.ErrorToken {
-		return true
-	}
-	token := psm.tokenizer.Token()
-	psm.token = &token
-	if psm.attrs == nil || len(psm.attrs) != 0 {
-		psm.attrs = map[string]string{}
-	}
-	return false
-}
-
-func (psm *PikabuParserSM) attr(key string) string {
-	if len(psm.token.Attr) != 0 && len(psm.attrs) == 0 {
-		psm.attrs = attrMap(psm.token)
-	}
-	if value, ok := psm.attrs[key]; ok {
-		return value
-	}
-	return ""
-}
-
 func (psm *PikabuParserSM) newArticle() {
-	token := psm.token
+	token := psm.Token()
 	attrs := attrMap(token)
 
 	time, err := toTimestamp(attrs["data-timestamp"])
@@ -116,12 +83,12 @@ func (psm *PikabuParserSM) newArticle() {
 		fmt.Printf("ERROR: %s\n", err)
 	}
 	psm.article = &opb.Object{
-		Id:        psm.attr("data-story-id"),
+		Id:        psm.Attr("data-story-id"),
 		CreatedAt: time,
 		Generator: []*opb.Generator{
 			{
-				Id:   psm.attr("data-author-id"),
-				Name: psm.attr("data-author-name"),
+				Id:   psm.Attr("data-author-id"),
+				Name: psm.Attr("data-author-name"),
 			},
 		},
 	}
@@ -129,7 +96,7 @@ func (psm *PikabuParserSM) newArticle() {
 
 func (psm *PikabuParserSM) newComment() {
 	meta := map[string]string{}
-	for _, metaParam := range strings.Split(psm.attr("data-meta"), ";") {
+	for _, metaParam := range strings.Split(psm.Attr("data-meta"), ";") {
 		kv := strings.Split(metaParam, "=")
 		if len(kv) == 1 {
 			meta[kv[0]] = ""
@@ -145,98 +112,136 @@ func (psm *PikabuParserSM) newComment() {
 		// TODO: log time parse error
 	}
 	psm.comment = append(psm.comment, &opb.Object{
-		Id:        psm.attr("data-id"),
+		Id:        psm.Attr("data-id"),
 		CreatedAt: t,
 		Parent:    meta["pid"],
 		Generator: []*opb.Generator{
 			{
-				Id: psm.attr("data-author-id"),
+				Id: psm.Attr("data-author-id"),
 			},
 		},
 	})
 }
 
 func (psm *PikabuParserSM) InDocument() {
-	if psm.token.Data == "article" {
+	if psm.Matches("article") {
 		psm.newArticle()
-		psm.state = InArticle
-	} else if psm.token.Data == "div" && hasClass(psm.token, "comment") {
+		psm.SetState(InArticle)
+	} else if psm.Matches("div", "comment") {
 		psm.newComment()
-		psm.state = InComment
+		psm.SetState(InComment)
 	}
 }
 
 func (psm *PikabuParserSM) InArticle() {
-	if psm.token.Data == "span" && psm.attr("class") == "story__title-link" {
-		psm.state = InArticleTitle
-	} else if psm.token.Data == "article" {
-		psm.state = InDocument
+	if psm.Matches("span", "story__title-link") {
+		psm.SetState(InArticleTitle)
+	} else if psm.Matches("div", "story__tags") {
+		psm.SetState(InArticleTags)
+	} else if psm.Matches("div", "story__content-inner") {
+		psm.count = 1
+		psm.SetState(InArticleContent)
+	} else if psm.Matches("article") {
+		psm.SetState(InDocument)
 	}
 }
 
 func (psm *PikabuParserSM) InArticleTitle() {
-	if psm.token.Data == "span" {
-		psm.state = InArticle
+	if psm.Matches("span") {
+		psm.SetState(InArticle)
 	} else {
-		if psm.article.Content == nil {
-			psm.article.Content = []*opb.Content{}
+		psm.article.Content = append(psm.article.Content, &opb.Content{Text: psm.Token().Data})
+	}
+}
+
+func (psm *PikabuParserSM) InArticleContent() {
+	if psm.Matches("div") {
+		psm.count++
+	} else if psm.Matches("/div") {
+		psm.count--
+	}
+	if psm.count == 0 {
+		psm.SetState(InArticle)
+		return
+	}
+	if psm.article.Content == nil {
+		psm.article.Content = []*opb.Content{{Mime: "text/html"}}
+	}
+	psm.article.Content[len(psm.article.Content)-1].Text += psm.Raw()
+	if attachment := getAttachment(psm.Token()); attachment != nil {
+		psm.article.Attachment = append(psm.article.Attachment, attachment)
+	}
+}
+
+func (psm *PikabuParserSM) InArticleTags() {
+	if psm.Matches("/div") {
+		psm.SetState(InArticle)
+	} else if psm.Matches("a", "tags__tag") {
+		if psm.article.Tag == nil {
+			psm.article.Tag = []*opb.Tag{}
 		}
-		psm.article.Content = append(psm.article.Content, &opb.Content{
-			Text: psm.token.Data,
+		psm.article.Tag = append(psm.article.Tag, &opb.Tag{
+			Name: psm.Attr("data-tag"),
+			Url:  psm.Attr("href"),
 		})
 	}
 }
 
-func (psm *PikabuParserSM) InComment() {}
+func (psm *PikabuParserSM) InComment() {
+	if psm.Matches("div", "comment__content") {
+		psm.count = 1
+		psm.SetState(InCommentContent)
+	}
+}
 
-func (psm *PikabuParserSM) InCommentContent() {}
+func (psm *PikabuParserSM) InCommentContent() {
+	if psm.Matches("div") {
+		psm.count++
+	} else if psm.Matches("/div") {
+		psm.count--
+	}
+	if psm.count == 0 {
+		psm.SetState(InDocument)
+		return
+	}
+	lastComment := psm.comment[len(psm.comment)-1]
+	if lastComment.Content == nil {
+		lastComment.Content = []*opb.Content{{Mime: "text/html"}}
+	}
+	if attachment := getAttachment(psm.Token()); attachment != nil {
+		lastComment.Attachment = append(lastComment.Attachment, attachment)
+	}
+	lastComment.Content[len(lastComment.Content)-1].Text += string(psm.Raw())
+}
+
+func (psm *PikabuParserSM) SetState(state int) error {
+	psm.state = state
+	return nil
+}
 
 func (psm *PikabuParserSM) Parse() error {
-	counter := 0
-	for !psm.nextToken() {
-		tag := psm.token.Data
-		switch psm.state {
-		case InDocument:
-			psm.InDocument()
-		case InArticle:
-			psm.InArticle()
-		case InArticleTitle:
-			psm.InArticleTitle()
-		case InComment:
-			if tag == "div" && psm.attr("class") == "comment__content" {
-				counter = 1
-				psm.state = InCommentContent
-			}
-		case InCommentContent:
-			lastComment := psm.comment[len(psm.comment)-1]
-			if lastComment.Content == nil {
-				lastComment.Content = []*opb.Content{{Mime: "text/html"}}
-			}
-			if attachment := getAttachment(psm.token); attachment != nil {
-				lastComment.Attachment = append(lastComment.Attachment, attachment)
-			}
-			lastComment.Content[len(lastComment.Content)-1].Text += string(psm.tokenizer.Raw())
-			if tag == "div" {
-				if psm.token.Type == html.EndTagToken {
-					counter--
-				} else {
-					counter++
-				}
-			}
-			if counter == 0 {
-				psm.state = InDocument
-			}
-		}
+	for !psm.NextToken() {
+		psm.states[psm.state]()
 	}
 	return nil
 }
 
 func NewParser(src io.Reader) *PikabuParserSM {
-	return &PikabuParserSM{
-		tokenizer: html.NewTokenizer(charmap.Windows1251.NewDecoder().Reader(src)),
-		state:     InDocument,
-		comment:   []*opb.Object{},
+	psm := &PikabuParserSM{
+		state:   InDocument,
+		comment: []*opb.Object{},
 	}
+	psm.Reader = charmap.Windows1251.NewDecoder().Reader(src)
+	psm.states = map[int]func(){
+		InDocument:       psm.InDocument,
+		InArticle:        psm.InArticle,
+		InArticleTitle:   psm.InArticleTitle,
+		InArticleContent: psm.InArticleContent,
+		InArticleTags:    psm.InArticleTags,
+		InComment:        psm.InComment,
+		InCommentContent: psm.InCommentContent,
+	}
+	return psm
 }
 
 func main() {
@@ -252,7 +257,7 @@ func main() {
 	}
 
 	fmt.Printf("Article: %s\n", parser.article)
-	for _, c := range parser.comment {
-		fmt.Printf("Comment: %s\n", c)
-	}
+	// for _, c := range parser.comment {
+	// 	fmt.Printf("Comment: %s\n", c)
+	// }
 }
