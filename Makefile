@@ -6,9 +6,9 @@ deps:
 
 go.mod:
 	go mod init chronicler
-	go mod tidy
 
 build: deps go.mod
+	go mod tidy
 	go build -o main main.go
 
 run: build

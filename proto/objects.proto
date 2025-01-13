@@ -11,31 +11,31 @@ message Timestamp {
 }
 
 message Attachment {
-   repeated string link = 1;
-   uint32 size = 2;
-   repeated string checksum = 3;
-   string mime = 4;
+  repeated string link = 1;
+  uint32 size = 2;
+  repeated string checksum = 3;
+  string mime = 4;
 }
 
 // Text content with information, contains type information if possible
 message Content {
-    string text = 2;
-    string mime = 3;
+  string text = 2;
+  string mime = 3;
 }
 
 // Creator of an entity: User, Tool, Service, etc.
 message Generator {
-    string id = 1;   
-    string name = 2;
+  string id = 1;
+  string name = 2;
 }
 
 // Some data with relation and authoring
 message Object {
-   string id = 1;
-   string parent = 2;
-   string createdAt = 3;
+  string id = 1;
+  string parent = 2;
+  Timestamp createdAt = 3;
 
-   repeated Generator generator = 4;
-   repeated Content content = 5;
-   repeated Attachment attachment = 6;
+  repeated Generator generator = 4;
+  repeated Content content = 5;
+  repeated Attachment attachment = 6;
 }
