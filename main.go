@@ -14,12 +14,27 @@ import (
 	opb "chronicler/proto"
 )
 
+func sanitizeUrl(remotePath string) string {
+	builder := strings.Builder{}
+	for _, r := range remotePath {
+		if (r >= 'a' && r <= 'z') ||
+			(r >= 'A' && r <= 'Z') ||
+			(r >= '0' && r <= '9') ||
+			r == '-' || r == '_' || r == '.' {
+			builder.WriteRune(r)
+		} else {
+			builder.WriteRune('_')
+		}
+	}
+	return builder.String()
+}
+
 func main() {
 	logger := common.NewLogger("Main")
-	link := &opb.Link{Href: "12267205"}
 	httpClient := &http.Client{}
 	loader := common.NewHttpDownloader(httpClient)
 	ad := pikabu.NewAdapter(httpClient)
+	link := &opb.Link{Href: os.Args[1]}
 
 	id := common.UUID4For(link)
 	if err := os.Mkdir(id, 0777); err != nil {
@@ -66,13 +81,16 @@ func main() {
 
 	logger.Infof("Files to download: %d", len(filesToLoad))
 	for k := range filesToLoad {
-		path := strings.Split(k.Path, "/")
-		targetPath := filepath.Join(id, path[len(path)-1])
+		targetPath := filepath.Join(id, sanitizeUrl(k.Path))
 		size, err := loader.Download(k.String(), targetPath)
 		if err != nil {
 			logger.Warningf("Cannot download %s to %s: %s", k, targetPath, err)
 			continue
 		}
-		logger.Infof("Downloaded %s to %s, sise %d", k, targetPath, size)
+		if size == -1 {
+		} else {
+			logger.Infof("Downloaded %s to %s, sise %d", k, targetPath, size)
+		}
 	}
+	logger.Infof("Saved objects: %d, files: %d", len(objs), len(filesToLoad))
 }
