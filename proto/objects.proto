@@ -16,10 +16,28 @@ message Tag {
 }
 
 // Object types
+message Link {
+  string href = 1;
+  string mediaType = 2;
+}
+
+message Stats {
+
+  enum StatsType {
+    UNKNOWN_REACTION = 0;
+    RATING = 1;
+    UPVOTE = 2;
+    DOWNVOTE = 3;
+  }
+
+  StatsType type = 1;
+  int64 counter = 2;
+}
+
 message Attachment {
-  repeated string url = 1;
+  string url = 1;
   uint32 size = 2;
-  repeated string checksum = 3;
+  string checksum = 3;
   string mime = 4;
 }
 
@@ -45,4 +63,5 @@ message Object {
   repeated Generator generator = 5;
   repeated Content content = 6;
   repeated Attachment attachment = 7;
+  repeated Stats stats = 8;
 }

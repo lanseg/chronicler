@@ -15,6 +15,9 @@
         "makefile.configureOnOpen": false,
         "cSpell.words": [
             "charmap",
+            "Debugf",
+            "Infof",
+            "Warningf",
             "Pikabu",
             "protoc"
         ]
