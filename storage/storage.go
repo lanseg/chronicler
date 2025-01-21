@@ -1,6 +1,8 @@
 package storage
 
-import "io"
+import (
+	"io"
+)
 
 type PutRequest struct {
 	Url string

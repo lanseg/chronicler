@@ -3,7 +3,6 @@ package main
 import (
 	"chronicler/adapter/pikabu"
 	"chronicler/common"
-	"encoding/json"
 	"net/http"
 	"net/url"
 	"os"
@@ -39,10 +38,11 @@ func main() {
 	link := &opb.Link{Href: os.Args[1]}
 
 	id := common.UUID4For(link)
-	s, err := storage.NewLocalStorage(filepath.Join(root, id))
+	baseStorage, err := storage.NewLocalStorage(filepath.Join(root, id))
 	if err != nil {
 		os.Exit(-1)
 	}
+	s := storage.BlockStorage{Storage: baseStorage}
 
 	objs, err := ad.Get(link)
 	if err != nil {
@@ -50,22 +50,11 @@ func main() {
 		os.Exit(-1)
 	}
 
-	str, err := json.Marshal(objs)
+	bytesWritten, err := s.PutJson(&storage.PutRequest{Url: "objects.json"}, objs)
 	if err != nil {
 		logger.Errorf("Cannot convert result to json: %s", err)
 		os.Exit(-1)
 	}
-
-	w, err := s.Put(&storage.PutRequest{Url: "objects.json"})
-	if err != nil {
-		os.Exit(-1)
-	}
-
-	bytesWritten, err := w.Write(str)
-	if err != nil {
-		os.Exit(-1)
-	}
-	w.Close()
 	logger.Infof("Saved objects.json, written bytes: %d", bytesWritten)
 
 	filesToLoad := map[*url.URL]bool{}

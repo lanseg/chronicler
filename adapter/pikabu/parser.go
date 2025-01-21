@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"io"
 	"mime"
+	"net/url"
 	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
 
+	"chronicler/common"
 	"chronicler/parser"
 
 	opb "chronicler/proto"
@@ -42,7 +44,8 @@ func toTimestamp(s string) (*opb.Timestamp, error) {
 }
 
 type PikabuParser struct {
-	doc parser.HtmlReader
+	doc    parser.HtmlReader
+	logger *common.Logger
 
 	count  int
 	state  int
@@ -112,6 +115,19 @@ func (psm *PikabuParser) getAttachments() {
 		"data-large-image", "data-url", "data-thumb",
 	} {
 		if attrValue := psm.doc.Attr(attr); attrValue != "" {
+			maybeUrl, err := url.Parse(attrValue)
+			if err != nil {
+				psm.logger.Warningf("Cannot parse %q as url: %s", attrValue, err)
+				continue
+			}
+			if attr == "href" && maybeUrl.Query().Has("u") {
+				actualUrl := maybeUrl.Query().Get("u")
+				attrValue, err = url.QueryUnescape(actualUrl)
+				if err != nil {
+					psm.logger.Warningf("Cannot decode %q as url: %s", actualUrl, err)
+					continue
+				}
+			}
 			urls[attrValue] = true
 		}
 	}
@@ -291,6 +307,7 @@ func NewPikabuParser(src io.Reader) *PikabuParser {
 		doc:     parser.NewHtmlReader(src),
 		state:   InDocument,
 		comment: []*opb.Object{},
+		logger:  common.NewLogger("PikabuParser"),
 	}
 	psm.states = map[int]func(){
 		InDocument:       psm.InDocument,
