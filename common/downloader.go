@@ -3,11 +3,12 @@ package common
 import (
 	"io"
 	"net/http"
-	"os"
+
+	"chronicler/storage"
 )
 
 type Downloader interface {
-	Download(from string, to string) (int64, error)
+	Download(string, storage.Storage) (int64, error)
 }
 
 type httpDownloader struct {
@@ -23,24 +24,18 @@ func NewHttpDownloader(client *http.Client) Downloader {
 		client: client,
 	}
 }
-func (h *httpDownloader) Download(sourcePath string, targetPath string) (int64, error) {
-	h.logger.Debugf("Downloading %s to %s", sourcePath, targetPath)
-	if _, err := os.Stat(targetPath); err == nil {
-		h.logger.Debugf("File %s already exists as %s", sourcePath, targetPath)
-		return -1, nil
-	}
-
-	targetFile, err := os.Create(targetPath)
-	if err != nil {
-		return -1, err
-	}
-	defer targetFile.Close()
-
-	resp, err := h.client.Get(sourcePath)
+func (h *httpDownloader) Download(source string, target storage.Storage) (int64, error) {
+	resp, err := h.client.Get(source)
 	if err != nil {
 		return -1, err
 	}
 	defer resp.Body.Close()
+
+	targetFile, err := target.Put(&storage.PutRequest{Url: source})
+	if err != nil {
+		return -1, err
+	}
+	defer targetFile.Close()
 
 	size, err := io.Copy(targetFile, resp.Body)
 	if err != nil {

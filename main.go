@@ -4,7 +4,6 @@ import (
 	"chronicler/adapter/pikabu"
 	"chronicler/common"
 	"encoding/json"
-	"errors"
 	"net/http"
 	"net/url"
 	"os"
@@ -12,6 +11,7 @@ import (
 	"strings"
 
 	opb "chronicler/proto"
+	"chronicler/storage"
 )
 
 func sanitizeUrl(remotePath string) string {
@@ -30,6 +30,8 @@ func sanitizeUrl(remotePath string) string {
 }
 
 func main() {
+	root := "data"
+
 	logger := common.NewLogger("Main")
 	httpClient := &http.Client{}
 	loader := common.NewHttpDownloader(httpClient)
@@ -37,13 +39,9 @@ func main() {
 	link := &opb.Link{Href: os.Args[1]}
 
 	id := common.UUID4For(link)
-	if err := os.Mkdir(id, 0777); err != nil {
-		if errors.Is(err, os.ErrExist) {
-			logger.Infof("Folder already exist, updating %s", id)
-		} else {
-			logger.Errorf("Cannot create folder for saving: %s", err)
-			os.Exit(-1)
-		}
+	s, err := storage.NewLocalStorage(filepath.Join(root, id))
+	if err != nil {
+		os.Exit(-1)
 	}
 
 	objs, err := ad.Get(link)
@@ -58,11 +56,17 @@ func main() {
 		os.Exit(-1)
 	}
 
-	resultJsonFile := filepath.Join(id, "objects.json")
-	if err = os.WriteFile(resultJsonFile, str, 0666); err != nil {
-		logger.Errorf("Cannot save result to json file %s: %s", resultJsonFile, err)
+	w, err := s.Put(&storage.PutRequest{Url: "objects.json"})
+	if err != nil {
 		os.Exit(-1)
 	}
+
+	bytesWritten, err := w.Write(str)
+	if err != nil {
+		os.Exit(-1)
+	}
+	w.Close()
+	logger.Infof("Saved objects.json, written bytes: %d", bytesWritten)
 
 	filesToLoad := map[*url.URL]bool{}
 	for _, obj := range objs {
@@ -82,7 +86,7 @@ func main() {
 	logger.Infof("Files to download: %d", len(filesToLoad))
 	for k := range filesToLoad {
 		targetPath := filepath.Join(id, sanitizeUrl(k.Path))
-		size, err := loader.Download(k.String(), targetPath)
+		size, err := loader.Download(k.String(), s)
 		if err != nil {
 			logger.Warningf("Cannot download %s to %s: %s", k, targetPath, err)
 			continue
