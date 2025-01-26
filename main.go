@@ -11,12 +11,31 @@ import (
 
 	opb "chronicler/proto"
 	"chronicler/storage"
+	"chronicler/viewer"
+)
+
+const (
+	root = "data"
 )
 
 func main() {
+	switch os.Args[1] {
+	case "save":
+		save(os.Args[2:])
+	case "view":
+		view(os.Args[2:])
+	}
+}
+
+func view(args []string) {
+	link := &opb.Link{Href: args[0]}
+	v := &viewer.Viewer{Root: root}
+	v.View(common.UUID4For(link))
+}
+
+func save(args []string) {
 	logger := common.NewLogger("Main")
-	root := "data"
-	link := &opb.Link{Href: os.Args[1]}
+	link := &opb.Link{Href: args[0]}
 	id := common.UUID4For(link)
 	s := storage.BlockStorage{Storage: iferr.Exit(storage.NewLocalStorage(filepath.Join(root, id)))}
 
