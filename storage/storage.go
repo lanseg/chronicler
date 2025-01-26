@@ -16,6 +16,7 @@ type ListRequest struct {
 }
 
 type ListResponse struct {
+	Url []string
 }
 
 type Storage interface {

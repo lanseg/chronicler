@@ -1,7 +1,6 @@
 package pikabu
 
 import (
-	"fmt"
 	"io"
 	"mime"
 	"net/url"
@@ -57,13 +56,8 @@ type PikabuParser struct {
 }
 
 func (psm *PikabuParser) newArticle() {
-	time, err := toTimestamp(psm.doc.Attr("data-timestamp"))
-	if err != nil {
-		fmt.Printf("ERROR: %s\n", err)
-	}
 	psm.article = &opb.Object{
-		Id:        psm.doc.Attr("data-story-id"),
-		CreatedAt: time,
+		Id: psm.doc.Attr("data-story-id"),
 		Generator: []*opb.Generator{
 			{
 				Id:   psm.doc.Attr("data-author-id"),
@@ -131,7 +125,7 @@ func (psm *PikabuParser) getAttachments() {
 			urls[attrValue] = true
 		}
 	}
-	for k, _ := range urls {
+	for k := range urls {
 		attachment := &opb.Attachment{Url: k}
 		if ext := filepath.Ext(k); ext != "" {
 			attachment.Mime = mime.TypeByExtension(filepath.Ext(k))
@@ -162,6 +156,10 @@ func (psm *PikabuParser) InArticle() {
 		psm.SetState(InArticleContent)
 	} else if psm.doc.Matches("div", "story__rating-count") {
 		psm.SetState(InArticleRating)
+	} else if psm.doc.Matches("time") {
+		if ts, err := toTimestamp(psm.doc.Attr("datetime")); err == nil {
+			psm.article.CreatedAt = ts
+		}
 	} else if psm.doc.Matches("/article") {
 		psm.SetState(InDocument)
 	}

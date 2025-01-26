@@ -16,10 +16,11 @@
         "cSpell.words": [
             "charmap",
             "Debugf",
+            "iferr",
             "Infof",
-            "Warningf",
             "Pikabu",
-            "protoc"
+            "protoc",
+            "Warningf"
         ]
     }
 }

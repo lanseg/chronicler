@@ -109,5 +109,9 @@ func (ls *localStorage) Get(get *GetRequest) (io.ReadCloser, error) {
 }
 
 func (ls *localStorage) List(list *ListRequest) (*ListResponse, error) {
-	return nil, nil
+	result := &ListResponse{}
+	for k := range ls.localNames {
+		result.Url = append(result.Url, k)
+	}
+	return result, nil
 }

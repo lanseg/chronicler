@@ -58,6 +58,9 @@ func (pa *pikabuAdapter) Get(link *opb.Link) ([]*opb.Object, error) {
 	for _, c := range commText {
 		objs, _ := NewPikabuParser(bytes.NewReader([]byte(c.Html))).Parse()
 		for _, obj := range objs {
+			if obj.Parent == "0" || obj.Parent == "" {
+				obj.Parent = id
+			}
 			objects[obj.Id] = obj
 		}
 	}
