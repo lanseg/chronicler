@@ -33,6 +33,16 @@ func NewAdapter(client *http.Client) adapter.Adapter {
 	}
 }
 
+func (pa *pikabuAdapter) Match(link *opb.Link) bool {
+	// _, err := url.Parse(link.Href)
+	// if err != nil {
+	// 	pa.logger.Warningf("Not matching link %s:%s ", link, err)
+	// 	return false
+	// }
+	// return true
+	return false
+}
+
 func (pa *pikabuAdapter) Get(link *opb.Link) ([]*opb.Object, error) {
 	id := storyId.FindString(link.Href)
 	if id == "" {

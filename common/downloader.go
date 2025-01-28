@@ -24,6 +24,7 @@ func NewHttpDownloader(client *http.Client) Downloader {
 		client: client,
 	}
 }
+
 func (h *httpDownloader) Download(source string, target storage.Storage) (int64, error) {
 	resp, err := h.client.Get(source)
 	if err != nil {

@@ -19,24 +19,20 @@ type Viewer struct {
 func formatObject(obj *opb.Object, prefix int) string {
 	result := strings.Builder{}
 	t := time.Unix(obj.CreatedAt.Seconds, int64(obj.CreatedAt.Nanos))
-	result.WriteString(fmt.Sprintf("[%s] %s: ", t.Format("2006-01-02 15:04"), obj.Generator[0].Name))
+	result.WriteString(fmt.Sprintf("‣ [%s] %s: ", t.Format("2006-01-02 15:04"), obj.Generator[0].Name))
 	for _, c := range obj.Content {
 		txt := regexp.MustCompilePOSIX("[\n\t]*").ReplaceAllString(c.Text, "")
-		txt = regexp.MustCompilePOSIX("(<br>)+").ReplaceAllString(txt, "\n")
+		txt = regexp.MustCompilePOSIX("(<br>|</p>)+").ReplaceAllString(txt, "\n")
 		txt = regexp.MustCompilePOSIX("<[^>]*>").ReplaceAllString(txt, " ")
-		result.WriteString(strings.Trim(txt, " "))
+		result.WriteString(strings.TrimSpace(txt))
 	}
 	prefixStr := ""
 	for range prefix {
-		prefixStr += "\t"
+		prefixStr += "    "
 	}
 	lines := strings.Split(common.WrapText(result.String(), 80), "\n")
 	for i := range lines {
-		if i > 0 {
-			lines[i] = prefixStr + " " + lines[i]
-		} else {
-			lines[i] = prefixStr + lines[i]
-		}
+		lines[i] = prefixStr + "   " + strings.TrimSpace(lines[i])
 	}
 	return strings.Join(lines, "\n")
 }
