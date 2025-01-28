@@ -31,16 +31,17 @@ func NewAdapter(client *http.Client) adapter.Adapter {
 }
 
 func (wa *webAdapter) Match(link *opb.Link) bool {
-	u, err := url.Parse(link.Href)
-	if err != nil {
-		wa.logger.Warningf("Not matching, link %s is not an url:%s ", link, err)
-		return false
-	}
-	matches := u.Scheme == "http" || u.Scheme == "https"
-	if !matches {
-		wa.logger.Warningf("Not a http/https link: Scheme is %q", u.Scheme)
-	}
-	return matches
+	return false
+	// u, err := url.Parse(link.Href)
+	// if err != nil {
+	// 	wa.logger.Warningf("Not matching, link %s is not an url:%s ", link, err)
+	// 	return false
+	// }
+	// matches := u.Scheme == "http" || u.Scheme == "https"
+	// if !matches {
+	// 	wa.logger.Warningf("Not a http/https link: Scheme is %q", u.Scheme)
+	// }
+	//return matches
 }
 
 func (pa *webAdapter) Get(link *opb.Link) ([]*opb.Object, error) {

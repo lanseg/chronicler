@@ -153,6 +153,9 @@ func (psm *PikabuParser) InArticle() {
 		psm.SetState(InArticleTags)
 	} else if psm.doc.Matches("div", "story__content-inner") {
 		psm.count = 1
+		psm.article.Content = append(psm.article.Content, &opb.Content{
+			Mime: "text/html",
+		})
 		psm.SetState(InArticleContent)
 	} else if psm.doc.Matches("div", "story__rating-count") {
 		psm.SetState(InArticleRating)

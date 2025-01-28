@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"net/http"
+	"net/url"
 	"regexp"
 	"sort"
 	"strings"
@@ -16,7 +17,7 @@ import (
 )
 
 var (
-	storyId = regexp.MustCompile("[0-9]+$")
+	storyId = regexp.MustCompile("pikabu.ru/story/[^/?]*_([0-9]+)")
 )
 
 type pikabuAdapter struct {
@@ -33,18 +34,30 @@ func NewAdapter(client *http.Client) adapter.Adapter {
 	}
 }
 
+func (pa *pikabuAdapter) getPostId(link *opb.Link) string {
+	maybeId := storyId.FindAllStringSubmatch(link.Href, 1)
+	if len(maybeId) == 0 {
+		return ""
+	}
+	return maybeId[0][1]
+}
+
 func (pa *pikabuAdapter) Match(link *opb.Link) bool {
-	// _, err := url.Parse(link.Href)
-	// if err != nil {
-	// 	pa.logger.Warningf("Not matching link %s:%s ", link, err)
-	// 	return false
-	// }
-	// return true
-	return false
+	_, err := url.Parse(link.Href)
+	if err != nil {
+		pa.logger.Debugf("Invalid link %s:%s ", link, err)
+		return false
+	}
+	id := pa.getPostId(link)
+	if id == "" {
+		pa.logger.Debugf("Doesn't look like a pikabu post link:%s ", link)
+		return false
+	}
+	return true
 }
 
 func (pa *pikabuAdapter) Get(link *opb.Link) ([]*opb.Object, error) {
-	id := storyId.FindString(link.Href)
+	id := pa.getPostId(link)
 	if id == "" {
 		return nil, fmt.Errorf("no post id in the link: %s", link.Href)
 	}

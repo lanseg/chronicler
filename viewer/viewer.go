@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strings"
 	"time"
 )
@@ -24,7 +25,7 @@ func formatObject(obj *opb.Object, prefix int) string {
 		txt := regexp.MustCompilePOSIX("[\n\t]*").ReplaceAllString(c.Text, "")
 		txt = regexp.MustCompilePOSIX("(<br>|</p>)+").ReplaceAllString(txt, "\n")
 		txt = regexp.MustCompilePOSIX("<[^>]*>").ReplaceAllString(txt, " ")
-		result.WriteString(strings.TrimSpace(txt))
+		result.WriteString(strings.TrimSpace(txt) + "\n")
 	}
 	prefixStr := ""
 	for range prefix {
@@ -34,7 +35,18 @@ func formatObject(obj *opb.Object, prefix int) string {
 	for i := range lines {
 		lines[i] = prefixStr + "   " + strings.TrimSpace(lines[i])
 	}
-	return strings.Join(lines, "\n")
+	from := 0
+	to := 0
+	total := len(lines)
+	for i := 0; i < total/2; i++ {
+		if lines[i] == "" && (i == 0 || i == from+1) {
+			from = i
+		}
+		if lines[total-i-1] == "" && (i == 0 || i == to+1) {
+			to = i
+		}
+	}
+	return strings.Join(lines[from:total-to-1], "\n")
 }
 
 func (v *Viewer) View(id string) error {
@@ -73,6 +85,9 @@ func (v *Viewer) View(id string) error {
 		if len(children) == 0 {
 			continue
 		}
+		sort.Slice(children, func(i, j int) bool {
+			return children[i].CreatedAt.Seconds < children[j].CreatedAt.Seconds
+		})
 		toVisit = append(children, toVisit...)
 	}
 	return nil
