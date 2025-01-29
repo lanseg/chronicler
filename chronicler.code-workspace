@@ -18,6 +18,7 @@
             "Debugf",
             "iferr",
             "Infof",
+            "lipsum",
             "Pikabu",
             "protoc",
             "Warningf"

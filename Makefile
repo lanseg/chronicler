@@ -1,5 +1,6 @@
 SHELL = /bin/sh
 GO_OUT = "."
+COVFILE = "coverage.out"
 
 deps:
 	$(MAKE) -C proto all
@@ -12,12 +13,13 @@ build: deps go.mod
 	go build -o main main.go
 
 test: build
+	@rm -rf $(COVFILE)
 	go vet
-	go test ./...
+	go test -cover -coverprofile=$(COVFILE) ./...
 
 run: build
 	./main
 
 clean:
 	$(MAKE) -C proto clean
-	rm -rfv main chronicler go.mod go.sum
+	rm -rfv main chronicler go.mod go.sum $(COVFILE)
