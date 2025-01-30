@@ -59,8 +59,8 @@ func (pa *webAdapter) Get(link *opb.Link) ([]*opb.Object, error) {
 	re := regexp.MustCompile("(http|ftp|https):\\/\\/([\\w_-]+(?:(?:\\.[\\w_-]+)+))([\\w.,@?^=%&:\\/~+#-]*[\\w@?^=%&\\/~+#-])")
 	urls := map[string]bool{}
 	reader := parser.NewHtmlReader(bytes.NewReader(data))
-	for !reader.NextToken() {
-		if href := reader.Attr("href"); href != "" {
+	for reader.NextToken() {
+		if href, ok := reader.Attr("href"); ok && href != "" {
 			h, err := url.Parse(href)
 			if err == nil {
 				if h.Scheme == "" {

@@ -40,9 +40,6 @@ type localStorage struct {
 }
 
 func NewLocalStorage(root string) (Storage, error) {
-	if err := os.MkdirAll(root, defaultPerms); err != nil {
-		return nil, err
-	}
 	if err := os.MkdirAll(filepath.Join(root, defaultMetadata), defaultPerms); err != nil {
 		return nil, err
 	}

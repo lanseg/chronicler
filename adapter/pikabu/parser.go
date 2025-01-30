@@ -55,13 +55,21 @@ type PikabuParser struct {
 	attachment map[string]*opb.Attachment
 }
 
+func (psm *PikabuParser) attr(key string) string {
+	value, ok := psm.doc.Attr(key)
+	if !ok {
+		return ""
+	}
+	return value
+}
+
 func (psm *PikabuParser) newArticle() {
 	psm.article = &opb.Object{
-		Id: psm.doc.Attr("data-story-id"),
+		Id: psm.attr("data-story-id"),
 		Generator: []*opb.Generator{
 			{
-				Id:   psm.doc.Attr("data-author-id"),
-				Name: psm.doc.Attr("data-author-name"),
+				Id:   psm.attr("data-author-id"),
+				Name: psm.attr("data-author-name"),
 			},
 		},
 	}
@@ -72,7 +80,7 @@ func (psm *PikabuParser) newArticle() {
 
 func (psm *PikabuParser) newComment() {
 	meta := map[string]string{}
-	for _, metaParam := range strings.Split(psm.doc.Attr("data-meta"), ";") {
+	for _, metaParam := range strings.Split(psm.attr("data-meta"), ";") {
 		kv := strings.Split(metaParam, "=")
 		if len(kv) == 1 {
 			meta[kv[0]] = ""
@@ -88,12 +96,12 @@ func (psm *PikabuParser) newComment() {
 		// TODO: log time parse error
 	}
 	psm.comment = append(psm.comment, &opb.Object{
-		Id:        psm.doc.Attr("data-id"),
+		Id:        psm.attr("data-id"),
 		CreatedAt: t,
 		Parent:    meta["pid"],
 		Generator: []*opb.Generator{
 			{
-				Id: psm.doc.Attr("data-author-id"),
+				Id: psm.attr("data-author-id"),
 			},
 		},
 	})
@@ -108,7 +116,7 @@ func (psm *PikabuParser) getAttachments() {
 		"href", "src", "data-src", "data-source", "data-hls", "data-webm", "data-mp4",
 		"data-large-image", "data-url", "data-thumb",
 	} {
-		if attrValue := psm.doc.Attr(attr); attrValue != "" {
+		if attrValue := psm.attr(attr); attrValue != "" {
 			maybeUrl, err := url.Parse(attrValue)
 			if err != nil {
 				psm.logger.Warningf("Cannot parse %q as url: %s", attrValue, err)
@@ -160,7 +168,7 @@ func (psm *PikabuParser) InArticle() {
 	} else if psm.doc.Matches("div", "story__rating-count") {
 		psm.SetState(InArticleRating)
 	} else if psm.doc.Matches("time") {
-		if ts, err := toTimestamp(psm.doc.Attr("datetime")); err == nil {
+		if ts, err := toTimestamp(psm.attr("datetime")); err == nil {
 			psm.article.CreatedAt = ts
 		}
 	} else if psm.doc.Matches("/article") {
@@ -213,8 +221,8 @@ func (psm *PikabuParser) InArticleTags() {
 		psm.SetState(InArticle)
 	} else if psm.doc.Matches("a", "tags__tag") {
 		psm.article.Tag = append(psm.article.Tag, &opb.Tag{
-			Name: psm.doc.Attr("data-tag"),
-			Url:  psm.doc.Attr("href"),
+			Name: psm.attr("data-tag"),
+			Url:  psm.attr("href"),
 		})
 	}
 }
@@ -245,7 +253,7 @@ func (psm *PikabuParser) InCommentHeader() {
 	}
 	lastComment := psm.comment[len(psm.comment)-1]
 	if psm.doc.Matches("div", "comment__user") {
-		lastComment.Generator[0].Name = psm.doc.Attr("data-name")
+		lastComment.Generator[0].Name = psm.attr("data-name")
 	}
 }
 
@@ -292,7 +300,7 @@ func (psm *PikabuParser) SetState(state int) error {
 }
 
 func (psm *PikabuParser) Parse() ([]*opb.Object, error) {
-	for !psm.doc.NextToken() {
+	for psm.doc.NextToken() {
 		psm.states[psm.state]()
 	}
 	result := []*opb.Object{}

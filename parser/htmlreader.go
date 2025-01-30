@@ -19,7 +19,7 @@ func attrMap(token *html.Token) map[string]string {
 type HtmlReader interface {
 	NextToken() bool
 	HasClass(class string) bool
-	Attr(key string) string
+	Attr(key string) (string, bool)
 	Matches(name string, class ...string) bool
 	Raw() string
 }
@@ -39,31 +39,41 @@ func (hr *htmlReader) NextToken() bool {
 		hr.tokenizer = html.NewTokenizer(hr.reader)
 	}
 	if tokenType := hr.tokenizer.Next(); tokenType == html.ErrorToken {
-		return true
+		return false
 	}
 	token := hr.tokenizer.Token()
 	hr.token = &token
 	if hr.attrs == nil || len(hr.attrs) != 0 {
 		hr.attrs = map[string]string{}
 	}
-	return false
+	return true
 }
 
 func (hr *htmlReader) HasClass(class string) bool {
-	return slices.Contains(strings.Split(hr.Attr("class"), " "), class)
+	if hr.tokenizer == nil {
+		return false
+	}
+	param, ok := hr.Attr("class")
+	return ok && slices.Contains(strings.Split(param, " "), class)
 }
 
-func (hr *htmlReader) Attr(key string) string {
+func (hr *htmlReader) Attr(key string) (string, bool) {
+	if hr.tokenizer == nil {
+		return "", false
+	}
 	if len(hr.token.Attr) != 0 && len(hr.attrs) == 0 {
 		hr.attrs = attrMap(hr.token)
 	}
 	if value, ok := hr.attrs[key]; ok {
-		return value
+		return value, true
 	}
-	return ""
+	return "", false
 }
 
 func (hr *htmlReader) Matches(name string, class ...string) bool {
+	if hr.tokenizer == nil {
+		return false
+	}
 	t := hr.token.Type
 	if t == html.CommentToken || t == html.TextToken || t == html.ErrorToken {
 		return false
@@ -75,6 +85,9 @@ func (hr *htmlReader) Matches(name string, class ...string) bool {
 }
 
 func (hr *htmlReader) Raw() string {
+	if hr.tokenizer == nil {
+		return ""
+	}
 	return string(hr.tokenizer.Raw())
 }
 
