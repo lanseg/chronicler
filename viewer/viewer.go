@@ -55,7 +55,7 @@ func (v *Viewer) View(id string) error {
 	}
 
 	result := []*opb.Object{}
-	if err := store.GetJson(&storage.GetRequest{Url: "objects.json"}, &result); err != nil {
+	if err := store.GetObject(&storage.GetRequest{Url: "objects.json"}, &result); err != nil {
 		return err
 	}
 

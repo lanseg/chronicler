@@ -32,7 +32,7 @@ func (bs *BlockStorage) GetBytes(get *GetRequest) ([]byte, error) {
 	return io.ReadAll(reader)
 }
 
-func (bs *BlockStorage) PutJson(put *PutRequest, data interface{}) (int64, error) {
+func (bs *BlockStorage) PutObject(put *PutRequest, data interface{}) (int64, error) {
 	jsonBytes, err := json.Marshal(data)
 	if err != nil {
 		return -1, err
@@ -40,7 +40,7 @@ func (bs *BlockStorage) PutJson(put *PutRequest, data interface{}) (int64, error
 	return bs.PutBytes(put, jsonBytes)
 }
 
-func (bs *BlockStorage) GetJson(get *GetRequest, data interface{}) error {
+func (bs *BlockStorage) GetObject(get *GetRequest, data interface{}) error {
 	jsonBytes, err := bs.GetBytes(get)
 	if err != nil {
 		return err

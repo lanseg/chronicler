@@ -75,7 +75,7 @@ func (r *resolver) resolveLoop() error {
 	}
 	s, err := r.getStorage(link)
 
-	bytesWritten, err := s.PutJson(&storage.PutRequest{Url: "objects.json"}, objs)
+	bytesWritten, err := s.PutObject(&storage.PutRequest{Url: "objects.json"}, objs)
 	if err != nil {
 		return err
 	}
