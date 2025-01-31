@@ -83,6 +83,7 @@ func (r *resolver) Resolve(link *opb.Link) error {
 		if adapter.Match(link) {
 			r.taskWaiter.Add(1)
 			r.tasks <- resolverTask{link: link, adapter: i}
+			break
 		}
 	}
 	return nil
@@ -107,7 +108,9 @@ func (r *resolver) resolveTask(task resolverTask) error {
 		return err
 	}
 	s, err := r.getStorage(link)
-
+	if err != nil {
+		return err
+	}
 	bytesWritten, err := s.PutObject(&storage.PutRequest{Url: "objects.json"}, objs)
 	if err != nil {
 		return err

@@ -31,17 +31,16 @@ func NewAdapter(client *http.Client) adapter.Adapter {
 }
 
 func (wa *webAdapter) Match(link *opb.Link) bool {
-	return false
-	// u, err := url.Parse(link.Href)
-	// if err != nil {
-	// 	wa.logger.Warningf("Not matching, link %s is not an url:%s ", link, err)
-	// 	return false
-	// }
-	// matches := u.Scheme == "http" || u.Scheme == "https"
-	// if !matches {
-	// 	wa.logger.Warningf("Not a http/https link: Scheme is %q", u.Scheme)
-	// }
-	//return matches
+	u, err := url.Parse(link.Href)
+	if err != nil {
+		wa.logger.Warningf("Not matching, link %s is not an url:%s ", link, err)
+		return false
+	}
+	matches := u.Scheme == "http" || u.Scheme == "https"
+	if !matches {
+		wa.logger.Warningf("Not a http/https link: Scheme is %q", u.Scheme)
+	}
+	return matches
 }
 
 func (pa *webAdapter) Get(link *opb.Link) ([]*opb.Object, error) {
@@ -56,7 +55,7 @@ func (pa *webAdapter) Get(link *opb.Link) ([]*opb.Object, error) {
 		return nil, err
 	}
 
-	re := regexp.MustCompile("(http|ftp|https):\\/\\/([\\w_-]+(?:(?:\\.[\\w_-]+)+))([\\w.,@?^=%&:\\/~+#-]*[\\w@?^=%&\\/~+#-])")
+	re := regexp.MustCompile(`(http|ftp|https)://([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-])`)
 	urls := map[string]bool{}
 	reader := parser.NewHtmlReader(bytes.NewReader(data))
 	for reader.NextToken() {
@@ -82,9 +81,14 @@ func (pa *webAdapter) Get(link *opb.Link) ([]*opb.Object, error) {
 
 	attachments := []*opb.Attachment{}
 	for u := range urls {
+		queryPath := u
+		url, err := url.Parse(u)
+		if err == nil {
+			queryPath = url.Path
+		}
 		attachments = append(attachments, &opb.Attachment{
 			Url:  u,
-			Mime: mime.TypeByExtension(filepath.Ext(u)),
+			Mime: mime.TypeByExtension(filepath.Ext(queryPath)),
 		})
 	}
 	sort.Slice(attachments, func(i, j int) bool {

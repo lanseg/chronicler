@@ -6,10 +6,6 @@ import (
 	"io"
 )
 
-const (
-	writeBlockSize = 65535
-)
-
 type BlockStorage struct {
 	Storage
 }

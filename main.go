@@ -11,7 +11,6 @@ import (
 
 	opb "chronicler/proto"
 	"chronicler/viewer"
-	"sync"
 )
 
 const (
@@ -43,9 +42,9 @@ func save(args []string) {
 			web.NewAdapter(httpClient),
 		},
 	)
+	r.Start()
 	r.Resolve(&opb.Link{Href: args[0]})
 
-	wg := sync.WaitGroup{}
-	wg.Add(1)
-	wg.Wait()
+	r.Wait()
+	r.Stop()
 }

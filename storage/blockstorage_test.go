@@ -39,7 +39,7 @@ func TestBlockStorage(t *testing.T) {
 		if _, err := bs.PutBytes(&PutRequest{Url: "byte-file"}, toWrite); err != nil {
 			t.Errorf("Error writing json to storage: %s", err)
 		}
-		toRead := []byte{}
+		var toRead []byte
 		if toRead, err = bs.GetBytes(&GetRequest{Url: "byte-file"}); err != nil {
 			t.Errorf("Error reading json from storage: %s", err)
 		}

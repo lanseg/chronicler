@@ -14,6 +14,7 @@ build: deps go.mod
 
 test: build
 	@rm -rf $(COVFILE)
+	staticcheck ./...
 	go vet
 	go test -cover -coverprofile=$(COVFILE) ./...
 

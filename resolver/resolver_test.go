@@ -6,7 +6,6 @@ import (
 
 	"chronicler/adapter"
 	"chronicler/common"
-	"chronicler/proto"
 	opb "chronicler/proto"
 	"chronicler/storage"
 )
@@ -58,7 +57,7 @@ func TestResolver(t *testing.T) {
 		}
 		r := NewResolver(root, loader, adapters)
 		r.Start()
-		if err := r.Resolve(&proto.Link{Href: "http://some/url"}); err != nil {
+		if err := r.Resolve(&opb.Link{Href: "http://some/url"}); err != nil {
 			t.Errorf("Failed while resolving: %q", err)
 		}
 		r.Wait()

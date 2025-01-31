@@ -86,7 +86,7 @@ func (ls *localStorage) Put(put *PutRequest) (io.WriteCloser, error) {
 	localName := sanitizeUrl(put.Url)
 	file, err := os.Create(filepath.Join(ls.root, localName))
 	if err != nil {
-		return nil, fmt.Errorf("Cannot open for writing %s/%s: %s", ls.root, put.Url, err)
+		return nil, fmt.Errorf("cannot open for writing %s/%s: %s", ls.root, put.Url, err)
 	}
 	ls.localNames[put.Url] = localName
 	ls.saveMapping()
@@ -96,11 +96,11 @@ func (ls *localStorage) Put(put *PutRequest) (io.WriteCloser, error) {
 func (ls *localStorage) Get(get *GetRequest) (io.ReadCloser, error) {
 	localName, ok := ls.localNames[get.Url]
 	if !ok {
-		return nil, fmt.Errorf("Cannot open %s/%s: %s", ls.root, get.Url, os.ErrNotExist)
+		return nil, fmt.Errorf("cannot open %s/%s: %s", ls.root, get.Url, os.ErrNotExist)
 	}
 	file, err := os.Open(filepath.Join(ls.root, localName))
 	if err != nil {
-		return nil, fmt.Errorf("Cannot open %s/%s: %s", ls.root, get.Url, err)
+		return nil, fmt.Errorf("cannot open %s/%s: %s", ls.root, get.Url, err)
 	}
 	return file, nil
 }

@@ -29,7 +29,7 @@ func TestText(t *testing.T) {
 
 	t.Run("One symbol width test", func(t *testing.T) {
 		maxWidth := 1
-		splitter := regexp.MustCompile("\\s+")
+		splitter := regexp.MustCompile(`\s+`)
 		lipsumLines := strings.Split(WrapText(lipsum, maxWidth), "\n")
 		for _, l := range lipsumLines {
 			words := splitter.Split(l, -1)
