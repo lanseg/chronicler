@@ -7,20 +7,27 @@ import (
 	"chronicler/storage"
 	"net/url"
 	"path/filepath"
+	"sync"
 )
 
 type resolverTask struct {
 	link    *opb.Link
-	adapter adapter.Adapter
+	adapter int
 }
 
 type Resolver interface {
 	Resolve(link *opb.Link) error
+	Start()
+	Stop()
+	Wait()
 }
 
 type resolver struct {
 	Resolver
 
+	taskWaiter sync.WaitGroup
+
+	done     chan bool
 	tasks    chan resolverTask
 	loader   common.Downloader
 	root     string
@@ -30,6 +37,9 @@ type resolver struct {
 
 func NewResolver(root string, loader common.Downloader, adapters []adapter.Adapter) Resolver {
 	r := &resolver{
+		taskWaiter: sync.WaitGroup{},
+
+		done:     make(chan bool, 1),
 		tasks:    make(chan resolverTask, 10),
 		adapters: adapters,
 		loader:   loader,
@@ -37,18 +47,42 @@ func NewResolver(root string, loader common.Downloader, adapters []adapter.Adapt
 		logger:   common.NewLogger("Resolver"),
 	}
 	r.logger.Infof("Initialized resolver with %d adapters", len(adapters))
-	go func() {
-		for {
-			r.resolveLoop()
-		}
-	}()
 	return r
 }
 
+func (r *resolver) Start() {
+	r.logger.Infof("Starting resolver thread")
+	go func() {
+	loop:
+		for {
+			select {
+			case <-r.done:
+				break loop
+			case task := <-r.tasks:
+				r.resolveTask(task)
+				r.taskWaiter.Done()
+			}
+		}
+		close(r.tasks)
+		close(r.done)
+	}()
+}
+
+func (r *resolver) Wait() {
+	r.logger.Infof("Waiting for all tasks to complete")
+	r.taskWaiter.Wait()
+}
+
+func (r *resolver) Stop() {
+	r.logger.Infof("Stopping resolver")
+	r.done <- true
+}
+
 func (r *resolver) Resolve(link *opb.Link) error {
-	for _, adapter := range r.adapters {
+	for i, adapter := range r.adapters {
 		if adapter.Match(link) {
-			r.tasks <- resolverTask{link: link, adapter: adapter}
+			r.taskWaiter.Add(1)
+			r.tasks <- resolverTask{link: link, adapter: i}
 		}
 	}
 	return nil
@@ -64,9 +98,8 @@ func (r *resolver) getStorage(link *opb.Link) (*storage.BlockStorage, error) {
 	}, nil
 }
 
-func (r *resolver) resolveLoop() error {
-	task := <-r.tasks
-	ad := task.adapter
+func (r *resolver) resolveTask(task resolverTask) error {
+	ad := r.adapters[task.adapter]
 	link := task.link
 
 	objs, err := ad.Get(link)
