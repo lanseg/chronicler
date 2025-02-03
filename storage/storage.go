@@ -5,7 +5,8 @@ import (
 )
 
 type PutRequest struct {
-	Url string
+	Url             string
+	SaveOnOverwrite bool
 }
 
 type GetRequest struct {

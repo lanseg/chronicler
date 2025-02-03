@@ -120,7 +120,10 @@ func (r *resolver) resolveTask(task resolverTask) error {
 		},
 		Objects: objs,
 	}
-	bytesWritten, err := s.PutObject(&storage.PutRequest{Url: objectFileName}, snapshot)
+	bytesWritten, err := s.PutObject(&storage.PutRequest{
+		Url:             objectFileName,
+		SaveOnOverwrite: true,
+	}, snapshot)
 	if err != nil {
 		return err
 	}
@@ -147,16 +150,16 @@ func (r *resolver) resolveTask(task resolverTask) error {
 	for k := range filesToLoad {
 		file += 1
 		r.logger.Infof("Downloading [%d of %d] %s", file, toLoad, k)
-		size, err := r.loader.Download(k.String(), s)
+		writer, err := s.Put(&storage.PutRequest{Url: k.String()})
 		if err != nil {
-			r.logger.Warningf("Failed to download %s: %s", k, err)
+			r.logger.Warningf("Cannot create writer for %q: %s", k.String(), err)
 			continue
 		}
-		if size == -1 {
-			r.logger.Infof("No need to download file %s", k)
-		} else {
-			r.logger.Infof("Downloaded %s, size %d", k, size)
+		_, err = r.loader.Download(k.String(), writer)
+		if err != nil {
+			r.logger.Warningf("Failed to download %s: %s", k, err)
 		}
+		writer.Close()
 	}
 	r.logger.Infof("Saved objects: %d, files: %d", len(objs), len(filesToLoad))
 	return nil

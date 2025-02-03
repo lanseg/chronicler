@@ -1,7 +1,9 @@
 package storage
 
 import (
+	"chronicler/common"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -11,8 +13,10 @@ import (
 )
 
 const (
+	maxBackups      = 1000
 	defaultPerms    = 0777
 	defaultMetadata = ".metadata"
+	defaultSnapshot = ".snapshot"
 	defaultMapping  = defaultMetadata + "/mapping.json"
 )
 
@@ -37,6 +41,7 @@ type localStorage struct {
 	writeMux   sync.Mutex
 	root       string
 	localNames map[string]string
+	logger     *common.Logger
 }
 
 func NewLocalStorage(root string) (Storage, error) {
@@ -46,6 +51,7 @@ func NewLocalStorage(root string) (Storage, error) {
 	storage := &localStorage{
 		root:       root,
 		localNames: map[string]string{},
+		logger:     common.NewLogger("LocalStorage"),
 	}
 	if err := storage.readMapping(); err != nil {
 		return nil, err
@@ -79,12 +85,36 @@ func (ls *localStorage) readMapping() error {
 	return nil
 }
 
+func (ls *localStorage) snapshotFile(localName string) error {
+	snapshotRoot := filepath.Join(ls.root, defaultSnapshot)
+	if err := os.MkdirAll(snapshotRoot, defaultPerms); err != nil {
+		return err
+	}
+	i := 0
+	for ; i < maxBackups; i++ {
+		backupName := filepath.Join(snapshotRoot, fmt.Sprintf("%s_%04d", localName, i))
+		if _, err := os.Stat(backupName); errors.Is(err, os.ErrNotExist) {
+			return os.Rename(filepath.Join(ls.root, localName), backupName)
+		}
+	}
+	return fmt.Errorf("Too many backups already")
+}
+
 func (ls *localStorage) Put(put *PutRequest) (io.WriteCloser, error) {
 	ls.writeMux.Lock()
 	defer ls.writeMux.Unlock()
 
 	localName := sanitizeUrl(put.Url)
-	file, err := os.Create(filepath.Join(ls.root, localName))
+	localPath := filepath.Join(ls.root, localName)
+	if _, err := os.Stat(localPath); err == nil {
+		if put.SaveOnOverwrite {
+			ls.logger.Debugf("File %q will be saved on overwrite", put.Url)
+			if err = ls.snapshotFile(localName); err != nil {
+				return nil, err
+			}
+		}
+	}
+	file, err := os.Create(localPath)
 	if err != nil {
 		return nil, fmt.Errorf("cannot open for writing %s/%s: %s", ls.root, put.Url, err)
 	}

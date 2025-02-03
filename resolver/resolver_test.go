@@ -1,13 +1,13 @@
 package resolver
 
 import (
+	"io"
 	"reflect"
 	"testing"
 
 	"chronicler/adapter"
 	"chronicler/common"
 	opb "chronicler/proto"
-	"chronicler/storage"
 )
 
 type fakeDownloader struct {
@@ -16,7 +16,7 @@ type fakeDownloader struct {
 	urls []string
 }
 
-func (fd *fakeDownloader) Download(url string, s storage.Storage) (int64, error) {
+func (fd *fakeDownloader) Download(url string, s io.Writer) (int64, error) {
 	fd.urls = append(fd.urls, url)
 	return 0, nil
 }
