@@ -93,7 +93,7 @@ func (psm *PikabuParser) newComment() {
 	}
 	t, err := toTimestamp(meta["d"])
 	if err != nil {
-		// TODO: log time parse error
+		t = nil
 	}
 	psm.comment = append(psm.comment, &opb.Object{
 		Id:        psm.attr("data-id"),

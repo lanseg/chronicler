@@ -43,8 +43,8 @@ func (wa *webAdapter) Match(link *opb.Link) bool {
 	return matches
 }
 
-func (pa *webAdapter) Get(link *opb.Link) ([]*opb.Object, error) {
-	resp, err := pa.client.Get(link.Href)
+func (wa *webAdapter) Get(link *opb.Link) ([]*opb.Object, error) {
+	resp, err := wa.client.Get(link.Href)
 	if err != nil {
 		return nil, err
 	}

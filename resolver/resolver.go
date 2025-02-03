@@ -113,6 +113,9 @@ func (r *resolver) resolveTask(task resolverTask) error {
 		return err
 	}
 	s, err := r.getStorage(link)
+	if err != nil {
+		return err
+	}
 
 	snapshot := &opb.Snapshot{
 		FetchTime: &opb.Timestamp{

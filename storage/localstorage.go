@@ -97,7 +97,7 @@ func (ls *localStorage) snapshotFile(localName string) error {
 			return os.Rename(filepath.Join(ls.root, localName), backupName)
 		}
 	}
-	return fmt.Errorf("Too many backups already")
+	return fmt.Errorf("too many backups already")
 }
 
 func (ls *localStorage) Put(put *PutRequest) (io.WriteCloser, error) {

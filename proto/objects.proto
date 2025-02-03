@@ -1,3 +1,4 @@
+// lint:file-ignore SA1019 ignore this
 syntax = "proto3";
 
 option go_package = "chronicler/proto";
