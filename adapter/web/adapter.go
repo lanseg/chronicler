@@ -16,14 +16,18 @@ import (
 	opb "chronicler/proto"
 )
 
+type HttpClient interface {
+	Do(request *http.Request) (*http.Response, error)
+}
+
 type webAdapter struct {
 	adapter.Adapter
 
 	logger *common.Logger
-	client *http.Client
+	client HttpClient
 }
 
-func NewAdapter(client *http.Client) adapter.Adapter {
+func NewAdapter(client HttpClient) adapter.Adapter {
 	return &webAdapter{
 		client: client,
 		logger: common.NewLogger("WebAdapter"),
@@ -44,7 +48,11 @@ func (wa *webAdapter) Match(link *opb.Link) bool {
 }
 
 func (wa *webAdapter) Get(link *opb.Link) ([]*opb.Object, error) {
-	resp, err := wa.client.Get(link.Href)
+	url, err := url.Parse(link.Href)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := wa.client.Do(&http.Request{Method: "GET", URL: url})
 	if err != nil {
 		return nil, err
 	}

@@ -162,7 +162,7 @@ func TestLocalStoragePutFile(t *testing.T) {
 			gets: []*get{
 				{request: &GetRequest{Url: "someurl"}, wantErr: "file does not exist"},
 			},
-			list: []*ListRequest{{WithSnapshots: true}},
+			list:     []*ListRequest{{WithSnapshots: true}},
 			wantList: []*ListResponse{},
 		},
 	} {
@@ -220,6 +220,9 @@ func TestLocalStoragePutFile(t *testing.T) {
 				if err != nil {
 					t.Errorf("Error while listing files")
 				}
+				sort.Slice(list.Items, func(i, j int) bool {
+					return list.Items[i].Url < list.Items[j].Url
+				})
 				if !reflect.DeepEqual(list, tc.wantList[i]) {
 					t.Errorf("Expected list to be %q, but got %q", tc.wantList[i], list)
 				}
