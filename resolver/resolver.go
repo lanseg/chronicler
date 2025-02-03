@@ -8,6 +8,11 @@ import (
 	"net/url"
 	"path/filepath"
 	"sync"
+	"time"
+)
+
+const (
+	objectFileName = "snapshot.json"
 )
 
 type resolverTask struct {
@@ -108,14 +113,18 @@ func (r *resolver) resolveTask(task resolverTask) error {
 		return err
 	}
 	s, err := r.getStorage(link)
+
+	snapshot := &opb.Snapshot{
+		FetchTime: &opb.Timestamp{
+			Seconds: time.Now().Unix(),
+		},
+		Objects: objs,
+	}
+	bytesWritten, err := s.PutObject(&storage.PutRequest{Url: objectFileName}, snapshot)
 	if err != nil {
 		return err
 	}
-	bytesWritten, err := s.PutObject(&storage.PutRequest{Url: "objects.json"}, objs)
-	if err != nil {
-		return err
-	}
-	r.logger.Infof("Saved objects.json, written bytes: %d", bytesWritten)
+	r.logger.Infof("Saved %q, written bytes: %d", objectFileName, bytesWritten)
 
 	filesToLoad := map[*url.URL]bool{}
 	for _, obj := range objs {

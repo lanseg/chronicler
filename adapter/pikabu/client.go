@@ -2,6 +2,7 @@ package pikabu
 
 import (
 	"bytes"
+	"chronicler/common"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -9,6 +10,10 @@ import (
 	"strings"
 
 	"golang.org/x/text/encoding/charmap"
+)
+
+const (
+	commentBatchSize = 200
 )
 
 type HttpClient interface {
@@ -30,11 +35,13 @@ type CommentResponse struct {
 
 type Client struct {
 	httpClient HttpClient
+	logger     *common.Logger
 }
 
 func NewClient(httpClient HttpClient) *Client {
 	return &Client{
 		httpClient: httpClient,
+		logger:     common.NewLogger("PikabuClient"),
 	}
 }
 
@@ -59,13 +66,13 @@ func (c *Client) getComments(ids []string, from int, to int) (*CommentResponse, 
 }
 
 func (c *Client) GetComments(ids []string) ([]*CommentData, error) {
-	batchSize := 200
 	result := []*CommentData{}
-	for i := 0; i < len(ids); i += batchSize {
-		end := i + batchSize
+	for i := 0; i < len(ids); i += commentBatchSize {
+		end := i + commentBatchSize
 		if end >= len(ids) {
 			end = len(ids)
 		}
+		c.logger.Debugf("Loading comments [%4d to %4d] of %4d", i, end, len(ids))
 		batch, err := c.getComments(ids, i, end)
 		if err != nil {
 			return nil, err

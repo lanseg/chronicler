@@ -65,3 +65,10 @@ message Object {
   repeated Attachment attachment = 7;
   repeated Stats stats = 8;
 }
+
+// Snapshot with the fetch result and time of the fetch
+message Snapshot {
+  Timestamp fetch_time = 1;
+
+  repeated Object objects = 2;
+}

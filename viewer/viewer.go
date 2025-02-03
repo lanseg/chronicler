@@ -13,6 +13,10 @@ import (
 	"time"
 )
 
+const (
+	objectFileName = "snapshot.json"
+)
+
 type Viewer struct {
 	Root string
 }
@@ -54,14 +58,14 @@ func (v *Viewer) View(id string) error {
 		Storage: iferr.Exit(storage.NewLocalStorage(filepath.Join(v.Root, id))),
 	}
 
-	result := []*opb.Object{}
-	if err := store.GetObject(&storage.GetRequest{Url: "objects.json"}, &result); err != nil {
+	result := &opb.Snapshot{}
+	if err := store.GetObject(&storage.GetRequest{Url: objectFileName}, &result); err != nil {
 		return err
 	}
 
 	objByParent := map[string]([]*opb.Object){}
 	objById := map[string]*opb.Object{}
-	for _, obj := range result {
+	for _, obj := range result.Objects {
 		if _, ok := objByParent[obj.Parent]; !ok {
 			objByParent[obj.Parent] = []*opb.Object{}
 		}

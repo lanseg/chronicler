@@ -44,7 +44,6 @@ func save(args []string) {
 	)
 	r.Start()
 	r.Resolve(&opb.Link{Href: args[0]})
-
 	r.Wait()
 	r.Stop()
 }
