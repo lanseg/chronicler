@@ -9,3 +9,5 @@ go.sum
 main
 proto/objects.pb.go
 demo
+data/
+coverage.out
