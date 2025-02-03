@@ -1,0 +1,11 @@
+[
+    {
+        "id": "http://demo",
+        "content": [
+            {
+                "text": "\u003chtml\u003e\n\n\u003cbody\u003e\n    Hello world\n\u003c/body\u003e\n\n\u003c/html\u003e",
+                "mime": "text/html"
+            }
+        ]
+    }
+]
