@@ -137,8 +137,21 @@ func (ls *localStorage) Get(get *GetRequest) (io.ReadCloser, error) {
 
 func (ls *localStorage) List(list *ListRequest) (*ListResponse, error) {
 	result := &ListResponse{}
-	for k := range ls.localNames {
-		result.Url = append(result.Url, k)
+	snapshotRoot := filepath.Join(ls.root, defaultSnapshot)
+	for actual, local := range ls.localNames {
+		item := StorageItem{
+			Url: actual,
+		}
+		if list.WithSnapshots {
+			for i := 0; i < maxBackups; i++ {
+				backupName := filepath.Join(snapshotRoot, fmt.Sprintf("%s_%04d", local, i))
+				if _, err := os.Stat(backupName); errors.Is(err, os.ErrNotExist) {
+					break
+				}
+				item.Versions = append(item.Versions, fmt.Sprintf("%04d", i))
+			}
+		}
+		result.Items = append(result.Items, item)
 	}
 	return result, nil
 }

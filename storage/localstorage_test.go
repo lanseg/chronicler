@@ -4,12 +4,23 @@ import (
 	"io"
 	"reflect"
 	"sort"
+	"strings"
 	"testing"
 )
 
 const (
 	defaultFile = "test_file"
 )
+
+func listResponseUrls(urls ...string) *ListResponse {
+	result := &ListResponse{}
+	for _, u := range urls {
+		result.Items = append(result.Items, StorageItem{
+			Url: u,
+		})
+	}
+	return result
+}
 
 func write(s Storage, fname string, content []byte) error {
 	wc, err := s.Put(&PutRequest{Url: fname})
@@ -45,8 +56,10 @@ func TestLocalStorageMapping(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error while listing files")
 	}
-	wantList := &ListResponse{Url: testfiles}
-	sort.Strings(list.Url)
+	wantList := listResponseUrls(testfiles...)
+	sort.Slice(list.Items, func(a int, b int) bool {
+		return list.Items[a].Url < list.Items[b].Url
+	})
 
 	if !reflect.DeepEqual(list, wantList) {
 		t.Errorf("Expected list to be %q, but got %q", wantList, list)
@@ -61,6 +74,7 @@ type put struct {
 type get struct {
 	request   *GetRequest
 	wantBytes []byte
+	wantErr   string
 }
 
 func TestLocalStoragePutFile(t *testing.T) {
@@ -71,54 +85,94 @@ func TestLocalStoragePutFile(t *testing.T) {
 		list       []*ListRequest
 		wantList   []*ListResponse
 		wantBackup map[string]([]byte)
-		wantErr    bool
 	}{
 		{
 			name:     "successful read write",
 			puts:     []*put{{writes: [][]byte{[]byte("Hello"), []byte("There")}}},
 			gets:     []*get{{wantBytes: []byte("HelloThere")}},
 			list:     []*ListRequest{{}},
-			wantList: []*ListResponse{{Url: []string{defaultFile}}},
+			wantList: []*ListResponse{listResponseUrls(defaultFile)},
 		},
 		{
 			name:     "empty payload",
 			puts:     []*put{{writes: [][]byte{{}, {}, {}}}},
 			gets:     []*get{{wantBytes: []byte{}}},
 			list:     []*ListRequest{{}},
-			wantList: []*ListResponse{{Url: []string{defaultFile}}},
+			wantList: []*ListResponse{listResponseUrls(defaultFile)},
 		},
 		{
 			name:     "zeroes payload",
 			puts:     []*put{{writes: [][]byte{{0}, {0}, {0}}}},
 			gets:     []*get{{wantBytes: []byte{0, 0, 0}}},
 			list:     []*ListRequest{{}},
-			wantList: []*ListResponse{{Url: []string{defaultFile}}},
+			wantList: []*ListResponse{listResponseUrls(defaultFile)},
 		},
 		{
 			name:     "bytes payload",
 			puts:     []*put{{writes: [][]byte{{1}, {2}, {3}}}},
 			gets:     []*get{{wantBytes: []byte{1, 2, 3}}},
 			list:     []*ListRequest{{}},
-			wantList: []*ListResponse{{Url: []string{defaultFile}}},
+			wantList: []*ListResponse{listResponseUrls(defaultFile)},
 		},
 		{
 			name: "bytes payload",
 			puts: []*put{{
-				request: &PutRequest{Url: "regergergergergтестовое сообщение   +\"*%\"*ç\"*%&"},
+				request: &PutRequest{Url: "reтестобщение   +\"*%\"*ç\"*%&"},
 				writes:  [][]byte{{1}, {2}, {3}},
 			}},
 			gets: []*get{{
-				request:   &GetRequest{Url: "regergergergergтестовое сообщение   +\"*%\"*ç\"*%&"},
+				request:   &GetRequest{Url: "reтестобщение   +\"*%\"*ç\"*%&"},
 				wantBytes: []byte{1, 2, 3},
 			}},
 			list:     []*ListRequest{{}},
-			wantList: []*ListResponse{{Url: []string{"regergergergergтестовое сообщение   +\"*%\"*ç\"*%&"}}},
+			wantList: []*ListResponse{listResponseUrls("reтестобщение   +\"*%\"*ç\"*%&")},
+		},
+		{
+			name: "multiple puts",
+			puts: []*put{
+				{request: &PutRequest{Url: "Message"}, writes: [][]byte{{1, 2, 3}}},
+				{request: &PutRequest{Url: "Message 2"}, writes: [][]byte{{4, 5, 6}}},
+			},
+			gets: []*get{
+				{request: &GetRequest{Url: "Message"}, wantBytes: []byte{1, 2, 3}},
+				{request: &GetRequest{Url: "Message 2"}, wantBytes: []byte{4, 5, 6}},
+			},
+			list:     []*ListRequest{{}},
+			wantList: []*ListResponse{listResponseUrls("Message", "Message 2")},
+		},
+		{
+			name: "save on overwrite",
+			puts: []*put{
+				{request: &PutRequest{Url: "Message"}, writes: [][]byte{{1, 2, 3}}},
+				{request: &PutRequest{Url: "Message", SaveOnOverwrite: true}, writes: [][]byte{{4, 5, 6}}},
+				{request: &PutRequest{Url: "Message", SaveOnOverwrite: true}, writes: [][]byte{{7, 8, 9}}},
+			},
+			gets: []*get{
+				{request: &GetRequest{Url: "Message"}, wantBytes: []byte{7, 8, 9}},
+			},
+			list: []*ListRequest{{WithSnapshots: true}},
+			wantList: []*ListResponse{{
+				Items: []StorageItem{
+					{Url: "Message", Versions: []string{"0000", "0001"}},
+				},
+			}},
+		},
+		{
+			name: "non existing get",
+			gets: []*get{
+				{request: &GetRequest{Url: "someurl"}, wantErr: "file does not exist"},
+			},
+			list: []*ListRequest{{WithSnapshots: true}},
+			wantList: []*ListResponse{},
 		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			s, err := NewLocalStorage(t.TempDir())
 			if err != nil {
 				t.Errorf("Cannot create temporary storage: %s", err)
+			}
+			if tc.puts == nil {
+				tc.puts = []*put{}
 			}
 			for _, put := range tc.puts {
 				if put.request == nil {
@@ -144,7 +198,9 @@ func TestLocalStoragePutFile(t *testing.T) {
 				}
 				rc, err := s.Get(get.request)
 				if err != nil {
-					t.Errorf("Cannot open reader for the new file %s %s", get.request.Url, err)
+					if !strings.Contains(err.Error(), get.wantErr) {
+						t.Errorf("Cannot open reader for the new file %s %s", get.request.Url, err)
+					}
 					return
 				}
 				result, err := io.ReadAll(rc)

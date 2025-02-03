@@ -14,10 +14,16 @@ type GetRequest struct {
 }
 
 type ListRequest struct {
+	WithSnapshots bool
+}
+
+type StorageItem struct {
+	Url      string
+	Versions []string
 }
 
 type ListResponse struct {
-	Url []string
+	Items []StorageItem
 }
 
 type Storage interface {
