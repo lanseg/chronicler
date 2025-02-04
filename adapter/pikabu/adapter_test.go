@@ -11,7 +11,6 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/google/go-cmp/cmp/cmpopts"
 	"google.golang.org/protobuf/testing/protocmp"
 
 	opb "chronicler/proto"
@@ -47,7 +46,7 @@ func TestPikabuAdapter(t *testing.T) {
 	}{
 		{name: "simple post", file: "12333399"},
 		{name: "post with comments", file: "12335516"},
-		{name: "post with comments", file: "12336257"},
+		{name: "post with comments and more content", file: "12335104"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			// What we get
@@ -58,23 +57,22 @@ func TestPikabuAdapter(t *testing.T) {
 				t.Errorf("error while doing get: %s", err)
 				return
 			}
+			gotBytes, _ := json.Marshal(got)
+			os.WriteFile(fmt.Sprintf("/tmp/%s.json", tc.file), gotBytes, 0777)
 
-			data, _ := json.Marshal(got)
-			os.WriteFile(fmt.Sprintf("/tmp/%s.json", tc.file), data, 0777)
 			// Reference data
-			want := []*opb.Object{}
 			wantBytes, err := os.ReadFile(fmt.Sprintf("test_data/%s.json", tc.file))
 			if err != nil {
 				t.Errorf("cannot load reference file %s.json: %s", tc.file, err)
 				return
 			}
+			want := []*opb.Object{}
 			if err = json.Unmarshal(wantBytes, &want); err != nil {
 				t.Errorf("cannot unmarshal reference file %s.json: %s", tc.file, err)
 				return
 			}
 
-			if diff := cmp.Diff(want, got, protocmp.Transform(),
-				cmpopts.SortSlices(func(a, b string) bool { return a < b })); diff != "" {
+			if diff := cmp.Diff(want, got, protocmp.Transform()); diff != "" {
 				t.Errorf("expected parsed and reference results to be equal, but got %s", diff)
 			}
 		})
