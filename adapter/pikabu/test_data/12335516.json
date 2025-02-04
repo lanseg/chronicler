@@ -443,17 +443,17 @@
         ],
         "attachment": [
             {
-                "url": "https://cs15.pikabu.ru/video/2025/02/04/1738643856272054510_138ab5d8_720x960"
-            },
-            {
-                "url": "https://cs15.pikabu.ru/video/2025/02/04/1738643856272054510_hls_67a199aaaf0360_720x960"
+                "url": "blob:https://pikabu.ru/dc5d8704-a7f8-43d1-a681-2b5cbeeffbb5"
             },
             {
                 "url": "https://cs15.pikabu.ru/video/2025/02/04/1738643856272054510_039e81b4_720x960.webm",
                 "mime": "video/webm"
             },
             {
-                "url": "blob:https://pikabu.ru/dc5d8704-a7f8-43d1-a681-2b5cbeeffbb5"
+                "url": "https://cs15.pikabu.ru/video/2025/02/04/1738643856272054510_138ab5d8_720x960"
+            },
+            {
+                "url": "https://cs15.pikabu.ru/video/2025/02/04/1738643856272054510_hls_67a199aaaf0360_720x960"
             },
             {
                 "url": "https://pikabu.ru/community/MrCuteCat?"

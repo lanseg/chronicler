@@ -5,6 +5,7 @@ import (
 	"mime"
 	"net/url"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -209,6 +210,9 @@ func (psm *PikabuParser) InArticleContent() {
 		for _, attachment := range psm.attachment {
 			psm.article.Attachment = append(psm.article.Attachment, attachment)
 		}
+		sort.Slice(psm.article.Attachment, func(i, j int) bool {
+			return psm.article.Attachment[i].Url < psm.article.Attachment[j].Url
+		})
 		psm.SetState(InArticle)
 		return
 	}
