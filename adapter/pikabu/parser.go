@@ -285,6 +285,7 @@ func (psm *PikabuParser) InCommentContent() {
 		for _, attachment := range psm.attachment {
 			lastComment.Attachment = append(lastComment.Attachment, attachment)
 		}
+		lastComment.Content[len(lastComment.Content)-1].Text = strings.TrimSpace(lastComment.Content[len(lastComment.Content)-1].Text)
 		return
 	}
 	if lastComment.Content == nil {

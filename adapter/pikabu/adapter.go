@@ -3,7 +3,6 @@ package pikabu
 import (
 	"bytes"
 	"fmt"
-	"net/http"
 	"net/url"
 	"regexp"
 	"sort"
@@ -27,7 +26,7 @@ type pikabuAdapter struct {
 	client *Client
 }
 
-func NewAdapter(client *http.Client) adapter.Adapter {
+func NewAdapter(client HttpClient) adapter.Adapter {
 	return &pikabuAdapter{
 		client: NewClient(client),
 		logger: common.NewLogger("PikabuAdapter"),

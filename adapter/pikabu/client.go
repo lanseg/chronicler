@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"golang.org/x/text/encoding/charmap"
@@ -17,8 +18,7 @@ const (
 )
 
 type HttpClient interface {
-	Get(string) (*http.Response, error)
-	Post(url, contentType string, body io.Reader) (*http.Response, error)
+	Do(request *http.Request) (*http.Response, error)
 }
 
 type CommentData struct {
@@ -46,11 +46,20 @@ func NewClient(httpClient HttpClient) *Client {
 }
 
 func (c *Client) getComments(ids []string, from int, to int) (*CommentResponse, error) {
-	request := fmt.Sprintf("action=get_comments_by_ids&ids=%s", strings.Join(ids[from:to], ","))
-	resp, err := c.httpClient.Post(
-		"https://pikabu.ru/ajax/comments_actions.php",
-		"application/x-www-form-urlencoded",
-		bytes.NewReader([]byte(request)))
+	requestBody := fmt.Sprintf("action=get_comments_by_ids&ids=%s", strings.Join(ids[from:to], ","))
+	requestUrl, err := url.Parse("https://pikabu.ru/ajax/comments_actions.php")
+	if err != nil {
+		return nil, err
+	}
+	request := &http.Request{
+		Method: "POST",
+		URL:    requestUrl,
+		Body:   io.NopCloser(bytes.NewReader([]byte(requestBody))),
+		Header: http.Header{
+			"Content-type": []string{"application/x-www-form-urlencoded"},
+		},
+	}
+	resp, err := c.httpClient.Do(request)
 	if err != nil {
 		return nil, err
 	}
@@ -83,7 +92,15 @@ func (c *Client) GetComments(ids []string) ([]*CommentData, error) {
 }
 
 func (c *Client) GetPost(id string) (string, error) {
-	resp, err := c.httpClient.Get(fmt.Sprintf("https://pikabu.ru/story/_%s", id))
+	requestUrl, err := url.Parse(fmt.Sprintf("https://pikabu.ru/story/_%s", id))
+	if err != nil {
+		return "", nil
+	}
+	request := &http.Request{
+		Method: "GET",
+		URL:    requestUrl,
+	}
+	resp, err := c.httpClient.Do(request)
 	if err != nil {
 		return "", err
 	}
