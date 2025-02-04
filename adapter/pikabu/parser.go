@@ -290,6 +290,9 @@ func (psm *PikabuParser) InCommentContent() {
 			lastComment.Attachment = append(lastComment.Attachment, attachment)
 		}
 		lastComment.Content[len(lastComment.Content)-1].Text = strings.TrimSpace(lastComment.Content[len(lastComment.Content)-1].Text)
+		sort.Slice(lastComment.Attachment, func(i, j int) bool {
+			return lastComment.Attachment[i].Url < lastComment.Attachment[j].Url
+		})
 		return
 	}
 	if lastComment.Content == nil {

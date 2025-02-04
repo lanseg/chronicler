@@ -96,7 +96,12 @@ func (pa *pikabuAdapter) Get(link *opb.Link) ([]*opb.Object, error) {
 		i++
 	}
 	sort.Slice(result, func(i, j int) bool {
-		return result[i].CreatedAt.Seconds > result[j].CreatedAt.Seconds
+		if result[i].CreatedAt.Seconds > result[j].CreatedAt.Seconds {
+			return true
+		} else if result[i].CreatedAt.Seconds < result[j].CreatedAt.Seconds {
+			return false
+		}
+		return result[i].Id < result[j].Id
 	})
 	return result, nil
 }
