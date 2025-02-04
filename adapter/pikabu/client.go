@@ -94,7 +94,7 @@ func (c *Client) GetComments(ids []string) ([]*CommentData, error) {
 func (c *Client) GetPost(id string) (string, error) {
 	requestUrl, err := url.Parse(fmt.Sprintf("https://pikabu.ru/story/_%s", id))
 	if err != nil {
-		return "", nil
+		return "", err
 	}
 	request := &http.Request{
 		Method: "GET",

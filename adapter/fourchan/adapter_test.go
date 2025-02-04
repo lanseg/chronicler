@@ -1,4 +1,4 @@
-package pikabu
+package fourchan
 
 import (
 	"bytes"
@@ -10,10 +10,10 @@ import (
 	"path/filepath"
 	"testing"
 
+	opb "chronicler/proto"
+
 	"github.com/google/go-cmp/cmp"
 	"google.golang.org/protobuf/testing/protocmp"
-
-	opb "chronicler/proto"
 )
 
 type fakeHttpClient struct {
@@ -39,24 +39,24 @@ func newFakeHttp(file string) *fakeHttpClient {
 	}
 }
 
-func TestPikabuAdapter(t *testing.T) {
+func TestFourchanAdapter(t *testing.T) {
 	for _, tc := range []struct {
 		name string
 		file string
 	}{
-		{name: "simple post", file: "12333399"},
-		{name: "post with comments", file: "12335516"},
-		{name: "post with comments and more content", file: "12335104"},
+		{name: "simple post", file: "g104208157"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			// What we get
-			fakeClient := newFakeHttp(tc.file + ".html")
-			pikabuAdapter := NewAdapter(fakeClient)
-			got, err := pikabuAdapter.Get(&opb.Link{Href: fmt.Sprintf("http://pikabu.ru/story/_%s", tc.file)})
+			fakeClient := newFakeHttp(tc.file + "_chan.json")
+			fourchanAdapter := NewAdapter(fakeClient)
+			got, err := fourchanAdapter.Get(&opb.Link{Href: "https://boards.4chan.org/g/thread/104191633"})
 			if err != nil {
 				t.Errorf("error while doing get: %s", err)
 				return
 			}
+			gotBytes, _ := json.Marshal(got)
+			os.WriteFile(fmt.Sprintf("/tmp/%s.json", tc.file), gotBytes, 0777)
 
 			// Reference data
 			wantBytes, err := os.ReadFile(fmt.Sprintf("test_data/%s.json", tc.file))
@@ -77,25 +77,19 @@ func TestPikabuAdapter(t *testing.T) {
 	}
 }
 
-func TestWebAdapterMatcher(t *testing.T) {
-	pikabuAdapter := NewAdapter(nil)
+func TestFourChanAdapterMatcher(t *testing.T) {
+	fourchanAdapter := NewAdapter(nil)
 	for _, tc := range []struct {
 		name    string
 		url     string
 		matches bool
 	}{
-		{name: "basic http link", url: `http://localhost.localdomain`, matches: false},
-		{name: "basic broken http link", url: `ht#t\];]ldomain`, matches: false},
-		{name: "empty link", url: ``, matches: false},
-		{name: "link without schema", url: `localhost.localdomain`, matches: false},
-		{name: "link without all parameters", url: `localhost.localdomain`, matches: false},
-		{name: "link without post id", url: "https://pikabu.ru/story/", matches: false},
-		{name: "link with post id", url: "https://pikabu.ru/story/_1234", matches: true},
-		{name: "link with post name and id", url: "https://pikabu.ru/story/a_post_name_and_12333062", matches: true},
-		{name: "link with post id and query args", url: "https://pikabu.ru/story/bwef_wef_12333062?cid=339516221", matches: true},
+		{name: "basic http link", url: `https://boards.4chan.org/g/thread/102519935/this-board-is-for-the-discussion-of-technology`, matches: true},
+		{name: "link with id", url: `https://boards.4chan.org/g/thread/104191633#p104206868`, matches: true},
+		{name: "link with name", url: `https://boards.4chan.org/g/thread/104205910/termux`, matches: true},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			if tc.matches != pikabuAdapter.Match(&opb.Link{Href: tc.url}) {
+			if tc.matches != fourchanAdapter.Match(&opb.Link{Href: tc.url}) {
 				t.Errorf("web adapter should match %s", tc.url)
 			}
 		})

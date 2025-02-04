@@ -64,7 +64,9 @@ func (r *resolver) Start() {
 			case <-r.done:
 				break loop
 			case task := <-r.tasks:
-				r.resolveTask(task)
+				if err := r.resolveTask(task); err != nil {
+					r.logger.Warningf("Cannot resolve link %s: %s", task.link.Href, err)
+				}
 				r.taskWaiter.Done()
 			}
 		}

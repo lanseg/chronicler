@@ -1,0 +1,378 @@
+[
+    {
+        "id": "339610226",
+        "parent": "339592086",
+        "createdAt": {
+            "seconds": 1738664068
+        },
+        "generator": [
+            {
+                "id": "413840",
+                "name": "GLADvanger"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u003cp class=\"rv-comment\"\u003eТО будешь проходить, выкупи обратно\u003c/p\u003e",
+                "mime": "text/html"
+            }
+        ],
+        "stats": [
+            {
+                "type": 1,
+                "counter": 5
+            }
+        ]
+    },
+    {
+        "id": "339592086",
+        "parent": "339574511",
+        "createdAt": {
+            "seconds": 1738655286
+        },
+        "generator": [
+            {
+                "id": "9616349",
+                "name": "user9616349"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u003cp class=\"rv-comment\"\u003eЯ его,ЗМЗ ,даже пару раз завел...и продал в соседний яхтклуб\u003c/p\u003e",
+                "mime": "text/html"
+            }
+        ],
+        "stats": [
+            {
+                "type": 1,
+                "counter": 26
+            }
+        ]
+    },
+    {
+        "id": "339586093",
+        "parent": "339574511",
+        "createdAt": {
+            "seconds": 1738652228
+        },
+        "generator": [
+            {
+                "id": "1015893",
+                "name": "dimmmka"
+            }
+        ],
+        "content": [
+            {
+                "text": "Ну а как иначе?) ЗМЗ на регистрацию, потом на полочку, транспортное \nсредство должно эксплуатироваться а не вечно ремонтироваться",
+                "mime": "text/html"
+            }
+        ],
+        "stats": [
+            {
+                "type": 1,
+                "counter": 35
+            }
+        ]
+    },
+    {
+        "id": "339574511",
+        "parent": "12335104",
+        "createdAt": {
+            "seconds": 1738645517
+        },
+        "generator": [
+            {
+                "id": "1018961",
+                "name": "So4neishiy"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u003cp class=\"rv-comment\"\u003eНастоящий баржевод - починил змз и воткнул Тойоту))\u003c/p\u003e\u003cp class=\"rv-comment\"\u003eКрасавчик\u003c/p\u003e",
+                "mime": "text/html"
+            }
+        ],
+        "stats": [
+            {
+                "type": 1,
+                "counter": 314
+            }
+        ]
+    },
+    {
+        "id": "339568720",
+        "parent": "12335104",
+        "createdAt": {
+            "seconds": 1738640288
+        },
+        "generator": [
+            {
+                "id": "1620999",
+                "name": "azewsep.ol"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u003cp class=\"rv-comment\"\u003eЕбать ты рукастый. Молодцом! \u003c/p\u003e",
+                "mime": "text/html"
+            }
+        ],
+        "stats": [
+            {
+                "type": 1,
+                "counter": 269
+            }
+        ]
+    },
+    {
+        "id": "12335104",
+        "createdAt": {
+            "seconds": 1738627430
+        },
+        "tag": [
+            {
+                "name": "Моё",
+                "url": "https://pikabu.ru/original-stories"
+            },
+            {
+                "name": "Судно на подводных крыльях",
+                "url": "https://pikabu.ru/tag/%D0%A1%D1%83%D0%B4%D0%BD%D0%BE%20%D0%BD%D0%B0%20%D0%BF%D0%BE%D0%B4%D0%B2%D0%BE%D0%B4%D0%BD%D1%8B%D1%85%20%D0%BA%D1%80%D1%8B%D0%BB%D1%8C%D1%8F%D1%85/hot"
+            },
+            {
+                "name": "Река Волга",
+                "url": "https://pikabu.ru/tag/%D0%A0%D0%B5%D0%BA%D0%B0%20%D0%92%D0%BE%D0%BB%D0%B3%D0%B0/hot"
+            },
+            {
+                "name": "Газ-24 Волга",
+                "url": "https://pikabu.ru/tag/%D0%93%D0%B0%D0%B7-24%20%D0%92%D0%BE%D0%BB%D0%B3%D0%B0/hot"
+            },
+            {
+                "name": "Длиннопост",
+                "url": "https://pikabu.ru/tag/%D0%94%D0%BB%D0%B8%D0%BD%D0%BD%D0%BE%D0%BF%D0%BE%D1%81%D1%82/hot"
+            }
+        ],
+        "generator": [
+            {
+                "id": "9616349",
+                "name": "user9616349"
+            }
+        ],
+        "content": [
+            {
+                "text": "Катер на подводных крыльях \"Волга\".Рукожопства пост"
+            },
+            {
+                "text": "\n\t\t\t\t\n\t\t\t\t\t\t\u003cdiv class=\"story-block story-block_type_text\"\u003e\n\t\t\t\t\t\t\t\u003cp\u003eВведите описание к карусели (не обязательно)\u003c/p\u003e\n\t\t\t\t\t\t\u003c/div\u003e\n\t\t\t\t\t\n\t\t\t\u003cdiv class=\"story-block story-block_type_carousel \"\u003e\n\t\t\t\u003csection class=\"carousel carousel_images\"\u003e\n\t\t\t\t\u003cdiv class=\"carousel__main\"\u003e\n\t\t\t\t\t\u003cbutton type=\"button\" class=\"carousel__scroll button carousel__scroll_left carousel__scroll_hidden\"\u003e\n\t\t\t\t\t\t\u003csvg xmlns=\"http://www.w3.org/2000/svg\" class=\"icon icon--ui__arrow-left\"\u003e\u003cuse xlink:href=\"#icon--ui__arrow-left\"\u003e\u003c/use\u003e\u003c/svg\u003e\n\t\t\t\t\t\u003c/button\u003e\n\t\t\t\t\t\u003cdiv class=\"carousel__content\"\u003e\n\t\t\t\t\t\t\u003cdiv class=\"carousel__helper\"\u003e\n\t\t\t\t\u003carticle class=\"carousel__item\" data-index=\"0\"\u003e\u003cimg src=\"12335104_files/1738626710173063898.jpg\" fetchpriority=\"high\" data-large-image=\"https://cs15.pikabu.ru/post_img/big/2025/02/04/1/1738626710173063898.jpg\" data-viewable=\"true\" alt=\"\"\u003e\u003c/article\u003e\n\t\t\t\t\u003carticle class=\"carousel__item\" data-index=\"1\"\u003e\u003cimg src=\"12335104_files/1738626713119853125.jpg\" data-large-image=\"https://cs15.pikabu.ru/post_img/big/2025/02/04/1/1738626713119853125.jpg\" data-viewable=\"true\" alt=\"\"\u003e\u003c/article\u003e\n\t\t\t\t\u003carticle class=\"carousel__item\" data-index=\"2\"\u003e\u003cimg src=\"12335104_files/1738626713185673593.jpg\" data-large-image=\"https://cs15.pikabu.ru/post_img/big/2025/02/04/1/1738626713185673593.jpg\" data-viewable=\"true\" alt=\"\"\u003e\u003c/article\u003e\n\t\t\t\t\t\t\u003c/div\u003e\n\t\t\t\t\t\u003c/div\u003e\n\t\t\t\t\t\u003cbutton type=\"button\" class=\"carousel__scroll button carousel__scroll_right\"\u003e\n\t\t\t\t\t\t\u003csvg xmlns=\"http://www.w3.org/2000/svg\" class=\"icon icon--ui__arrow-right\"\u003e\u003cuse xlink:href=\"#icon--ui__arrow-right\"\u003e\u003c/use\u003e\u003c/svg\u003e\n\t\t\t\t\t\u003c/button\u003e\n\t\t\t\t\t\u003cdiv class=\"carousel__cur-slide\"\u003e1/3\u003c/div\u003e\n\t\t\t\t\u003c/div\u003e\n\t\t\t\u003c/section\u003e\n\t\t\n\t\t\t\t\u003cul class=\"carousel-bullets carousel-bullets_fixed\"\u003e\n\t\t\t\t\t\u003cli class=\"carousel-bullets__bullet carousel-bullets__bullet_active\"\u003e\u003c/li\u003e\u003cli class=\"carousel-bullets__bullet\"\u003e\u003c/li\u003e\u003cli class=\"carousel-bullets__bullet\"\u003e\u003c/li\u003e\n\t\t\t\t\u003c/ul\u003e\u003cp class=\"story-block__title\"\u003eВ саратове\u003c/p\u003e\u003c/div\u003e\n\t\t\t\t\t\t\u003cdiv class=\"story-block story-block_type_text\"\u003e\n\t\t\t\t\t\t\t\u003cp\u003eКак то сидя на Авито в поисках \"а чего бы купить такого\" \nувидел её,в Саратове продавалась за 150к.Порадовало наличие \nдокументов(нет,кривые), мотора и редуктора.Ну и крылья на \nместе.разворована конечно,но пойдет за эту цену.\u003c/p\u003e\n\t\t\t\t\t\t\u003c/div\u003e\n\t\t\t\t\t\n\t\t\t\t\t\t\u003cdiv class=\"story-block story-block_type_text\"\u003e\n\t\t\t\t\t\t\t\u003cp\u003eДля ясности,эти катера все вообще-то удроченые в усмерть и без документов ,вобщем металолом,почти всегда.\u003c/p\u003e\n\t\t\t\t\t\t\u003c/div\u003e\n\t\t\t\t\t\n\t\t\t\t\t\t\u003cdiv class=\"story-block story-block_type_text\"\u003e\n\t\t\t\t\t\t\t\u003cp\u003eБеру билет,лечу в Саратов,смотрю,договариваюсь,лечу назад.Ищу фуру,нахожу,за 45к ее привозят в СПб.и понеслось.\u003c/p\u003e\n\t\t\t\t\t\t\u003c/div\u003e\n\t\t\t\t\t\n\t\t\t\t\t\t\u003cdiv class=\"story-block story-block_type_text\"\u003e\n\t\t\t\t\t\t\t\u003cp\u003eИзначально думал заказать пескоструй,мне объявили около \n30тысяч вроде,я подумал дорого,сам обдеру.итого обдирание заняло два \nгода,одной смывки ушло тысяч на 30,ещё абразив,инструмент,тонна \nвремени.на катере сто слоев краски,и смывка по одному слою \nподнимает.вобщем ободрал,покрасил кислотным грунтом,поверх \nэпоксидным.вмятинки что не смог выстучать-шпаклей автомобильной заделал \n.Поверх полиуретановой краской покрыл ,и наконец вытащил из \nгаража.Попутно сделал слани,торпеду,мотор и редуктор.\u003c/p\u003e\n\t\t\t\t\t\t\u003c/div\u003e\n\t\t\t\t\t\n\t\t\t\u003cdiv class=\"story-block story-block_type_carousel \"\u003e\n\t\t\t\u003csection class=\"carousel carousel_images\"\u003e\n\t\t\t\t\u003cdiv class=\"carousel__main\"\u003e\n\t\t\t\t\t\u003cbutton type=\"button\" class=\"carousel__scroll button carousel__scroll_left carousel__scroll_hidden\"\u003e\n\t\t\t\t\t\t\u003csvg xmlns=\"http://www.w3.org/2000/svg\" class=\"icon icon--ui__arrow-left\"\u003e\u003cuse xlink:href=\"#icon--ui__arrow-left\"\u003e\u003c/use\u003e\u003c/svg\u003e\n\t\t\t\t\t\u003c/button\u003e\n\t\t\t\t\t\u003cdiv class=\"carousel__content\"\u003e\n\t\t\t\t\t\t\u003cdiv class=\"carousel__helper\"\u003e\n\t\t\t\t\u003carticle class=\"carousel__item\" data-index=\"0\"\u003e\u003cimg src=\"12335104_files/1738624652296130852.jpg\" data-large-image=\"https://cs15.pikabu.ru/post_img/2025/02/04/1/1738624652296130852.jpg\" data-viewable=\"true\" alt=\"\"\u003e\u003c/article\u003e\n\t\t\t\t\u003carticle class=\"carousel__item\" data-index=\"1\"\u003e\u003cimg src=\"12335104_files/173862465422011866.jpg\" data-large-image=\"https://cs15.pikabu.ru/post_img/2025/02/04/1/173862465422011866.jpg\" data-viewable=\"true\" alt=\"\"\u003e\u003c/article\u003e\n\t\t\t\t\u003carticle class=\"carousel__item\" data-index=\"2\"\u003e\u003cimg src=\"12335104_files/1738624654267683230.jpg\" data-large-image=\"https://cs15.pikabu.ru/post_img/2025/02/04/1/1738624654267683230.jpg\" data-viewable=\"true\" alt=\"\"\u003e\u003c/article\u003e\n\t\t\t\t\u003carticle class=\"carousel__item image-lazy\" data-index=\"3\"\u003e\u003cimg src=\"\" data-src=\"https://cs15.pikabu.ru/post_img/2025/02/04/1/1738624655231628980.jpg\" data-large-image=\"https://cs15.pikabu.ru/post_img/2025/02/04/1/1738624655231628980.jpg\" data-viewable=\"true\" alt=\"\"\u003e\u003c/article\u003e\n\t\t\t\t\u003carticle class=\"carousel__item image-lazy\" data-index=\"4\"\u003e\u003cimg src=\"\" data-src=\"https://cs15.pikabu.ru/post_img/2025/02/04/1/173862465629976186.jpg\" data-large-image=\"https://cs15.pikabu.ru/post_img/2025/02/04/1/173862465629976186.jpg\" data-viewable=\"true\" alt=\"\"\u003e\u003c/article\u003e\n\t\t\t\t\u003carticle class=\"carousel__item image-lazy\" data-index=\"5\"\u003e\u003cimg src=\"\" data-src=\"https://cs15.pikabu.ru/post_img/2025/02/04/1/1738624657157979298.jpg\" data-large-image=\"https://cs15.pikabu.ru/post_img/big/2025/02/04/1/1738624657157979298.jpg\" data-viewable=\"true\" alt=\"\"\u003e\u003c/article\u003e\n\t\t\t\t\u003carticle class=\"carousel__item image-lazy\" data-index=\"6\"\u003e\u003cimg src=\"\" data-src=\"https://cs15.pikabu.ru/post_img/2025/02/04/1/1738624658139093593.jpg\" data-large-image=\"https://cs15.pikabu.ru/post_img/big/2025/02/04/1/1738624658139093593.jpg\" data-viewable=\"true\" alt=\"\"\u003e\u003c/article\u003e\n\t\t\t\t\t\t\u003c/div\u003e\n\t\t\t\t\t\u003c/div\u003e\n\t\t\t\t\t\u003cbutton type=\"button\" class=\"carousel__scroll button carousel__scroll_right\"\u003e\n\t\t\t\t\t\t\u003csvg xmlns=\"http://www.w3.org/2000/svg\" class=\"icon icon--ui__arrow-right\"\u003e\u003cuse xlink:href=\"#icon--ui__arrow-right\"\u003e\u003c/use\u003e\u003c/svg\u003e\n\t\t\t\t\t\u003c/button\u003e\n\t\t\t\t\t\u003cdiv class=\"carousel__cur-slide\"\u003e1/7\u003c/div\u003e\n\t\t\t\t\u003c/div\u003e\n\t\t\t\u003c/section\u003e\n\t\t\n\t\t\t\t\u003cul class=\"carousel-bullets carousel-bullets_fixed\"\u003e\n\t\t\t\t\t\u003cli class=\"carousel-bullets__bullet carousel-bullets__bullet_active\"\u003e\u003c/li\u003e\u003cli class=\"carousel-bullets__bullet\"\u003e\u003c/li\u003e\u003cli class=\"carousel-bullets__bullet\"\u003e\u003c/li\u003e\u003cli class=\"carousel-bullets__bullet\"\u003e\u003c/li\u003e\u003cli class=\"carousel-bullets__bullet\"\u003e\u003c/li\u003e\u003cli class=\"carousel-bullets__bullet\"\u003e\u003c/li\u003e\u003cli class=\"carousel-bullets__bullet\"\u003e\u003c/li\u003e\n\t\t\t\t\u003c/ul\u003e\u003c/div\u003e\n\t\t\t\t\t\t\u003cdiv class=\"story-block story-block_type_text\"\u003e\n\t\t\t\t\t\t\t\u003cp\u003eПо мотору разграблено всё было,а оказалось что восстановить \nЗМЗ та ещё задача,ушло тысяч 50на всякую хрень чтоб только завести \nего.редуктор уррп25 тоже удрочен.все подшибник разбиты,с люфтом в \nсантиметр.перебрал всё \u003c/p\u003e\n\t\t\t\t\t\t\u003c/div\u003e\n\t\t\t\t\t\n\t\t\t\u003cdiv class=\"story-block story-block_type_carousel \"\u003e\n\t\t\t\u003csection class=\"carousel carousel_images\"\u003e\n\t\t\t\t\u003cdiv class=\"carousel__main\"\u003e\n\t\t\t\t\t\u003cbutton type=\"button\" class=\"carousel__scroll button carousel__scroll_left carousel__scroll_hidden\"\u003e\n\t\t\t\t\t\t\u003csvg xmlns=\"http://www.w3.org/2000/svg\" class=\"icon icon--ui__arrow-left\"\u003e\u003cuse xlink:href=\"#icon--ui__arrow-left\"\u003e\u003c/use\u003e\u003c/svg\u003e\n\t\t\t\t\t\u003c/button\u003e\n\t\t\t\t\t\u003cdiv class=\"carousel__content\"\u003e\n\t\t\t\t\t\t\u003cdiv class=\"carousel__helper\"\u003e\n\t\t\t\t\u003carticle class=\"carousel__item image-lazy image-lazy-processed\" data-index=\"0\"\u003e\u003cimg src=\"12335104_files/1738625334228049670.jpg\" data-src=\"https://cs15.pikabu.ru/post_img/2025/02/04/1/1738625334228049670.jpg\" data-large-image=\"https://cs15.pikabu.ru/post_img/2025/02/04/1/1738625334228049670.jpg\" data-viewable=\"true\" alt=\"\" class=\"image-lazy-processed image-loaded\"\u003e\u003c/article\u003e\n\t\t\t\t\u003carticle class=\"carousel__item image-lazy image-lazy-processed\" data-index=\"1\"\u003e\u003cimg src=\"12335104_files/1738625334179466890.jpg\" data-src=\"https://cs15.pikabu.ru/post_img/2025/02/04/1/1738625334179466890.jpg\" data-large-image=\"https://cs15.pikabu.ru/post_img/big/2025/02/04/1/1738625334179466890.jpg\" data-viewable=\"true\" alt=\"\" class=\"image-lazy-processed image-loaded\"\u003e\u003c/article\u003e\n\t\t\t\t\u003carticle class=\"carousel__item image-lazy\" data-index=\"2\"\u003e\u003cimg src=\"\" data-src=\"https://cs15.pikabu.ru/post_img/2025/02/04/1/1738625334114077561.jpg\" data-large-image=\"https://cs15.pikabu.ru/post_img/big/2025/02/04/1/1738625334114077561.jpg\" data-viewable=\"true\" alt=\"\"\u003e\u003c/article\u003e\n\t\t\t\t\u003carticle class=\"carousel__item image-lazy\" data-index=\"3\"\u003e\u003cimg src=\"\" data-src=\"https://cs15.pikabu.ru/post_img/2025/02/04/1/173862533611561908.jpg\" data-large-image=\"https://cs15.pikabu.ru/post_img/big/2025/02/04/1/173862533611561908.jpg\" data-viewable=\"true\" alt=\"\"\u003e\u003c/article\u003e\n\t\t\t\t\u003carticle class=\"carousel__item image-lazy\" data-index=\"4\"\u003e\u003cimg src=\"\" data-src=\"https://cs15.pikabu.ru/post_img/2025/02/04/1/173862533618646612.jpg\" data-large-image=\"https://cs15.pikabu.ru/post_img/big/2025/02/04/1/173862533618646612.jpg\" data-viewable=\"true\" alt=\"\"\u003e\u003c/article\u003e\n\t\t\t\t\u003carticle class=\"carousel__item image-lazy\" data-index=\"5\"\u003e\u003cimg src=\"\" data-src=\"https://cs15.pikabu.ru/post_img/2025/02/04/1/1738625337195163896.jpg\" data-large-image=\"https://cs15.pikabu.ru/post_img/big/2025/02/04/1/1738625337195163896.jpg\" data-viewable=\"true\" alt=\"\"\u003e\u003c/article\u003e\n\t\t\t\t\t\t\u003c/div\u003e\n\t\t\t\t\t\u003c/div\u003e\n\t\t\t\t\t\u003cbutton type=\"button\" class=\"carousel__scroll button carousel__scroll_right\"\u003e\n\t\t\t\t\t\t\u003csvg xmlns=\"http://www.w3.org/2000/svg\" class=\"icon icon--ui__arrow-right\"\u003e\u003cuse xlink:href=\"#icon--ui__arrow-right\"\u003e\u003c/use\u003e\u003c/svg\u003e\n\t\t\t\t\t\u003c/button\u003e\n\t\t\t\t\t\u003cdiv class=\"carousel__cur-slide\"\u003e1/6\u003c/div\u003e\n\t\t\t\t\u003c/div\u003e\n\t\t\t\u003c/section\u003e\n\t\t\n\t\t\t\t\u003cul class=\"carousel-bullets carousel-bullets_fixed\"\u003e\n\t\t\t\t\t\u003cli class=\"carousel-bullets__bullet carousel-bullets__bullet_active\"\u003e\u003c/li\u003e\u003cli class=\"carousel-bullets__bullet\"\u003e\u003c/li\u003e\u003cli class=\"carousel-bullets__bullet\"\u003e\u003c/li\u003e\u003cli class=\"carousel-bullets__bullet\"\u003e\u003c/li\u003e\u003cli class=\"carousel-bullets__bullet\"\u003e\u003c/li\u003e\u003cli class=\"carousel-bullets__bullet\"\u003e\u003c/li\u003e\n\t\t\t\t\u003c/ul\u003e\u003c/div\u003e\n\t\t\t\t\t\t\u003cdiv class=\"story-block story-block_type_text\"\u003e\n\t\t\t\t\t\t\t\u003cp\u003eЗатем прокатился впервые в жизни на другой Волге и понял что с\n этим мотором она нежизнеспособна,сплошное страдание,и надо как минимум \n4,7 собирать.\u003c/p\u003e\n\t\t\t\t\t\t\u003c/div\u003e\n\t\t\t\t\t\n\t\t\t\u003cdiv class=\"story-block story-block_type_carousel \"\u003e\n\t\t\t\u003csection class=\"carousel carousel_images\"\u003e\n\t\t\t\t\u003cdiv class=\"carousel__main\"\u003e\n\t\t\t\t\t\u003cbutton type=\"button\" class=\"carousel__scroll button carousel__scroll_left carousel__scroll_hidden\"\u003e\n\t\t\t\t\t\t\u003csvg xmlns=\"http://www.w3.org/2000/svg\" class=\"icon icon--ui__arrow-left\"\u003e\u003cuse xlink:href=\"#icon--ui__arrow-left\"\u003e\u003c/use\u003e\u003c/svg\u003e\n\t\t\t\t\t\u003c/button\u003e\n\t\t\t\t\t\u003cdiv class=\"carousel__content\"\u003e\n\t\t\t\t\t\t\u003cdiv class=\"carousel__helper\"\u003e\n\t\t\t\t\u003carticle class=\"carousel__item image-lazy image-lazy-processed\" data-index=\"0\"\u003e\u003cimg src=\"12335104_files/1738626486234564464.jpg\" data-src=\"https://cs15.pikabu.ru/post_img/2025/02/04/1/1738626486234564464.jpg\" data-large-image=\"https://cs15.pikabu.ru/post_img/2025/02/04/1/1738626486234564464.jpg\" data-viewable=\"true\" alt=\"\" class=\"image-lazy-processed image-loaded\"\u003e\u003c/article\u003e\n\t\t\t\t\u003carticle class=\"carousel__item image-lazy image-lazy-processed\" data-index=\"1\"\u003e\u003cimg src=\"12335104_files/1738626485233598149.jpg\" data-src=\"https://cs15.pikabu.ru/post_img/2025/02/04/1/1738626485233598149.jpg\" data-large-image=\"https://cs15.pikabu.ru/post_img/2025/02/04/1/1738626485233598149.jpg\" data-viewable=\"true\" alt=\"\" class=\"image-lazy-processed image-loaded\"\u003e\u003c/article\u003e\n\t\t\t\t\u003carticle class=\"carousel__item image-lazy\" data-index=\"2\"\u003e\u003cimg src=\"\" data-src=\"https://cs15.pikabu.ru/post_img/2025/02/04/1/1738626484263831287.jpg\" data-large-image=\"https://cs15.pikabu.ru/post_img/2025/02/04/1/1738626484263831287.jpg\" data-viewable=\"true\" alt=\"\"\u003e\u003c/article\u003e\n\t\t\t\t\u003carticle class=\"carousel__item image-lazy\" data-index=\"3\"\u003e\u003cimg src=\"\" data-src=\"https://cs15.pikabu.ru/post_img/2025/02/04/1/1738626484296863466.jpg\" data-large-image=\"https://cs15.pikabu.ru/post_img/2025/02/04/1/1738626484296863466.jpg\" data-viewable=\"true\" alt=\"\"\u003e\u003c/article\u003e\n\t\t\t\t\t\t\u003c/div\u003e\n\t\t\t\t\t\u003c/div\u003e\n\t\t\t\t\t\u003cbutton type=\"button\" class=\"carousel__scroll button carousel__scroll_right\"\u003e\n\t\t\t\t\t\t\u003csvg xmlns=\"http://www.w3.org/2000/svg\" class=\"icon icon--ui__arrow-right\"\u003e\u003cuse xlink:href=\"#icon--ui__arrow-right\"\u003e\u003c/use\u003e\u003c/svg\u003e\n\t\t\t\t\t\u003c/button\u003e\n\t\t\t\t\t\u003cdiv class=\"carousel__cur-slide\"\u003e1/4\u003c/div\u003e\n\t\t\t\t\u003c/div\u003e\n\t\t\t\u003c/section\u003e\n\t\t\n\t\t\t\t\u003cul class=\"carousel-bullets carousel-bullets_fixed\"\u003e\n\t\t\t\t\t\u003cli class=\"carousel-bullets__bullet carousel-bullets__bullet_active\"\u003e\u003c/li\u003e\u003cli class=\"carousel-bullets__bullet\"\u003e\u003c/li\u003e\u003cli class=\"carousel-bullets__bullet\"\u003e\u003c/li\u003e\u003cli class=\"carousel-bullets__bullet\"\u003e\u003c/li\u003e\n\t\t\t\t\u003c/ul\u003e\u003cp class=\"story-block__title\"\u003eКрасивый,блестящий,совсем как настоящий\u003c/p\u003e\u003c/div\u003e\n\t\t\t\t\t\t\u003cdiv class=\"story-block story-block_type_text\"\u003e\n\t\t\t\t\t\t\t\u003cp\u003eСварил пацанский выхлоп, поменял сальник баллера руля.\u003c/p\u003e\n\t\t\t\t\t\t\u003c/div\u003e\n\t\t\t\t\t\n\t\t\t\t\t\t\u003cdiv class=\"story-block story-block_type_text\"\u003e\n\t\t\t\t\t\t\t\u003cp\u003eПараллельно занялся вопросом регистрации.и черт меня дёрнул \nзаглянуть только на этом моменте в судовой билет.Оказалось мотор записан\n как газ-53 115лс,а должно быть м8чспу100 и 90лс,но вообще в этой \n,родной мотор газ52 должен стоять-(это по одному выхлопу понятно,низкому\n капоту,рычагу КПП в полу,и короткому привальному брусу).\u003c/p\u003e\n\t\t\t\t\t\t\u003c/div\u003e\n\t\t\t\t\t\n\t\t\t\t\u003cdiv class=\"story-block story-block_type_image\"\u003e\n\t\t\t\t\t\u003cfigure class=\"story-image image-lazy image-lazy-processed\"\u003e\n\t\t\t\n\t\t\t\t\t\t\u003csvg class=\"story-image__stretch\" aria-hidden=\"true\" width=\"700\" height=\"100%\" viewbox=\"0 0 700 526\"\u003e\u003crect width=\"700\" height=\"526\"\u003e\u003c/rect\u003e\u003c/svg\u003e\n\t\t\t\t\t\t\u003cdiv class=\"story-image__content image-lazy image-lazy-processed\"\u003e\u003ca href=\"https://cs15.pikabu.ru/post_img/2025/02/04/2/1738627271281386602.jpg\" target=\"_blank\" class=\"image-link\"\u003e\u003cimg data-src=\"https://cs15.pikabu.ru/post_img/2025/02/04/2/1738627271281386602.jpg\" src=\"12335104_files/1738627271281386602.jpg\" data-large-image=\"https://cs15.pikabu.ru/post_img/2025/02/04/2/1738627271281386602.jpg\" class=\"story-image__image image-lazy-processed image-loaded\" data-viewable=\"true\" alt=\"Катер на подводных крыльях \"Волга\".Рукожопства пост Судно на подводных крыльях, Река Волга, Газ-24 Волга, Длиннопостопост\"\u003e\u003c/a\u003e\u003c/div\u003e\n\t\t\t\t\n\t\t\t\t\t\u003c/figure\u003e\n\t\t\t\n\t\t\t\t\u003c/div\u003e\n\t\t\t\n\t\t\t\t\t\t\u003cdiv class=\"story-block story-block_type_text\"\u003e\n\t\t\t\t\t\t\t\u003cp\u003eНемного салоном занялся,потом переделал\u003c/p\u003e\n\t\t\t\t\t\t\u003c/div\u003e\n\t\t\t\t\t\n\t\t\t\t\t\t\u003cdiv class=\"story-block story-block_type_text\"\u003e\n\t\t\t\t\t\t\t\u003cp\u003eПро торпедо поясню:сначало от 21волги приборка и торпеда стояла,затем от 24.сама приборка своя,собранная через жопу.\u003c/p\u003e\n\t\t\t\t\t\t\u003c/div\u003e\n\t\t\t\t\t\n\t\t\t\t\t\t\u003cdiv class=\"story-block story-block_type_text\"\u003e\n\t\t\t\t\t\t\t\u003cp\u003eРуль слева непросто так:винт стоит левого вращения и при \nстарте сместа реактивный момент поднимает левую сторону,и вес капитана \nдолжен компенсировать этот момент.\u003c/p\u003e\n\t\t\t\t\t\t\u003c/div\u003e\n\t\t\t\t\t\n\t\t\t\t\t\t\u003cdiv class=\"story-block story-block_type_text\"\u003e\n\t\t\t\t\t\t\t\u003cp\u003eДалее:катер на учёте стоит ,на ОАО....вобщем процес \nзатянулся.очень долго длились тяжбы и удалось восстановить \nсправедливость.мотор стал м8чспу100у 90лс,и поставил на учёт на себя.так\n прошел второй год владения\u003c/p\u003e\n\t\t\t\t\t\t\u003c/div\u003e\n\t\t\t\t\t\n\t\t\t\t\u003cdiv class=\"story-block story-block_type_image story-block_padding_left\"\u003e\n\t\t\t\t\t\u003cfigure class=\"story-image image-lazy\"\u003e\n\t\t\t\n\t\t\t\t\t\t\u003csvg class=\"story-image__stretch\" aria-hidden=\"true\" width=\"640\" height=\"100%\" viewbox=\"0 0 640 480\"\u003e\u003crect width=\"640\" height=\"480\"\u003e\u003c/rect\u003e\u003c/svg\u003e\n\t\t\t\t\t\t\u003cdiv class=\"story-image__content image-lazy\"\u003e\u003ca href=\"https://cs15.pikabu.ru/post_img/2025/02/04/2/1738627272235311166.jpg\" target=\"_blank\" class=\"image-link\"\u003e\u003cimg data-src=\"https://cs15.pikabu.ru/post_img/2025/02/04/2/1738627272235311166.jpg\" src=\"\" data-large-image=\"https://cs15.pikabu.ru/post_img/2025/02/04/2/1738627272235311166.jpg\" class=\"story-image__image\" data-viewable=\"true\" alt=\"Катер на подводных крыльях \"Волга\".Рукожопства пост Судно на подводных крыльях, Река Волга, Газ-24 Волга, Длиннопостопост\"\u003e\u003c/a\u003e\u003c/div\u003e\n\t\t\t\t\n\t\t\t\t\t\u003c/figure\u003e\n\t\t\t\n\t\t\t\t\u003c/div\u003e\n\t\t\t\n\t\t\t\t\t\t\u003cdiv class=\"story-block story-block_type_text\"\u003e\n\t\t\t\t\t\t\t\u003cp\u003eМама,я судовладелец\u003c/p\u003e\n\t\t\t\t\t\t\u003c/div\u003e\n\t\t\t\t\t\n\t\t\t\t\t\t\u003cdiv class=\"story-block story-block_type_text\"\u003e\n\t\t\t\t\t\t\t\u003cp\u003eНаступила зима,начал думать как с мотором поступить,чтоб \nмомента добавить.решил собирать 4,7л из этого 4,2.и тут коллега \nпредлогает 1uz-fe за 50т.р. в состоянии кот в мешке.ему ума пару лет \nдать немогут.с радость забираю этот подарок судьбы.\u003c/p\u003e\n\t\t\t\t\t\t\u003c/div\u003e\n\t\t\t\t\t\n\t\t\t\t\t\t\u003cdiv class=\"story-block story-block_type_text\"\u003e\n\t\t\t\t\t\t\t\u003cp\u003eУзет на январе,на ваш катушках,на стенде 300лс даёт,только незаводится и недаботает толком.Передрал проводку и все заработало.\u003c/p\u003e\n\t\t\t\t\t\t\u003c/div\u003e\n\t\t\t\t\t\n\t\t\t\u003cdiv class=\"story-block story-block_type_carousel \"\u003e\n\t\t\t\u003csection class=\"carousel carousel_images\"\u003e\n\t\t\t\t\u003cdiv class=\"carousel__main\"\u003e\n\t\t\t\t\t\u003cbutton type=\"button\" class=\"carousel__scroll button carousel__scroll_left carousel__scroll_hidden\"\u003e\n\t\t\t\t\t\t\u003csvg xmlns=\"http://www.w3.org/2000/svg\" class=\"icon icon--ui__arrow-left\"\u003e\u003cuse xlink:href=\"#icon--ui__arrow-left\"\u003e\u003c/use\u003e\u003c/svg\u003e\n\t\t\t\t\t\u003c/button\u003e\n\t\t\t\t\t\u003cdiv class=\"carousel__content\"\u003e\n\t\t\t\t\t\t\u003cdiv class=\"carousel__helper\"\u003e\n\t\t\t\t\u003carticle class=\"carousel__item image-lazy\" data-index=\"0\"\u003e\u003cimg src=\"\" data-src=\"https://cs15.pikabu.ru/post_img/2025/02/04/1/1738626620146594269.jpg\" data-large-image=\"https://cs15.pikabu.ru/post_img/big/2025/02/04/1/1738626620146594269.jpg\" data-viewable=\"true\" alt=\"\"\u003e\u003c/article\u003e\n\t\t\t\t\u003carticle class=\"carousel__item image-lazy\" data-index=\"1\"\u003e\u003cimg src=\"\" data-src=\"https://cs15.pikabu.ru/post_img/2025/02/04/1/1738626620174272532.jpg\" data-large-image=\"https://cs15.pikabu.ru/post_img/big/2025/02/04/1/1738626620174272532.jpg\" data-viewable=\"true\" alt=\"\"\u003e\u003c/article\u003e\n\t\t\t\t\t\t\u003c/div\u003e\n\t\t\t\t\t\u003c/div\u003e\n\t\t\t\t\t\u003cbutton type=\"button\" class=\"carousel__scroll button carousel__scroll_right\"\u003e\n\t\t\t\t\t\t\u003csvg xmlns=\"http://www.w3.org/2000/svg\" class=\"icon icon--ui__arrow-right\"\u003e\u003cuse xlink:href=\"#icon--ui__arrow-right\"\u003e\u003c/use\u003e\u003c/svg\u003e\n\t\t\t\t\t\u003c/button\u003e\n\t\t\t\t\t\u003cdiv class=\"carousel__cur-slide\"\u003e1/2\u003c/div\u003e\n\t\t\t\t\u003c/div\u003e\n\t\t\t\u003c/section\u003e\n\t\t\n\t\t\t\t\u003cul class=\"carousel-bullets carousel-bullets_fixed\"\u003e\n\t\t\t\t\t\u003cli class=\"carousel-bullets__bullet carousel-bullets__bullet_active\"\u003e\u003c/li\u003e\u003cli class=\"carousel-bullets__bullet\"\u003e\u003c/li\u003e\n\t\t\t\t\u003c/ul\u003e\u003c/div\u003e\n\t\t\t\t\t\t\u003cdiv class=\"story-block story-block_type_text\"\u003e\n\t\t\t\t\t\t\t\u003cp\u003eУзет на своем месте\u003c/p\u003e\n\t\t\t\t\t\t\u003c/div\u003e\n\t\t\t\t\t\n\t\t\t\t\t\t\u003cdiv class=\"story-block story-block_type_text\"\u003e\n\t\t\t\t\t\t\t\u003cp\u003eВроде все закончено.нашел винт 350*595шаг,цепляю,спускаю на воду,первые испытания,радости полные штаны.\u003c/p\u003e\n\t\t\t\t\t\t\u003c/div\u003e\n\t\t\t\t\t\n\t\t\t\t\u003cdiv class=\"story-block story-block_type_image\"\u003e\n\t\t\t\t\t\u003cfigure class=\"story-image image-lazy\"\u003e\n\t\t\t\n\t\t\t\t\t\t\u003csvg class=\"story-image__stretch\" aria-hidden=\"true\" width=\"700\" height=\"100%\" viewbox=\"0 0 700 526\"\u003e\u003crect width=\"700\" height=\"526\"\u003e\u003c/rect\u003e\u003c/svg\u003e\n\t\t\t\t\t\t\u003cdiv class=\"story-image__content image-lazy\"\u003e\u003ca href=\"https://cs15.pikabu.ru/post_img/2025/02/04/1/1738626845273642190.jpg\" target=\"_blank\" class=\"image-link\"\u003e\u003cimg data-src=\"https://cs15.pikabu.ru/post_img/2025/02/04/1/1738626845273642190.jpg\" src=\"\" data-large-image=\"https://cs15.pikabu.ru/post_img/2025/02/04/1/1738626845273642190.jpg\" class=\"story-image__image\" data-viewable=\"true\" alt=\"Катер на подводных крыльях \"Волга\".Рукожопства пост Судно на подводных крыльях, Река Волга, Газ-24 Волга, Длиннопостопост\"\u003e\u003c/a\u003e\u003c/div\u003e\n\t\t\t\t\n\t\t\t\t\t\u003c/figure\u003e\n\t\t\t\n\t\t\t\t\u003c/div\u003e\n\t\t\t\n\t\t\t\t\t\t\u003cdiv class=\"story-block story-block_type_text\"\u003e\n\t\t\t\t\t\t\t\u003cp\u003eИ первые разочарования.вибрация дикая,аж торпеда раскрутилась и\n после 65км/ч начинает корма гулять по сторонам.Оказывается это от \nнедостатка веса,недогружено кормовое крыло.Узет весит 180кг и \n50уррп,вместо 450кг ЗМЗ с редуктором которые должны там быть.Но зато на \nкрылья выскакивает секунд за 5,с места сразу с 12км/ч выпрыгивает на \nпереднее,затем резкое ускорение и на 35-40 уже на заднее крыло.\u003c/p\u003e\n\t\t\t\t\t\t\u003c/div\u003e\n\t\t\t\t\t\n\t\t\t\u003cdiv class=\"story-block story-block_type_carousel \"\u003e\n\t\t\t\u003csection class=\"carousel carousel_images\"\u003e\n\t\t\t\t\u003cdiv class=\"carousel__main\"\u003e\n\t\t\t\t\t\u003cbutton type=\"button\" class=\"carousel__scroll button carousel__scroll_left carousel__scroll_hidden\"\u003e\n\t\t\t\t\t\t\u003csvg xmlns=\"http://www.w3.org/2000/svg\" class=\"icon icon--ui__arrow-left\"\u003e\u003cuse xlink:href=\"#icon--ui__arrow-left\"\u003e\u003c/use\u003e\u003c/svg\u003e\n\t\t\t\t\t\u003c/button\u003e\n\t\t\t\t\t\u003cdiv class=\"carousel__content\"\u003e\n\t\t\t\t\t\t\u003cdiv class=\"carousel__helper\"\u003e\n\t\t\t\t\u003carticle class=\"carousel__item image-lazy\" data-index=\"0\"\u003e\u003cimg src=\"\" data-src=\"https://cs15.pikabu.ru/post_img/2025/02/04/1/1738626339110920101.jpg\" data-large-image=\"https://cs15.pikabu.ru/post_img/big/2025/02/04/1/1738626339110920101.jpg\" data-viewable=\"true\" alt=\"\"\u003e\u003c/article\u003e\n\t\t\t\t\u003carticle class=\"carousel__item image-lazy\" data-index=\"1\"\u003e\u003cimg src=\"\" data-src=\"https://cs15.pikabu.ru/post_img/2025/02/04/1/1738626339145355267.jpg\" data-large-image=\"https://cs15.pikabu.ru/post_img/big/2025/02/04/1/1738626339145355267.jpg\" data-viewable=\"true\" alt=\"\"\u003e\u003c/article\u003e\n\t\t\t\t\t\t\u003c/div\u003e\n\t\t\t\t\t\u003c/div\u003e\n\t\t\t\t\t\u003cbutton type=\"button\" class=\"carousel__scroll button carousel__scroll_right\"\u003e\n\t\t\t\t\t\t\u003csvg xmlns=\"http://www.w3.org/2000/svg\" class=\"icon icon--ui__arrow-right\"\u003e\u003cuse xlink:href=\"#icon--ui__arrow-right\"\u003e\u003c/use\u003e\u003c/svg\u003e\n\t\t\t\t\t\u003c/button\u003e\n\t\t\t\t\t\u003cdiv class=\"carousel__cur-slide\"\u003e1/2\u003c/div\u003e\n\t\t\t\t\u003c/div\u003e\n\t\t\t\u003c/section\u003e\n\t\t\n\t\t\t\t\u003cul class=\"carousel-bullets carousel-bullets_fixed\"\u003e\n\t\t\t\t\t\u003cli class=\"carousel-bullets__bullet carousel-bullets__bullet_active\"\u003e\u003c/li\u003e\u003cli class=\"carousel-bullets__bullet\"\u003e\u003c/li\u003e\n\t\t\t\t\u003c/ul\u003e\u003c/div\u003e\n\t\t\t\t\t\t\u003cdiv class=\"story-block story-block_type_text\"\u003e\n\t\t\t\t\t\t\t\u003cp\u003eНа радостях с друзьями выбрались в Питер,прокатился по центру,нахлобучил Метеор\u003c/p\u003e\n\t\t\t\t\t\t\u003c/div\u003e\n\t\t\t\t\t\n\t\t\t\t\u003cdiv class=\"story-block story-block_type_image\"\u003e\n\t\t\t\t\t\u003cfigure class=\"story-image image-lazy\"\u003e\n\t\t\t\n\t\t\t\t\t\t\u003csvg class=\"story-image__stretch\" aria-hidden=\"true\" width=\"700\" height=\"100%\" viewbox=\"0 0 700 525\"\u003e\u003crect width=\"700\" height=\"525\"\u003e\u003c/rect\u003e\u003c/svg\u003e\n\t\t\t\t\t\t\u003cdiv class=\"story-image__content image-lazy\"\u003e\u003ca href=\"https://cs15.pikabu.ru/post_img/2025/02/04/1/1738626972244429218.jpg\" target=\"_blank\" class=\"image-link\"\u003e\u003cimg data-src=\"https://cs15.pikabu.ru/post_img/2025/02/04/1/1738626972244429218.jpg\" src=\"\" data-large-image=\"https://cs15.pikabu.ru/post_img/2025/02/04/1/1738626972244429218.jpg\" class=\"story-image__image\" data-viewable=\"true\" alt=\"Катер на подводных крыльях \"Волга\".Рукожопства пост Судно на подводных крыльях, Река Волга, Газ-24 Волга, Длиннопостопост\"\u003e\u003c/a\u003e\u003c/div\u003e\n\t\t\t\t\n\t\t\t\t\t\u003c/figure\u003e\n\t\t\t\n\t\t\t\t\u003c/div\u003e\n\t\t\t\n\t\t\t\t\t\t\u003cdiv class=\"story-block story-block_type_text\"\u003e\n\t\t\t\t\t\t\t\u003cp\u003eВведите описание к изображению (не обязательно)\u003c/p\u003e\n\t\t\t\t\t\t\u003c/div\u003e\n\t\t\t\t\t\n\t\t\t\t\t\t\u003cdiv class=\"story-block story-block_type_text\"\u003e\n\t\t\t\t\t\t\t\u003cp\u003eНа сегодня хватит.Если будет интерес,продолжу.\u003c/p\u003e\n\t\t\t\t\t\t\u003c/div\u003e\n\t\t\t\t\t\n\t\t\t\t\t\t\u003cdiv class=\"story-block story-block_type_text\"\u003e\n\t\t\t\t\t\t\t\u003cp\u003eСразу скажу,я не реставратор,и не собираюсь её вылизывать в \nяичко.Она сильно гнилая и мятая.надо по-хорошему все днище менять.По \nвозможности как можно дольше продержу ее на ходу и потихоньку \nвостанавливает,я не миллионер ,а простой автослесарь.лодка первая в \nсвоей серии,и дарил массу эмоций\u003c/p\u003e\n\t\t\t\t\t\t\u003c/div\u003e\n\t\t\t\t\t\n\t\t\t",
+                "mime": "text/html"
+            }
+        ],
+        "attachment": [
+            {
+                "url": "12335104_files/1738624652296130852.jpg",
+                "mime": "image/jpeg"
+            },
+            {
+                "url": "12335104_files/173862465422011866.jpg",
+                "mime": "image/jpeg"
+            },
+            {
+                "url": "12335104_files/1738624654267683230.jpg",
+                "mime": "image/jpeg"
+            },
+            {
+                "url": "12335104_files/1738625334179466890.jpg",
+                "mime": "image/jpeg"
+            },
+            {
+                "url": "12335104_files/1738625334228049670.jpg",
+                "mime": "image/jpeg"
+            },
+            {
+                "url": "12335104_files/1738626485233598149.jpg",
+                "mime": "image/jpeg"
+            },
+            {
+                "url": "12335104_files/1738626486234564464.jpg",
+                "mime": "image/jpeg"
+            },
+            {
+                "url": "12335104_files/1738626710173063898.jpg",
+                "mime": "image/jpeg"
+            },
+            {
+                "url": "12335104_files/1738626713119853125.jpg",
+                "mime": "image/jpeg"
+            },
+            {
+                "url": "12335104_files/1738626713185673593.jpg",
+                "mime": "image/jpeg"
+            },
+            {
+                "url": "12335104_files/1738627271281386602.jpg",
+                "mime": "image/jpeg"
+            },
+            {
+                "url": "https://cs15.pikabu.ru/post_img/2025/02/04/1/1738624652296130852.jpg",
+                "mime": "image/jpeg"
+            },
+            {
+                "url": "https://cs15.pikabu.ru/post_img/2025/02/04/1/173862465422011866.jpg",
+                "mime": "image/jpeg"
+            },
+            {
+                "url": "https://cs15.pikabu.ru/post_img/2025/02/04/1/1738624654267683230.jpg",
+                "mime": "image/jpeg"
+            },
+            {
+                "url": "https://cs15.pikabu.ru/post_img/2025/02/04/1/1738624655231628980.jpg",
+                "mime": "image/jpeg"
+            },
+            {
+                "url": "https://cs15.pikabu.ru/post_img/2025/02/04/1/173862465629976186.jpg",
+                "mime": "image/jpeg"
+            },
+            {
+                "url": "https://cs15.pikabu.ru/post_img/2025/02/04/1/1738624657157979298.jpg",
+                "mime": "image/jpeg"
+            },
+            {
+                "url": "https://cs15.pikabu.ru/post_img/2025/02/04/1/1738624658139093593.jpg",
+                "mime": "image/jpeg"
+            },
+            {
+                "url": "https://cs15.pikabu.ru/post_img/2025/02/04/1/1738625334114077561.jpg",
+                "mime": "image/jpeg"
+            },
+            {
+                "url": "https://cs15.pikabu.ru/post_img/2025/02/04/1/1738625334179466890.jpg",
+                "mime": "image/jpeg"
+            },
+            {
+                "url": "https://cs15.pikabu.ru/post_img/2025/02/04/1/1738625334228049670.jpg",
+                "mime": "image/jpeg"
+            },
+            {
+                "url": "https://cs15.pikabu.ru/post_img/2025/02/04/1/173862533611561908.jpg",
+                "mime": "image/jpeg"
+            },
+            {
+                "url": "https://cs15.pikabu.ru/post_img/2025/02/04/1/173862533618646612.jpg",
+                "mime": "image/jpeg"
+            },
+            {
+                "url": "https://cs15.pikabu.ru/post_img/2025/02/04/1/1738625337195163896.jpg",
+                "mime": "image/jpeg"
+            },
+            {
+                "url": "https://cs15.pikabu.ru/post_img/2025/02/04/1/1738626339110920101.jpg",
+                "mime": "image/jpeg"
+            },
+            {
+                "url": "https://cs15.pikabu.ru/post_img/2025/02/04/1/1738626339145355267.jpg",
+                "mime": "image/jpeg"
+            },
+            {
+                "url": "https://cs15.pikabu.ru/post_img/2025/02/04/1/1738626484263831287.jpg",
+                "mime": "image/jpeg"
+            },
+            {
+                "url": "https://cs15.pikabu.ru/post_img/2025/02/04/1/1738626484296863466.jpg",
+                "mime": "image/jpeg"
+            },
+            {
+                "url": "https://cs15.pikabu.ru/post_img/2025/02/04/1/1738626485233598149.jpg",
+                "mime": "image/jpeg"
+            },
+            {
+                "url": "https://cs15.pikabu.ru/post_img/2025/02/04/1/1738626486234564464.jpg",
+                "mime": "image/jpeg"
+            },
+            {
+                "url": "https://cs15.pikabu.ru/post_img/2025/02/04/1/1738626620146594269.jpg",
+                "mime": "image/jpeg"
+            },
+            {
+                "url": "https://cs15.pikabu.ru/post_img/2025/02/04/1/1738626620174272532.jpg",
+                "mime": "image/jpeg"
+            },
+            {
+                "url": "https://cs15.pikabu.ru/post_img/2025/02/04/1/1738626845273642190.jpg",
+                "mime": "image/jpeg"
+            },
+            {
+                "url": "https://cs15.pikabu.ru/post_img/2025/02/04/1/1738626972244429218.jpg",
+                "mime": "image/jpeg"
+            },
+            {
+                "url": "https://cs15.pikabu.ru/post_img/2025/02/04/2/1738627271281386602.jpg",
+                "mime": "image/jpeg"
+            },
+            {
+                "url": "https://cs15.pikabu.ru/post_img/2025/02/04/2/1738627272235311166.jpg",
+                "mime": "image/jpeg"
+            },
+            {
+                "url": "https://cs15.pikabu.ru/post_img/big/2025/02/04/1/1738624657157979298.jpg",
+                "mime": "image/jpeg"
+            },
+            {
+                "url": "https://cs15.pikabu.ru/post_img/big/2025/02/04/1/1738624658139093593.jpg",
+                "mime": "image/jpeg"
+            },
+            {
+                "url": "https://cs15.pikabu.ru/post_img/big/2025/02/04/1/1738625334114077561.jpg",
+                "mime": "image/jpeg"
+            },
+            {
+                "url": "https://cs15.pikabu.ru/post_img/big/2025/02/04/1/1738625334179466890.jpg",
+                "mime": "image/jpeg"
+            },
+            {
+                "url": "https://cs15.pikabu.ru/post_img/big/2025/02/04/1/173862533611561908.jpg",
+                "mime": "image/jpeg"
+            },
+            {
+                "url": "https://cs15.pikabu.ru/post_img/big/2025/02/04/1/173862533618646612.jpg",
+                "mime": "image/jpeg"
+            },
+            {
+                "url": "https://cs15.pikabu.ru/post_img/big/2025/02/04/1/1738625337195163896.jpg",
+                "mime": "image/jpeg"
+            },
+            {
+                "url": "https://cs15.pikabu.ru/post_img/big/2025/02/04/1/1738626339110920101.jpg",
+                "mime": "image/jpeg"
+            },
+            {
+                "url": "https://cs15.pikabu.ru/post_img/big/2025/02/04/1/1738626339145355267.jpg",
+                "mime": "image/jpeg"
+            },
+            {
+                "url": "https://cs15.pikabu.ru/post_img/big/2025/02/04/1/1738626620146594269.jpg",
+                "mime": "image/jpeg"
+            },
+            {
+                "url": "https://cs15.pikabu.ru/post_img/big/2025/02/04/1/1738626620174272532.jpg",
+                "mime": "image/jpeg"
+            },
+            {
+                "url": "https://cs15.pikabu.ru/post_img/big/2025/02/04/1/1738626710173063898.jpg",
+                "mime": "image/jpeg"
+            },
+            {
+                "url": "https://cs15.pikabu.ru/post_img/big/2025/02/04/1/1738626713119853125.jpg",
+                "mime": "image/jpeg"
+            },
+            {
+                "url": "https://cs15.pikabu.ru/post_img/big/2025/02/04/1/1738626713185673593.jpg",
+                "mime": "image/jpeg"
+            }
+        ],
+        "stats": [
+            {
+                "type": 1,
+                "counter": 3317
+            }
+        ]
+    }
+]

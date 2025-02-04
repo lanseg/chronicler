@@ -14,13 +14,20 @@
         "editor.formatOnSave": true,
         "makefile.configureOnOpen": false,
         "cSpell.words": [
+            "bumplimit",
+            "capcode",
             "charmap",
             "Debugf",
+            "filedeleted",
+            "fourchan",
+            "fsize",
             "iferr",
+            "imagelimit",
             "Infof",
             "lipsum",
             "Pikabu",
             "protoc",
+            "Resto",
             "Warningf"
         ]
     }

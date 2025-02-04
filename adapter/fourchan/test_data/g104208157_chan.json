@@ -1,0 +1,644 @@
+{
+    "posts": [
+        {
+            "no": 104208157,
+            "now": "02\/04\/25(Tue)08:09:33",
+            "name": "Anonymous",
+            "sub": "Pirated software is full of malware and you&#039;re coping",
+            "com": "Why do people say that &quot;pirated games don&#039;t have viruses bro&quot;, it seems to be a common myth. For example, entire &quot;online-fix&quot; is basically just malware distribution with a crypto miner. Every single time I went through their .dlls at least one had an obvious detection.<br><br>Hell, I came across an infected .dll even in a fitgirl release. Fitgirl just repacks, yet still will pull infected crap sometimes, and that&#039;s the uploader with least cases so far. However I noticed almost EVERY uploader has malware in their shit. I only downloaded from &quot;&quot;trusted&quot;&quot; downloaders on 1337x (such as fitgirl or DODI). I even got banned once on 1337 for mentioning detections on one of their files. What a coincidence eh?<br><br>And that&#039;s only the ones that virustotal can detect. Can you imagine the amount of novel malware that goes undetected in newer releases? AV programs aren&#039;t perfect and it usually takes months before they reliably detect a new threat. <br><br>tl;dr pirated games are a haven for cryptominers and mass stealing of data\/joining your PC into a botnet.<br><br>Ever since I started scanning every single file in pirated games I downloaded I stopped trusting any and all &quot;torrenting&quot; sites. I guess it&#039;s true, if you don&#039;t pay, you&#039;re the product. Also protip: never trust big .exe files. They are overbloated so you can&#039;t scan them and guaranteed to be malware.",
+            "filename": "onlinefix",
+            "ext": ".png",
+            "w": 1503,
+            "h": 1170,
+            "tn_w": 250,
+            "tn_h": 194,
+            "tim": 1738674573182974,
+            "time": 1738674573,
+            "md5": "QGkpVYKIo3MGGDWTlyB+CQ==",
+            "fsize": 168514,
+            "resto": 0,
+            "bumplimit": 0,
+            "imagelimit": 0,
+            "semantic_url": "pirated-software-is-full-of-malware-and-youre",
+            "replies": 68,
+            "images": 8
+        },
+        {
+            "no": 104208169,
+            "now": "02\/04\/25(Tue)08:10:42",
+            "name": "Anonymous",
+            "com": "Didn&#039;t read see you on page 10, buyfag",
+            "time": 1738674642,
+            "resto": 104208157
+        },
+        {
+            "no": 104208179,
+            "now": "02\/04\/25(Tue)08:12:18",
+            "name": "Anonymous",
+            "com": "<a href=\"#p104208157\" class=\"quotelink\">&gt;&gt;104208157<\/a><br>Outside world is full of virus which can kill you. Stay in your basement forever, retard.",
+            "time": 1738674738,
+            "resto": 104208157
+        },
+        {
+            "no": 104208189,
+            "now": "02\/04\/25(Tue)08:13:37",
+            "name": "Anonymous",
+            "com": "<a href=\"#p104208179\" class=\"quotelink\">&gt;&gt;104208179<\/a><br>That&#039;s why I have an immune system which reliably detects them and fights them off.",
+            "time": 1738674817,
+            "resto": 104208157
+        },
+        {
+            "no": 104208206,
+            "now": "02\/04\/25(Tue)08:15:35",
+            "name": "Anonymous",
+            "com": "<span class=\"quote\">&gt;Packed.VMProtect.AC<\/span><br>No fucking shit, it&#039;s a modified tamper protection file to bypass copy protection, of course it&#039;s false flagged as malware.",
+            "time": 1738674935,
+            "resto": 104208157
+        },
+        {
+            "no": 104208211,
+            "now": "02\/04\/25(Tue)08:16:14",
+            "name": "Anonymous",
+            "com": "<a href=\"#p104208157\" class=\"quotelink\">&gt;&gt;104208157<\/a><br><span class=\"quote\">&gt;Pirated software is full of malware<\/span><br>probably. imagine the payload.<br>retard faggots executing executables? it&#039;s perfect and they&#039;re trained to pretend all the AV scans are &quot;false positives.&quot; I legitimately cannot fathom being dumb enough to do it.",
+            "time": 1738674974,
+            "resto": 104208157
+        },
+        {
+            "no": 104208235,
+            "now": "02\/04\/25(Tue)08:18:25",
+            "name": "Anonymous",
+            "com": "<a href=\"#p104208157\" class=\"quotelink\">&gt;&gt;104208157<\/a><br>Tech illiterates shouldn&#039;t be allowed to pirate.",
+            "time": 1738675105,
+            "resto": 104208157
+        },
+        {
+            "no": 104208244,
+            "now": "02\/04\/25(Tue)08:18:52",
+            "name": "Anonymous",
+            "com": "<a href=\"#p104208206\" class=\"quotelink\">&gt;&gt;104208206<\/a><br>That&#039;s why they use to prevent reverse engineering\/hide purpose. It&#039;s a new .dll file provided by the cracker. Why would you do this unless you wanted to hide what the dll you inject does?",
+            "time": 1738675132,
+            "resto": 104208157
+        },
+        {
+            "no": 104208245,
+            "now": "02\/04\/25(Tue)08:18:56",
+            "name": "Anonymous",
+            "com": "<a href=\"#p104208235\" class=\"quotelink\">&gt;&gt;104208235<\/a><br><span class=\"quote\">&gt;T-tech illiterates shouldn&#039;t be allowed to pirate.<\/span><br>says the retard who runs literal malware.",
+            "time": 1738675136,
+            "resto": 104208157
+        },
+        {
+            "no": 104208262,
+            "now": "02\/04\/25(Tue)08:21:01",
+            "name": "Anonymous",
+            "com": "<a href=\"#p104208244\" class=\"quotelink\">&gt;&gt;104208244<\/a><br>my guess would be that they&#039;re trying to obfuscate their code so companies can&#039;t look at how they bypassed their copy protection",
+            "time": 1738675261,
+            "resto": 104208157
+        },
+        {
+            "no": 104208279,
+            "now": "02\/04\/25(Tue)08:22:38",
+            "name": "Anonymous",
+            "com": "<a href=\"#p104208262\" class=\"quotelink\">&gt;&gt;104208262<\/a><br>Some publishers use VMProtect on their executables, OP must be from some Ubisoft garbage",
+            "time": 1738675358,
+            "resto": 104208157
+        },
+        {
+            "no": 104208300,
+            "now": "02\/04\/25(Tue)08:24:54",
+            "name": "Anonymous",
+            "com": "<a href=\"#p104208279\" class=\"quotelink\">&gt;&gt;104208279<\/a><br><span class=\"quote\">&gt;Ubisoft<\/span><br>I&#039;m surprised people even want to pirate these desu",
+            "time": 1738675494,
+            "resto": 104208157
+        },
+        {
+            "no": 104208305,
+            "now": "02\/04\/25(Tue)08:25:14",
+            "name": "Anonymous",
+            "com": "<a href=\"#p104208245\" class=\"quotelink\">&gt;&gt;104208245<\/a><br><span class=\"quote\">&gt;retard who runs literal malware<\/span><br>But enough about anti-tamper software.<br>It&#039;s true retards looking up &quot;X.dll download&quot; is the easiest way to catch AIDS though.",
+            "time": 1738675514,
+            "resto": 104208157
+        },
+        {
+            "no": 104208313,
+            "now": "02\/04\/25(Tue)08:25:45",
+            "name": "Anonymous",
+            "com": "<a href=\"#p104208300\" class=\"quotelink\">&gt;&gt;104208300<\/a><br><a href=\"#p104208279\" class=\"quotelink\">&gt;&gt;104208279<\/a><br><a href=\"#p104208262\" class=\"quotelink\">&gt;&gt;104208262<\/a><br>This particular detection is Palworld. So no. Retards.",
+            "time": 1738675545,
+            "resto": 104208157
+        },
+        {
+            "no": 104208316,
+            "now": "02\/04\/25(Tue)08:25:50",
+            "name": "Anonymous",
+            "com": "<a href=\"#p104208157\" class=\"quotelink\">&gt;&gt;104208157<\/a><br>I personally wouldn&#039;t allow that on my machine, but none of those detections on VirusTotal are meaningful.",
+            "time": 1738675550,
+            "resto": 104208157
+        },
+        {
+            "no": 104208320,
+            "now": "02\/04\/25(Tue)08:26:00",
+            "name": "Anonymous",
+            "com": "<a href=\"#p104208244\" class=\"quotelink\">&gt;&gt;104208244<\/a><br><span class=\"quote\">&gt;Why would you do this unless you wanted to hide what the dll you inject does?<\/span><br>that&#039;s part of the scam too, to be fair. they want to be the single source but they also want to make the game dev wagies sweat trying to prevent it.<br>I still think anyone who downloads tampered executable code and goes and actually executes it outside of some kind of isolation or VM is a fucking retard.",
+            "time": 1738675560,
+            "resto": 104208157
+        },
+        {
+            "no": 104208331,
+            "now": "02\/04\/25(Tue)08:26:46",
+            "name": "Anonymous",
+            "com": "<a href=\"#p104208157\" class=\"quotelink\">&gt;&gt;104208157<\/a><br>AV companies get money to flag cracks as a virus.",
+            "time": 1738675606,
+            "resto": 104208157
+        },
+        {
+            "no": 104208336,
+            "now": "02\/04\/25(Tue)08:27:02",
+            "name": "Anonymous",
+            "com": "<a href=\"#p104208157\" class=\"quotelink\">&gt;&gt;104208157<\/a><br>so? if anything happens, I&#039;ll format the drive and go again",
+            "time": 1738675622,
+            "resto": 104208157
+        },
+        {
+            "no": 104208339,
+            "now": "02\/04\/25(Tue)08:27:11",
+            "name": "Anonymous",
+            "com": "<a href=\"#p104208157\" class=\"quotelink\">&gt;&gt;104208157<\/a><br>I&#039;m still not buying your $60 slop, Peter.",
+            "time": 1738675631,
+            "resto": 104208157
+        },
+        {
+            "no": 104208349,
+            "now": "02\/04\/25(Tue)08:28:06",
+            "name": "Anonymous",
+            "com": "<a href=\"#p104208305\" class=\"quotelink\">&gt;&gt;104208305<\/a><br><span class=\"quote\">&gt;But enough about anti-tamper software.<\/span><br>I don&#039;t defend nonfree shitware either, but you&#039;re literally a fucking mouth breathing retard if you think a literal criminal vs a publisher + dev studio who can be sued and held accountable are the same thing.<br><br>again, if you actually execute this shit, you&#039;re literally retarded.",
+            "time": 1738675686,
+            "resto": 104208157
+        },
+        {
+            "no": 104208365,
+            "now": "02\/04\/25(Tue)08:29:03",
+            "name": "Anonymous",
+            "com": "<a href=\"#p104208313\" class=\"quotelink\">&gt;&gt;104208313<\/a>",
+            "filename": "file",
+            "ext": ".jpg",
+            "w": 540,
+            "h": 541,
+            "tn_w": 124,
+            "tn_h": 125,
+            "tim": 1738675743133745,
+            "time": 1738675743,
+            "md5": "wvyd2z6+oZEknIbqR1+odw==",
+            "fsize": 39124,
+            "resto": 104208157
+        },
+        {
+            "no": 104208381,
+            "now": "02\/04\/25(Tue)08:30:02",
+            "name": "Anonymous",
+            "com": "it&#039;s proprietary, it&#039;s malware by definion.",
+            "filename": "1708135321458702",
+            "ext": ".png",
+            "w": 872,
+            "h": 720,
+            "tn_w": 125,
+            "tn_h": 103,
+            "tim": 1738675802996383,
+            "time": 1738675802,
+            "md5": "799qTObqdVvyJUnapeDV1w==",
+            "fsize": 524897,
+            "resto": 104208157
+        },
+        {
+            "no": 104208398,
+            "now": "02\/04\/25(Tue)08:30:59",
+            "name": "Anonymous",
+            "com": "<a href=\"#p104208349\" class=\"quotelink\">&gt;&gt;104208349<\/a><br>ah yes, we all remember that time that sony totally didn&#039;t install literal rootkits onto our PCs because that would hurt them",
+            "time": 1738675859,
+            "resto": 104208157
+        },
+        {
+            "no": 104208402,
+            "now": "02\/04\/25(Tue)08:31:33",
+            "name": "Anonymous",
+            "com": "<a href=\"#p104208398\" class=\"quotelink\">&gt;&gt;104208398<\/a><br>At least they didn&#039;t steal your data and identity.",
+            "time": 1738675893,
+            "resto": 104208157
+        },
+        {
+            "no": 104208403,
+            "now": "02\/04\/25(Tue)08:31:34",
+            "name": "Anonymous",
+            "com": "<a href=\"#p104208157\" class=\"quotelink\">&gt;&gt;104208157<\/a><br>Irrelevant for 99% of cases since for Steam you can get clean files directly from Valve and use an open source emulator, and for GOG installers check the MD5 to see if it&#039;s untampered.<br>For EA\/Ubisoft\/Sega bullshit that require three cracks, a VM and a backwards cartwheel to bypass the DRM, you&#039;re on your own",
+            "time": 1738675894,
+            "resto": 104208157
+        },
+        {
+            "no": 104208410,
+            "now": "02\/04\/25(Tue)08:31:54",
+            "name": "Anonymous",
+            "com": "<a href=\"#p104208157\" class=\"quotelink\">&gt;&gt;104208157<\/a><br><span class=\"quote\">&gt;fitgirl<\/span><br>You&#039;re a fucking retard never post here again.",
+            "time": 1738675914,
+            "resto": 104208157
+        },
+        {
+            "no": 104208412,
+            "now": "02\/04\/25(Tue)08:32:06",
+            "name": "Anonymous",
+            "com": "<a href=\"#p104208402\" class=\"quotelink\">&gt;&gt;104208402<\/a><br><span class=\"quote\">&gt;<\/span>",
+            "time": 1738675926,
+            "resto": 104208157
+        },
+        {
+            "no": 104208458,
+            "now": "02\/04\/25(Tue)08:35:46",
+            "name": "Anonymous",
+            "com": "<a href=\"#p104208398\" class=\"quotelink\">&gt;&gt;104208398<\/a><br>I bought one of those CDs and the &quot;protection&quot; was useless anyway because if you had autorun disabled on your PC it wouldn&#039;t execute and install. I was able to rip the CD just fine and copy it to my mp3 player as any legally paying customer should be able to do.",
+            "time": 1738676146,
+            "resto": 104208157
+        },
+        {
+            "no": 104208465,
+            "now": "02\/04\/25(Tue)08:36:38",
+            "name": "Anonymous",
+            "com": "<a href=\"#p104208157\" class=\"quotelink\">&gt;&gt;104208157<\/a><br>Idk, my router shows no suspicious connections from my PC (I use firewall btw, so Windows don&#039;t shit in logs).",
+            "time": 1738676198,
+            "resto": 104208157
+        },
+        {
+            "no": 104208485,
+            "now": "02\/04\/25(Tue)08:38:14",
+            "name": "Anonymous",
+            "com": "<a href=\"#p104208458\" class=\"quotelink\">&gt;&gt;104208458<\/a><br><span class=\"quote\">&gt;rip the CD just fine and copy it to my mp3 player<\/span>",
+            "filename": "542-5428066_post-happy-merchant-meme-color",
+            "ext": ".jpg",
+            "w": 820,
+            "h": 807,
+            "tn_w": 125,
+            "tn_h": 123,
+            "tim": 1738676294061421,
+            "time": 1738676294,
+            "md5": "C5GfJBsF\/+A+UbfFcJtixg==",
+            "fsize": 299931,
+            "resto": 104208157
+        },
+        {
+            "no": 104208500,
+            "now": "02\/04\/25(Tue)08:39:26",
+            "name": "Anonymous",
+            "com": "<a href=\"#p104208349\" class=\"quotelink\">&gt;&gt;104208349<\/a><br><span class=\"quote\">&gt;again, if you actually execute this shit, you&#039;re literally retarded.<\/span><br>I&#039;ve pirated tens of thousands of euros of software of all types for my whole life, and never got any malware, never lost any account, not a peep.",
+            "filename": "1727618503853478",
+            "ext": ".png",
+            "w": 839,
+            "h": 839,
+            "tn_w": 125,
+            "tn_h": 125,
+            "tim": 1738676366893564,
+            "time": 1738676366,
+            "md5": "Qenb488tL2zSoCvvf4uXvA==",
+            "fsize": 1234051,
+            "resto": 104208157
+        },
+        {
+            "no": 104208504,
+            "now": "02\/04\/25(Tue)08:39:42",
+            "name": "Anonymous",
+            "com": "<a href=\"#p104208398\" class=\"quotelink\">&gt;&gt;104208398<\/a><br>and they were held accountable for it.<br>nice self-own though, retard.",
+            "time": 1738676382,
+            "resto": 104208157
+        },
+        {
+            "no": 104208516,
+            "now": "02\/04\/25(Tue)08:40:42",
+            "name": "Anonymous",
+            "com": "<a href=\"#p104208500\" class=\"quotelink\">&gt;&gt;104208500<\/a><br><span class=\"quote\">&gt;I-i never got malware I swear goy!<\/span><br>retards like this is why your site get&#039;s DoS&#039;d by TB of crap.",
+            "time": 1738676442,
+            "resto": 104208157
+        },
+        {
+            "no": 104208531,
+            "now": "02\/04\/25(Tue)08:41:57",
+            "name": "Anonymous",
+            "com": "<a href=\"#p104208189\" class=\"quotelink\">&gt;&gt;104208189<\/a><br>Thank you based avast",
+            "time": 1738676517,
+            "resto": 104208157
+        },
+        {
+            "no": 104208561,
+            "now": "02\/04\/25(Tue)08:44:36",
+            "name": "Anonymous",
+            "com": "After installing bunch of pirate adobe software, every time i google, google ask for captcha.<br><br>Don&#039;t know if isp give me dirty ip address or just adobe pirate doing some ddos",
+            "time": 1738676676,
+            "resto": 104208157
+        },
+        {
+            "no": 104208632,
+            "now": "02\/04\/25(Tue)08:51:11",
+            "name": "Anonymous",
+            "com": "<a href=\"#p104208516\" class=\"quotelink\">&gt;&gt;104208516<\/a><br><span class=\"quote\">&gt;never got malware<\/span><br>Correct.",
+            "time": 1738677071,
+            "resto": 104208157
+        },
+        {
+            "no": 104208680,
+            "now": "02\/04\/25(Tue)08:56:04",
+            "name": "Anonymous",
+            "com": "<a href=\"#p104208561\" class=\"quotelink\">&gt;&gt;104208561<\/a><br>it&#039;s because you&#039;re a part of a botnet retard, like this delusional faggot <a href=\"#p104208632\" class=\"quotelink\">&gt;&gt;104208632<\/a>",
+            "time": 1738677364,
+            "resto": 104208157
+        },
+        {
+            "no": 104208713,
+            "now": "02\/04\/25(Tue)09:00:10",
+            "name": "Anonymous",
+            "com": "<a href=\"#p104208680\" class=\"quotelink\">&gt;&gt;104208680<\/a><br>hahahahaha",
+            "time": 1738677610,
+            "resto": 104208157
+        },
+        {
+            "no": 104208720,
+            "now": "02\/04\/25(Tue)09:00:55",
+            "name": "Anonymous",
+            "com": "<a href=\"#p104208157\" class=\"quotelink\">&gt;&gt;104208157<\/a><br><span class=\"quote\">&gt;buy new laptop 6 years ago<\/span><br><span class=\"quote\">&gt;idle is 1-3% use 45c temp<\/span><br><span class=\"quote\">&gt;pirate countless games and software<\/span><br><span class=\"quote\">&gt;still 1-3% use and 45c temp today<\/span><br><br>botnet and miners you say hmmm....",
+            "time": 1738677655,
+            "resto": 104208157
+        },
+        {
+            "no": 104208741,
+            "now": "02\/04\/25(Tue)09:01:54",
+            "name": "Anonymous",
+            "com": "<a href=\"#p104208157\" class=\"quotelink\">&gt;&gt;104208157<\/a><br>skill issue<br>I download everything from rutracker, besides anime",
+            "time": 1738677714,
+            "resto": 104208157
+        },
+        {
+            "no": 104208767,
+            "now": "02\/04\/25(Tue)09:04:16",
+            "name": "Anonymous",
+            "com": "<a href=\"#p104208157\" class=\"quotelink\">&gt;&gt;104208157<\/a><br><span class=\"quote\">&gt;download normal software from reputable source<\/span><br><span class=\"quote\">&gt;SEVERE THREAT ALERT<\/span><br><span class=\"quote\">&gt;SEVERE THREAT ALERT TROJAN HORSE AAAAAAAAA<\/span><br><span class=\"quote\">&gt;...<\/span><br><span class=\"quote\">&gt;it&#039;s wack attack nothingburger false flag<\/span><br><br>every fucking time",
+            "filename": "Wacatac-Trojan",
+            "ext": ".png",
+            "w": 669,
+            "h": 388,
+            "tn_w": 125,
+            "tn_h": 72,
+            "tim": 1738677856275634,
+            "time": 1738677856,
+            "md5": "XrJIx9JvqnMrmtCdtyaHHw==",
+            "fsize": 42060,
+            "resto": 104208157
+        },
+        {
+            "no": 104208845,
+            "now": "02\/04\/25(Tue)09:11:02",
+            "name": "Anonymous",
+            "com": "I only download scene releases and I trust scene groups more than I trust the original publisher.",
+            "time": 1738678262,
+            "resto": 104208157
+        },
+        {
+            "no": 104208875,
+            "now": "02\/04\/25(Tue)09:12:26",
+            "name": "Anonymous",
+            "com": "what&#039;s a good malware removal app? malwarebytes doesn&#039;t seem to detect this virus i seem to have when i google things. i get a &#039; trktacular&#039; error code and it&#039;s annoying as hell.",
+            "time": 1738678346,
+            "resto": 104208157
+        },
+        {
+            "no": 104208896,
+            "now": "02\/04\/25(Tue)09:14:02",
+            "name": "Anonymous",
+            "com": "<a href=\"#p104208157\" class=\"quotelink\">&gt;&gt;104208157<\/a><br><span class=\"quote\">&gt; caring about viruses<\/span><br>I have a dedicated box for playing games.  They can mine bitcoin or whatever the fuck else they want as long as the game works.",
+            "time": 1738678442,
+            "resto": 104208157
+        },
+        {
+            "no": 104208901,
+            "now": "02\/04\/25(Tue)09:14:15",
+            "name": "php-dude",
+            "com": "ye, sure, hey yo yo, everybody, listen to that troonified microsoft manager..<br><br>windows is a virus itself, who cares what it runs, just re-flash it when it becomes unstable and avoid the problematic source next time. torrenters will fry uploader anyway. make us whole microsoft, start torrenting, hehe",
+            "time": 1738678455,
+            "resto": 104208157
+        },
+        {
+            "no": 104208910,
+            "now": "02\/04\/25(Tue)09:14:49",
+            "name": "Anonymous",
+            "com": "Retards see no problem with getting their computer pozzed if it means free games <br><br>There\u2019s actually people out there who deliberately try to get aids. Same mindset as pirates",
+            "time": 1738678489,
+            "resto": 104208157
+        },
+        {
+            "no": 104208975,
+            "now": "02\/04\/25(Tue)09:18:55",
+            "name": "Anonymous",
+            "com": "<a href=\"#p104208157\" class=\"quotelink\">&gt;&gt;104208157<\/a><br><span class=\"quote\">&gt;years ago made a trainer for myself<\/span><br><span class=\"quote\">&gt;decide to share it<\/span><br><span class=\"quote\">&gt;DUN DOWNLOAD IT FRENS ITZ A VIRUS<\/span><br><span class=\"quote\">&gt;click report link<\/span><br><span class=\"quote\">&gt;69\/420 ITZ AAAA GENERIC HACKTOOL REEHHHHHH<\/span><br><span class=\"quote\">&gt;thread closed<\/span><br><span class=\"quote\">&gt;banned<\/span><br>never again",
+            "time": 1738678735,
+            "resto": 104208157
+        },
+        {
+            "no": 104208987,
+            "now": "02\/04\/25(Tue)09:19:33",
+            "name": "Anonymous",
+            "com": "<a href=\"#p104208910\" class=\"quotelink\">&gt;&gt;104208910<\/a><br><span class=\"quote\">&gt;muh pozzed muh aids<\/span><br>Yeah ok redcap boy you&#039;re totally knowledgable. Go put your wifebeater on and pretend you have a wife as you angrily wail at your drywall interior",
+            "time": 1738678773,
+            "resto": 104208157
+        },
+        {
+            "no": 104208999,
+            "now": "02\/04\/25(Tue)09:20:15",
+            "name": "Anonymous",
+            "com": "<a href=\"#p104208987\" class=\"quotelink\">&gt;&gt;104208987<\/a><br>You are pozzed",
+            "time": 1738678815,
+            "resto": 104208157
+        },
+        {
+            "no": 104209014,
+            "now": "02\/04\/25(Tue)09:21:16",
+            "name": "Anonymous",
+            "com": "kys govt agent",
+            "time": 1738678876,
+            "resto": 104208157
+        },
+        {
+            "no": 104209031,
+            "now": "02\/04\/25(Tue)09:22:10",
+            "name": "Anonymous",
+            "com": "<a href=\"#p104208999\" class=\"quotelink\">&gt;&gt;104208999<\/a><br><span class=\"quote\">&gt;Reeeeee poooozzeeeed<\/span><br>Why don&#039;t you just start screaming &quot;tranny&quot; already like you&#039;re programmed to do? :)",
+            "time": 1738678930,
+            "resto": 104208157
+        },
+        {
+            "no": 104209032,
+            "now": "02\/04\/25(Tue)09:22:11",
+            "name": "Anonymous",
+            "com": "<a href=\"#p104208157\" class=\"quotelink\">&gt;&gt;104208157<\/a><br>Bait used to be good.",
+            "time": 1738678931,
+            "resto": 104208157
+        },
+        {
+            "no": 104209058,
+            "now": "02\/04\/25(Tue)09:24:45",
+            "name": "Anonymous",
+            "com": "<a href=\"#p104209031\" class=\"quotelink\">&gt;&gt;104209031<\/a><br>Why don\u2019t you start DDOSing a website like your computer is programmed to do?",
+            "time": 1738679085,
+            "resto": 104208157
+        },
+        {
+            "no": 104209066,
+            "now": "02\/04\/25(Tue)09:25:17",
+            "name": "Anonymous",
+            "com": "<a href=\"#p104209058\" class=\"quotelink\">&gt;&gt;104209058<\/a><br>Citation needed",
+            "time": 1738679117,
+            "resto": 104208157
+        },
+        {
+            "no": 104209332,
+            "now": "02\/04\/25(Tue)09:50:55",
+            "name": "Anonymous",
+            "com": "<a href=\"#p104208875\" class=\"quotelink\">&gt;&gt;104208875<\/a><br>no such thing. just don&#039;t download malware or risk downloading malware downloading tampered binaries like a smoothbrained wincuckold.",
+            "time": 1738680655,
+            "resto": 104208157
+        },
+        {
+            "no": 104209362,
+            "now": "02\/04\/25(Tue)09:53:22",
+            "name": "Anonymous",
+            "com": "<a href=\"#p104209332\" class=\"quotelink\">&gt;&gt;104209332<\/a><br>well i havent had a virus in maybe 10 years, sometimes it just happens. this seems to be some weird redirect one, happens when i google. if you don&#039;t know then sorry for wasting your time, just frustrated.",
+            "filename": "3",
+            "ext": ".jpg",
+            "w": 1384,
+            "h": 127,
+            "tn_w": 125,
+            "tn_h": 11,
+            "tim": 1738680802243649,
+            "time": 1738680802,
+            "md5": "dP1EM2eM8\/IXAiJcdx5Iiw==",
+            "fsize": 51629,
+            "resto": 104208157
+        },
+        {
+            "no": 104209405,
+            "now": "02\/04\/25(Tue)09:56:28",
+            "name": "Anonymous",
+            "com": "<a href=\"#p104209362\" class=\"quotelink\">&gt;&gt;104209362<\/a><br>you probably got some generic http proxy malware. check your settings. it likely registers itself as a service you can disable as well.",
+            "time": 1738680988,
+            "resto": 104208157
+        },
+        {
+            "no": 104209461,
+            "now": "02\/04\/25(Tue)10:01:23",
+            "name": "Anonymous",
+            "com": "<a href=\"#p104208157\" class=\"quotelink\">&gt;&gt;104208157<\/a><br>repacks are for third worlders, only retards download  a random dll to fix an issue. <br>stick to private trackers or good usenet indexers and scene releases and you&#039;ll be fine.",
+            "time": 1738681283,
+            "resto": 104208157
+        },
+        {
+            "no": 104209477,
+            "now": "02\/04\/25(Tue)10:02:56",
+            "name": "Anonymous",
+            "com": "<a href=\"#p104209461\" class=\"quotelink\">&gt;&gt;104209461<\/a><br>I&#039;ll keep downloading fitgirl repacks and I&#039;ll keep making you cry about it.",
+            "time": 1738681376,
+            "resto": 104208157
+        },
+        {
+            "no": 104209492,
+            "now": "02\/04\/25(Tue)10:04:14",
+            "name": "Anonymous",
+            "com": "<a href=\"#p104209405\" class=\"quotelink\">&gt;&gt;104209405<\/a><br>thank you so much for replying and at least nudging me in some direction, i&#039;ll be researching this. have this pikachu i drew a while ago",
+            "filename": "pika",
+            "ext": ".jpg",
+            "w": 711,
+            "h": 910,
+            "tn_w": 97,
+            "tn_h": 125,
+            "tim": 1738681454525619,
+            "time": 1738681454,
+            "md5": "B7TA+W3HotbVKOVBXNUERg==",
+            "fsize": 94275,
+            "resto": 104208157
+        },
+        {
+            "no": 104209838,
+            "now": "02\/04\/25(Tue)10:32:26",
+            "name": "Anonymous",
+            "com": "<a href=\"#p104209477\" class=\"quotelink\">&gt;&gt;104209477<\/a><br>It doesn&#039;t make me cry. It just makes me pity you.",
+            "time": 1738683146,
+            "resto": 104208157
+        },
+        {
+            "no": 104209869,
+            "now": "02\/04\/25(Tue)10:34:06",
+            "name": "Anonymous",
+            "com": "<a href=\"#p104209838\" class=\"quotelink\">&gt;&gt;104209838<\/a><br>Your pity doesnt affect my life so... ???",
+            "time": 1738683246,
+            "resto": 104208157
+        },
+        {
+            "no": 104209876,
+            "now": "02\/04\/25(Tue)10:34:32",
+            "name": "Anonymous",
+            "com": "<a href=\"#p104209869\" class=\"quotelink\">&gt;&gt;104209869<\/a><br>Whatever you say, peasant.",
+            "time": 1738683272,
+            "resto": 104208157
+        },
+        {
+            "no": 104210021,
+            "now": "02\/04\/25(Tue)10:44:51",
+            "name": "Anonymous",
+            "com": "<a href=\"#p104208157\" class=\"quotelink\">&gt;&gt;104208157<\/a><br>I&#039;ve never gotten hacked, RATted, etc. by a torrent. However the internet is full of leaks and data breaches from webshitter sites that I&#039;ve logged into.  It&#039;s gotten to the point where a russian torrent is more trustworthy than typing your personal info into FAGMAN&#039;s webshite",
+            "time": 1738683891,
+            "resto": 104208157
+        },
+        {
+            "no": 104210164,
+            "now": "02\/04\/25(Tue)10:57:19",
+            "name": "Anonymous",
+            "com": "you&#039;d think theres some obvious easy windows solution where it goes &quot;heres an exe I want to not download anything or access the internet and watnot and keep all the files it handles in a restricted area&quot;<br><br>Like why isn&#039;t that just a basic windows feature in the context menu when you right click a pirated game.",
+            "time": 1738684639,
+            "resto": 104208157
+        },
+        {
+            "no": 104210179,
+            "now": "02\/04\/25(Tue)10:58:22",
+            "name": "SS2",
+            "com": "<a href=\"#p104208157\" class=\"quotelink\">&gt;&gt;104208157<\/a><br>It&#039;s a risk you take when game studios themselves start using these cracks because the DRM is out of control it makes you wonder a lot of things. You know, like all the DEI shit cancer these days. BTW did you know that modern denuvo DRM itself is malware? You LITERALLY lose performance and god knows how much privacy in games that have it.<br><br>https:\/\/wccftech.com\/tekken-7-denuv<wbr>o-drm-performance-issues\/<br>https:\/\/www.bleepingcomputer.com\/ne<wbr>ws\/gaming\/rockstar-games-reportedly<wbr>-sold-games-with-razor-1911-cracks-<wbr>on-steam\/",
+            "filename": "DEI",
+            "ext": ".webm",
+            "w": 1280,
+            "h": 720,
+            "tn_w": 125,
+            "tn_h": 70,
+            "tim": 1738684702948054,
+            "time": 1738684702,
+            "md5": "GHl8mM\/0CGNPp7NTe8LfYA==",
+            "fsize": 3977175,
+            "resto": 104208157,
+            "trip": "!!WVqoLX59JkL"
+        },
+        {
+            "no": 104210199,
+            "now": "02\/04\/25(Tue)10:59:55",
+            "name": "Anonymous",
+            "com": "<a href=\"#p104209876\" class=\"quotelink\">&gt;&gt;104209876<\/a><br>cope lol",
+            "time": 1738684795,
+            "resto": 104208157
+        },
+        {
+            "no": 104210206,
+            "now": "02\/04\/25(Tue)11:00:24",
+            "name": "Anonymous",
+            "com": "<a href=\"#p104208504\" class=\"quotelink\">&gt;&gt;104208504<\/a><br>No they weren&#039;t",
+            "time": 1738684824,
+            "resto": 104208157
+        },
+        {
+            "no": 104210218,
+            "now": "02\/04\/25(Tue)11:01:22",
+            "name": "Anonymous",
+            "com": "<a href=\"#p104210164\" class=\"quotelink\">&gt;&gt;104210164<\/a><br>firewall...",
+            "time": 1738684882,
+            "resto": 104208157
+        }
+    ]
+}

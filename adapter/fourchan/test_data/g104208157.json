@@ -1,0 +1,1310 @@
+[
+    {
+        "id": "104208157",
+        "createdAt": {
+            "seconds": 1738674573
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "Pirated software is full of malware and you\u0026#039;re coping",
+                "mime": "text/html"
+            },
+            {
+                "text": "Why do people say that \u0026quot;pirated games don\u0026#039;t have viruses bro\u0026quot;, it seems to be a common myth. For example, entire \u0026quot;online-fix\u0026quot; is basically just malware distribution with a crypto miner. Every single time I went through their .dlls at least one had an obvious detection.\u003cbr\u003e\u003cbr\u003eHell, I came across an infected .dll even in a fitgirl release. Fitgirl just repacks, yet still will pull infected crap sometimes, and that\u0026#039;s the uploader with least cases so far. However I noticed almost EVERY uploader has malware in their shit. I only downloaded from \u0026quot;\u0026quot;trusted\u0026quot;\u0026quot; downloaders on 1337x (such as fitgirl or DODI). I even got banned once on 1337 for mentioning detections on one of their files. What a coincidence eh?\u003cbr\u003e\u003cbr\u003eAnd that\u0026#039;s only the ones that virustotal can detect. Can you imagine the amount of novel malware that goes undetected in newer releases? AV programs aren\u0026#039;t perfect and it usually takes months before they reliably detect a new threat. \u003cbr\u003e\u003cbr\u003etl;dr pirated games are a haven for cryptominers and mass stealing of data/joining your PC into a botnet.\u003cbr\u003e\u003cbr\u003eEver since I started scanning every single file in pirated games I downloaded I stopped trusting any and all \u0026quot;torrenting\u0026quot; sites. I guess it\u0026#039;s true, if you don\u0026#039;t pay, you\u0026#039;re the product. Also protip: never trust big .exe files. They are overbloated so you can\u0026#039;t scan them and guaranteed to be malware.",
+                "mime": "text/html"
+            }
+        ],
+        "attachment": [
+            {
+                "url": "https://i.4cdn.org/g/1738674573182974.png",
+                "checksum": "md5:QGkpVYKIo3MGGDWTlyB+CQ==",
+                "mime": "image/png"
+            }
+        ]
+    },
+    {
+        "id": "104208169",
+        "parent": "104208157",
+        "createdAt": {
+            "seconds": 1738674642
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "Didn\u0026#039;t read see you on page 10, buyfag",
+                "mime": "text/html"
+            }
+        ]
+    },
+    {
+        "id": "104208179",
+        "parent": "104208157",
+        "createdAt": {
+            "seconds": 1738674738
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u003ca href=\"#p104208157\" class=\"quotelink\"\u003e\u0026gt;\u0026gt;104208157\u003c/a\u003e\u003cbr\u003eOutside world is full of virus which can kill you. Stay in your basement forever, retard.",
+                "mime": "text/html"
+            }
+        ]
+    },
+    {
+        "id": "104208189",
+        "parent": "104208179",
+        "createdAt": {
+            "seconds": 1738674817
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u003ca href=\"#p104208179\" class=\"quotelink\"\u003e\u0026gt;\u0026gt;104208179\u003c/a\u003e\u003cbr\u003eThat\u0026#039;s why I have an immune system which reliably detects them and fights them off.",
+                "mime": "text/html"
+            }
+        ]
+    },
+    {
+        "id": "104208206",
+        "parent": "104208157",
+        "createdAt": {
+            "seconds": 1738674935
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u003cspan class=\"quote\"\u003e\u0026gt;Packed.VMProtect.AC\u003c/span\u003e\u003cbr\u003eNo fucking shit, it\u0026#039;s a modified tamper protection file to bypass copy protection, of course it\u0026#039;s false flagged as malware.",
+                "mime": "text/html"
+            }
+        ]
+    },
+    {
+        "id": "104208211",
+        "parent": "104208157",
+        "createdAt": {
+            "seconds": 1738674974
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u003ca href=\"#p104208157\" class=\"quotelink\"\u003e\u0026gt;\u0026gt;104208157\u003c/a\u003e\u003cbr\u003e\u003cspan class=\"quote\"\u003e\u0026gt;Pirated software is full of malware\u003c/span\u003e\u003cbr\u003eprobably. imagine the payload.\u003cbr\u003eretard faggots executing executables? it\u0026#039;s perfect and they\u0026#039;re trained to pretend all the AV scans are \u0026quot;false positives.\u0026quot; I legitimately cannot fathom being dumb enough to do it.",
+                "mime": "text/html"
+            }
+        ]
+    },
+    {
+        "id": "104208235",
+        "parent": "104208157",
+        "createdAt": {
+            "seconds": 1738675105
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u003ca href=\"#p104208157\" class=\"quotelink\"\u003e\u0026gt;\u0026gt;104208157\u003c/a\u003e\u003cbr\u003eTech illiterates shouldn\u0026#039;t be allowed to pirate.",
+                "mime": "text/html"
+            }
+        ]
+    },
+    {
+        "id": "104208244",
+        "parent": "104208206",
+        "createdAt": {
+            "seconds": 1738675132
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u003ca href=\"#p104208206\" class=\"quotelink\"\u003e\u0026gt;\u0026gt;104208206\u003c/a\u003e\u003cbr\u003eThat\u0026#039;s why they use to prevent reverse engineering/hide purpose. It\u0026#039;s a new .dll file provided by the cracker. Why would you do this unless you wanted to hide what the dll you inject does?",
+                "mime": "text/html"
+            }
+        ]
+    },
+    {
+        "id": "104208245",
+        "parent": "104208235",
+        "createdAt": {
+            "seconds": 1738675136
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u003ca href=\"#p104208235\" class=\"quotelink\"\u003e\u0026gt;\u0026gt;104208235\u003c/a\u003e\u003cbr\u003e\u003cspan class=\"quote\"\u003e\u0026gt;T-tech illiterates shouldn\u0026#039;t be allowed to pirate.\u003c/span\u003e\u003cbr\u003esays the retard who runs literal malware.",
+                "mime": "text/html"
+            }
+        ]
+    },
+    {
+        "id": "104208262",
+        "parent": "104208244",
+        "createdAt": {
+            "seconds": 1738675261
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u003ca href=\"#p104208244\" class=\"quotelink\"\u003e\u0026gt;\u0026gt;104208244\u003c/a\u003e\u003cbr\u003emy guess would be that they\u0026#039;re trying to obfuscate their code so companies can\u0026#039;t look at how they bypassed their copy protection",
+                "mime": "text/html"
+            }
+        ]
+    },
+    {
+        "id": "104208279",
+        "parent": "104208262",
+        "createdAt": {
+            "seconds": 1738675358
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u003ca href=\"#p104208262\" class=\"quotelink\"\u003e\u0026gt;\u0026gt;104208262\u003c/a\u003e\u003cbr\u003eSome publishers use VMProtect on their executables, OP must be from some Ubisoft garbage",
+                "mime": "text/html"
+            }
+        ]
+    },
+    {
+        "id": "104208300",
+        "parent": "104208279",
+        "createdAt": {
+            "seconds": 1738675494
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u003ca href=\"#p104208279\" class=\"quotelink\"\u003e\u0026gt;\u0026gt;104208279\u003c/a\u003e\u003cbr\u003e\u003cspan class=\"quote\"\u003e\u0026gt;Ubisoft\u003c/span\u003e\u003cbr\u003eI\u0026#039;m surprised people even want to pirate these desu",
+                "mime": "text/html"
+            }
+        ]
+    },
+    {
+        "id": "104208305",
+        "parent": "104208245",
+        "createdAt": {
+            "seconds": 1738675514
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u003ca href=\"#p104208245\" class=\"quotelink\"\u003e\u0026gt;\u0026gt;104208245\u003c/a\u003e\u003cbr\u003e\u003cspan class=\"quote\"\u003e\u0026gt;retard who runs literal malware\u003c/span\u003e\u003cbr\u003eBut enough about anti-tamper software.\u003cbr\u003eIt\u0026#039;s true retards looking up \u0026quot;X.dll download\u0026quot; is the easiest way to catch AIDS though.",
+                "mime": "text/html"
+            }
+        ]
+    },
+    {
+        "id": "104208313",
+        "parent": "104208300",
+        "createdAt": {
+            "seconds": 1738675545
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u003ca href=\"#p104208300\" class=\"quotelink\"\u003e\u0026gt;\u0026gt;104208300\u003c/a\u003e\u003cbr\u003e\u003ca href=\"#p104208279\" class=\"quotelink\"\u003e\u0026gt;\u0026gt;104208279\u003c/a\u003e\u003cbr\u003e\u003ca href=\"#p104208262\" class=\"quotelink\"\u003e\u0026gt;\u0026gt;104208262\u003c/a\u003e\u003cbr\u003eThis particular detection is Palworld. So no. Retards.",
+                "mime": "text/html"
+            }
+        ]
+    },
+    {
+        "id": "104208316",
+        "parent": "104208157",
+        "createdAt": {
+            "seconds": 1738675550
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u003ca href=\"#p104208157\" class=\"quotelink\"\u003e\u0026gt;\u0026gt;104208157\u003c/a\u003e\u003cbr\u003eI personally wouldn\u0026#039;t allow that on my machine, but none of those detections on VirusTotal are meaningful.",
+                "mime": "text/html"
+            }
+        ]
+    },
+    {
+        "id": "104208320",
+        "parent": "104208244",
+        "createdAt": {
+            "seconds": 1738675560
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u003ca href=\"#p104208244\" class=\"quotelink\"\u003e\u0026gt;\u0026gt;104208244\u003c/a\u003e\u003cbr\u003e\u003cspan class=\"quote\"\u003e\u0026gt;Why would you do this unless you wanted to hide what the dll you inject does?\u003c/span\u003e\u003cbr\u003ethat\u0026#039;s part of the scam too, to be fair. they want to be the single source but they also want to make the game dev wagies sweat trying to prevent it.\u003cbr\u003eI still think anyone who downloads tampered executable code and goes and actually executes it outside of some kind of isolation or VM is a fucking retard.",
+                "mime": "text/html"
+            }
+        ]
+    },
+    {
+        "id": "104208331",
+        "parent": "104208157",
+        "createdAt": {
+            "seconds": 1738675606
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u003ca href=\"#p104208157\" class=\"quotelink\"\u003e\u0026gt;\u0026gt;104208157\u003c/a\u003e\u003cbr\u003eAV companies get money to flag cracks as a virus.",
+                "mime": "text/html"
+            }
+        ]
+    },
+    {
+        "id": "104208336",
+        "parent": "104208157",
+        "createdAt": {
+            "seconds": 1738675622
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u003ca href=\"#p104208157\" class=\"quotelink\"\u003e\u0026gt;\u0026gt;104208157\u003c/a\u003e\u003cbr\u003eso? if anything happens, I\u0026#039;ll format the drive and go again",
+                "mime": "text/html"
+            }
+        ]
+    },
+    {
+        "id": "104208339",
+        "parent": "104208157",
+        "createdAt": {
+            "seconds": 1738675631
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u003ca href=\"#p104208157\" class=\"quotelink\"\u003e\u0026gt;\u0026gt;104208157\u003c/a\u003e\u003cbr\u003eI\u0026#039;m still not buying your $60 slop, Peter.",
+                "mime": "text/html"
+            }
+        ]
+    },
+    {
+        "id": "104208349",
+        "parent": "104208305",
+        "createdAt": {
+            "seconds": 1738675686
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u003ca href=\"#p104208305\" class=\"quotelink\"\u003e\u0026gt;\u0026gt;104208305\u003c/a\u003e\u003cbr\u003e\u003cspan class=\"quote\"\u003e\u0026gt;But enough about anti-tamper software.\u003c/span\u003e\u003cbr\u003eI don\u0026#039;t defend nonfree shitware either, but you\u0026#039;re literally a fucking mouth breathing retard if you think a literal criminal vs a publisher + dev studio who can be sued and held accountable are the same thing.\u003cbr\u003e\u003cbr\u003eagain, if you actually execute this shit, you\u0026#039;re literally retarded.",
+                "mime": "text/html"
+            }
+        ]
+    },
+    {
+        "id": "104208365",
+        "parent": "104208313",
+        "createdAt": {
+            "seconds": 1738675743
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u003ca href=\"#p104208313\" class=\"quotelink\"\u003e\u0026gt;\u0026gt;104208313\u003c/a\u003e",
+                "mime": "text/html"
+            }
+        ],
+        "attachment": [
+            {
+                "url": "https://i.4cdn.org/g/1738675743133745.jpg",
+                "checksum": "md5:wvyd2z6+oZEknIbqR1+odw==",
+                "mime": "image/jpeg"
+            }
+        ]
+    },
+    {
+        "id": "104208381",
+        "parent": "104208157",
+        "createdAt": {
+            "seconds": 1738675802
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "it\u0026#039;s proprietary, it\u0026#039;s malware by definion.",
+                "mime": "text/html"
+            }
+        ],
+        "attachment": [
+            {
+                "url": "https://i.4cdn.org/g/1738675802996383.png",
+                "checksum": "md5:799qTObqdVvyJUnapeDV1w==",
+                "mime": "image/png"
+            }
+        ]
+    },
+    {
+        "id": "104208398",
+        "parent": "104208349",
+        "createdAt": {
+            "seconds": 1738675859
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u003ca href=\"#p104208349\" class=\"quotelink\"\u003e\u0026gt;\u0026gt;104208349\u003c/a\u003e\u003cbr\u003eah yes, we all remember that time that sony totally didn\u0026#039;t install literal rootkits onto our PCs because that would hurt them",
+                "mime": "text/html"
+            }
+        ]
+    },
+    {
+        "id": "104208402",
+        "parent": "104208398",
+        "createdAt": {
+            "seconds": 1738675893
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u003ca href=\"#p104208398\" class=\"quotelink\"\u003e\u0026gt;\u0026gt;104208398\u003c/a\u003e\u003cbr\u003eAt least they didn\u0026#039;t steal your data and identity.",
+                "mime": "text/html"
+            }
+        ]
+    },
+    {
+        "id": "104208403",
+        "parent": "104208157",
+        "createdAt": {
+            "seconds": 1738675894
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u003ca href=\"#p104208157\" class=\"quotelink\"\u003e\u0026gt;\u0026gt;104208157\u003c/a\u003e\u003cbr\u003eIrrelevant for 99% of cases since for Steam you can get clean files directly from Valve and use an open source emulator, and for GOG installers check the MD5 to see if it\u0026#039;s untampered.\u003cbr\u003eFor EA/Ubisoft/Sega bullshit that require three cracks, a VM and a backwards cartwheel to bypass the DRM, you\u0026#039;re on your own",
+                "mime": "text/html"
+            }
+        ]
+    },
+    {
+        "id": "104208410",
+        "parent": "104208157",
+        "createdAt": {
+            "seconds": 1738675914
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u003ca href=\"#p104208157\" class=\"quotelink\"\u003e\u0026gt;\u0026gt;104208157\u003c/a\u003e\u003cbr\u003e\u003cspan class=\"quote\"\u003e\u0026gt;fitgirl\u003c/span\u003e\u003cbr\u003eYou\u0026#039;re a fucking retard never post here again.",
+                "mime": "text/html"
+            }
+        ]
+    },
+    {
+        "id": "104208412",
+        "parent": "104208402",
+        "createdAt": {
+            "seconds": 1738675926
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u003ca href=\"#p104208402\" class=\"quotelink\"\u003e\u0026gt;\u0026gt;104208402\u003c/a\u003e\u003cbr\u003e\u003cspan class=\"quote\"\u003e\u0026gt;\u003c/span\u003e",
+                "mime": "text/html"
+            }
+        ]
+    },
+    {
+        "id": "104208458",
+        "parent": "104208398",
+        "createdAt": {
+            "seconds": 1738676146
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u003ca href=\"#p104208398\" class=\"quotelink\"\u003e\u0026gt;\u0026gt;104208398\u003c/a\u003e\u003cbr\u003eI bought one of those CDs and the \u0026quot;protection\u0026quot; was useless anyway because if you had autorun disabled on your PC it wouldn\u0026#039;t execute and install. I was able to rip the CD just fine and copy it to my mp3 player as any legally paying customer should be able to do.",
+                "mime": "text/html"
+            }
+        ]
+    },
+    {
+        "id": "104208465",
+        "parent": "104208157",
+        "createdAt": {
+            "seconds": 1738676198
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u003ca href=\"#p104208157\" class=\"quotelink\"\u003e\u0026gt;\u0026gt;104208157\u003c/a\u003e\u003cbr\u003eIdk, my router shows no suspicious connections from my PC (I use firewall btw, so Windows don\u0026#039;t shit in logs).",
+                "mime": "text/html"
+            }
+        ]
+    },
+    {
+        "id": "104208485",
+        "parent": "104208458",
+        "createdAt": {
+            "seconds": 1738676294
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u003ca href=\"#p104208458\" class=\"quotelink\"\u003e\u0026gt;\u0026gt;104208458\u003c/a\u003e\u003cbr\u003e\u003cspan class=\"quote\"\u003e\u0026gt;rip the CD just fine and copy it to my mp3 player\u003c/span\u003e",
+                "mime": "text/html"
+            }
+        ],
+        "attachment": [
+            {
+                "url": "https://i.4cdn.org/g/1738676294061421.jpg",
+                "checksum": "md5:C5GfJBsF/+A+UbfFcJtixg==",
+                "mime": "image/jpeg"
+            }
+        ]
+    },
+    {
+        "id": "104208500",
+        "parent": "104208349",
+        "createdAt": {
+            "seconds": 1738676366
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u003ca href=\"#p104208349\" class=\"quotelink\"\u003e\u0026gt;\u0026gt;104208349\u003c/a\u003e\u003cbr\u003e\u003cspan class=\"quote\"\u003e\u0026gt;again, if you actually execute this shit, you\u0026#039;re literally retarded.\u003c/span\u003e\u003cbr\u003eI\u0026#039;ve pirated tens of thousands of euros of software of all types for my whole life, and never got any malware, never lost any account, not a peep.",
+                "mime": "text/html"
+            }
+        ],
+        "attachment": [
+            {
+                "url": "https://i.4cdn.org/g/1738676366893564.png",
+                "checksum": "md5:Qenb488tL2zSoCvvf4uXvA==",
+                "mime": "image/png"
+            }
+        ]
+    },
+    {
+        "id": "104208504",
+        "parent": "104208398",
+        "createdAt": {
+            "seconds": 1738676382
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u003ca href=\"#p104208398\" class=\"quotelink\"\u003e\u0026gt;\u0026gt;104208398\u003c/a\u003e\u003cbr\u003eand they were held accountable for it.\u003cbr\u003enice self-own though, retard.",
+                "mime": "text/html"
+            }
+        ]
+    },
+    {
+        "id": "104208516",
+        "parent": "104208500",
+        "createdAt": {
+            "seconds": 1738676442
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u003ca href=\"#p104208500\" class=\"quotelink\"\u003e\u0026gt;\u0026gt;104208500\u003c/a\u003e\u003cbr\u003e\u003cspan class=\"quote\"\u003e\u0026gt;I-i never got malware I swear goy!\u003c/span\u003e\u003cbr\u003eretards like this is why your site get\u0026#039;s DoS\u0026#039;d by TB of crap.",
+                "mime": "text/html"
+            }
+        ]
+    },
+    {
+        "id": "104208531",
+        "parent": "104208189",
+        "createdAt": {
+            "seconds": 1738676517
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u003ca href=\"#p104208189\" class=\"quotelink\"\u003e\u0026gt;\u0026gt;104208189\u003c/a\u003e\u003cbr\u003eThank you based avast",
+                "mime": "text/html"
+            }
+        ]
+    },
+    {
+        "id": "104208561",
+        "parent": "104208157",
+        "createdAt": {
+            "seconds": 1738676676
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "After installing bunch of pirate adobe software, every time i google, google ask for captcha.\u003cbr\u003e\u003cbr\u003eDon\u0026#039;t know if isp give me dirty ip address or just adobe pirate doing some ddos",
+                "mime": "text/html"
+            }
+        ]
+    },
+    {
+        "id": "104208632",
+        "parent": "104208516",
+        "createdAt": {
+            "seconds": 1738677071
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u003ca href=\"#p104208516\" class=\"quotelink\"\u003e\u0026gt;\u0026gt;104208516\u003c/a\u003e\u003cbr\u003e\u003cspan class=\"quote\"\u003e\u0026gt;never got malware\u003c/span\u003e\u003cbr\u003eCorrect.",
+                "mime": "text/html"
+            }
+        ]
+    },
+    {
+        "id": "104208680",
+        "parent": "104208561",
+        "createdAt": {
+            "seconds": 1738677364
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u003ca href=\"#p104208561\" class=\"quotelink\"\u003e\u0026gt;\u0026gt;104208561\u003c/a\u003e\u003cbr\u003eit\u0026#039;s because you\u0026#039;re a part of a botnet retard, like this delusional faggot \u003ca href=\"#p104208632\" class=\"quotelink\"\u003e\u0026gt;\u0026gt;104208632\u003c/a\u003e",
+                "mime": "text/html"
+            }
+        ]
+    },
+    {
+        "id": "104208713",
+        "parent": "104208680",
+        "createdAt": {
+            "seconds": 1738677610
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u003ca href=\"#p104208680\" class=\"quotelink\"\u003e\u0026gt;\u0026gt;104208680\u003c/a\u003e\u003cbr\u003ehahahahaha",
+                "mime": "text/html"
+            }
+        ]
+    },
+    {
+        "id": "104208720",
+        "parent": "104208157",
+        "createdAt": {
+            "seconds": 1738677655
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u003ca href=\"#p104208157\" class=\"quotelink\"\u003e\u0026gt;\u0026gt;104208157\u003c/a\u003e\u003cbr\u003e\u003cspan class=\"quote\"\u003e\u0026gt;buy new laptop 6 years ago\u003c/span\u003e\u003cbr\u003e\u003cspan class=\"quote\"\u003e\u0026gt;idle is 1-3% use 45c temp\u003c/span\u003e\u003cbr\u003e\u003cspan class=\"quote\"\u003e\u0026gt;pirate countless games and software\u003c/span\u003e\u003cbr\u003e\u003cspan class=\"quote\"\u003e\u0026gt;still 1-3% use and 45c temp today\u003c/span\u003e\u003cbr\u003e\u003cbr\u003ebotnet and miners you say hmmm....",
+                "mime": "text/html"
+            }
+        ]
+    },
+    {
+        "id": "104208741",
+        "parent": "104208157",
+        "createdAt": {
+            "seconds": 1738677714
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u003ca href=\"#p104208157\" class=\"quotelink\"\u003e\u0026gt;\u0026gt;104208157\u003c/a\u003e\u003cbr\u003eskill issue\u003cbr\u003eI download everything from rutracker, besides anime",
+                "mime": "text/html"
+            }
+        ]
+    },
+    {
+        "id": "104208767",
+        "parent": "104208157",
+        "createdAt": {
+            "seconds": 1738677856
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u003ca href=\"#p104208157\" class=\"quotelink\"\u003e\u0026gt;\u0026gt;104208157\u003c/a\u003e\u003cbr\u003e\u003cspan class=\"quote\"\u003e\u0026gt;download normal software from reputable source\u003c/span\u003e\u003cbr\u003e\u003cspan class=\"quote\"\u003e\u0026gt;SEVERE THREAT ALERT\u003c/span\u003e\u003cbr\u003e\u003cspan class=\"quote\"\u003e\u0026gt;SEVERE THREAT ALERT TROJAN HORSE AAAAAAAAA\u003c/span\u003e\u003cbr\u003e\u003cspan class=\"quote\"\u003e\u0026gt;...\u003c/span\u003e\u003cbr\u003e\u003cspan class=\"quote\"\u003e\u0026gt;it\u0026#039;s wack attack nothingburger false flag\u003c/span\u003e\u003cbr\u003e\u003cbr\u003eevery fucking time",
+                "mime": "text/html"
+            }
+        ],
+        "attachment": [
+            {
+                "url": "https://i.4cdn.org/g/1738677856275634.png",
+                "checksum": "md5:XrJIx9JvqnMrmtCdtyaHHw==",
+                "mime": "image/png"
+            }
+        ]
+    },
+    {
+        "id": "104208845",
+        "parent": "104208157",
+        "createdAt": {
+            "seconds": 1738678262
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "I only download scene releases and I trust scene groups more than I trust the original publisher.",
+                "mime": "text/html"
+            }
+        ]
+    },
+    {
+        "id": "104208875",
+        "parent": "104208157",
+        "createdAt": {
+            "seconds": 1738678346
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "what\u0026#039;s a good malware removal app? malwarebytes doesn\u0026#039;t seem to detect this virus i seem to have when i google things. i get a \u0026#039; trktacular\u0026#039; error code and it\u0026#039;s annoying as hell.",
+                "mime": "text/html"
+            }
+        ]
+    },
+    {
+        "id": "104208896",
+        "parent": "104208157",
+        "createdAt": {
+            "seconds": 1738678442
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u003ca href=\"#p104208157\" class=\"quotelink\"\u003e\u0026gt;\u0026gt;104208157\u003c/a\u003e\u003cbr\u003e\u003cspan class=\"quote\"\u003e\u0026gt; caring about viruses\u003c/span\u003e\u003cbr\u003eI have a dedicated box for playing games.  They can mine bitcoin or whatever the fuck else they want as long as the game works.",
+                "mime": "text/html"
+            }
+        ]
+    },
+    {
+        "id": "104208901",
+        "parent": "104208157",
+        "createdAt": {
+            "seconds": 1738678455
+        },
+        "generator": [
+            {
+                "name": "php-dude"
+            }
+        ],
+        "content": [
+            {
+                "text": "ye, sure, hey yo yo, everybody, listen to that troonified microsoft manager..\u003cbr\u003e\u003cbr\u003ewindows is a virus itself, who cares what it runs, just re-flash it when it becomes unstable and avoid the problematic source next time. torrenters will fry uploader anyway. make us whole microsoft, start torrenting, hehe",
+                "mime": "text/html"
+            }
+        ]
+    },
+    {
+        "id": "104208910",
+        "parent": "104208157",
+        "createdAt": {
+            "seconds": 1738678489
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "Retards see no problem with getting their computer pozzed if it means free games \u003cbr\u003e\u003cbr\u003eThere’s actually people out there who deliberately try to get aids. Same mindset as pirates",
+                "mime": "text/html"
+            }
+        ]
+    },
+    {
+        "id": "104208975",
+        "parent": "104208157",
+        "createdAt": {
+            "seconds": 1738678735
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u003ca href=\"#p104208157\" class=\"quotelink\"\u003e\u0026gt;\u0026gt;104208157\u003c/a\u003e\u003cbr\u003e\u003cspan class=\"quote\"\u003e\u0026gt;years ago made a trainer for myself\u003c/span\u003e\u003cbr\u003e\u003cspan class=\"quote\"\u003e\u0026gt;decide to share it\u003c/span\u003e\u003cbr\u003e\u003cspan class=\"quote\"\u003e\u0026gt;DUN DOWNLOAD IT FRENS ITZ A VIRUS\u003c/span\u003e\u003cbr\u003e\u003cspan class=\"quote\"\u003e\u0026gt;click report link\u003c/span\u003e\u003cbr\u003e\u003cspan class=\"quote\"\u003e\u0026gt;69/420 ITZ AAAA GENERIC HACKTOOL REEHHHHHH\u003c/span\u003e\u003cbr\u003e\u003cspan class=\"quote\"\u003e\u0026gt;thread closed\u003c/span\u003e\u003cbr\u003e\u003cspan class=\"quote\"\u003e\u0026gt;banned\u003c/span\u003e\u003cbr\u003enever again",
+                "mime": "text/html"
+            }
+        ]
+    },
+    {
+        "id": "104208987",
+        "parent": "104208910",
+        "createdAt": {
+            "seconds": 1738678773
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u003ca href=\"#p104208910\" class=\"quotelink\"\u003e\u0026gt;\u0026gt;104208910\u003c/a\u003e\u003cbr\u003e\u003cspan class=\"quote\"\u003e\u0026gt;muh pozzed muh aids\u003c/span\u003e\u003cbr\u003eYeah ok redcap boy you\u0026#039;re totally knowledgable. Go put your wifebeater on and pretend you have a wife as you angrily wail at your drywall interior",
+                "mime": "text/html"
+            }
+        ]
+    },
+    {
+        "id": "104208999",
+        "parent": "104208987",
+        "createdAt": {
+            "seconds": 1738678815
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u003ca href=\"#p104208987\" class=\"quotelink\"\u003e\u0026gt;\u0026gt;104208987\u003c/a\u003e\u003cbr\u003eYou are pozzed",
+                "mime": "text/html"
+            }
+        ]
+    },
+    {
+        "id": "104209014",
+        "parent": "104208157",
+        "createdAt": {
+            "seconds": 1738678876
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "kys govt agent",
+                "mime": "text/html"
+            }
+        ]
+    },
+    {
+        "id": "104209031",
+        "parent": "104208999",
+        "createdAt": {
+            "seconds": 1738678930
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u003ca href=\"#p104208999\" class=\"quotelink\"\u003e\u0026gt;\u0026gt;104208999\u003c/a\u003e\u003cbr\u003e\u003cspan class=\"quote\"\u003e\u0026gt;Reeeeee poooozzeeeed\u003c/span\u003e\u003cbr\u003eWhy don\u0026#039;t you just start screaming \u0026quot;tranny\u0026quot; already like you\u0026#039;re programmed to do? :)",
+                "mime": "text/html"
+            }
+        ]
+    },
+    {
+        "id": "104209032",
+        "parent": "104208157",
+        "createdAt": {
+            "seconds": 1738678931
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u003ca href=\"#p104208157\" class=\"quotelink\"\u003e\u0026gt;\u0026gt;104208157\u003c/a\u003e\u003cbr\u003eBait used to be good.",
+                "mime": "text/html"
+            }
+        ]
+    },
+    {
+        "id": "104209058",
+        "parent": "104209031",
+        "createdAt": {
+            "seconds": 1738679085
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u003ca href=\"#p104209031\" class=\"quotelink\"\u003e\u0026gt;\u0026gt;104209031\u003c/a\u003e\u003cbr\u003eWhy don’t you start DDOSing a website like your computer is programmed to do?",
+                "mime": "text/html"
+            }
+        ]
+    },
+    {
+        "id": "104209066",
+        "parent": "104209058",
+        "createdAt": {
+            "seconds": 1738679117
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u003ca href=\"#p104209058\" class=\"quotelink\"\u003e\u0026gt;\u0026gt;104209058\u003c/a\u003e\u003cbr\u003eCitation needed",
+                "mime": "text/html"
+            }
+        ]
+    },
+    {
+        "id": "104209332",
+        "parent": "104208875",
+        "createdAt": {
+            "seconds": 1738680655
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u003ca href=\"#p104208875\" class=\"quotelink\"\u003e\u0026gt;\u0026gt;104208875\u003c/a\u003e\u003cbr\u003eno such thing. just don\u0026#039;t download malware or risk downloading malware downloading tampered binaries like a smoothbrained wincuckold.",
+                "mime": "text/html"
+            }
+        ]
+    },
+    {
+        "id": "104209362",
+        "parent": "104209332",
+        "createdAt": {
+            "seconds": 1738680802
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u003ca href=\"#p104209332\" class=\"quotelink\"\u003e\u0026gt;\u0026gt;104209332\u003c/a\u003e\u003cbr\u003ewell i havent had a virus in maybe 10 years, sometimes it just happens. this seems to be some weird redirect one, happens when i google. if you don\u0026#039;t know then sorry for wasting your time, just frustrated.",
+                "mime": "text/html"
+            }
+        ],
+        "attachment": [
+            {
+                "url": "https://i.4cdn.org/g/1738680802243649.jpg",
+                "checksum": "md5:dP1EM2eM8/IXAiJcdx5Iiw==",
+                "mime": "image/jpeg"
+            }
+        ]
+    },
+    {
+        "id": "104209405",
+        "parent": "104209362",
+        "createdAt": {
+            "seconds": 1738680988
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u003ca href=\"#p104209362\" class=\"quotelink\"\u003e\u0026gt;\u0026gt;104209362\u003c/a\u003e\u003cbr\u003eyou probably got some generic http proxy malware. check your settings. it likely registers itself as a service you can disable as well.",
+                "mime": "text/html"
+            }
+        ]
+    },
+    {
+        "id": "104209461",
+        "parent": "104208157",
+        "createdAt": {
+            "seconds": 1738681283
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u003ca href=\"#p104208157\" class=\"quotelink\"\u003e\u0026gt;\u0026gt;104208157\u003c/a\u003e\u003cbr\u003erepacks are for third worlders, only retards download  a random dll to fix an issue. \u003cbr\u003estick to private trackers or good usenet indexers and scene releases and you\u0026#039;ll be fine.",
+                "mime": "text/html"
+            }
+        ]
+    },
+    {
+        "id": "104209477",
+        "parent": "104209461",
+        "createdAt": {
+            "seconds": 1738681376
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u003ca href=\"#p104209461\" class=\"quotelink\"\u003e\u0026gt;\u0026gt;104209461\u003c/a\u003e\u003cbr\u003eI\u0026#039;ll keep downloading fitgirl repacks and I\u0026#039;ll keep making you cry about it.",
+                "mime": "text/html"
+            }
+        ]
+    },
+    {
+        "id": "104209492",
+        "parent": "104209405",
+        "createdAt": {
+            "seconds": 1738681454
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u003ca href=\"#p104209405\" class=\"quotelink\"\u003e\u0026gt;\u0026gt;104209405\u003c/a\u003e\u003cbr\u003ethank you so much for replying and at least nudging me in some direction, i\u0026#039;ll be researching this. have this pikachu i drew a while ago",
+                "mime": "text/html"
+            }
+        ],
+        "attachment": [
+            {
+                "url": "https://i.4cdn.org/g/1738681454525619.jpg",
+                "checksum": "md5:B7TA+W3HotbVKOVBXNUERg==",
+                "mime": "image/jpeg"
+            }
+        ]
+    },
+    {
+        "id": "104209838",
+        "parent": "104209477",
+        "createdAt": {
+            "seconds": 1738683146
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u003ca href=\"#p104209477\" class=\"quotelink\"\u003e\u0026gt;\u0026gt;104209477\u003c/a\u003e\u003cbr\u003eIt doesn\u0026#039;t make me cry. It just makes me pity you.",
+                "mime": "text/html"
+            }
+        ]
+    },
+    {
+        "id": "104209869",
+        "parent": "104209838",
+        "createdAt": {
+            "seconds": 1738683246
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u003ca href=\"#p104209838\" class=\"quotelink\"\u003e\u0026gt;\u0026gt;104209838\u003c/a\u003e\u003cbr\u003eYour pity doesnt affect my life so... ???",
+                "mime": "text/html"
+            }
+        ]
+    },
+    {
+        "id": "104209876",
+        "parent": "104209869",
+        "createdAt": {
+            "seconds": 1738683272
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u003ca href=\"#p104209869\" class=\"quotelink\"\u003e\u0026gt;\u0026gt;104209869\u003c/a\u003e\u003cbr\u003eWhatever you say, peasant.",
+                "mime": "text/html"
+            }
+        ]
+    },
+    {
+        "id": "104210021",
+        "parent": "104208157",
+        "createdAt": {
+            "seconds": 1738683891
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u003ca href=\"#p104208157\" class=\"quotelink\"\u003e\u0026gt;\u0026gt;104208157\u003c/a\u003e\u003cbr\u003eI\u0026#039;ve never gotten hacked, RATted, etc. by a torrent. However the internet is full of leaks and data breaches from webshitter sites that I\u0026#039;ve logged into.  It\u0026#039;s gotten to the point where a russian torrent is more trustworthy than typing your personal info into FAGMAN\u0026#039;s webshite",
+                "mime": "text/html"
+            }
+        ]
+    },
+    {
+        "id": "104210164",
+        "parent": "104208157",
+        "createdAt": {
+            "seconds": 1738684639
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "you\u0026#039;d think theres some obvious easy windows solution where it goes \u0026quot;heres an exe I want to not download anything or access the internet and watnot and keep all the files it handles in a restricted area\u0026quot;\u003cbr\u003e\u003cbr\u003eLike why isn\u0026#039;t that just a basic windows feature in the context menu when you right click a pirated game.",
+                "mime": "text/html"
+            }
+        ]
+    },
+    {
+        "id": "104210179",
+        "parent": "104208157",
+        "createdAt": {
+            "seconds": 1738684702
+        },
+        "generator": [
+            {
+                "name": "SS2"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u003ca href=\"#p104208157\" class=\"quotelink\"\u003e\u0026gt;\u0026gt;104208157\u003c/a\u003e\u003cbr\u003eIt\u0026#039;s a risk you take when game studios themselves start using these cracks because the DRM is out of control it makes you wonder a lot of things. You know, like all the DEI shit cancer these days. BTW did you know that modern denuvo DRM itself is malware? You LITERALLY lose performance and god knows how much privacy in games that have it.\u003cbr\u003e\u003cbr\u003ehttps://wccftech.com/tekken-7-denuv\u003cwbr\u003eo-drm-performance-issues/\u003cbr\u003ehttps://www.bleepingcomputer.com/ne\u003cwbr\u003ews/gaming/rockstar-games-reportedly\u003cwbr\u003e-sold-games-with-razor-1911-cracks-\u003cwbr\u003eon-steam/",
+                "mime": "text/html"
+            }
+        ],
+        "attachment": [
+            {
+                "url": "https://i.4cdn.org/g/1738684702948054.webm",
+                "checksum": "md5:GHl8mM/0CGNPp7NTe8LfYA==",
+                "mime": "video/webm"
+            }
+        ]
+    },
+    {
+        "id": "104210199",
+        "parent": "104209876",
+        "createdAt": {
+            "seconds": 1738684795
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u003ca href=\"#p104209876\" class=\"quotelink\"\u003e\u0026gt;\u0026gt;104209876\u003c/a\u003e\u003cbr\u003ecope lol",
+                "mime": "text/html"
+            }
+        ]
+    },
+    {
+        "id": "104210206",
+        "parent": "104208504",
+        "createdAt": {
+            "seconds": 1738684824
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u003ca href=\"#p104208504\" class=\"quotelink\"\u003e\u0026gt;\u0026gt;104208504\u003c/a\u003e\u003cbr\u003eNo they weren\u0026#039;t",
+                "mime": "text/html"
+            }
+        ]
+    },
+    {
+        "id": "104210218",
+        "parent": "104210164",
+        "createdAt": {
+            "seconds": 1738684882
+        },
+        "generator": [
+            {
+                "name": "Anonymous"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u003ca href=\"#p104210164\" class=\"quotelink\"\u003e\u0026gt;\u0026gt;104210164\u003c/a\u003e\u003cbr\u003efirewall...",
+                "mime": "text/html"
+            }
+        ]
+    }
+]

@@ -2,6 +2,7 @@ package main
 
 import (
 	"chronicler/adapter"
+	"chronicler/adapter/fourchan"
 	"chronicler/adapter/pikabu"
 	"chronicler/adapter/web"
 	"chronicler/common"
@@ -38,6 +39,7 @@ func save(args []string) {
 		root,
 		common.NewHttpDownloader(httpClient),
 		[]adapter.Adapter{
+			fourchan.NewAdapter(httpClient),
 			pikabu.NewAdapter(httpClient),
 			web.NewAdapter(httpClient),
 		},
