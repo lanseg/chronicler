@@ -1,0 +1,39 @@
+[
+    {
+        "id": "1296887091901718529",
+        "createdAt": {
+            "seconds": 1598036952
+        },
+        "generator": [
+            {
+                "id": "2244994945",
+                "name": "TwitterDev"
+            }
+        ],
+        "content": [
+            {
+                "text": "Dr. @RainaMerchant and her team at the Penn Medicine CDH are helping build the future of health care.\n\nThe team is using insights from social data in many different ways — ranging from uncovering risk factors to shedding light on public sentiment. 🔎",
+                "mime": "text/plain"
+            }
+        ]
+    },
+    {
+        "id": "1296887316556980230",
+        "parent": "1296887091901718529",
+        "createdAt": {
+            "seconds": 1598037005
+        },
+        "generator": [
+            {
+                "id": "2244994945",
+                "name": "TwitterDev"
+            }
+        ],
+        "content": [
+            {
+                "text": "See how @PennMedCDH are using Twitter data to understand the COVID-19 health crisis 📊\n\nhttps://t.co/1tdA8uDWes",
+                "mime": "text/plain"
+            }
+        ]
+    }
+]

@@ -4,6 +4,7 @@ import (
 	"chronicler/adapter"
 	"chronicler/adapter/fourchan"
 	"chronicler/adapter/pikabu"
+	"chronicler/adapter/twitter"
 	"chronicler/adapter/web"
 	"chronicler/common"
 	"chronicler/resolver"
@@ -35,10 +36,12 @@ func view(args []string) {
 
 func save(args []string) {
 	httpClient := &http.Client{}
+	twitterToken := "AAAAAAAAAAAAAAAAAAAAABmxiQEAAAAAl7oWqu61eggqCUi4nO8DjPygbGs%3DpxQdGsIkGZi9mPeJpznL8LMKEtRd4TQVQb5qyZw0JdwL6YTMV0"
 	r := resolver.NewResolver(
 		root,
 		common.NewHttpDownloader(httpClient),
 		[]adapter.Adapter{
+			twitter.NewAdapter(twitter.NewClient(httpClient, twitterToken)),
 			fourchan.NewAdapter(httpClient),
 			pikabu.NewAdapter(httpClient),
 			web.NewAdapter(httpClient),

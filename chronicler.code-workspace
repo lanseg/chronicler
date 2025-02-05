@@ -18,6 +18,7 @@
             "bumplimit",
             "capcode",
             "charmap",
+            "COVFILE",
             "Debugf",
             "filedeleted",
             "fourchan",
@@ -29,6 +30,7 @@
             "Pikabu",
             "protoc",
             "Resto",
+            "staticcheck",
             "Warningf"
         ]
     }

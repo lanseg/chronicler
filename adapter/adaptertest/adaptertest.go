@@ -47,11 +47,11 @@ func TestRequestResponse(a adapter.Adapter, link string, wantFile string) error 
 	// Reference data
 	wantBytes, err := os.ReadFile(wantFile)
 	if err != nil {
-		return fmt.Errorf("cannot load reference file %s.json: %s", wantFile, err)
+		return fmt.Errorf("cannot load reference file %s: %s", wantFile, err)
 	}
 	want := []*opb.Object{}
 	if err = json.Unmarshal(wantBytes, &want); err != nil {
-		return fmt.Errorf("cannot unmarshal reference file %s.json: %s", wantFile, err)
+		return fmt.Errorf("cannot unmarshal reference file %s: %s", wantFile, err)
 
 	}
 
