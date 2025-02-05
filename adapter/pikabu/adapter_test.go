@@ -1,43 +1,13 @@
 package pikabu
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
-	"os"
 	"path/filepath"
 	"testing"
 
-	"github.com/google/go-cmp/cmp"
-	"google.golang.org/protobuf/testing/protocmp"
-
+	"chronicler/adapter/adaptertest"
 	opb "chronicler/proto"
 )
-
-type fakeHttpClient struct {
-	HttpClient
-
-	file string
-}
-
-func (fh *fakeHttpClient) Do(req *http.Request) (*http.Response, error) {
-	bts, err := os.ReadFile(filepath.Join("test_data", fh.file))
-	if err != nil {
-		return nil, err
-	}
-	return &http.Response{
-		Body:    io.NopCloser(bytes.NewReader(bts)),
-		Request: req,
-	}, nil
-}
-
-func newFakeHttp(file string) *fakeHttpClient {
-	return &fakeHttpClient{
-		file: file,
-	}
-}
 
 func TestPikabuAdapter(t *testing.T) {
 	for _, tc := range []struct {
@@ -50,28 +20,11 @@ func TestPikabuAdapter(t *testing.T) {
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			// What we get
-			fakeClient := newFakeHttp(tc.file + ".html")
-			pikabuAdapter := NewAdapter(fakeClient)
-			got, err := pikabuAdapter.Get(&opb.Link{Href: fmt.Sprintf("http://pikabu.ru/story/_%s", tc.file)})
-			if err != nil {
-				t.Errorf("error while doing get: %s", err)
-				return
-			}
-
-			// Reference data
-			wantBytes, err := os.ReadFile(fmt.Sprintf("test_data/%s.json", tc.file))
-			if err != nil {
-				t.Errorf("cannot load reference file %s.json: %s", tc.file, err)
-				return
-			}
-			want := []*opb.Object{}
-			if err = json.Unmarshal(wantBytes, &want); err != nil {
-				t.Errorf("cannot unmarshal reference file %s.json: %s", tc.file, err)
-				return
-			}
-
-			if diff := cmp.Diff(want, got, protocmp.Transform()); diff != "" {
-				t.Errorf("expected parsed and reference results to be equal, but got %s", diff)
+			if err := adaptertest.TestRequestResponse(
+				NewAdapter(adaptertest.NewFakeHttp(filepath.Join("test_data", tc.file+".html"))),
+				fmt.Sprintf("http://pikabu.ru/story/_%s", tc.file),
+				filepath.Join("test_data", tc.file+".json")); err != nil {
+				t.Error(err)
 			}
 		})
 	}

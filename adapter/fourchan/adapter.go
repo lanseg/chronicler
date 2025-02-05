@@ -39,10 +39,10 @@ type fourchanAdapter struct {
 	adapter.Adapter
 
 	logger     *common.Logger
-	httpClient HttpClient
+	httpClient adapter.HttpClient
 }
 
-func NewAdapter(client HttpClient) adapter.Adapter {
+func NewAdapter(client adapter.HttpClient) adapter.Adapter {
 	return &fourchanAdapter{
 		httpClient: client,
 		logger:     common.NewLogger("FourChanAdapter"),

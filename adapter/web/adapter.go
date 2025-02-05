@@ -16,18 +16,14 @@ import (
 	opb "chronicler/proto"
 )
 
-type HttpClient interface {
-	Do(request *http.Request) (*http.Response, error)
-}
-
 type webAdapter struct {
 	adapter.Adapter
 
 	logger *common.Logger
-	client HttpClient
+	client adapter.HttpClient
 }
 
-func NewAdapter(client HttpClient) adapter.Adapter {
+func NewAdapter(client adapter.HttpClient) adapter.Adapter {
 	return &webAdapter{
 		client: client,
 		logger: common.NewLogger("WebAdapter"),

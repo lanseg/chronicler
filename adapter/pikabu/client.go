@@ -2,6 +2,7 @@ package pikabu
 
 import (
 	"bytes"
+	"chronicler/adapter"
 	"chronicler/common"
 	"encoding/json"
 	"fmt"
@@ -17,10 +18,6 @@ const (
 	commentBatchSize = 200
 )
 
-type HttpClient interface {
-	Do(request *http.Request) (*http.Response, error)
-}
-
 type CommentData struct {
 	Id   int    `json:"id"`
 	Html string `json:"html"`
@@ -34,11 +31,11 @@ type CommentResponse struct {
 }
 
 type Client struct {
-	httpClient HttpClient
+	httpClient adapter.HttpClient
 	logger     *common.Logger
 }
 
-func NewClient(httpClient HttpClient) *Client {
+func NewClient(httpClient adapter.HttpClient) *Client {
 	return &Client{
 		httpClient: httpClient,
 		logger:     common.NewLogger("PikabuClient"),
