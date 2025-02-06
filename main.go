@@ -1,17 +1,17 @@
 package main
 
 import (
+	"net/http"
+	"os"
+
 	"chronicler/adapter"
 	"chronicler/adapter/fourchan"
 	"chronicler/adapter/pikabu"
 	"chronicler/adapter/twitter"
 	"chronicler/adapter/web"
 	"chronicler/common"
-	"chronicler/resolver"
-	"net/http"
-	"os"
-
 	opb "chronicler/proto"
+	"chronicler/resolver"
 	"chronicler/viewer"
 )
 
@@ -36,7 +36,9 @@ func view(args []string) {
 
 func save(args []string) {
 	httpClient := &http.Client{}
-	twitterToken := "redacted and revoked"
+
+	twitterToken := os.Getenv("TWITTER_TOKEN")
+
 	r := resolver.NewResolver(
 		root,
 		common.NewHttpDownloader(httpClient),
