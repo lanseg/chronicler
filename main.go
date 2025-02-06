@@ -36,7 +36,7 @@ func view(args []string) {
 
 func save(args []string) {
 	httpClient := &http.Client{}
-	twitterToken := "AAAAAAAAAAAAAAAAAAAAABmxiQEAAAAAl7oWqu61eggqCUi4nO8DjPygbGs%3DpxQdGsIkGZi9mPeJpznL8LMKEtRd4TQVQb5qyZw0JdwL6YTMV0"
+	twitterToken := "redacted and revoked"
 	r := resolver.NewResolver(
 		root,
 		common.NewHttpDownloader(httpClient),
