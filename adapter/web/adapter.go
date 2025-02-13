@@ -16,6 +16,20 @@ import (
 	opb "chronicler/proto"
 )
 
+var (
+	linkRe   = regexp.MustCompile(`(http|ftp|https)://([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-])`)
+	linkAttr = map[string]bool{
+		"href":       true,
+		"src":        true,
+		"background": true,
+		"profile":    true,
+		"longdesc":   true,
+		"icon":       true,
+		"manifest":   true,
+		"poster":     true,
+	}
+)
+
 type webAdapter struct {
 	adapter.Adapter
 
@@ -59,26 +73,27 @@ func (wa *webAdapter) Get(link *opb.Link) ([]*opb.Object, error) {
 		return nil, err
 	}
 
-	re := regexp.MustCompile(`(http|ftp|https)://([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-])`)
 	urls := map[string]bool{}
 	reader := parser.NewHtmlReader(bytes.NewReader(data))
 	for reader.NextToken() {
-		if href, ok := reader.Attr("href"); ok && href != "" {
-			h, err := url.Parse(href)
-			if err == nil {
-				if h.Scheme == "" {
-					h.Scheme = actualUrl.Scheme
+		for attr := range linkAttr {
+			if href, ok := reader.Attr(attr); ok && href != "" {
+				h, err := url.Parse(href)
+				if err == nil {
+					if h.Scheme == "" {
+						h.Scheme = actualUrl.Scheme
+					}
+					if h.Host == "" {
+						h.Host = actualUrl.Host
+					}
+					if h.Path == "" {
+						h.Path = actualUrl.Path
+					}
+					urls[h.String()] = true
 				}
-				if h.Host == "" {
-					h.Host = actualUrl.Host
-				}
-				if h.Path == "" {
-					h.Path = actualUrl.Path
-				}
-				urls[h.String()] = true
 			}
 		}
-		for _, u := range re.FindAllString(reader.Raw(), -1) {
+		for _, u := range linkRe.FindAllString(reader.Raw(), -1) {
 			urls[u] = true
 		}
 	}
