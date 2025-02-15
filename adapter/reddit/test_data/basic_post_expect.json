@@ -1,0 +1,238 @@
+[
+    {
+        "id": "1hlvz0u",
+        "createdAt": {
+            "seconds": 1735110959
+        },
+        "generator": [
+            {
+                "name": "[deleted]"
+            }
+        ]
+    },
+    {
+        "id": "m3phnvm",
+        "parent": "t3_1hlvz0u",
+        "createdAt": {
+            "seconds": 1735111369
+        },
+        "generator": [
+            {
+                "id": "t2_2vl4cv9p",
+                "name": "Quplet"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u0026lt;div class=\"md\"\u0026gt;\u0026lt;p\u0026gt;I\u0026amp;#39;ve been using arch for a while now and the main reasons I\u0026amp;#39;m sticking with it are\u0026lt;/p\u0026gt;\n\n\u0026lt;ol\u0026gt;\n\u0026lt;li\u0026gt;\u0026lt;p\u0026gt;I like having all the latest software \u0026lt;/p\u0026gt;\u0026lt;/li\u0026gt;\n\u0026lt;li\u0026gt;\u0026lt;p\u0026gt;The AUR\u0026lt;/p\u0026gt;\u0026lt;/li\u0026gt;\n\u0026lt;li\u0026gt;\u0026lt;p\u0026gt;The AUR\u0026lt;/p\u0026gt;\u0026lt;/li\u0026gt;\n\u0026lt;li\u0026gt;\u0026lt;p\u0026gt;The AUR\u0026lt;/p\u0026gt;\u0026lt;/li\u0026gt;\n\u0026lt;/ol\u0026gt;\n\u0026lt;/div\u0026gt;",
+                "mime": "text/html"
+            }
+        ],
+        "stats": [
+            {
+                "type": 2,
+                "counter": 88
+            }
+        ]
+    },
+    {
+        "id": "m3pi5w5",
+        "parent": "t3_1hlvz0u",
+        "createdAt": {
+            "seconds": 1735111723
+        },
+        "generator": [
+            {
+                "id": "t2_8x5ldtml",
+                "name": "Cool-Childhood-2730"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u0026lt;div class=\"md\"\u0026gt;\u0026lt;p\u0026gt;Here are the most popular reasons I would say:\u0026lt;/p\u0026gt;\n\n\u0026lt;ol\u0026gt;\n\u0026lt;li\u0026gt;\u0026lt;p\u0026gt;Rolling Release: Always up-to-date software.\n(Obviously if you are fine with that model)\u0026lt;/p\u0026gt;\u0026lt;/li\u0026gt;\n\u0026lt;li\u0026gt;\u0026lt;p\u0026gt;Customizability: You mostly install only what you need, no bloatware.\u0026lt;/p\u0026gt;\u0026lt;/li\u0026gt;\n\u0026lt;li\u0026gt;\u0026lt;p\u0026gt;Arch Wiki: Insanely comprehensive and detailed documentation.\u0026lt;/p\u0026gt;\u0026lt;/li\u0026gt;\n\u0026lt;li\u0026gt;\u0026lt;p\u0026gt;AUR (Arch User Repository): Enormous access to thousands of user-contributed packages.\u0026lt;/p\u0026gt;\u0026lt;/li\u0026gt;\n\u0026lt;li\u0026gt;\u0026lt;p\u0026gt;Control: Full control over your system’s configuration.\u0026lt;/p\u0026gt;\u0026lt;/li\u0026gt;\n\u0026lt;li\u0026gt;\u0026lt;p\u0026gt;Lightweight: As in minimal base installation.\u0026lt;/p\u0026gt;\u0026lt;/li\u0026gt;\n\u0026lt;li\u0026gt;\u0026lt;p\u0026gt;Community: Very active and knowledgeable user base.\u0026lt;/p\u0026gt;\u0026lt;/li\u0026gt;\n\u0026lt;li\u0026gt;\u0026lt;p\u0026gt;Learning Experience: Forces you to understand Linux a bit more than some other beginner friendly distros.\u0026lt;/p\u0026gt;\u0026lt;/li\u0026gt;\n\u0026lt;li\u0026gt;\u0026lt;p\u0026gt;Performance: For some of the reasons listed above.\u0026lt;/p\u0026gt;\u0026lt;/li\u0026gt;\n\u0026lt;li\u0026gt;\u0026lt;p\u0026gt;Freedom: No constraints on software choices or configurations.\u0026lt;/p\u0026gt;\u0026lt;/li\u0026gt;\n\u0026lt;/ol\u0026gt;\n\u0026lt;/div\u0026gt;",
+                "mime": "text/html"
+            }
+        ],
+        "stats": [
+            {
+                "type": 2,
+                "counter": 51
+            }
+        ]
+    },
+    {
+        "id": "m3phiua",
+        "parent": "t3_1hlvz0u",
+        "createdAt": {
+            "seconds": 1735111273
+        },
+        "generator": [
+            {
+                "id": "t2_98uikklu",
+                "name": "FlexFreak"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u0026lt;div class=\"md\"\u0026gt;\u0026lt;p\u0026gt;I kinda like installing any package without having to worry about external repositories\u0026lt;/p\u0026gt;\n\u0026lt;/div\u0026gt;",
+                "mime": "text/html"
+            }
+        ],
+        "stats": [
+            {
+                "type": 2,
+                "counter": 31
+            }
+        ]
+    },
+    {
+        "id": "m3q5ejm",
+        "parent": "t3_1hlvz0u",
+        "createdAt": {
+            "seconds": 1735128733
+        },
+        "generator": [
+            {
+                "id": "t2_12bmxf53",
+                "name": "ahferroin7"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u0026lt;div class=\"md\"\u0026gt;\u0026lt;p\u0026gt;Not an Arch user, but I’ve worked with it a lot since a major part of my job is cross-distro testing and platform support and Arch is one of the major Linux distros. I will also admit to being a bit biased here because Arch is the problem child among the test VMs I run, the Arch one breaks roughly quarterly in some way that I need to boot recovery media to fix it despite it being a relatively clean install that’s just being updated daily.\u0026lt;/p\u0026gt;\n\n\u0026lt;p\u0026gt;Arch has a distinct advantage in that it \u0026lt;em\u0026gt;mostly\u0026lt;/em\u0026gt; does not get in your way and \u0026lt;em\u0026gt;mostly\u0026lt;/em\u0026gt; is highly unopinionated. The combination of those two aspects means that it’s attractive for people who want a system that just does what they tell it to do. The rolling release aspect is also attractive for those who want the newest software all the time. And it is generally pretty stable despite those aspects, though it’s not perfect.\u0026lt;/p\u0026gt;\n\n\u0026lt;p\u0026gt;On the flip side, Arch is crap as a development environment because there’s no way to get a consistently reproducible system with it, the vocal part of the community has an absurdly strong tendency to deny that any issue is a problem with Arch itself if they have not experienced the problem themselves, and pacman has some seriously questionable design choices (though these are more prominent in other places that use it, such as MSYS2).\u0026lt;/p\u0026gt;\n\n\u0026lt;p\u0026gt;Astute observers will notice that I did not mention the Wiki that most other people bring up, and this is because the Arch Wiki is not really tied strictly to Arch itself. Most of the documentation there except for ‘what package to install for this’ is accurate for essentially any systemd-based distribution, and a lot of it is accurate even for non-systemd distributions, so I do not see it as being any specific advantage of Arch.\u0026lt;/p\u0026gt;\n\u0026lt;/div\u0026gt;",
+                "mime": "text/html"
+            }
+        ],
+        "stats": [
+            {
+                "type": 2,
+                "counter": 7
+            }
+        ]
+    },
+    {
+        "id": "m3pity0",
+        "parent": "t3_1hlvz0u",
+        "createdAt": {
+            "seconds": 1735112189
+        },
+        "generator": [
+            {
+                "id": "t2_x4pmz",
+                "name": "Redditperegrino"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u0026lt;div class=\"md\"\u0026gt;\u0026lt;p\u0026gt;I’m a long time Linux user and used Arch for the first time 2-3 years ago. \u0026lt;/p\u0026gt;\n\n\u0026lt;p\u0026gt;Please forgive my simple response to your question: it’s fun! \u0026lt;/p\u0026gt;\n\n\u0026lt;p\u0026gt;It felt like driving a manual car vs driving an automatic.\u0026lt;/p\u0026gt;\n\u0026lt;/div\u0026gt;",
+                "mime": "text/html"
+            }
+        ],
+        "stats": [
+            {
+                "type": 2,
+                "counter": 5
+            }
+        ]
+    },
+    {
+        "id": "m3piyi3",
+        "parent": "t3_1hlvz0u",
+        "createdAt": {
+            "seconds": 1735112277
+        },
+        "generator": [
+            {
+                "id": "t2_3axwojjq",
+                "name": "gaijoan"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u0026lt;div class=\"md\"\u0026gt;\u0026lt;ul\u0026gt;\n\u0026lt;li\u0026gt;No pre-installed bloat.\u0026lt;/li\u0026gt;\n\u0026lt;li\u0026gt;User centric rather than \u0026amp;quot;user friendly\u0026amp;quot;.\u0026lt;/li\u0026gt;\n\u0026lt;li\u0026gt;Rolling release.\u0026lt;/li\u0026gt;\n\u0026lt;li\u0026gt;Wiki is great.\u0026lt;/li\u0026gt;\n\u0026lt;/ul\u0026gt;\n\n\u0026lt;p\u0026gt;I went straight to Arch when I switched to Linux and have felt no need/want to distro-hop. IMO it\u0026amp;#39;s a terrific newbie-distro, provided you have the right mindset and have the will and time to learn.\u0026lt;/p\u0026gt;\n\n\u0026lt;p\u0026gt;It\u0026amp;#39;s not the ultimate distro for everyone, and, thankfully, ut doesn\u0026amp;#39;t strive to be. Like with everything else, you have to look at your own use-case and preferences, and decide what\u0026amp;#39;s best four \u0026lt;em\u0026gt;you\u0026lt;/em\u0026gt;, not have others tell you what to use - I\u0026amp;#39;m very happy using Arch+Hyprland, but that doesn\u0026amp;#39;t mean it\u0026amp;#39;s a good fit for everyone...\u0026lt;/p\u0026gt;\n\u0026lt;/div\u0026gt;",
+                "mime": "text/html"
+            }
+        ],
+        "stats": [
+            {
+                "type": 2,
+                "counter": 11
+            }
+        ]
+    },
+    {
+        "id": "m3plbam",
+        "parent": "t3_1hlvz0u",
+        "createdAt": {
+            "seconds": 1735113944
+        },
+        "generator": [
+            {
+                "id": "t2_f0jlt",
+                "name": "MentalUproar"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u0026lt;div class=\"md\"\u0026gt;\u0026lt;p\u0026gt;I use arch on my home server because I’m playing around with bcachefs and it’s just easier to deal with on arch. But it’s definitely a minefield. Arch is not merciful. If you tell it to do something dumb, in the spirit of Linux it will fucking do it. If you don’t know what you are doing with Linux, arch is a great way to learn because there’s another side to this problem. While it’s easy to break, the documentation is fantastic.  It’s in-depth and still easy to understand. With enough effort you will eventually dig yourself out of just about anything in arch.\u0026lt;/p\u0026gt;\n\n\u0026lt;p\u0026gt;Arch rewards effort. You have to be willing to learn to really appreciate arch. When I get enough free time I may redoing my server in straight fedora honestly because arch is NOT a server distro but it is a fantastic tinker distro.\u0026lt;/p\u0026gt;\n\u0026lt;/div\u0026gt;",
+                "mime": "text/html"
+            }
+        ],
+        "stats": [
+            {
+                "type": 2,
+                "counter": 4
+            }
+        ]
+    },
+    {
+        "id": "m3phtfz",
+        "parent": "t3_1hlvz0u",
+        "createdAt": {
+            "seconds": 1735111477
+        },
+        "generator": [
+            {
+                "id": "t2_69l0kzy5",
+                "name": "jaskij"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u0026lt;div class=\"md\"\u0026gt;\u0026lt;p\u0026gt;I want rolling release, and I want clean software without distro specific patches. Hence, Arch.\u0026lt;/p\u0026gt;\n\n\u0026lt;p\u0026gt;As for AUR: it\u0026amp;#39;s a place where you can get a lot of software that is, by and large, unmoderated. So yes, it can be dangerous and you need to be careful, but it also has a lot of good stuff that simplifies my life. Just like any other time you download random software from the Internet.\u0026lt;/p\u0026gt;\n\u0026lt;/div\u0026gt;",
+                "mime": "text/html"
+            }
+        ],
+        "stats": [
+            {
+                "type": 2,
+                "counter": 10
+            }
+        ]
+    },
+    {
+        "id": "m3phorz",
+        "parent": "t3_1hlvz0u",
+        "createdAt": {
+            "seconds": 1735111386
+        },
+        "generator": [
+            {
+                "id": "t2_47qtrni",
+                "name": "samueltheboss2002"
+            }
+        ],
+        "content": [
+            {
+                "text": "\u0026lt;div class=\"md\"\u0026gt;\u0026lt;p\u0026gt;Full control of what you have installed in your computer, no extra packages that you don\u0026amp;#39;t need and DiY experience.\u0026lt;/p\u0026gt;\n\u0026lt;/div\u0026gt;",
+                "mime": "text/html"
+            }
+        ],
+        "stats": [
+            {
+                "type": 2,
+                "counter": 11
+            }
+        ]
+    }
+]

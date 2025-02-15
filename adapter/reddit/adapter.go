@@ -51,32 +51,41 @@ func (ta *redditAdapter) Get(link *opb.Link) ([]*opb.Object, error) {
 	}
 	result := []*opb.Object{}
 	for _, e := range entities {
-		attachments := []*opb.Attachment{}
+		links := map[string]bool{}
 		if e.Media != nil && e.Media.RedditVideo != nil {
-			attachments = append(attachments, &opb.Attachment{
-				Url:  e.Media.RedditVideo.FallbackUrl,
-				Mime: getMime(e.Media.RedditVideo.FallbackUrl),
-			})
+			links[e.Media.RedditVideo.FallbackUrl] = true
+		}
+		if e.SecureMedia != nil && e.SecureMedia.RedditVideo != nil {
+			links[e.SecureMedia.RedditVideo.FallbackUrl] = true
 		}
 		if e.Preview != nil {
 			for _, img := range e.Preview.Images {
-				attachments = append(attachments, &opb.Attachment{
-					Url:  img.Source.Url,
-					Mime: getMime(img.Source.Url),
-				})
+				links[img.Source.Url] = true
 			}
 		}
 		for _, v := range e.MediaMetadata {
+			links[v.Original.Url] = true
+		}
+		attachments := []*opb.Attachment{}
+		for l := range links {
 			attachments = append(attachments, &opb.Attachment{
-				Url:  v.Original.Url,
-				Mime: v.MimeType,
+				Url:  l,
+				Mime: getMime(l),
 			})
 		}
+
 		content := []*opb.Content{}
 		if e.BodyHtml != "" {
 			content = append(content, &opb.Content{Text: e.BodyHtml, Mime: "text/html"})
 		} else if e.Body != "" {
 			content = append(content, &opb.Content{Text: e.BodyHtml, Mime: "text/plain"})
+		}
+		stats := []*opb.Stats{}
+		if e.Ups > 0 {
+			stats = append(stats, &opb.Stats{Type: opb.Stats_UPVOTE, Counter: int64(e.Ups)})
+		}
+		if e.Downs > 0 {
+			stats = append(stats, &opb.Stats{Type: opb.Stats_DOWNVOTE, Counter: int64(e.Downs)})
 		}
 		result = append(result, &opb.Object{
 			Id:     e.Id,
@@ -84,12 +93,9 @@ func (ta *redditAdapter) Get(link *opb.Link) ([]*opb.Object, error) {
 			CreatedAt: &opb.Timestamp{
 				Seconds: int64(e.CreatedUtc),
 			},
-			Stats: []*opb.Stats{
-				{Type: opb.Stats_UPVOTE, Counter: int64(e.Ups)},
-				{Type: opb.Stats_DOWNVOTE, Counter: int64(e.Downs)},
-			},
+			Stats:      stats,
 			Attachment: attachments,
-			Generator:  []*opb.Generator{{Id: e.AuthotFullName, Name: e.Author}},
+			Generator:  []*opb.Generator{{Id: e.AuthorFullName, Name: e.Author}},
 			Content:    content,
 		})
 	}

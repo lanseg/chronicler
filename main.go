@@ -7,6 +7,7 @@ import (
 	"chronicler/adapter"
 	"chronicler/adapter/fourchan"
 	"chronicler/adapter/pikabu"
+	"chronicler/adapter/reddit"
 	"chronicler/adapter/twitter"
 	"chronicler/adapter/web"
 	"chronicler/common"
@@ -46,6 +47,7 @@ func save(args []string) {
 			twitter.NewAdapter(twitter.NewClient(httpClient, twitterToken)),
 			fourchan.NewAdapter(httpClient),
 			pikabu.NewAdapter(httpClient),
+			reddit.NewAdapter(httpClient),
 			web.NewAdapter(httpClient),
 		},
 	)

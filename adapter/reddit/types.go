@@ -132,7 +132,7 @@ type Entity struct {
 	Body           string `json:"body"`
 	BodyHtml       string `json:"body_html"`
 	Author         string `json:"author"`
-	AuthotFullName string `json:"author_fullname"`
+	AuthorFullName string `json:"author_fullname"`
 	Subreddit      string `json:"subreddit"`
 	Permalink      string `json:"permalink"`
 

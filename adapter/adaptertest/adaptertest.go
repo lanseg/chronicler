@@ -10,6 +10,7 @@ import (
 	"os"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"google.golang.org/protobuf/testing/protocmp"
 
 	opb "chronicler/proto"
@@ -55,7 +56,11 @@ func TestRequestResponse(a adapter.Adapter, link string, wantFile string) error 
 
 	}
 
-	if diff := cmp.Diff(want, got, protocmp.Transform()); diff != "" {
+	options := []cmp.Option{
+		protocmp.Transform(),
+		cmpopts.SortSlices(func(a, b string) bool { return a < b }),
+	}
+	if diff := cmp.Diff(want, got, options...); diff != "" {
 		return fmt.Errorf("expected parsed and reference results to be equal, but got %s", diff)
 	}
 	return nil

@@ -8,9 +8,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"os"
 	"regexp"
-	"sort"
 )
 
 var (
@@ -64,7 +62,7 @@ type redditClient struct {
 }
 
 func (rc *redditClient) get(def *RedditPostDef) ([]Thing[Listing[Thing[Entity]]], error) {
-	resp, err := rc.httpClient.Do(&http.Request{
+	request := &http.Request{
 		Method: "GET",
 		URL: &url.URL{
 			Scheme:   "https",
@@ -75,7 +73,11 @@ func (rc *redditClient) get(def *RedditPostDef) ([]Thing[Listing[Thing[Entity]]]
 		Header: http.Header{
 			"Content-type": []string{"application/x-www-form-urlencoded"},
 		},
-	})
+	}
+	if rc.auth != nil {
+		request.Header.Add("Authentication", fmt.Sprintf("Bearer %s", rc.auth.AccessToken))
+	}
+	resp, err := rc.httpClient.Do(request)
 	if err != nil {
 		return nil, err
 	}
@@ -85,7 +87,6 @@ func (rc *redditClient) get(def *RedditPostDef) ([]Thing[Listing[Thing[Entity]]]
 	if err != nil {
 		return nil, err
 	}
-	os.WriteFile("/home/arusakov/devel/lanseg/chronicler/reddit.json_", responseBytes, 0777)
 	result := []Thing[Listing[Thing[Entity]]]{}
 	if err = json.Unmarshal(responseBytes, &result); err != nil {
 		return nil, err
@@ -117,7 +118,6 @@ func (rc *redditClient) fetch(def *RedditPostDef) (*GetPostResponse, error) {
 	for k := range toFetch {
 		result.More = append(result.More, k)
 	}
-	sort.Strings(result.More)
 	return result, nil
 }
 

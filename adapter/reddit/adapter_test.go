@@ -16,13 +16,28 @@ func TestRedditAdapterMatcher(t *testing.T) {
 	}{
 		{
 			name:    "successful match",
-			url:     "https://www.reddit.com/r/law/comments/1inaszr/musk_crashes_trumps_interview_and_goes_on_an_info/",
+			url:     "https://www.reddit.com/r/subreddit/comments/1fsokfgg/mulfoe/",
 			matches: true,
 		},
 		{
 			name:    "comment succesful match",
-			url:     "https://www.reddit.com/r/law/comments/1inaszr/comment/mc9uo5g/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button",
+			url:     "https://www.reddit.com/r/subreddit/comments/1fsokfgg/comment/mc9kwefuo5g/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button",
 			matches: true,
+		},
+		{
+			name:    "failed match subreddit only",
+			url:     "https://www.reddit.com/r/subreddit",
+			matches: false,
+		},
+		{
+			name:    "failed match no post id",
+			url:     "https://www.reddit.com/r/subreddit/comments",
+			matches: false,
+		},
+		{
+			name:    "failed match garbage url",
+			url:     "eg=elkrg[lreg=3rgergr/lasubredditw",
+			matches: false,
 		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
@@ -39,12 +54,14 @@ func TestRedditAdapter(t *testing.T) {
 		name     string
 		response string
 	}{
-		//{name: "basic reddit post", response: "reddut_basic"},
+		{name: "reddit basic short post", response: "basic_post"},
+		{name: "reddit basic post with video", response: "video_post"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			if err := adaptertest.TestRequestResponse(
-				NewAdapter(adaptertest.NewFakeHttp(filepath.Join("test_data", tc.response+".json"))),
-				"http://x.com/username/status/123123123123",
+				NewAdapter(
+					adaptertest.NewFakeHttp(filepath.Join("test_data", tc.response+".json"))),
+				"https://www.reddit.com/r/subreddit/comments/rand0m/comment/mc9uo5u",
 				filepath.Join("test_data", tc.response+"_expect.json")); err != nil {
 				t.Error(err)
 			}
