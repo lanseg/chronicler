@@ -72,7 +72,6 @@ func (v *Viewer) View(id string) error {
 		objByParent[obj.Parent] = append(objByParent[obj.Parent], obj)
 		objById[obj.Id] = obj
 	}
-
 	toVisit := append([]*opb.Object{}, objByParent[""]...)
 	for len(toVisit) > 0 {
 		obj := toVisit[0]
@@ -83,7 +82,6 @@ func (v *Viewer) View(id string) error {
 		for ; p != ""; prefix++ {
 			p = objById[p].Parent
 		}
-
 		fmt.Println(formatObject(obj, prefix))
 		children := objByParent[obj.Id]
 		if len(children) == 0 {

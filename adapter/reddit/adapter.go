@@ -87,15 +87,23 @@ func (ta *redditAdapter) Get(link *opb.Link) ([]*opb.Object, error) {
 		if e.Downs > 0 {
 			stats = append(stats, &opb.Stats{Type: opb.Stats_DOWNVOTE, Counter: int64(e.Downs)})
 		}
+		authorIdName := e.AuthorFullName
+		parent := e.ParentId
+		if len(parent) > 3 {
+			parent = parent[3:]
+		}
+		if len(authorIdName) > 3 {
+			authorIdName = authorIdName[3:]
+		}
 		result = append(result, &opb.Object{
 			Id:     e.Id,
-			Parent: e.ParentId,
+			Parent: parent,
 			CreatedAt: &opb.Timestamp{
 				Seconds: int64(e.CreatedUtc),
 			},
 			Stats:      stats,
 			Attachment: attachments,
-			Generator:  []*opb.Generator{{Id: e.AuthorFullName, Name: e.Author}},
+			Generator:  []*opb.Generator{{Id: authorIdName, Name: e.Author}},
 			Content:    content,
 		})
 	}
