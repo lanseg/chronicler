@@ -8,7 +8,7 @@ import (
 )
 
 func TestRedditAdapterMatcher(t *testing.T) {
-	redditAdapter := NewAdapter(nil)
+	redditAdapter := NewAnonymousAdapter(nil)
 	for _, tc := range []struct {
 		name    string
 		url     string
@@ -51,18 +51,35 @@ func TestRedditAdapterMatcher(t *testing.T) {
 func TestRedditAdapter(t *testing.T) {
 
 	for _, tc := range []struct {
-		name     string
-		response string
+		name      string
+		responses []string
+		expect    string
 	}{
-		{name: "reddit basic short post", response: "basic_post"},
-		{name: "reddit basic post with video", response: "video_post"},
+		{
+			name:      "short post",
+			responses: []string{"basic_post"},
+			expect:    "basic_post",
+		},
+		{
+			name:      "post with video",
+			responses: []string{"video_post"},
+			expect:    "video_post",
+		},
+		{
+			name:      "reddit more children",
+			responses: []string{"with_children", "with_children_more"},
+			expect:    "with_children",
+		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
+			responseFiles := []string{}
+			for _, r := range tc.responses {
+				responseFiles = append(responseFiles, filepath.Join("test_data", r+".json"))
+			}
 			if err := adaptertest.TestRequestResponse(
-				NewAdapter(
-					adaptertest.NewFakeHttp(filepath.Join("test_data", tc.response+".json"))),
+				NewAnonymousAdapter(adaptertest.NewFakeHttp(responseFiles...)),
 				"https://www.reddit.com/r/subreddit/comments/rand0m/comment/mc9uo5u",
-				filepath.Join("test_data", tc.response+"_expect.json")); err != nil {
+				filepath.Join("test_data", tc.expect+"_expect.json")); err != nil {
 				t.Error(err)
 			}
 		})

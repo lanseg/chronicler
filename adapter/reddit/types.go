@@ -111,13 +111,19 @@ type Media struct {
 	RedditVideo *RedditVideo `json:"reddit_video"`
 }
 
+type MediaVariant struct {
+	Width  int    `json:"x"`
+	Height int    `json:"y"`
+	Url    string `json:"u"`
+	Gif    string `json:"gif"`
+	Mp4    string `json:"mp4"`
+}
+
 type MediaMetadata struct {
-	MimeType string `json:"m"`
-	Original struct {
-		Width  int    `json:"x"`
-		Height int    `json:"y"`
-		Url    string `json:"u"`
-	} `json:"s"`
+	MimeType string          `json:"m"`
+	Status   string          `json:"status"`
+	Previews []*MediaVariant `json:"p"`
+	Source   *MediaVariant   `json:"s"`
 }
 
 // Entity is Reddit's comment or pos

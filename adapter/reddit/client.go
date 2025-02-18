@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"regexp"
+	"strings"
 )
 
 var (
@@ -25,6 +26,15 @@ type RedditPostDef struct {
 type GetPostResponse struct {
 	Entities []*Entity `json:"entities"`
 	More     []string  `json:"more"`
+}
+
+type GetMoreChildrenResponse struct {
+	Json struct {
+		Errors []interface{} `json:"errors"`
+		Data   struct {
+			Things []*Thing[Entity] `json:"things"`
+		} `json:"data"`
+	} `json:"json"`
 }
 
 func ParseLink(link string) *RedditPostDef {
@@ -46,8 +56,30 @@ func ParseLink(link string) *RedditPostDef {
 	return result
 }
 
+func parsePostResponse(redditPost []Thing[Listing[Thing[Entity]]]) *GetPostResponse {
+	result := &GetPostResponse{}
+	more := map[string]bool{}
+	for _, th := range redditPost {
+		for _, the := range th.Data.Children {
+			if the.Kind == "more" {
+				for _, ch := range the.Data.Children {
+					more[ch] = true
+				}
+			} else {
+				result.Entities = append(result.Entities, &the.Data)
+			}
+		}
+		th.Data.Children = nil
+	}
+	for k := range more {
+		result.More = append(result.More, k)
+	}
+	return result
+}
+
 type Client interface {
-	GetPost(def *RedditPostDef) ([]*Entity, error)
+	GetPost(def *RedditPostDef) (*GetPostResponse, error)
+	GetChildren(def *RedditPostDef, childIds []string) (*GetPostResponse, error)
 }
 
 type RedditAuth struct {
@@ -61,75 +93,71 @@ type redditClient struct {
 	logger     *common.Logger
 }
 
-func (rc *redditClient) get(def *RedditPostDef) ([]Thing[Listing[Thing[Entity]]], error) {
+func (rc *redditClient) performRequest(linkStr string, auth bool) ([]byte, error) {
+	link, err := url.Parse(linkStr)
+	if err != nil {
+		return nil, err
+	}
 	request := &http.Request{
 		Method: "GET",
-		URL: &url.URL{
-			Scheme:   "https",
-			Host:     "www.reddit.com",
-			Path:     fmt.Sprintf("/r/%s/comments/%s.json", def.Subreddit, def.PostId),
-			RawQuery: "threaded=false&limit=1000000",
-		},
+		URL:    link,
 		Header: http.Header{
-			"Content-type": []string{"application/x-www-form-urlencoded"},
+			"Accept":     []string{"application/json"},
+			"User-Agent": []string{"Mozilla/5.0 (X11; Linux x86_64; rv:58.0) Gecko/20100101 Firefox/58.0"},
 		},
 	}
-	if rc.auth != nil {
-		request.Header.Add("Authentication", fmt.Sprintf("Bearer %s", rc.auth.AccessToken))
+	if auth && rc.auth != nil {
+		request.Header.Add("Authorization", fmt.Sprintf("Bearer %s", rc.auth.AccessToken))
 	}
 	resp, err := rc.httpClient.Do(request)
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
-
 	responseBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
+	return responseBytes, nil
+}
+
+func (rc *redditClient) GetPost(def *RedditPostDef) (*GetPostResponse, error) {
+	redditPostBytes, err := rc.performRequest(
+		fmt.Sprintf("https://www.reddit.com/r/%s/comments/%s.json?threaded=false&limit=1000000",
+			def.Subreddit, def.PostId), false)
+	if err != nil {
+		return nil, err
+	}
 	result := []Thing[Listing[Thing[Entity]]]{}
-	if err = json.Unmarshal(responseBytes, &result); err != nil {
+	if err = json.Unmarshal(redditPostBytes, &result); err != nil {
 		return nil, err
 	}
-	return result, nil
+	return parsePostResponse(result), nil
 }
 
-func (rc *redditClient) fetch(def *RedditPostDef) (*GetPostResponse, error) {
-	result := &GetPostResponse{}
-	redditPost, err := rc.get(def)
+func (rc *redditClient) GetChildren(rp *RedditPostDef, childIds []string) (*GetPostResponse, error) {
+	redditPostBytes, err := rc.performRequest(fmt.Sprintf(
+		"https://oauth.reddit.com/api/morechildren?api_type=json&link_id=t3_%s&children=%s&limit_children=true&sort=new",
+		rp.PostId, strings.Join(childIds, ",")), true)
 	if err != nil {
 		return nil, err
 	}
-	toFetch := map[string]bool{}
-	for _, th := range redditPost {
-		for _, the := range th.Data.Children {
-			if the.Kind == "more" {
-				toFetch[the.Data.Id] = true
-				for _, ch := range the.Data.Children {
-					toFetch[ch] = true
-				}
-			} else {
-				result.Entities = append(result.Entities, &the.Data)
-			}
+	result := &GetMoreChildrenResponse{}
+	if err = json.Unmarshal(redditPostBytes, &result); err != nil {
+		return nil, err
+	}
+	entities := []*Entity{}
+	toLoad := []string{}
+	for _, th := range result.Json.Data.Things {
+		if th.Kind == "more" {
+			toLoad = append(toLoad, th.Data.Children...)
 		}
-		th.Data.Children = nil
+		entities = append(entities, &th.Data)
 	}
-
-	for k := range toFetch {
-		result.More = append(result.More, k)
-	}
-	return result, nil
-}
-
-func (rc *redditClient) GetPost(def *RedditPostDef) ([]*Entity, error) {
-	rc.logger.Infof("Loading post and comments from %s/%s", def.Subreddit, def.MaybePost)
-	post, err := rc.fetch(def)
-	if err != nil {
-		return nil, err
-	}
-	rc.logger.Infof("Loaded entities from %s/%s: %d, still to load at least %d",
-		def.Subreddit, def.MaybePost, len(post.Entities), len(post.More))
-	return post.Entities, nil
+	return &GetPostResponse{
+		Entities: entities,
+		More:     toLoad,
+	}, nil
 }
 
 func NewAnonymousClient(client adapter.HttpClient) Client {

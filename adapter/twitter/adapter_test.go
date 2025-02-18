@@ -10,7 +10,7 @@ const (
 	fakeToken = "fakeToken"
 )
 
-func TestTwityerAdapter(t *testing.T) {
+func TestTwitterAdapter(t *testing.T) {
 
 	for _, tc := range []struct {
 		name     string

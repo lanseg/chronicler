@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -19,11 +20,13 @@ import (
 type FakeHttpClient struct {
 	adapter.HttpClient
 
-	file string
+	currnetFile int
+	files       []string
 }
 
 func (fh *FakeHttpClient) Do(req *http.Request) (*http.Response, error) {
-	bts, err := os.ReadFile(fh.file)
+	bts, err := os.ReadFile(fh.files[fh.currnetFile])
+	fh.currnetFile = (fh.currnetFile + 1) % len(fh.files)
 	if err != nil {
 		return nil, err
 	}
@@ -33,9 +36,9 @@ func (fh *FakeHttpClient) Do(req *http.Request) (*http.Response, error) {
 	}, nil
 }
 
-func NewFakeHttp(responseFile string) *FakeHttpClient {
+func NewFakeHttp(responseFile ...string) *FakeHttpClient {
 	return &FakeHttpClient{
-		file: responseFile,
+		files: responseFile,
 	}
 }
 
@@ -44,7 +47,10 @@ func TestRequestResponse(a adapter.Adapter, link string, wantFile string) error 
 	if err != nil {
 		return fmt.Errorf("error while doing get: %s", err)
 	}
-
+	if strings.Contains(link, "reddit") {
+		bu, _ := json.Marshal(got)
+		os.WriteFile("/home/arusakov/devel/lanseg/chronicler/reddit_test_out.json", bu, 0777)
+	}
 	// Reference data
 	wantBytes, err := os.ReadFile(wantFile)
 	if err != nil {
