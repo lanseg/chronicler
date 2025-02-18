@@ -2,8 +2,6 @@ package twitter
 
 import (
 	"fmt"
-	"mime"
-	"path/filepath"
 	"regexp"
 	"sort"
 	"time"
@@ -160,16 +158,16 @@ func (ta *twitterAdapter) tweetToObject(
 			}
 			br := int64(0)
 			url := media.Url
-			mediaType := "" 
+			mediaType := ""
 			for _, v := range media.Variants {
 				if url == "" || v.Bitrate > br {
 					url = v.Url
 					br = v.Bitrate
-				    mediaType = v.ContentType
+					mediaType = v.ContentType
 				}
 			}
 			if mediaType == "" {
-				mediaType = mime.TypeByExtension(filepath.Ext(url))
+				mediaType = common.GuessMimeType(url)
 			}
 			obj.Attachment = append(obj.Attachment, &opb.Attachment{
 				Url:  url,
@@ -181,7 +179,7 @@ func (ta *twitterAdapter) tweetToObject(
 			if _, ok := medias[url.MediaKey]; !ok {
 				obj.Attachment = append(obj.Attachment, &opb.Attachment{
 					Url:  url.ExpandedUrl,
-					Mime: mime.TypeByExtension(filepath.Ext(url.ExpandedUrl)),
+					Mime: common.GuessMimeType(url.ExpandedUrl),
 				})
 			}
 		}

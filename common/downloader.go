@@ -2,7 +2,10 @@ package common
 
 import (
 	"io"
+	"mime"
 	"net/http"
+	"net/url"
+	"path/filepath"
 )
 
 type Downloader interface {
@@ -33,4 +36,14 @@ func (h *httpDownloader) Download(source string, target io.Writer) (int64, error
 		return -1, err
 	}
 	return size, nil
+}
+
+func GuessMimeType(href string) string {
+	fileName := ""
+	if u, err := url.Parse(href); err == nil {
+		fileName = u.Path
+	} else {
+		fileName = href
+	}
+	return mime.TypeByExtension(filepath.Ext(fileName))
 }

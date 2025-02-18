@@ -3,10 +3,8 @@ package web
 import (
 	"bytes"
 	"io"
-	"mime"
 	"net/http"
 	"net/url"
-	"path/filepath"
 	"regexp"
 	"sort"
 
@@ -27,6 +25,7 @@ var (
 		"icon":       true,
 		"manifest":   true,
 		"poster":     true,
+		"data-src":   true,
 	}
 )
 
@@ -100,14 +99,9 @@ func (wa *webAdapter) Get(link *opb.Link) ([]*opb.Object, error) {
 
 	attachments := []*opb.Attachment{}
 	for u := range urls {
-		queryPath := u
-		url, err := url.Parse(u)
-		if err == nil {
-			queryPath = url.Path
-		}
 		attachments = append(attachments, &opb.Attachment{
 			Url:  u,
-			Mime: mime.TypeByExtension(filepath.Ext(queryPath)),
+			Mime: common.GuessMimeType(u),
 		})
 	}
 	sort.Slice(attachments, func(i, j int) bool {

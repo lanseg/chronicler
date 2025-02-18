@@ -2,9 +2,6 @@ package reddit
 
 import (
 	"fmt"
-	"mime"
-	"net/url"
-	"path/filepath"
 	"strings"
 
 	"chronicler/adapter"
@@ -17,16 +14,6 @@ type redditAdapter struct {
 
 	logger *common.Logger
 	client Client
-}
-
-func getMime(href string) string {
-	fileName := ""
-	if u, err := url.Parse(href); err == nil {
-		fileName = u.Path
-	} else {
-		fileName = href
-	}
-	return mime.TypeByExtension(filepath.Ext(fileName))
 }
 
 func NewAnonymousAdapter(client adapter.HttpClient) adapter.Adapter {
@@ -107,7 +94,7 @@ func (ta *redditAdapter) Get(link *opb.Link) ([]*opb.Object, error) {
 		for l := range links {
 			attachments = append(attachments, &opb.Attachment{
 				Url:  strings.ReplaceAll(l, "&amp;", "&"),
-				Mime: getMime(l),
+				Mime: common.GuessMimeType(l),
 			})
 
 		}

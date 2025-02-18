@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"net/http/cookiejar"
 	"os"
-	"strings"
 
 	"chronicler/adapter"
 	"chronicler/adapter/fourchan"
@@ -36,21 +35,6 @@ func view(args []string) {
 	(&viewer.Viewer{
 		Root: root,
 	}).View(common.UUID4For(&opb.Link{Href: args[0]}))
-}
-
-func sanitizeUrl(remotePath string) string {
-	builder := strings.Builder{}
-	for _, r := range remotePath {
-		if (r >= 'a' && r <= 'z') ||
-			(r >= 'A' && r <= 'Z') ||
-			(r >= '0' && r <= '9') ||
-			r == '-' || r == '_' || r == '.' {
-			builder.WriteRune(r)
-		} else {
-			builder.WriteRune('_')
-		}
-	}
-	return builder.String()
 }
 
 func save(args []string) {
