@@ -105,7 +105,6 @@ func (ta *redditAdapter) Get(link *opb.Link) ([]*opb.Object, error) {
 		}
 		attachments := []*opb.Attachment{}
 		for l := range links {
-			fmt.Printf("HERE: %s\n", strings.ReplaceAll(l, "&amp;", "&"))
 			attachments = append(attachments, &opb.Attachment{
 				Url:  strings.ReplaceAll(l, "&amp;", "&"),
 				Mime: getMime(l),

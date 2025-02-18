@@ -1,9 +1,6 @@
 package main
 
 import (
-	"bytes"
-	"fmt"
-	"io"
 	"log"
 	"net/http"
 	"net/http/cookiejar"
@@ -56,50 +53,20 @@ func sanitizeUrl(remotePath string) string {
 	return builder.String()
 }
 
-type DumpHttpClient struct {
-	adapter.HttpClient
-
-	i            int
-	actualClient adapter.HttpClient
-}
-
-func (dh *DumpHttpClient) Do(request *http.Request) (*http.Response, error) {
-	if err := os.MkdirAll("/home/arusakov/devel/lanseg/chronicler/dump", 0777); err != nil {
-		fmt.Printf("HERE-ERR-1: %s\n", err)
-		return nil, err
-	}
-	result, err := dh.actualClient.Do(request)
-	if err != nil {
-		fmt.Printf("HERE-ERR-2: %s\n", err)
-		return nil, err
-	}
-	data, err := io.ReadAll(result.Body)
-	if err != nil {
-		fmt.Printf("HERE-ERR-3: %s\n", err)
-		return nil, err
-	}
-	defer result.Body.Close()
-	target := sanitizeUrl(request.URL.RawQuery)
-	os.WriteFile(fmt.Sprintf("dump/%s_%d", target, dh.i), data, 0777)
-	dh.i += 1
-	result.Body = io.NopCloser(bytes.NewReader(data))
-	return result, nil
-}
-
 func save(args []string) {
 	jar, err := cookiejar.New(&cookiejar.Options{})
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	httpClient := &DumpHttpClient{actualClient: &http.Client{Jar: jar}}
+	httpClient := &http.Client{Jar: jar}
 
 	twitterToken := os.Getenv("TWITTER_TOKEN")
 	redditToken := os.Getenv("REDDIT_TOKEN")
 
 	r := resolver.NewResolver(
 		root,
-		common.NewHttpDownloader(httpClient.actualClient.(*http.Client)),
+		common.NewHttpDownloader(httpClient),
 		[]adapter.Adapter{
 			twitter.NewAdapter(twitter.NewClient(httpClient, twitterToken)),
 			fourchan.NewAdapter(httpClient),
