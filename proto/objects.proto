@@ -70,6 +70,7 @@ message Object {
 // Snapshot with the fetch result and time of the fetch
 message Snapshot {
   Timestamp fetch_time = 1;
+  Link link = 3;
 
   repeated Object objects = 2;
 }

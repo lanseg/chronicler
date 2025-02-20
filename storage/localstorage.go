@@ -8,32 +8,17 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"strings"
 	"sync"
 )
 
 const (
 	maxBackups      = 1000
+	maxNameLen      = 200
 	defaultPerms    = 0777
 	defaultMetadata = ".metadata"
 	defaultSnapshot = ".snapshot"
 	defaultMapping  = defaultMetadata + "/mapping.json"
 )
-
-func sanitizeUrl(remotePath string) string {
-	builder := strings.Builder{}
-	for _, r := range remotePath {
-		if (r >= 'a' && r <= 'z') ||
-			(r >= 'A' && r <= 'Z') ||
-			(r >= '0' && r <= '9') ||
-			r == '-' || r == '_' || r == '.' {
-			builder.WriteRune(r)
-		} else {
-			builder.WriteRune('_')
-		}
-	}
-	return builder.String()
-}
 
 type localStorage struct {
 	Storage
@@ -104,7 +89,7 @@ func (ls *localStorage) Put(put *PutRequest) (io.WriteCloser, error) {
 	ls.writeMux.Lock()
 	defer ls.writeMux.Unlock()
 
-	localName := sanitizeUrl(put.Url)
+	localName := common.SanitizeUrl(put.Url, maxNameLen)
 	localPath := filepath.Join(ls.root, localName)
 	if _, err := os.Stat(localPath); err == nil {
 		if put.SaveOnOverwrite {

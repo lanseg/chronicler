@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-func TestText(t *testing.T) {
+func TestWrapText(t *testing.T) {
 	data, err := os.ReadFile("test_data/lipsum.txt")
 	if err != nil {
 		t.Errorf("Cannot load test data: %s", err)
@@ -73,4 +73,45 @@ func TestText(t *testing.T) {
 			t.Errorf("Wrapping %q should return %q, but got %q", srcStr, srcStr, result)
 		}
 	})
+}
+
+func TestSanitizeUrl(t *testing.T) {
+
+	for _, tc := range []struct {
+		name   string
+		url    string
+		want   string
+		maxLen int
+	}{
+		{
+			name: "basic url",
+			url:  "http://somehost.domain.com/query?a=b&c=d",
+			want: "http___somehost.domain.com_query_a_b_c_d",
+		},
+		{
+			name:   "basic url limited not truncated",
+			url:    "http://somehost.domain.com/query?a=b&c=d",
+			want:   "http___somehost.domain.com_query_a_b_c_d",
+			maxLen: 320,
+		},
+		{
+			name:   "basic url limited truncated",
+			url:    "http://somehost.domain.com/query?a=b&c=d",
+			want:   "http___somehost.domain._d3a8884e",
+			maxLen: 32,
+		},
+		{
+			name: "basic url unicode",
+			url:  "http://somehost.domain.com/query?a=b&wwwwtpowkfwüokзщулкпзщ3",
+			want: "http___somehost.domain.com_query_a_b_wwwwtpowkfw_ok________3",
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			result := SanitizeUrl(tc.url, tc.maxLen)
+			if tc.want != result || (tc.maxLen > 0 && tc.maxLen < len(result)) {
+				t.Errorf("Expected SanitizeUrl(%q, %d)=%q (%d), but got %q (%d)",
+					tc.url, tc.maxLen, tc.want, tc.maxLen, result, len(result))
+			}
+		})
+	}
 }

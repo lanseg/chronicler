@@ -8,7 +8,6 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"strings"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -47,10 +46,6 @@ func TestRequestResponse(a adapter.Adapter, link string, wantFile string) error 
 	if err != nil {
 		return fmt.Errorf("error while doing get: %s", err)
 	}
-	if strings.Contains(link, "reddit") {
-		bu, _ := json.Marshal(got)
-		os.WriteFile("/home/arusakov/devel/lanseg/chronicler/reddit_test_out.json", bu, 0777)
-	}
 	// Reference data
 	wantBytes, err := os.ReadFile(wantFile)
 	if err != nil {
@@ -64,7 +59,7 @@ func TestRequestResponse(a adapter.Adapter, link string, wantFile string) error 
 
 	options := []cmp.Option{
 		protocmp.Transform(),
-		cmpopts.SortSlices(func(a, b string) bool { return a < b }),
+		cmpopts.SortSlices(func(a, b interface{}) bool { return fmt.Sprintf("%s", a) < fmt.Sprintf("%s", b) }),
 	}
 	if diff := cmp.Diff(want, got, options...); diff != "" {
 		return fmt.Errorf("expected parsed and reference results to be equal, but got %s", diff)

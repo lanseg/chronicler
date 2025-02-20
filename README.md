@@ -28,6 +28,8 @@ It will save results to the ```./data/{SOME_UUID}``` directory
 
 Adapter is a module that parses some site or social network into a protobuf-defined format, extracts content, links, comment-reply structure, etc.
 
+For example, we are running ```./main save ./main save "http://some/url"```, we check which adapter matches it and let it work with the resource defined by link. If no special adapters found, we are downloading it as a simple web page.
+
 ```
 TODO: Add note about adapters
 ```
@@ -59,3 +61,5 @@ http___somewebsite.com_more_1
 http___somewebsite.com_more_2
 ```
 ### Export/View
+
+### Search/List

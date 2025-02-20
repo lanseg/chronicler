@@ -123,6 +123,7 @@ func (r *resolver) resolveTask(task resolverTask) error {
 		FetchTime: &opb.Timestamp{
 			Seconds: time.Now().Unix(),
 		},
+		Link:    link,
 		Objects: objs,
 	}
 	bytesWritten, err := s.PutObject(&storage.PutRequest{

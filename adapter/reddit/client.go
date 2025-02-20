@@ -38,11 +38,11 @@ type GetMoreChildrenResponse struct {
 }
 
 func ParseLink(link string) *RedditPostDef {
-	subexp := redditRe.SubexpNames()
-	submatch := redditRe.FindStringSubmatch(link)
+	groupName := redditRe.SubexpNames()
+	group := redditRe.FindStringSubmatch(link)
 	result := &RedditPostDef{}
-	for i, key := range submatch {
-		switch subexp[i] {
+	for i, key := range group {
+		switch groupName[i] {
 		case "subreddit":
 			result.Subreddit = key
 		case "postId":

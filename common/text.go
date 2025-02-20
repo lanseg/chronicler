@@ -1,6 +1,8 @@
 package common
 
 import (
+	"fmt"
+	"hash/fnv"
 	"strings"
 	"unicode"
 )
@@ -36,4 +38,29 @@ func WrapText(text string, maxWidth int) string {
 	}
 	result.WriteString(buffer.String())
 	return result.String()
+}
+
+func SanitizeUrl(remotePath string, maxLength int) string {
+	builder := strings.Builder{}
+	addHash := false
+	for i, r := range remotePath {
+		if maxLength > 0 && i >= maxLength-9 {
+			addHash = true
+			break
+		}
+		if (r >= 'a' && r <= 'z') ||
+			(r >= 'A' && r <= 'Z') ||
+			(r >= '0' && r <= '9') ||
+			r == '-' || r == '_' || r == '.' {
+			builder.WriteRune(r)
+		} else {
+			builder.WriteRune('_')
+		}
+	}
+	if addHash {
+		hash := fnv.New32()
+		hash.Write([]byte(remotePath))
+		builder.WriteString(fmt.Sprintf("_%x", hash.Sum([]byte{})))
+	}
+	return builder.String()
 }
