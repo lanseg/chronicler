@@ -165,6 +165,21 @@ func TestLocalStoragePutFile(t *testing.T) {
 			list:     []*ListRequest{{WithSnapshots: true}},
 			wantList: []*ListResponse{},
 		},
+		{
+			name: "list with filter",
+			puts: []*put{
+				{request: &PutRequest{Url: "filename 1"}, writes: [][]byte{[]byte("file 1")}},
+				{request: &PutRequest{Url: "filename 2"}, writes: [][]byte{[]byte("file 2")}},
+				{request: &PutRequest{Url: "filename 3"}, writes: [][]byte{[]byte("file 3")}},
+			},
+			gets: []*get{
+				{request: &GetRequest{Url: "filename 1"}, wantBytes: []byte("file 1")},
+				{request: &GetRequest{Url: "filename 2"}, wantBytes: []byte("file 2")},
+				{request: &GetRequest{Url: "filename 3"}, wantBytes: []byte("file 3")},
+			},
+			list:     []*ListRequest{{Url: []string{"filename 1", "filename 3"}}},
+			wantList: []*ListResponse{listResponseUrls("filename 1", "filename 3")},
+		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			s, err := NewLocalStorage(t.TempDir())

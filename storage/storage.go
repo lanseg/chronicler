@@ -15,6 +15,7 @@ type GetRequest struct {
 
 type ListRequest struct {
 	WithSnapshots bool
+	Url           []string
 }
 
 type StorageItem struct {

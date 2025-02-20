@@ -124,6 +124,18 @@ func (ls *localStorage) List(list *ListRequest) (*ListResponse, error) {
 	result := &ListResponse{}
 	snapshotRoot := filepath.Join(ls.root, defaultSnapshot)
 	for actual, local := range ls.localNames {
+		if len(list.Url) > 0 {
+			found := false
+			for _, url := range list.Url {
+				if url == actual {
+					found = true
+					break
+				}
+			}
+			if !found {
+				continue
+			}
+		}
 		item := StorageItem{
 			Url: actual,
 		}
