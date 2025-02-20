@@ -1,10 +1,13 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"net/http/cookiejar"
 	"os"
+	"path/filepath"
+	"time"
 
 	"chronicler/adapter"
 	"chronicler/adapter/fourchan"
@@ -15,6 +18,7 @@ import (
 	"chronicler/common"
 	opb "chronicler/proto"
 	"chronicler/resolver"
+	"chronicler/storage"
 	"chronicler/viewer"
 )
 
@@ -24,10 +28,35 @@ const (
 
 func main() {
 	switch os.Args[1] {
+	case "list":
+		list(os.Args[2:])
 	case "save":
 		save(os.Args[2:])
 	case "view":
 		view(os.Args[2:])
+	}
+}
+
+func list(_ []string) {
+	dir, err := os.ReadDir(root)
+	if err != nil {
+		return
+	}
+	for i, d := range dir {
+		ls, err := storage.NewLocalStorage(filepath.Join(root, d.Name()))
+		if err != nil {
+			fmt.Printf("%03d %s\n", i, err)
+			continue
+		}
+		bs := storage.BlockStorage{Storage: ls}
+		snapshot := &opb.Snapshot{}
+		err = bs.GetObject(&storage.GetRequest{Url: "snapshot.json"}, snapshot)
+		if err != nil {
+			fmt.Printf("%03d %s\n", i, err)
+			continue
+		}
+		fetchTime := time.Unix(snapshot.FetchTime.Seconds, int64(snapshot.FetchTime.Nanos))
+		fmt.Printf("%03d [%s] %s\n", i, fetchTime.Format(time.DateTime), snapshot.Link)
 	}
 }
 
