@@ -1,7 +1,6 @@
 package web
 
 import (
-	"bytes"
 	"io"
 	"net/http"
 	"net/url"
@@ -10,7 +9,6 @@ import (
 
 	"chronicler/adapter"
 	"chronicler/common"
-	"chronicler/parser"
 	opb "chronicler/proto"
 )
 
@@ -66,39 +64,14 @@ func (wa *webAdapter) Get(link *opb.Link) ([]*opb.Object, error) {
 		return nil, err
 	}
 
-	actualUrl := resp.Request.URL
 	data, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
 
-	urls := map[string]bool{}
-	reader := parser.NewHtmlReader(bytes.NewReader(data))
-	for reader.NextToken() {
-		for attr := range linkAttr {
-			if href, ok := reader.Attr(attr); ok && href != "" {
-				h, err := url.Parse(href)
-				if err == nil {
-					if h.Scheme == "" {
-						h.Scheme = actualUrl.Scheme
-					}
-					if h.Host == "" {
-						h.Host = actualUrl.Host
-					}
-					if h.Path == "" {
-						h.Path = actualUrl.Path
-					}
-					urls[h.String()] = true
-				}
-			}
-		}
-		for _, u := range linkRe.FindAllString(reader.Raw(), -1) {
-			urls[u] = true
-		}
-	}
-
+	links := FindLinks(resp.Request.URL, data)
 	attachments := []*opb.Attachment{}
-	for u := range urls {
+	for u := range links {
 		attachments = append(attachments, &opb.Attachment{
 			Url:  u,
 			Mime: common.GuessMimeType(u),

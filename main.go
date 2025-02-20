@@ -7,6 +7,7 @@ import (
 	"net/http/cookiejar"
 	"os"
 	"path/filepath"
+	"sort"
 	"time"
 
 	"chronicler/adapter"
@@ -42,21 +43,37 @@ func list(_ []string) {
 	if err != nil {
 		return
 	}
-	for i, d := range dir {
+	snapshots := []*opb.Snapshot{}
+	for _, d := range dir {
 		ls, err := storage.NewLocalStorage(filepath.Join(root, d.Name()))
 		if err != nil {
-			fmt.Printf("%03d %s\n", i, err)
+			//fmt.Printf("%03d %s\n", i, err)
 			continue
 		}
 		bs := storage.BlockStorage{Storage: ls}
 		snapshot := &opb.Snapshot{}
-		err = bs.GetObject(&storage.GetRequest{Url: "snapshot.json"}, snapshot)
-		if err != nil {
-			fmt.Printf("%03d %s\n", i, err)
+		if err = bs.GetObject(&storage.GetRequest{Url: "snapshot.json"}, snapshot); err != nil {
+			//fmt.Printf("%03d %s\n", i, err)
 			continue
 		}
-		fetchTime := time.Unix(snapshot.FetchTime.Seconds, int64(snapshot.FetchTime.Nanos))
-		fmt.Printf("%03d [%s] %s\n", i, fetchTime.Format(time.DateTime), snapshot.Link)
+		snapshots = append(snapshots, snapshot)
+	}
+	sort.Slice(snapshots, func(i, j int) bool {
+		sa := snapshots[i]
+		sb := snapshots[j]
+		if sb.FetchTime == nil {
+			return false
+		} else if sa.FetchTime == nil {
+			return true
+		}
+		return sa.FetchTime.Seconds < sb.FetchTime.Seconds
+	})
+	for i, snapshot := range snapshots {
+		fetchTime := "?"
+		if snapshot.FetchTime != nil {
+			fetchTime = time.Unix(snapshot.FetchTime.Seconds, 0).Format(time.DateTime)
+		}
+		fmt.Printf("%03d [%s] %s\n", i, fetchTime, snapshot.Link)
 	}
 }
 
