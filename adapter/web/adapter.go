@@ -1,9 +1,11 @@
 package web
 
 import (
+	"encoding/json"
 	"io"
 	"net/http"
 	"net/url"
+	"os"
 	"regexp"
 	"sort"
 	"time"
@@ -37,11 +39,24 @@ type webAdapter struct {
 }
 
 func NewAdapter(client adapter.HttpClient) adapter.Adapter {
+	walker := &LinkWalker{Visited: map[string]bool{}, ToVisit: map[string]bool{}}
+	data, err := os.ReadFile("walker.json")
+	if err != nil {
+		json.Unmarshal(data, walker)
+	}
 	return &webAdapter{
 		client: client,
-		walker: &LinkWalker{visited: map[string]bool{}, toVisit: map[string]bool{}},
+		walker: walker,
 		logger: common.NewLogger("WebAdapter"),
 	}
+}
+
+func (wa *webAdapter) saveWalker() error {
+	data, err := json.Marshal(wa.walker)
+	if err != nil {
+		return err
+	}
+	return os.WriteFile("walker.json", data, 0777)
 }
 
 func (wa *webAdapter) Match(link *opb.Link) bool {
@@ -69,7 +84,7 @@ func (wa *webAdapter) Get(link *opb.Link) ([]*opb.Object, error) {
 		wa.walker.MarkVisited(next)
 
 		current := next[0]
-		wa.logger.Infof("Resolving page [%d of %d (%d)]: %s", i, len(wa.walker.toVisit), maxLinks, current)
+		wa.logger.Infof("Resolving page [%d of %d (%d)]: %s", i, len(wa.walker.ToVisit), maxLinks, current)
 		url, err := url.Parse(current)
 		if err != nil {
 			continue
@@ -106,6 +121,11 @@ func (wa *webAdapter) Get(link *opb.Link) ([]*opb.Object, error) {
 			},
 			Attachment: attachments,
 		})
+		if (i % 100) == 0 {
+			if err = wa.saveWalker(); err != nil {
+				wa.logger.Warningf("Cannot save link walker status: %s", err)
+			}
+		}
 		time.Sleep(200 * time.Microsecond)
 	}
 	return result, nil

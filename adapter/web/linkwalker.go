@@ -9,21 +9,21 @@ import (
 )
 
 type LinkWalker struct {
-	visited map[string]bool
-	toVisit map[string]bool
+	Visited map[string]bool `json:"visited"`
+	ToVisit map[string]bool `json:"tovisit"`
 }
 
 func (lw *LinkWalker) MarkVisited(links []string) {
 	for _, l := range links {
-		delete(lw.toVisit, l)
-		lw.visited[l] = true
+		delete(lw.ToVisit, l)
+		lw.Visited[l] = true
 	}
 }
 
 func (lw *LinkWalker) NextToVisit(count int) []string {
 	result := []string{}
 	added := 0
-	for k := range lw.toVisit {
+	for k := range lw.ToVisit {
 		result = append(result, k)
 		added++
 		if added == count {
@@ -34,7 +34,14 @@ func (lw *LinkWalker) NextToVisit(count int) []string {
 }
 
 func (lw *LinkWalker) AddToVisit(link string) {
-	lw.toVisit[link] = true
+	lw.ToVisit[link] = true
+}
+
+func (lw *LinkWalker) shouldVisit(parent *url.URL, link *url.URL) bool {
+	href := link.String()
+	return !lw.Visited[href] && !lw.ToVisit[href] &&
+		common.GuessMimeType(href) == "" &&
+		(link.Scheme == "http" || link.Scheme == "https") && link.Hostname() == parent.Hostname()
 }
 
 func (lw *LinkWalker) FindLinks(baseUrl *url.URL, data []byte) map[string]bool {
@@ -67,8 +74,9 @@ func (lw *LinkWalker) FindLinks(baseUrl *url.URL, data []byte) map[string]bool {
 		if err != nil {
 			continue
 		}
-		if !lw.visited[k] && !lw.toVisit[k] && common.GuessMimeType(k) == "" && (linkAsUrl.Scheme == "http" || linkAsUrl.Scheme == "https") && linkAsUrl.Hostname() == baseUrl.Hostname() {
-			lw.toVisit[k] = true
+		linkAsUrl.Fragment = ""
+		if lw.shouldVisit(baseUrl, linkAsUrl) {
+			lw.ToVisit[k] = true
 		}
 	}
 	return allLinks
