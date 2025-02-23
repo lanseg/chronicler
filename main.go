@@ -2,9 +2,7 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
-	"net/http/cookiejar"
 	"os"
 	"path/filepath"
 	"sort"
@@ -84,12 +82,15 @@ func view(args []string) {
 }
 
 func save(args []string) {
-	jar, err := cookiejar.New(&cookiejar.Options{})
-	if err != nil {
-		log.Fatal(err)
-	}
+	// jar, err := cookiejar.New(&cookiejar.Options{})
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
-	httpClient := &http.Client{Jar: jar}
+	httpClient := &http.Client{
+		//	Jar:     jar,
+		Timeout: 10 * time.Minute,
+	}
 
 	twitterToken := os.Getenv("TWITTER_TOKEN")
 	redditToken := os.Getenv("REDDIT_TOKEN")

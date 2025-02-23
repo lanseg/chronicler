@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"regexp"
 	"sort"
+	"time"
 
 	"chronicler/adapter"
 	"chronicler/common"
@@ -30,6 +31,7 @@ var (
 type webAdapter struct {
 	adapter.Adapter
 
+	walker *LinkWalker
 	logger *common.Logger
 	client adapter.HttpClient
 }
@@ -37,6 +39,7 @@ type webAdapter struct {
 func NewAdapter(client adapter.HttpClient) adapter.Adapter {
 	return &webAdapter{
 		client: client,
+		walker: &LinkWalker{visited: map[string]bool{}, toVisit: map[string]bool{}},
 		logger: common.NewLogger("WebAdapter"),
 	}
 }
@@ -55,33 +58,45 @@ func (wa *webAdapter) Match(link *opb.Link) bool {
 }
 
 func (wa *webAdapter) Get(link *opb.Link) ([]*opb.Object, error) {
-	url, err := url.Parse(link.Href)
-	if err != nil {
-		return nil, err
-	}
-	resp, err := wa.client.Do(&http.Request{Method: "GET", URL: url})
-	if err != nil {
-		return nil, err
-	}
+	wa.walker.AddToVisit(link.Href)
+	result := []*opb.Object{}
+	maxLinks := 10000000
+	for i := 0; i < maxLinks; i++ {
+		next := wa.walker.NextToVisit(1)
+		if len(next) == 0 {
+			break
+		}
+		wa.walker.MarkVisited(next)
 
-	data, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
+		current := next[0]
+		wa.logger.Infof("Resolving page [%d of %d (%d)]: %s", i, len(wa.walker.toVisit), maxLinks, current)
+		url, err := url.Parse(current)
+		if err != nil {
+			continue
+		}
+		resp, err := wa.client.Do(&http.Request{Method: "GET", URL: url})
+		if err != nil {
+			return nil, err
+		}
 
-	links := FindLinks(resp.Request.URL, data)
-	attachments := []*opb.Attachment{}
-	for u := range links {
-		attachments = append(attachments, &opb.Attachment{
-			Url:  u,
-			Mime: common.GuessMimeType(u),
+		data, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return nil, err
+		}
+
+		attachments := []*opb.Attachment{}
+		for u := range wa.walker.FindLinks(resp.Request.URL, data) {
+			mime := common.GuessMimeType(u)
+			attachments = append(attachments, &opb.Attachment{
+				Url:  u,
+				Mime: mime,
+			})
+		}
+		sort.Slice(attachments, func(i, j int) bool {
+			return attachments[i].Url < attachments[j].Url
 		})
-	}
-	sort.Slice(attachments, func(i, j int) bool {
-		return attachments[i].Url < attachments[j].Url
-	})
-	return []*opb.Object{
-		{
+
+		result = append(result, &opb.Object{
 			Id: link.Href,
 			Content: []*opb.Content{
 				{
@@ -90,6 +105,8 @@ func (wa *webAdapter) Get(link *opb.Link) ([]*opb.Object, error) {
 				},
 			},
 			Attachment: attachments,
-		},
-	}, nil
+		})
+		time.Sleep(200 * time.Microsecond)
+	}
+	return result, nil
 }
