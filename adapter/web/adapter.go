@@ -1,18 +1,19 @@
 package web
 
 import (
-	"encoding/json"
 	"io"
 	"net/http"
 	"net/url"
-	"os"
 	"regexp"
-	"sort"
 	"time"
 
 	"chronicler/adapter"
 	"chronicler/common"
 	opb "chronicler/proto"
+)
+
+const (
+	defaultDelay = 200 * time.Millisecond
 )
 
 var (
@@ -33,30 +34,17 @@ var (
 type webAdapter struct {
 	adapter.Adapter
 
-	walker *LinkWalker
-	logger *common.Logger
 	client adapter.HttpClient
+	delay  time.Duration
+	logger *common.Logger
 }
 
 func NewAdapter(client adapter.HttpClient) adapter.Adapter {
-	walker := &LinkWalker{Visited: map[string]bool{}, ToVisit: map[string]bool{}}
-	data, err := os.ReadFile("walker.json")
-	if err != nil {
-		json.Unmarshal(data, walker)
-	}
 	return &webAdapter{
+		delay:  defaultDelay,
 		client: client,
-		walker: walker,
 		logger: common.NewLogger("WebAdapter"),
 	}
-}
-
-func (wa *webAdapter) saveWalker() error {
-	data, err := json.Marshal(wa.walker)
-	if err != nil {
-		return err
-	}
-	return os.WriteFile("walker.json", data, 0777)
 }
 
 func (wa *webAdapter) Match(link *opb.Link) bool {
@@ -73,20 +61,26 @@ func (wa *webAdapter) Match(link *opb.Link) bool {
 }
 
 func (wa *webAdapter) Get(link *opb.Link) ([]*opb.Object, error) {
-	wa.walker.AddToVisit(link.Href)
+	rootLink, err := url.Parse(link.Href)
+	if err != nil {
+		return nil, err
+	}
+
+	walker := NewWalker(rootLink)
 	result := []*opb.Object{}
-	maxLinks := 10000000
-	for i := 0; i < maxLinks; i++ {
-		next := wa.walker.NextToVisit(1)
+	for i := 0; ; i++ {
+		next := walker.NextToVisit(1)
 		if len(next) == 0 {
 			break
 		}
-		wa.walker.MarkVisited(next)
+		walker.MarkVisited(next)
 
 		current := next[0]
-		wa.logger.Infof("Resolving page [%d of %d (%d)]: %s", i, len(wa.walker.ToVisit), maxLinks, current)
+		wa.logger.Infof("Resolving page [%d of %d (%d)]: %s", i,
+			len(walker.ToVisit), len(walker.ToVisit)+len(walker.Visited), current)
 		url, err := url.Parse(current)
 		if err != nil {
+			wa.logger.Warningf("Ignoring invalid link %q: %s", current, err)
 			continue
 		}
 		resp, err := wa.client.Do(&http.Request{Method: "GET", URL: url})
@@ -100,33 +94,19 @@ func (wa *webAdapter) Get(link *opb.Link) ([]*opb.Object, error) {
 		}
 
 		attachments := []*opb.Attachment{}
-		for u := range wa.walker.FindLinks(resp.Request.URL, data) {
-			mime := common.GuessMimeType(u)
+		for u := range walker.FindLinks(resp.Request.URL, data) {
 			attachments = append(attachments, &opb.Attachment{
 				Url:  u,
-				Mime: mime,
+				Mime: common.GuessMimeType(u),
 			})
 		}
-		sort.Slice(attachments, func(i, j int) bool {
-			return attachments[i].Url < attachments[j].Url
-		})
 
 		result = append(result, &opb.Object{
-			Id: link.Href,
-			Content: []*opb.Content{
-				{
-					Text: string(data),
-					Mime: "text/html",
-				},
-			},
+			Id:         link.Href,
 			Attachment: attachments,
+			Content:    []*opb.Content{{Text: string(data), Mime: "text/html"}},
 		})
-		if (i % 100) == 0 {
-			if err = wa.saveWalker(); err != nil {
-				wa.logger.Warningf("Cannot save link walker status: %s", err)
-			}
-		}
-		time.Sleep(200 * time.Microsecond)
+		time.Sleep(wa.delay)
 	}
 	return result, nil
 }

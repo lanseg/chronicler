@@ -33,7 +33,8 @@ func TestWebAdapter(t *testing.T) {
 		name string
 		file string
 	}{
-		{name: "simple html", file: "simple.html"},
+		//{name: "simple html", file: "simple.html"},
+		{name: "self link html", file: "self_link.html"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			if err := adaptertest.TestRequestResponse(
