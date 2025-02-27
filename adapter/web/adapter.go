@@ -102,7 +102,7 @@ func (wa *webAdapter) Get(link *opb.Link) ([]*opb.Object, error) {
 		}
 
 		result = append(result, &opb.Object{
-			Id:         link.Href,
+			Id:         resp.Request.URL.String(),
 			Attachment: attachments,
 			Content:    []*opb.Content{{Text: string(data), Mime: "text/html"}},
 		})

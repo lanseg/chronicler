@@ -19,6 +19,15 @@ const (
 
 type Viewer struct {
 	Root string
+
+	logger *common.Logger
+}
+
+func NewViewer(root string) *Viewer {
+	return &Viewer{
+		Root:   root,
+		logger: common.NewLogger("viewer"),
+	}
 }
 
 func formatObject(obj *opb.Object, prefix int) string {

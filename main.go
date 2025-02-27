@@ -33,6 +33,8 @@ func main() {
 		save(os.Args[2:])
 	case "view":
 		view(os.Args[2:])
+	case "export":
+		export(os.Args[2:])
 	}
 }
 
@@ -45,13 +47,11 @@ func list(_ []string) {
 	for _, d := range dir {
 		ls, err := storage.NewLocalStorage(filepath.Join(root, d.Name()))
 		if err != nil {
-			//fmt.Printf("%03d %s\n", i, err)
 			continue
 		}
 		bs := storage.BlockStorage{Storage: ls}
 		snapshot := &opb.Snapshot{}
 		if err = bs.GetObject(&storage.GetRequest{Url: "snapshot.json"}, snapshot); err != nil {
-			//fmt.Printf("%03d %s\n", i, err)
 			continue
 		}
 		snapshots = append(snapshots, snapshot)
@@ -76,9 +76,11 @@ func list(_ []string) {
 }
 
 func view(args []string) {
-	(&viewer.Viewer{
-		Root: root,
-	}).View(common.UUID4For(&opb.Link{Href: args[0]}))
+	viewer.NewViewer(root).View(common.UUID4For(&opb.Link{Href: args[0]}))
+}
+
+func export(args []string) {
+	viewer.NewExporter(root, args[1]).Export(common.UUID4For(&opb.Link{Href: args[0]}))
 }
 
 func save(args []string) {
