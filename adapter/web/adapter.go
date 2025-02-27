@@ -1,9 +1,11 @@
 package web
 
 import (
+	"encoding/json"
 	"io"
 	"net/http"
 	"net/url"
+	"os"
 	"regexp"
 	"time"
 
@@ -67,6 +69,11 @@ func (wa *webAdapter) Get(link *opb.Link) ([]*opb.Object, error) {
 	}
 
 	walker := NewWalker(rootLink)
+	walkerData, err := os.ReadFile("walker.json")
+	if err != nil {
+		json.Unmarshal(walkerData, walker)
+	}
+
 	result := []*opb.Object{}
 	for i := 0; ; i++ {
 		next := walker.NextToVisit(1)
@@ -106,6 +113,10 @@ func (wa *webAdapter) Get(link *opb.Link) ([]*opb.Object, error) {
 			Attachment: attachments,
 			Content:    []*opb.Content{{Text: string(data), Mime: "text/html"}},
 		})
+		if i%100 == 0 {
+			walkerData, _ := json.Marshal(walker)
+			os.WriteFile("walker.json", walkerData, 0777)
+		}
 		time.Sleep(wa.delay)
 	}
 	return result, nil
