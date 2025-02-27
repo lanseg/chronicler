@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	defaultMaxLinks = 1000000
+	defaultMaxLinks = 3
 )
 
 type LinkWalker struct {
@@ -71,6 +71,9 @@ func (lw *LinkWalker) FindLinks(baseUrl *url.URL, data []byte) map[string]bool {
 	for reader.NextToken() {
 		for attr := range linkAttr {
 			if href, ok := reader.Attr(attr); ok && href != "" {
+				if strings.HasPrefix(href, "#") {
+					continue
+				}
 				h, err := url.Parse(href)
 				if err != nil {
 					continue
@@ -98,7 +101,7 @@ func (lw *LinkWalker) FindLinks(baseUrl *url.URL, data []byte) map[string]bool {
 		}
 		linkAsUrl.Fragment = ""
 		if lw.shouldVisit(baseUrl, linkAsUrl) {
-			lw.ToVisit[k] = true
+			lw.ToVisit[linkAsUrl.String()] = true
 		}
 	}
 	return allLinks
