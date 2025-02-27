@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	defaultMaxLinks = 3
+	defaultMaxLinks = 1000000
 )
 
 type LinkWalker struct {
