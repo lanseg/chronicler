@@ -33,8 +33,8 @@ func TestWebAdapter(t *testing.T) {
 		name string
 		file string
 	}{
-		//{name: "simple html", file: "simple.html"},
-		//{name: "self link html", file: "self_link.html"},
+		{name: "simple html", file: "simple.html"},
+		{name: "self link html", file: "self_link.html"},
 		{name: "broken links", file: "broken_links.html"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
