@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -45,6 +46,10 @@ func TestRequestResponse(a adapter.Adapter, link string, wantFile string) error 
 	got, err := a.Get(&opb.Link{Href: link})
 	if err != nil {
 		return fmt.Errorf("error while doing get: %s", err)
+	}
+	if strings.Contains(link, "demo") {
+		bu, _ := json.Marshal(got)
+		os.WriteFile("/home/arusakov/devel/lanseg/chronicler/reddit_test_out.json", bu, 0777)
 	}
 	// Reference data
 	wantBytes, err := os.ReadFile(wantFile)

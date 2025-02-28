@@ -2,6 +2,7 @@ package web
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -74,8 +75,10 @@ func (wa *webAdapter) Get(link *opb.Link) ([]*opb.Object, error) {
 		json.Unmarshal(walkerData, walker)
 	}
 
+	i := 0
+	errorCount := 0
 	result := []*opb.Object{}
-	for i := 0; ; i++ {
+	for ; ; i++ {
 		next := walker.NextToVisit(1)
 		if len(next) == 0 {
 			break
@@ -87,17 +90,22 @@ func (wa *webAdapter) Get(link *opb.Link) ([]*opb.Object, error) {
 			len(walker.ToVisit), len(walker.ToVisit)+len(walker.Visited), current)
 		url, err := url.Parse(current)
 		if err != nil {
+			errorCount++
 			wa.logger.Warningf("Ignoring invalid link %q: %s", current, err)
 			continue
 		}
 		resp, err := wa.client.Do(&http.Request{Method: "GET", URL: url})
 		if err != nil {
-			return nil, err
+			errorCount++
+			wa.logger.Warningf("Failed to fetch data from %q: %s", current, err)
+			continue
 		}
 
 		data, err := io.ReadAll(resp.Body)
 		if err != nil {
-			return nil, err
+			errorCount++
+			wa.logger.Warningf("Failed to fetch data from %q: %s", current, err)
+			continue
 		}
 
 		attachments := []*opb.Attachment{}
@@ -118,6 +126,9 @@ func (wa *webAdapter) Get(link *opb.Link) ([]*opb.Object, error) {
 			os.WriteFile("walker.json", walkerData, 0777)
 		}
 		time.Sleep(wa.delay)
+	}
+	if errorCount == i {
+		return nil, fmt.Errorf("%d of %d requests failed, fatal error", errorCount, i)
 	}
 	return result, nil
 }

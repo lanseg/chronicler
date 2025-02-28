@@ -29,14 +29,18 @@ func NewWalker(root *url.URL) *LinkWalker {
 	}
 }
 
+func isSameHost(parent *url.URL, link *url.URL) bool {
+	return parent.Hostname() == link.Hostname()
+}
+
 func (lw *LinkWalker) shouldVisit(parent *url.URL, link *url.URL) bool {
 	href := link.String()
 	mime := common.GuessMimeType(href)
 	return lw.MaxLinks > (len(lw.ToVisit)+len(lw.Visited)) &&
-		(lw.Root == nil || lw.Root.Hostname() == parent.Hostname()) &&
 		!lw.Visited[href] && !lw.ToVisit[href] &&
-		(mime == "" || strings.Contains(mime, "text/html")) &&
-		(link.Scheme == "http" || link.Scheme == "https") && link.Hostname() == parent.Hostname()
+		(lw.Root == nil || isSameHost(lw.Root, parent)) && isSameHost(parent, link) &&
+		(mime == "" || strings.HasPrefix(mime, "text/html")) &&
+		(link.Scheme == "http" || link.Scheme == "https")
 }
 
 func (lw *LinkWalker) MarkVisited(links []string) {

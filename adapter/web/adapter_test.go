@@ -35,7 +35,7 @@ func TestWebAdapter(t *testing.T) {
 	}{
 		//{name: "simple html", file: "simple.html"},
 		//{name: "self link html", file: "self_link.html"},
-		{name: "created at parse", file: "broken_links.html"},
+		{name: "broken links", file: "broken_links.html"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			if err := adaptertest.TestRequestResponse(
