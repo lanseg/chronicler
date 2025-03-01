@@ -14,6 +14,8 @@ const (
 )
 
 type LinkWalker struct {
+	logger *common.Logger
+
 	Root     *url.URL        `json:"root"`
 	MaxLinks int             `json:"max_links"`
 	Visited  map[string]bool `json:"visited"`
@@ -22,6 +24,7 @@ type LinkWalker struct {
 
 func NewWalker(root *url.URL) *LinkWalker {
 	return &LinkWalker{
+		logger:   common.NewLogger("LinkWalker"),
 		Root:     root,
 		MaxLinks: defaultMaxLinks,
 		ToVisit:  map[string]bool{root.String(): true},
@@ -29,16 +32,12 @@ func NewWalker(root *url.URL) *LinkWalker {
 	}
 }
 
-func isSameHost(parent *url.URL, link *url.URL) bool {
-	return parent.Hostname() == link.Hostname()
-}
-
 func (lw *LinkWalker) shouldVisit(parent *url.URL, link *url.URL) bool {
 	href := link.String()
 	mime := common.GuessMimeType(href)
 	return lw.MaxLinks > (len(lw.ToVisit)+len(lw.Visited)) &&
 		!lw.Visited[href] && !lw.ToVisit[href] &&
-		(lw.Root == nil || isSameHost(lw.Root, parent)) && isSameHost(parent, link) &&
+		(lw.Root == nil || common.IsSameHost(lw.Root, parent)) && common.IsSameHost(parent, link) &&
 		(mime == "" || strings.HasPrefix(mime, "text/html")) &&
 		(link.Scheme == "http" || link.Scheme == "https")
 }
@@ -78,18 +77,10 @@ func (lw *LinkWalker) FindLinks(baseUrl *url.URL, data []byte) map[string]bool {
 				if strings.HasPrefix(href, "#") {
 					continue
 				}
-				h, err := url.Parse(href)
+				h, err := common.ParseUrlDefaults(href, baseUrl)
 				if err != nil {
-					continue
-				}
-				if h.Scheme == "" {
-					h.Scheme = baseUrl.Scheme
-				}
-				if h.Host == "" {
-					h.Host = baseUrl.Host
-				}
-				if h.Path == "" {
-					h.Path = baseUrl.Path
+					lw.logger.Errorf("cannot parse attribute %q from token %q as url: %s",
+						attr, reader.Raw(), err)
 				}
 				allLinks[h.String()] = true
 			}

@@ -79,8 +79,8 @@ func (wa *webAdapter) Get(link *opb.Link) ([]*opb.Object, error) {
 		walker.MarkVisited(next)
 
 		current := next[0]
-		wa.logger.Infof("Resolving page [%d of %d (%d)]: %s", i,
-			len(walker.ToVisit), len(walker.ToVisit)+len(walker.Visited), current)
+		wa.logger.Infof("Resolving page [%d of %d (%d)]: %s",
+			i, len(walker.ToVisit), len(walker.ToVisit)+len(walker.Visited), current)
 		url, err := url.Parse(current)
 		if err != nil {
 			errorCount++
