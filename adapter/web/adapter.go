@@ -1,16 +1,19 @@
 package web
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
+	"path/filepath"
 	"regexp"
 	"time"
 
 	"chronicler/adapter"
 	"chronicler/common"
 	opb "chronicler/proto"
+	"chronicler/storage"
 )
 
 const (
@@ -66,8 +69,17 @@ func (wa *webAdapter) Get(link *opb.Link) ([]*opb.Object, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	walker := NewWalker(rootLink)
+
+	baseStorage, err := storage.NewLocalStorage(filepath.Join("data", common.UUID4For(link)))
+	if err != nil {
+		return nil, err
+	}
+	bs := &storage.BlockStorage{Storage: baseStorage}
+	if err = bs.GetObject(&storage.GetRequest{Url: "_walker.json"}, walker); err != nil {
+		wa.logger.Warningf("Cannot load link walker data: %q", err)
+	}
+
 	i := 0
 	errorCount := 0
 	result := []*opb.Object{}
@@ -77,6 +89,10 @@ func (wa *webAdapter) Get(link *opb.Link) ([]*opb.Object, error) {
 			break
 		}
 		walker.MarkVisited(next)
+		if i%100 == 0 {
+			wa.logger.Debugf("Saving walker data")
+			bs.PutObject(&storage.PutRequest{Url: "_walker.json"}, walker)
+		}
 
 		current := next[0]
 		wa.logger.Infof("Resolving page [%d of %d (%d)]: %s",
@@ -94,7 +110,23 @@ func (wa *webAdapter) Get(link *opb.Link) ([]*opb.Object, error) {
 			continue
 		}
 
-		data, err := io.ReadAll(resp.Body)
+		actualUrl := resp.Request.URL
+		wc, err := baseStorage.Put(&storage.PutRequest{Url: actualUrl.String()})
+		if err != nil {
+			errorCount++
+			wa.logger.Warningf("Cannot open writer for %q in storage: %s", actualUrl.String(), err)
+			continue
+		}
+
+		bodyData := &bytes.Buffer{}
+		if _, err := io.Copy(io.MultiWriter(wc, bodyData), resp.Body); err != nil {
+			errorCount++
+			wa.logger.Warningf("Cannot write %q to storage: %s", actualUrl.String(), err)
+			wc.Close()
+			continue
+		}
+
+		data := bodyData.Bytes()
 		if err != nil {
 			errorCount++
 			wa.logger.Warningf("Failed to fetch data from %q: %s", current, err)

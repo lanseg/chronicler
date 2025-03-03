@@ -32,8 +32,21 @@ func NewViewer(root string) *Viewer {
 
 func formatObject(obj *opb.Object, prefix int) string {
 	result := strings.Builder{}
-	t := time.Unix(obj.CreatedAt.Seconds, int64(obj.CreatedAt.Nanos))
-	result.WriteString(fmt.Sprintf("‣ [%s] %s: ", t.Format("2006-01-02 15:04"), obj.Generator[0].Name))
+	createdAt := "?Created?"
+	if obj.CreatedAt != nil {
+		createdAt = time.Unix(obj.CreatedAt.Seconds, int64(obj.CreatedAt.Nanos)).Format("2006-01-02 15:04")
+	}
+	generatorName := "?Generator?"
+	if len(obj.Generator) != 0 {
+		gen := obj.Generator[0]
+		if gen.Name != "" {
+			generatorName = obj.Generator[0].Name
+		} else if gen.Id != "" {
+			generatorName = gen.Id
+		}
+	}
+
+	result.WriteString(fmt.Sprintf("‣ [%s] %s: ", createdAt, generatorName))
 	for _, c := range obj.Content {
 		txt := regexp.MustCompilePOSIX("[\n\t]*").ReplaceAllString(c.Text, "")
 		txt = regexp.MustCompilePOSIX("(<br>|</p>)+").ReplaceAllString(txt, "\n")
