@@ -81,6 +81,7 @@ func (lw *LinkWalker) FindLinks(baseUrl *url.URL, data []byte) map[string]bool {
 				if err != nil {
 					lw.logger.Errorf("cannot parse attribute %q from token %q as url: %s",
 						attr, reader.Raw(), err)
+					continue
 				}
 				allLinks[h.String()] = true
 			}

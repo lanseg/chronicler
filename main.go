@@ -2,9 +2,7 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
-	"net/http/cookiejar"
 	"os"
 	"path/filepath"
 	"sort"
@@ -86,13 +84,7 @@ func export(args []string) {
 }
 
 func save(args []string) {
-	jar, err := cookiejar.New(&cookiejar.Options{})
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	httpClient := &http.Client{
-		Jar:     jar,
 		Timeout: 10 * time.Minute,
 	}
 
