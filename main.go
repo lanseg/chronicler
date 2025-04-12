@@ -23,24 +23,57 @@ import (
 	"chronicler/viewer"
 )
 
-const (
-	root = "data"
+var (
+	logger = common.NewLogger("main")
 )
 
-func main() {
-	switch os.Args[1] {
-	case "list":
-		list(os.Args[2:])
-	case "save":
-		save(os.Args[2:])
-	case "view":
-		view(os.Args[2:])
-	case "export":
-		export(os.Args[2:])
+type Settings struct {
+	Twitter *twitter.Settings `json:"twitter"`
+	Reddit  *reddit.Settings  `json:"reddit"`
+	Storage *storage.Settings `json:"storage"`
+}
+
+func getSettings() *Settings {
+	return &Settings{
+		Twitter: &twitter.Settings{
+			Token: os.Getenv("TWITTER_TOKEN"),
+		},
+		Reddit: &reddit.Settings{
+			Token: os.Getenv("REDDIT_TOKEN"),
+		},
+		Storage: &storage.Settings{
+			Root: os.Getenv("STORAGE_ROOT"),
+		},
 	}
 }
 
-func list(_ []string) {
+func getCommand() func(*Settings, []string) {
+	switch os.Args[1] {
+	case "list":
+		return list
+	case "save":
+		return save
+	case "view":
+		return view
+	case "export":
+		return export
+	}
+	return nil
+}
+
+func main() {
+	settings := getSettings()
+	command := getCommand()
+	if command == nil {
+		logger.Infof("Unknown command (args %q)", os.Args)
+		return
+	}
+	logger.Infof("Running command %q with args %q", os.Args[1], os.Args[2:])
+	command(settings, os.Args[2:])
+}
+
+func list(s *Settings, _ []string) {
+	root := s.Storage.Root
 	dir, err := os.ReadDir(root)
 	if err != nil {
 		return
@@ -77,15 +110,15 @@ func list(_ []string) {
 	}
 }
 
-func view(args []string) {
-	viewer.NewViewer(root).View(common.UUID4For(&opb.Link{Href: args[0]}))
+func view(s *Settings, args []string) {
+	viewer.NewViewer(s.Storage.Root).View(common.UUID4For(&opb.Link{Href: args[0]}))
 }
 
-func export(args []string) {
-	viewer.NewExporter(root, args[1]).Export(common.UUID4For(&opb.Link{Href: args[0]}))
+func export(s *Settings, args []string) {
+	viewer.NewExporter(s.Storage.Root, args[1]).Export(common.UUID4For(&opb.Link{Href: args[0]}))
 }
 
-func save(args []string) {
+func save(s *Settings, args []string) {
 	jar, err := cookiejar.New(&cookiejar.Options{})
 	if err != nil {
 		log.Fatal(err)
@@ -100,7 +133,7 @@ func save(args []string) {
 	redditToken := os.Getenv("REDDIT_TOKEN")
 
 	r := resolver.NewResolver(
-		root,
+		s.Storage.Root,
 		common.NewHttpDownloader(httpClient),
 		[]adapter.Adapter{
 			twitter.NewAdapter(twitter.NewClient(httpClient, twitterToken)),

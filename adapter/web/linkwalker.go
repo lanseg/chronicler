@@ -13,39 +13,60 @@ const (
 	defaultMaxLinks = 1000000
 )
 
+type VisitRule = func(*LinkWalker, *url.URL, *url.URL) bool
+
+func IsSameHost(lw *LinkWalker, parent *url.URL, link *url.URL) bool {
+	return (lw.Root == nil || common.IsSameHost(lw.Root, parent)) && common.IsSameHost(parent, link)
+}
+
+func IsHTTP(lw *LinkWalker, parent *url.URL, link *url.URL) bool {
+	return link.Scheme == "http" || link.Scheme == "https"
+}
+
+func IsHTML(lw *LinkWalker, parent *url.URL, link *url.URL) bool {
+	mime := common.GuessMimeType(link.String())
+	return mime == "" || strings.HasPrefix(mime, "text/html")
+}
+
 type LinkWalker struct {
 	logger *common.Logger
 
+	Rules    []VisitRule
 	Root     *url.URL        `json:"root"`
 	MaxLinks int             `json:"max_links"`
-	Visited  map[string]bool `json:"visited"`
-	ToVisit  map[string]bool `json:"to_visit"`
+	Links    map[string]bool `json:"links"`
 }
 
 func NewWalker(root *url.URL) *LinkWalker {
 	return &LinkWalker{
-		logger:   common.NewLogger("LinkWalker"),
-		Root:     root,
+		logger: common.NewLogger("LinkWalker"),
+		Root:   root,
+		Rules: []VisitRule{
+			IsHTTP,
+			IsSameHost,
+			IsHTML,
+		},
 		MaxLinks: defaultMaxLinks,
-		ToVisit:  map[string]bool{root.String(): true},
-		Visited:  map[string]bool{},
+		Links:    map[string]bool{root.String(): false},
 	}
 }
 
 func (lw *LinkWalker) shouldVisit(parent *url.URL, link *url.URL) bool {
-	href := link.String()
-	mime := common.GuessMimeType(href)
-	return lw.MaxLinks > (len(lw.ToVisit)+len(lw.Visited)) &&
-		!lw.Visited[href] && !lw.ToVisit[href] &&
-		(lw.Root == nil || common.IsSameHost(lw.Root, parent)) && common.IsSameHost(parent, link) &&
-		(mime == "" || strings.HasPrefix(mime, "text/html")) &&
-		(link.Scheme == "http" || link.Scheme == "https")
+	_, knownLink := lw.Links[link.String()]
+	if knownLink || lw.MaxLinks <= len(lw.Links) {
+		return false
+	}
+	for _, rule := range lw.Rules {
+		if !rule(lw, parent, link) {
+			return false
+		}
+	}
+	return true
 }
 
 func (lw *LinkWalker) MarkVisited(links []string) {
 	for _, l := range links {
-		delete(lw.ToVisit, l)
-		lw.Visited[l] = true
+		lw.Links[l] = true
 	}
 }
 
@@ -54,8 +75,11 @@ func (lw *LinkWalker) NextToVisit(count int) []string {
 		return []string{}
 	}
 	result := []string{}
-	for k := range lw.ToVisit {
-		result = append(result, k)
+	for link, known := range lw.Links {
+		if known {
+			continue
+		}
+		result = append(result, link)
 		count--
 		if count == 0 {
 			break
@@ -65,7 +89,9 @@ func (lw *LinkWalker) NextToVisit(count int) []string {
 }
 
 func (lw *LinkWalker) AddToVisit(link string) {
-	lw.ToVisit[link] = true
+	if _, ok := lw.Links[link]; !ok {
+		lw.Links[link] = false
+	}
 }
 
 func (lw *LinkWalker) FindLinks(baseUrl *url.URL, data []byte) map[string]bool {
@@ -81,6 +107,7 @@ func (lw *LinkWalker) FindLinks(baseUrl *url.URL, data []byte) map[string]bool {
 				if err != nil {
 					lw.logger.Errorf("cannot parse attribute %q from token %q as url: %s",
 						attr, reader.Raw(), err)
+					continue
 				}
 				allLinks[h.String()] = true
 			}
@@ -96,7 +123,7 @@ func (lw *LinkWalker) FindLinks(baseUrl *url.URL, data []byte) map[string]bool {
 		}
 		linkAsUrl.Fragment = ""
 		if lw.shouldVisit(baseUrl, linkAsUrl) {
-			lw.ToVisit[linkAsUrl.String()] = true
+			lw.Links[linkAsUrl.String()] = false
 		}
 	}
 	return allLinks
