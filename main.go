@@ -129,17 +129,14 @@ func save(s *Settings, args []string) {
 		Timeout: 10 * time.Minute,
 	}
 
-	twitterToken := os.Getenv("TWITTER_TOKEN")
-	redditToken := os.Getenv("REDDIT_TOKEN")
-
 	r := resolver.NewResolver(
 		s.Storage.Root,
 		common.NewHttpDownloader(httpClient),
 		[]adapter.Adapter{
-			twitter.NewAdapter(twitter.NewClient(httpClient, twitterToken)),
+			twitter.NewAdapter(twitter.NewClient(httpClient, s.Twitter.Token)),
 			fourchan.NewAdapter(httpClient),
 			pikabu.NewAdapter(httpClient),
-			reddit.NewAdapter(httpClient, &reddit.RedditAuth{AccessToken: redditToken}),
+			reddit.NewAdapter(httpClient, &reddit.RedditAuth{AccessToken: s.Reddit.Token}),
 			web.NewAdapter(httpClient),
 		},
 	)
