@@ -1,8 +1,7 @@
-package viewer
+package command
 
 import (
 	"chronicler/common"
-	"chronicler/iferr"
 	opb "chronicler/proto"
 	"chronicler/storage"
 	"path/filepath"
@@ -24,7 +23,7 @@ func NewExporter(root string, target string) *Exporter {
 
 func (v *Exporter) Export(id string) error {
 	store := storage.BlockStorage{
-		Storage: iferr.Exit(storage.NewLocalStorage(filepath.Join(v.Root, id))),
+		Storage: common.OrExit(storage.NewLocalStorage(filepath.Join(v.Root, id))),
 	}
 	v.logger.Infof("Loading objects from %q", objectFileName)
 	result := &opb.Snapshot{}
@@ -35,6 +34,7 @@ func (v *Exporter) Export(id string) error {
 	v.logger.Infof("Loaded objects: %d", total)
 	for i, obj := range result.Objects {
 		v.logger.Infof("[%06d of %06d] exporting %q to %q", i, total, obj.Id, v.Target)
+
 	}
 	return nil
 }

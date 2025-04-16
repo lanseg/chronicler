@@ -1,8 +1,7 @@
-package viewer
+package command
 
 import (
 	"chronicler/common"
-	"chronicler/iferr"
 	opb "chronicler/proto"
 	"chronicler/storage"
 	"fmt"
@@ -64,7 +63,7 @@ func formatObject(obj *opb.Object, prefix int) string {
 
 func (v *Viewer) View(id string) error {
 	store := storage.BlockStorage{
-		Storage: iferr.Exit(storage.NewLocalStorage(filepath.Join(v.Root, id))),
+		Storage: common.OrExit(storage.NewLocalStorage(filepath.Join(v.Root, id))),
 	}
 
 	result := &opb.Snapshot{}
