@@ -58,7 +58,7 @@ func view(s *Settings, args []string) {
 }
 
 func export(s *Settings, args []string) {
-	cmd.NewExporter(s.Storage.Root, args[0]).Export(common.UUID4For(&opb.Link{Href: args[0]}))
+	cmd.NewExporter(s.Storage.Root, args[0]).Export(common.UUID4For(&opb.Link{Href: args[1]}))
 }
 
 func save(s *Settings, args []string) {
