@@ -21,7 +21,9 @@
         ],
         "attachment": [
             {
-                "url": "https://i.4cdn.org/g/1738674573182974.png",
+                "url": {
+                    "href": "https://i.4cdn.org/g/1738674573182974.png"
+                },
                 "checksum": "md5:QGkpVYKIo3MGGDWTlyB+CQ==",
                 "mime": "image/png"
             }
@@ -388,7 +390,9 @@
         ],
         "attachment": [
             {
-                "url": "https://i.4cdn.org/g/1738675743133745.jpg",
+                "url": {
+                    "href": "https://i.4cdn.org/g/1738675743133745.jpg"
+                },
                 "checksum": "md5:wvyd2z6+oZEknIbqR1+odw==",
                 "mime": "image/jpeg"
             }
@@ -413,7 +417,9 @@
         ],
         "attachment": [
             {
-                "url": "https://i.4cdn.org/g/1738675802996383.png",
+                "url": {
+                    "href": "https://i.4cdn.org/g/1738675802996383.png"
+                },
                 "checksum": "md5:799qTObqdVvyJUnapeDV1w==",
                 "mime": "image/png"
             }
@@ -564,7 +570,9 @@
         ],
         "attachment": [
             {
-                "url": "https://i.4cdn.org/g/1738676294061421.jpg",
+                "url": {
+                    "href": "https://i.4cdn.org/g/1738676294061421.jpg"
+                },
                 "checksum": "md5:C5GfJBsF/+A+UbfFcJtixg==",
                 "mime": "image/jpeg"
             }
@@ -589,7 +597,9 @@
         ],
         "attachment": [
             {
-                "url": "https://i.4cdn.org/g/1738676366893564.png",
+                "url": {
+                    "href": "https://i.4cdn.org/g/1738676366893564.png"
+                },
                 "checksum": "md5:Qenb488tL2zSoCvvf4uXvA==",
                 "mime": "image/png"
             }
@@ -776,7 +786,9 @@
         ],
         "attachment": [
             {
-                "url": "https://i.4cdn.org/g/1738677856275634.png",
+                "url": {
+                    "href": "https://i.4cdn.org/g/1738677856275634.png"
+                },
                 "checksum": "md5:XrJIx9JvqnMrmtCdtyaHHw==",
                 "mime": "image/png"
             }
@@ -1053,7 +1065,9 @@
         ],
         "attachment": [
             {
-                "url": "https://i.4cdn.org/g/1738680802243649.jpg",
+                "url": {
+                    "href": "https://i.4cdn.org/g/1738680802243649.jpg"
+                },
                 "checksum": "md5:dP1EM2eM8/IXAiJcdx5Iiw==",
                 "mime": "image/jpeg"
             }
@@ -1132,7 +1146,9 @@
         ],
         "attachment": [
             {
-                "url": "https://i.4cdn.org/g/1738681454525619.jpg",
+                "url": {
+                    "href": "https://i.4cdn.org/g/1738681454525619.jpg"
+                },
                 "checksum": "md5:B7TA+W3HotbVKOVBXNUERg==",
                 "mime": "image/jpeg"
             }
@@ -1247,7 +1263,9 @@
         ],
         "attachment": [
             {
-                "url": "https://i.4cdn.org/g/1738684702948054.webm",
+                "url": {
+                    "href": "https://i.4cdn.org/g/1738684702948054.webm"
+                },
                 "checksum": "md5:GHl8mM/0CGNPp7NTe8LfYA==",
                 "mime": "video/webm"
             }

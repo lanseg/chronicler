@@ -158,6 +158,9 @@ func (ta *twitterAdapter) tweetToObject(
 			}
 			br := int64(0)
 			url := media.Url
+			if url == "" {
+				continue
+			}
 			mediaType := ""
 			for _, v := range media.Variants {
 				if url == "" || v.Bitrate > br {
@@ -170,15 +173,15 @@ func (ta *twitterAdapter) tweetToObject(
 				mediaType = common.GuessMimeType(url)
 			}
 			obj.Attachment = append(obj.Attachment, &opb.Attachment{
-				Url:  url,
+				Url:  &opb.Link{Href: url},
 				Mime: mediaType,
 			})
 		}
 
 		for _, url := range t.Entities.Urls {
-			if _, ok := medias[url.MediaKey]; !ok {
+			if _, ok := medias[url.MediaKey]; !ok && url.ExpandedUrl != "" {
 				obj.Attachment = append(obj.Attachment, &opb.Attachment{
-					Url:  url.ExpandedUrl,
+					Url:  &opb.Link{Href: url.ExpandedUrl},
 					Mime: common.GuessMimeType(url.ExpandedUrl),
 				})
 			}

@@ -51,7 +51,7 @@ func TestResolver(t *testing.T) {
 			newFakeAdapter(&opb.Object{
 				Id: "123",
 				Attachment: []*opb.Attachment{
-					{Url: "http://some/other/url", Mime: "text/html"},
+					{Url: &opb.Link{Href: "http://some/other/url"}, Mime: "text/html"},
 				},
 			}),
 		}

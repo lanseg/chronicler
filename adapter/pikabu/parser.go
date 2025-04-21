@@ -44,8 +44,9 @@ func toTimestamp(s string) (*opb.Timestamp, error) {
 }
 
 type PikabuParser struct {
-	doc    parser.HtmlReader
-	logger *common.Logger
+	doc     parser.HtmlReader
+	logger  *common.Logger
+	baseUrl string
 
 	count  int
 	state  int
@@ -135,7 +136,15 @@ func (psm *PikabuParser) getAttachments() {
 		}
 	}
 	for k := range urls {
-		attachment := &opb.Attachment{Url: k}
+		link, err := opb.ParsePageLink(psm.baseUrl, k)
+		if err != nil {
+			psm.logger.Warningf("incorrect link, error while parsing %q: %s", k, err)
+			link = &opb.Link{Href: k}
+		}
+		attachment := &opb.Attachment{
+			Url:  link,
+			Mime: common.GuessMimeType(k),
+		}
 		if ext := filepath.Ext(k); ext != "" {
 			attachment.Mime = mime.TypeByExtension(filepath.Ext(k))
 		}
@@ -211,7 +220,7 @@ func (psm *PikabuParser) InArticleContent() {
 			psm.article.Attachment = append(psm.article.Attachment, attachment)
 		}
 		sort.Slice(psm.article.Attachment, func(i, j int) bool {
-			return psm.article.Attachment[i].Url < psm.article.Attachment[j].Url
+			return psm.article.Attachment[i].Url.Href < psm.article.Attachment[j].Url.Href
 		})
 		psm.SetState(InArticle)
 		return
@@ -224,9 +233,15 @@ func (psm *PikabuParser) InArticleTags() {
 	if psm.doc.Matches("/div") {
 		psm.SetState(InArticle)
 	} else if psm.doc.Matches("a", "tags__tag") {
+		href := psm.attr("href")
+		link, err := opb.ParsePageLink(psm.baseUrl, href)
+		if err != nil {
+			psm.logger.Warningf("incorrect link, error while parsing %q: %s", href, err)
+			link = &opb.Link{Href: href}
+		}
 		psm.article.Tag = append(psm.article.Tag, &opb.Tag{
 			Name: psm.attr("data-tag"),
-			Url:  psm.attr("href"),
+			Url:  link,
 		})
 	}
 }
@@ -291,7 +306,7 @@ func (psm *PikabuParser) InCommentContent() {
 		}
 		lastComment.Content[len(lastComment.Content)-1].Text = strings.TrimSpace(lastComment.Content[len(lastComment.Content)-1].Text)
 		sort.Slice(lastComment.Attachment, func(i, j int) bool {
-			return lastComment.Attachment[i].Url < lastComment.Attachment[j].Url
+			return lastComment.Attachment[i].Url.Href < lastComment.Attachment[j].Url.Href
 		})
 		return
 	}
@@ -319,8 +334,9 @@ func (psm *PikabuParser) Parse() ([]*opb.Object, error) {
 	return result, nil
 }
 
-func NewPikabuParser(src io.Reader) *PikabuParser {
+func NewPikabuParser(baseUrl string, src io.Reader) *PikabuParser {
 	psm := &PikabuParser{
+		baseUrl: baseUrl,
 		doc:     parser.NewHtmlReader(src),
 		state:   InDocument,
 		comment: []*opb.Object{},

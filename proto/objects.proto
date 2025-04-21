@@ -13,13 +13,13 @@ message Timestamp {
 
 message Tag {
   string name = 1;
-  string url = 2;
+  Link url = 2;
 }
 
 // Object types
 message Link {
   string href = 1;
-  string mediaType = 2;
+  repeated string variants = 2;
 }
 
 message Stats {
@@ -36,7 +36,7 @@ message Stats {
 }
 
 message Attachment {
-  string url = 1;
+  Link url = 1;
   uint32 size = 2;
   string checksum = 3;
   string mime = 4;

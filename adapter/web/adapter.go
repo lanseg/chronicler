@@ -101,10 +101,13 @@ func (wa *webAdapter) Get(link *opb.Link) ([]*opb.Object, error) {
 		}
 
 		attachments := []*opb.Attachment{}
-		for u := range walker.FindLinks(resp.Request.URL, data) {
+		for actualUrl, pageLinks := range walker.FindLinks(resp.Request.URL, data) {
 			attachments = append(attachments, &opb.Attachment{
-				Url:  u,
-				Mime: common.GuessMimeType(u),
+				Url: &opb.Link{
+					Href:     actualUrl,
+					Variants: pageLinks,
+				},
+				Mime: common.GuessMimeType(actualUrl),
 			})
 		}
 

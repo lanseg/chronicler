@@ -141,7 +141,7 @@ func (r *resolver) resolveTask(task resolverTask) error {
 			if attachment.Mime == "" {
 				continue
 			}
-			fileUrl, err := url.Parse(attachment.Url)
+			fileUrl, err := url.Parse(attachment.Url.Href)
 			if err != nil {
 				r.logger.Warningf("Cannot parse url \"%s\" from object %s: %s", obj.Id, fileUrl, err)
 				continue

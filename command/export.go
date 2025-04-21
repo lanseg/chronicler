@@ -8,35 +8,10 @@ import (
 	"fmt"
 	"io"
 	"mime"
-	"net/url"
 	"os"
 	"path/filepath"
-	"sort"
 	"strings"
 )
-
-func denormalize(root *url.URL, link string) []string {
-	result := []string{link}
-	url, err := url.Parse(link)
-	if err != nil {
-		return result
-	}
-	if url.Scheme != "" {
-		url.Scheme = ""
-		result = append(result, url.String())
-	}
-	if root != nil && url.Host == root.Host {
-		url.Host = ""
-		pathOnly := url.String()
-		if pathOnly != "/" && pathOnly != "" {
-			result = append(result, url.String())
-		}
-	}
-	sort.Slice(result, func(i, j int) bool {
-		return len(result[j]) < len(result[i])
-	})
-	return result
-}
 
 func convertLinks(text string, realToLocal map[string][]string) string {
 	for localPath, links := range realToLocal {
@@ -71,7 +46,6 @@ func (v *Exporter) Export(id string) error {
 	if err := store.GetObject(&storage.GetRequest{Url: objectFileName}, &result); err != nil {
 		return err
 	}
-	root, _ := url.Parse(result.Link.Href)
 	total := len(result.Objects)
 	v.logger.Infof("Loaded objects: %d", total)
 	os.MkdirAll(v.Target, 0766)
@@ -81,12 +55,12 @@ func (v *Exporter) Export(id string) error {
 		}
 		atmapping := map[string][]string{}
 		for _, att := range obj.Attachment {
-			safeUrl := common.SanitizeUrl(att.Url, 255)
+			safeUrl := common.SanitizeUrl(att.Url.Href, 255)
 			exts, err := mime.ExtensionsByType(att.Mime)
 			if err == nil && len(exts) > 0 {
 				safeUrl += exts[0]
 			}
-			atmapping[safeUrl] = denormalize(root, att.Url)
+			atmapping[safeUrl] = att.Url.Variants
 			fmt.Printf("HERE %q -> %q\n", safeUrl, atmapping[safeUrl])
 		}
 
@@ -107,7 +81,7 @@ func (v *Exporter) Export(id string) error {
 		f.Close()
 
 		for _, att := range obj.Attachment {
-			safeUrl := common.SanitizeUrl(att.Url, 255)
+			safeUrl := common.SanitizeUrl(att.Url.Href, 255)
 			exts, err := mime.ExtensionsByType(att.Mime)
 			if err == nil && len(exts) > 0 {
 				safeUrl += exts[0]
@@ -118,7 +92,7 @@ func (v *Exporter) Export(id string) error {
 				continue
 			}
 			v.logger.Infof("[%06d of %06d] exporting %q to %q", i, total, att.Url, fileTarget)
-			request := &storage.GetRequest{Url: att.Url}
+			request := &storage.GetRequest{Url: att.Url.Href}
 			var reader io.ReadCloser
 			if strings.HasPrefix(att.Mime, "text") {
 				fileBytes, err := store.GetBytes(request)

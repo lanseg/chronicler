@@ -182,11 +182,15 @@
         ],
         "attachment": [
             {
-                "url": "https://cs15.pikabu.ru/images/big_size_comm/2025-02_1/173865428617162929.jpg",
+                "url": {
+                    "href": "https://cs15.pikabu.ru/images/big_size_comm/2025-02_1/173865428617162929.jpg"
+                },
                 "mime": "image/jpeg"
             },
             {
-                "url": "https://cs15.pikabu.ru/images/previews_comm/2025-02_1/173865428617162929.jpg",
+                "url": {
+                    "href": "https://cs15.pikabu.ru/images/previews_comm/2025-02_1/173865428617162929.jpg"
+                },
                 "mime": "image/jpeg"
             }
         ],
@@ -399,31 +403,45 @@
         "tag": [
             {
                 "name": "Кот",
-                "url": "https://pikabu.ru/tag/%D0%9A%D0%BE%D1%82/hot"
+                "url": {
+                    "href": "https://pikabu.ru/tag/%D0%9A%D0%BE%D1%82/hot"
+                }
             },
             {
                 "name": "Юмор",
-                "url": "https://pikabu.ru/tag/%D0%AE%D0%BC%D0%BE%D1%80/hot"
+                "url": {
+                    "href": "https://pikabu.ru/tag/%D0%AE%D0%BC%D0%BE%D1%80/hot"
+                }
             },
             {
                 "name": "Видео",
-                "url": "https://pikabu.ru/tag/%D0%92%D0%B8%D0%B4%D0%B5%D0%BE/hot"
+                "url": {
+                    "href": "https://pikabu.ru/tag/%D0%92%D0%B8%D0%B4%D0%B5%D0%BE/hot"
+                }
             },
             {
                 "name": "Вертикальное видео",
-                "url": "https://pikabu.ru/tag/%D0%92%D0%B5%D1%80%D1%82%D0%B8%D0%BA%D0%B0%D0%BB%D1%8C%D0%BD%D0%BE%D0%B5%20%D0%B2%D0%B8%D0%B4%D0%B5%D0%BE/hot"
+                "url": {
+                    "href": "https://pikabu.ru/tag/%D0%92%D0%B5%D1%80%D1%82%D0%B8%D0%BA%D0%B0%D0%BB%D1%8C%D0%BD%D0%BE%D0%B5%20%D0%B2%D0%B8%D0%B4%D0%B5%D0%BE/hot"
+                }
             },
             {
                 "name": "Короткие видео",
-                "url": "https://pikabu.ru/tag/%D0%9A%D0%BE%D1%80%D0%BE%D1%82%D0%BA%D0%B8%D0%B5%20%D0%B2%D0%B8%D0%B4%D0%B5%D0%BE/hot"
+                "url": {
+                    "href": "https://pikabu.ru/tag/%D0%9A%D0%BE%D1%80%D0%BE%D1%82%D0%BA%D0%B8%D0%B5%20%D0%B2%D0%B8%D0%B4%D0%B5%D0%BE/hot"
+                }
             },
             {
                 "name": "Котята",
-                "url": "https://pikabu.ru/tag/%D0%9A%D0%BE%D1%82%D1%8F%D1%82%D0%B0/hot"
+                "url": {
+                    "href": "https://pikabu.ru/tag/%D0%9A%D0%BE%D1%82%D1%8F%D1%82%D0%B0/hot"
+                }
             },
             {
                 "name": "Молочный шаг",
-                "url": "https://pikabu.ru/tag/%D0%9C%D0%BE%D0%BB%D0%BE%D1%87%D0%BD%D1%8B%D0%B9%20%D1%88%D0%B0%D0%B3/hot"
+                "url": {
+                    "href": "https://pikabu.ru/tag/%D0%9C%D0%BE%D0%BB%D0%BE%D1%87%D0%BD%D1%8B%D0%B9%20%D1%88%D0%B0%D0%B3/hot"
+                }
             }
         ],
         "generator": [
@@ -443,20 +461,33 @@
         ],
         "attachment": [
             {
-                "url": "blob:https://pikabu.ru/dc5d8704-a7f8-43d1-a681-2b5cbeeffbb5"
+                "url": {
+                    "href": "blob:https://pikabu.ru/dc5d8704-a7f8-43d1-a681-2b5cbeeffbb5"
+                }
             },
             {
-                "url": "https://cs15.pikabu.ru/video/2025/02/04/1738643856272054510_039e81b4_720x960.webm",
+                "url": {
+                    "href": "https://cs15.pikabu.ru/video/2025/02/04/1738643856272054510_039e81b4_720x960.webm"
+                },
                 "mime": "video/webm"
             },
             {
-                "url": "https://cs15.pikabu.ru/video/2025/02/04/1738643856272054510_138ab5d8_720x960"
+                "url": {
+                    "href": "https://cs15.pikabu.ru/video/2025/02/04/1738643856272054510_138ab5d8_720x960"
+                }
             },
             {
-                "url": "https://cs15.pikabu.ru/video/2025/02/04/1738643856272054510_hls_67a199aaaf0360_720x960"
+                "url": {
+                    "href": "https://cs15.pikabu.ru/video/2025/02/04/1738643856272054510_hls_67a199aaaf0360_720x960"
+                }
             },
             {
-                "url": "https://pikabu.ru/community/MrCuteCat?"
+                "url": {
+                    "href": "https://pikabu.ru/community/MrCuteCat",
+                    "variants": [
+                        "https://pikabu.ru/community/MrCuteCat?"
+                    ]
+                }
             }
         ],
         "stats": [

@@ -65,7 +65,7 @@ func (pa *pikabuAdapter) Get(link *opb.Link) ([]*opb.Object, error) {
 	if err != nil {
 		return nil, err
 	}
-	objs, err := NewPikabuParser(bytes.NewReader([]byte(postText))).Parse()
+	objs, err := NewPikabuParser(link.Href, bytes.NewReader([]byte(postText))).Parse()
 	if err != nil {
 		return nil, err
 	}
@@ -79,7 +79,7 @@ func (pa *pikabuAdapter) Get(link *opb.Link) ([]*opb.Object, error) {
 
 	commText, _ := pa.client.GetComments(ids)
 	for _, c := range commText {
-		objs, _ := NewPikabuParser(bytes.NewReader([]byte(c.Html))).Parse()
+		objs, _ := NewPikabuParser(link.Href, bytes.NewReader([]byte(c.Html))).Parse()
 		for _, obj := range objs {
 			if obj.Parent == "0" || obj.Parent == "" {
 				obj.Parent = id

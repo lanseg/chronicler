@@ -92,8 +92,16 @@ func (ta *redditAdapter) Get(link *opb.Link) ([]*opb.Object, error) {
 		}
 		attachments := []*opb.Attachment{}
 		for l := range links {
+			link, err := opb.ParsePageLink("", strings.ReplaceAll(l, "&amp;", "&"))
+			if err != nil {
+				ta.logger.Warningf("cannot parse link %q as url: %s", l, err)
+				link = &opb.Link{Href: l}
+			}
+			if l != link.Href {
+				link.Variants = []string{l}
+			}
 			attachments = append(attachments, &opb.Attachment{
-				Url:  strings.ReplaceAll(l, "&amp;", "&"),
+				Url:  link,
 				Mime: common.GuessMimeType(l),
 			})
 

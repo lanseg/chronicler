@@ -132,23 +132,33 @@
         "tag": [
             {
                 "name": "Моё",
-                "url": "https://pikabu.ru/original-stories"
+                "url": {
+                    "href": "https://pikabu.ru/original-stories"
+                }
             },
             {
                 "name": "Судно на подводных крыльях",
-                "url": "https://pikabu.ru/tag/%D0%A1%D1%83%D0%B4%D0%BD%D0%BE%20%D0%BD%D0%B0%20%D0%BF%D0%BE%D0%B4%D0%B2%D0%BE%D0%B4%D0%BD%D1%8B%D1%85%20%D0%BA%D1%80%D1%8B%D0%BB%D1%8C%D1%8F%D1%85/hot"
+                "url": {
+                    "href": "https://pikabu.ru/tag/%D0%A1%D1%83%D0%B4%D0%BD%D0%BE%20%D0%BD%D0%B0%20%D0%BF%D0%BE%D0%B4%D0%B2%D0%BE%D0%B4%D0%BD%D1%8B%D1%85%20%D0%BA%D1%80%D1%8B%D0%BB%D1%8C%D1%8F%D1%85/hot"
+                }
             },
             {
                 "name": "Река Волга",
-                "url": "https://pikabu.ru/tag/%D0%A0%D0%B5%D0%BA%D0%B0%20%D0%92%D0%BE%D0%BB%D0%B3%D0%B0/hot"
+                "url": {
+                    "href": "https://pikabu.ru/tag/%D0%A0%D0%B5%D0%BA%D0%B0%20%D0%92%D0%BE%D0%BB%D0%B3%D0%B0/hot"
+                }
             },
             {
                 "name": "Газ-24 Волга",
-                "url": "https://pikabu.ru/tag/%D0%93%D0%B0%D0%B7-24%20%D0%92%D0%BE%D0%BB%D0%B3%D0%B0/hot"
+                "url": {
+                    "href": "https://pikabu.ru/tag/%D0%93%D0%B0%D0%B7-24%20%D0%92%D0%BE%D0%BB%D0%B3%D0%B0/hot"
+                }
             },
             {
                 "name": "Длиннопост",
-                "url": "https://pikabu.ru/tag/%D0%94%D0%BB%D0%B8%D0%BD%D0%BD%D0%BE%D0%BF%D0%BE%D1%81%D1%82/hot"
+                "url": {
+                    "href": "https://pikabu.ru/tag/%D0%94%D0%BB%D0%B8%D0%BD%D0%BD%D0%BE%D0%BF%D0%BE%D1%81%D1%82/hot"
+                }
             }
         ],
         "generator": [
@@ -168,203 +178,336 @@
         ],
         "attachment": [
             {
-                "url": "12335104_files/1738624652296130852.jpg",
+                "url": {
+                    "href": "http://pikabu.ru/12335104_files/1738624652296130852.jpg",
+                    "variants": [
+                        "12335104_files/1738624652296130852.jpg"
+                    ]
+                },
                 "mime": "image/jpeg"
             },
             {
-                "url": "12335104_files/173862465422011866.jpg",
+                "url": {
+                    "href": "http://pikabu.ru/12335104_files/173862465422011866.jpg",
+                    "variants": [
+                        "12335104_files/173862465422011866.jpg"
+                    ]
+                },
                 "mime": "image/jpeg"
             },
             {
-                "url": "12335104_files/1738624654267683230.jpg",
+                "url": {
+                    "href": "http://pikabu.ru/12335104_files/1738624654267683230.jpg",
+                    "variants": [
+                        "12335104_files/1738624654267683230.jpg"
+                    ]
+                },
                 "mime": "image/jpeg"
             },
             {
-                "url": "12335104_files/1738625334179466890.jpg",
+                "url": {
+                    "href": "http://pikabu.ru/12335104_files/1738625334179466890.jpg",
+                    "variants": [
+                        "12335104_files/1738625334179466890.jpg"
+                    ]
+                },
                 "mime": "image/jpeg"
             },
             {
-                "url": "12335104_files/1738625334228049670.jpg",
+                "url": {
+                    "href": "http://pikabu.ru/12335104_files/1738625334228049670.jpg",
+                    "variants": [
+                        "12335104_files/1738625334228049670.jpg"
+                    ]
+                },
                 "mime": "image/jpeg"
             },
             {
-                "url": "12335104_files/1738626485233598149.jpg",
+                "url": {
+                    "href": "http://pikabu.ru/12335104_files/1738626485233598149.jpg",
+                    "variants": [
+                        "12335104_files/1738626485233598149.jpg"
+                    ]
+                },
                 "mime": "image/jpeg"
             },
             {
-                "url": "12335104_files/1738626486234564464.jpg",
+                "url": {
+                    "href": "http://pikabu.ru/12335104_files/1738626486234564464.jpg",
+                    "variants": [
+                        "12335104_files/1738626486234564464.jpg"
+                    ]
+                },
                 "mime": "image/jpeg"
             },
             {
-                "url": "12335104_files/1738626710173063898.jpg",
+                "url": {
+                    "href": "http://pikabu.ru/12335104_files/1738626710173063898.jpg",
+                    "variants": [
+                        "12335104_files/1738626710173063898.jpg"
+                    ]
+                },
                 "mime": "image/jpeg"
             },
             {
-                "url": "12335104_files/1738626713119853125.jpg",
+                "url": {
+                    "href": "http://pikabu.ru/12335104_files/1738626713119853125.jpg",
+                    "variants": [
+                        "12335104_files/1738626713119853125.jpg"
+                    ]
+                },
                 "mime": "image/jpeg"
             },
             {
-                "url": "12335104_files/1738626713185673593.jpg",
+                "url": {
+                    "href": "http://pikabu.ru/12335104_files/1738626713185673593.jpg",
+                    "variants": [
+                        "12335104_files/1738626713185673593.jpg"
+                    ]
+                },
                 "mime": "image/jpeg"
             },
             {
-                "url": "12335104_files/1738627271281386602.jpg",
+                "url": {
+                    "href": "http://pikabu.ru/12335104_files/1738627271281386602.jpg",
+                    "variants": [
+                        "12335104_files/1738627271281386602.jpg"
+                    ]
+                },
                 "mime": "image/jpeg"
             },
             {
-                "url": "https://cs15.pikabu.ru/post_img/2025/02/04/1/1738624652296130852.jpg",
+                "url": {
+                    "href": "https://cs15.pikabu.ru/post_img/2025/02/04/1/1738624652296130852.jpg"
+                },
                 "mime": "image/jpeg"
             },
             {
-                "url": "https://cs15.pikabu.ru/post_img/2025/02/04/1/173862465422011866.jpg",
+                "url": {
+                    "href": "https://cs15.pikabu.ru/post_img/2025/02/04/1/173862465422011866.jpg"
+                },
                 "mime": "image/jpeg"
             },
             {
-                "url": "https://cs15.pikabu.ru/post_img/2025/02/04/1/1738624654267683230.jpg",
+                "url": {
+                    "href": "https://cs15.pikabu.ru/post_img/2025/02/04/1/1738624654267683230.jpg"
+                },
                 "mime": "image/jpeg"
             },
             {
-                "url": "https://cs15.pikabu.ru/post_img/2025/02/04/1/1738624655231628980.jpg",
+                "url": {
+                    "href": "https://cs15.pikabu.ru/post_img/2025/02/04/1/1738624655231628980.jpg"
+                },
                 "mime": "image/jpeg"
             },
             {
-                "url": "https://cs15.pikabu.ru/post_img/2025/02/04/1/173862465629976186.jpg",
+                "url": {
+                    "href": "https://cs15.pikabu.ru/post_img/2025/02/04/1/173862465629976186.jpg"
+                },
                 "mime": "image/jpeg"
             },
             {
-                "url": "https://cs15.pikabu.ru/post_img/2025/02/04/1/1738624657157979298.jpg",
+                "url": {
+                    "href": "https://cs15.pikabu.ru/post_img/2025/02/04/1/1738624657157979298.jpg"
+                },
                 "mime": "image/jpeg"
             },
             {
-                "url": "https://cs15.pikabu.ru/post_img/2025/02/04/1/1738624658139093593.jpg",
+                "url": {
+                    "href": "https://cs15.pikabu.ru/post_img/2025/02/04/1/1738624658139093593.jpg"
+                },
                 "mime": "image/jpeg"
             },
             {
-                "url": "https://cs15.pikabu.ru/post_img/2025/02/04/1/1738625334114077561.jpg",
+                "url": {
+                    "href": "https://cs15.pikabu.ru/post_img/2025/02/04/1/1738625334114077561.jpg"
+                },
                 "mime": "image/jpeg"
             },
             {
-                "url": "https://cs15.pikabu.ru/post_img/2025/02/04/1/1738625334179466890.jpg",
+                "url": {
+                    "href": "https://cs15.pikabu.ru/post_img/2025/02/04/1/1738625334179466890.jpg"
+                },
                 "mime": "image/jpeg"
             },
             {
-                "url": "https://cs15.pikabu.ru/post_img/2025/02/04/1/1738625334228049670.jpg",
+                "url": {
+                    "href": "https://cs15.pikabu.ru/post_img/2025/02/04/1/1738625334228049670.jpg"
+                },
                 "mime": "image/jpeg"
             },
             {
-                "url": "https://cs15.pikabu.ru/post_img/2025/02/04/1/173862533611561908.jpg",
+                "url": {
+                    "href": "https://cs15.pikabu.ru/post_img/2025/02/04/1/173862533611561908.jpg"
+                },
                 "mime": "image/jpeg"
             },
             {
-                "url": "https://cs15.pikabu.ru/post_img/2025/02/04/1/173862533618646612.jpg",
+                "url": {
+                    "href": "https://cs15.pikabu.ru/post_img/2025/02/04/1/173862533618646612.jpg"
+                },
                 "mime": "image/jpeg"
             },
             {
-                "url": "https://cs15.pikabu.ru/post_img/2025/02/04/1/1738625337195163896.jpg",
+                "url": {
+                    "href": "https://cs15.pikabu.ru/post_img/2025/02/04/1/1738625337195163896.jpg"
+                },
                 "mime": "image/jpeg"
             },
             {
-                "url": "https://cs15.pikabu.ru/post_img/2025/02/04/1/1738626339110920101.jpg",
+                "url": {
+                    "href": "https://cs15.pikabu.ru/post_img/2025/02/04/1/1738626339110920101.jpg"
+                },
                 "mime": "image/jpeg"
             },
             {
-                "url": "https://cs15.pikabu.ru/post_img/2025/02/04/1/1738626339145355267.jpg",
+                "url": {
+                    "href": "https://cs15.pikabu.ru/post_img/2025/02/04/1/1738626339145355267.jpg"
+                },
                 "mime": "image/jpeg"
             },
             {
-                "url": "https://cs15.pikabu.ru/post_img/2025/02/04/1/1738626484263831287.jpg",
+                "url": {
+                    "href": "https://cs15.pikabu.ru/post_img/2025/02/04/1/1738626484263831287.jpg"
+                },
                 "mime": "image/jpeg"
             },
             {
-                "url": "https://cs15.pikabu.ru/post_img/2025/02/04/1/1738626484296863466.jpg",
+                "url": {
+                    "href": "https://cs15.pikabu.ru/post_img/2025/02/04/1/1738626484296863466.jpg"
+                },
                 "mime": "image/jpeg"
             },
             {
-                "url": "https://cs15.pikabu.ru/post_img/2025/02/04/1/1738626485233598149.jpg",
+                "url": {
+                    "href": "https://cs15.pikabu.ru/post_img/2025/02/04/1/1738626485233598149.jpg"
+                },
                 "mime": "image/jpeg"
             },
             {
-                "url": "https://cs15.pikabu.ru/post_img/2025/02/04/1/1738626486234564464.jpg",
+                "url": {
+                    "href": "https://cs15.pikabu.ru/post_img/2025/02/04/1/1738626486234564464.jpg"
+                },
                 "mime": "image/jpeg"
             },
             {
-                "url": "https://cs15.pikabu.ru/post_img/2025/02/04/1/1738626620146594269.jpg",
+                "url": {
+                    "href": "https://cs15.pikabu.ru/post_img/2025/02/04/1/1738626620146594269.jpg"
+                },
                 "mime": "image/jpeg"
             },
             {
-                "url": "https://cs15.pikabu.ru/post_img/2025/02/04/1/1738626620174272532.jpg",
+                "url": {
+                    "href": "https://cs15.pikabu.ru/post_img/2025/02/04/1/1738626620174272532.jpg"
+                },
                 "mime": "image/jpeg"
             },
             {
-                "url": "https://cs15.pikabu.ru/post_img/2025/02/04/1/1738626845273642190.jpg",
+                "url": {
+                    "href": "https://cs15.pikabu.ru/post_img/2025/02/04/1/1738626845273642190.jpg"
+                },
                 "mime": "image/jpeg"
             },
             {
-                "url": "https://cs15.pikabu.ru/post_img/2025/02/04/1/1738626972244429218.jpg",
+                "url": {
+                    "href": "https://cs15.pikabu.ru/post_img/2025/02/04/1/1738626972244429218.jpg"
+                },
                 "mime": "image/jpeg"
             },
             {
-                "url": "https://cs15.pikabu.ru/post_img/2025/02/04/2/1738627271281386602.jpg",
+                "url": {
+                    "href": "https://cs15.pikabu.ru/post_img/2025/02/04/2/1738627271281386602.jpg"
+                },
                 "mime": "image/jpeg"
             },
             {
-                "url": "https://cs15.pikabu.ru/post_img/2025/02/04/2/1738627272235311166.jpg",
+                "url": {
+                    "href": "https://cs15.pikabu.ru/post_img/2025/02/04/2/1738627272235311166.jpg"
+                },
                 "mime": "image/jpeg"
             },
             {
-                "url": "https://cs15.pikabu.ru/post_img/big/2025/02/04/1/1738624657157979298.jpg",
+                "url": {
+                    "href": "https://cs15.pikabu.ru/post_img/big/2025/02/04/1/1738624657157979298.jpg"
+                },
                 "mime": "image/jpeg"
             },
             {
-                "url": "https://cs15.pikabu.ru/post_img/big/2025/02/04/1/1738624658139093593.jpg",
+                "url": {
+                    "href": "https://cs15.pikabu.ru/post_img/big/2025/02/04/1/1738624658139093593.jpg"
+                },
                 "mime": "image/jpeg"
             },
             {
-                "url": "https://cs15.pikabu.ru/post_img/big/2025/02/04/1/1738625334114077561.jpg",
+                "url": {
+                    "href": "https://cs15.pikabu.ru/post_img/big/2025/02/04/1/1738625334114077561.jpg"
+                },
                 "mime": "image/jpeg"
             },
             {
-                "url": "https://cs15.pikabu.ru/post_img/big/2025/02/04/1/1738625334179466890.jpg",
+                "url": {
+                    "href": "https://cs15.pikabu.ru/post_img/big/2025/02/04/1/1738625334179466890.jpg"
+                },
                 "mime": "image/jpeg"
             },
             {
-                "url": "https://cs15.pikabu.ru/post_img/big/2025/02/04/1/173862533611561908.jpg",
+                "url": {
+                    "href": "https://cs15.pikabu.ru/post_img/big/2025/02/04/1/173862533611561908.jpg"
+                },
                 "mime": "image/jpeg"
             },
             {
-                "url": "https://cs15.pikabu.ru/post_img/big/2025/02/04/1/173862533618646612.jpg",
+                "url": {
+                    "href": "https://cs15.pikabu.ru/post_img/big/2025/02/04/1/173862533618646612.jpg"
+                },
                 "mime": "image/jpeg"
             },
             {
-                "url": "https://cs15.pikabu.ru/post_img/big/2025/02/04/1/1738625337195163896.jpg",
+                "url": {
+                    "href": "https://cs15.pikabu.ru/post_img/big/2025/02/04/1/1738625337195163896.jpg"
+                },
                 "mime": "image/jpeg"
             },
             {
-                "url": "https://cs15.pikabu.ru/post_img/big/2025/02/04/1/1738626339110920101.jpg",
+                "url": {
+                    "href": "https://cs15.pikabu.ru/post_img/big/2025/02/04/1/1738626339110920101.jpg"
+                },
                 "mime": "image/jpeg"
             },
             {
-                "url": "https://cs15.pikabu.ru/post_img/big/2025/02/04/1/1738626339145355267.jpg",
+                "url": {
+                    "href": "https://cs15.pikabu.ru/post_img/big/2025/02/04/1/1738626339145355267.jpg"
+                },
                 "mime": "image/jpeg"
             },
             {
-                "url": "https://cs15.pikabu.ru/post_img/big/2025/02/04/1/1738626620146594269.jpg",
+                "url": {
+                    "href": "https://cs15.pikabu.ru/post_img/big/2025/02/04/1/1738626620146594269.jpg"
+                },
                 "mime": "image/jpeg"
             },
             {
-                "url": "https://cs15.pikabu.ru/post_img/big/2025/02/04/1/1738626620174272532.jpg",
+                "url": {
+                    "href": "https://cs15.pikabu.ru/post_img/big/2025/02/04/1/1738626620174272532.jpg"
+                },
                 "mime": "image/jpeg"
             },
             {
-                "url": "https://cs15.pikabu.ru/post_img/big/2025/02/04/1/1738626710173063898.jpg",
+                "url": {
+                    "href": "https://cs15.pikabu.ru/post_img/big/2025/02/04/1/1738626710173063898.jpg"
+                },
                 "mime": "image/jpeg"
             },
             {
-                "url": "https://cs15.pikabu.ru/post_img/big/2025/02/04/1/1738626713119853125.jpg",
+                "url": {
+                    "href": "https://cs15.pikabu.ru/post_img/big/2025/02/04/1/1738626713119853125.jpg"
+                },
                 "mime": "image/jpeg"
             },
             {
-                "url": "https://cs15.pikabu.ru/post_img/big/2025/02/04/1/1738626713185673593.jpg",
+                "url": {
+                    "href": "https://cs15.pikabu.ru/post_img/big/2025/02/04/1/1738626713185673593.jpg"
+                },
                 "mime": "image/jpeg"
             }
         ],

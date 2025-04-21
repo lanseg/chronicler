@@ -19,11 +19,15 @@
         ],
         "attachment": [
             {
-                "url": "https://cs15.pikabu.ru/images/big_size_comm/2025-02_1/173865977817822439.jpg",
+                "url": {
+                    "href": "https://cs15.pikabu.ru/images/big_size_comm/2025-02_1/173865977817822439.jpg"
+                },
                 "mime": "image/jpeg"
             },
             {
-                "url": "https://cs15.pikabu.ru/images/previews_comm/2025-02_1/173865977817822439.jpg",
+                "url": {
+                    "href": "https://cs15.pikabu.ru/images/previews_comm/2025-02_1/173865977817822439.jpg"
+                },
                 "mime": "image/jpeg"
             }
         ],
@@ -161,7 +165,9 @@
         ],
         "attachment": [
             {
-                "url": "https://cs15.pikabu.ru/images/previews_comm/2025-01_6/1738180641166879926.jpg",
+                "url": {
+                    "href": "https://cs15.pikabu.ru/images/previews_comm/2025-01_6/1738180641166879926.jpg"
+                },
                 "mime": "image/jpeg"
             }
         ],
@@ -611,7 +617,9 @@
         ],
         "attachment": [
             {
-                "url": "https://cs15.pikabu.ru/images/previews_comm/2025-02_1/173861091918122390.jpg",
+                "url": {
+                    "href": "https://cs15.pikabu.ru/images/previews_comm/2025-02_1/173861091918122390.jpg"
+                },
                 "mime": "image/jpeg"
             }
         ],
@@ -667,7 +675,9 @@
         ],
         "attachment": [
             {
-                "url": "https://cs15.pikabu.ru/tmp/1738610475179065069.jpg",
+                "url": {
+                    "href": "https://cs15.pikabu.ru/tmp/1738610475179065069.jpg"
+                },
                 "mime": "image/jpeg"
             }
         ],
@@ -698,11 +708,15 @@
         ],
         "attachment": [
             {
-                "url": "https://cs14.pikabu.ru/images/big_size_comm/2022-03_3/1647190024119734473.jpg",
+                "url": {
+                    "href": "https://cs14.pikabu.ru/images/big_size_comm/2022-03_3/1647190024119734473.jpg"
+                },
                 "mime": "image/jpeg"
             },
             {
-                "url": "https://cs14.pikabu.ru/images/previews_comm/2022-03_3/1647190024119734473.jpg",
+                "url": {
+                    "href": "https://cs14.pikabu.ru/images/previews_comm/2022-03_3/1647190024119734473.jpg"
+                },
                 "mime": "image/jpeg"
             }
         ],
@@ -1021,35 +1035,51 @@
         "tag": [
             {
                 "name": "Моё",
-                "url": "https://pikabu.ru/original-stories"
+                "url": {
+                    "href": "https://pikabu.ru/original-stories"
+                }
             },
             {
                 "name": "Грамотность",
-                "url": "https://pikabu.ru/tag/%D0%93%D1%80%D0%B0%D0%BC%D0%BE%D1%82%D0%BD%D0%BE%D1%81%D1%82%D1%8C/hot"
+                "url": {
+                    "href": "https://pikabu.ru/tag/%D0%93%D1%80%D0%B0%D0%BC%D0%BE%D1%82%D0%BD%D0%BE%D1%81%D1%82%D1%8C/hot"
+                }
             },
             {
                 "name": "Орфография",
-                "url": "https://pikabu.ru/tag/%D0%9E%D1%80%D1%84%D0%BE%D0%B3%D1%80%D0%B0%D1%84%D0%B8%D1%8F/hot"
+                "url": {
+                    "href": "https://pikabu.ru/tag/%D0%9E%D1%80%D1%84%D0%BE%D0%B3%D1%80%D0%B0%D1%84%D0%B8%D1%8F/hot"
+                }
             },
             {
                 "name": "Русский язык",
-                "url": "https://pikabu.ru/tag/%D0%A0%D1%83%D1%81%D1%81%D0%BA%D0%B8%D0%B9%20%D1%8F%D0%B7%D1%8B%D0%BA/hot"
+                "url": {
+                    "href": "https://pikabu.ru/tag/%D0%A0%D1%83%D1%81%D1%81%D0%BA%D0%B8%D0%B9%20%D1%8F%D0%B7%D1%8B%D0%BA/hot"
+                }
             },
             {
                 "name": "Призыв",
-                "url": "https://pikabu.ru/tag/%D0%9F%D1%80%D0%B8%D0%B7%D1%8B%D0%B2/hot"
+                "url": {
+                    "href": "https://pikabu.ru/tag/%D0%9F%D1%80%D0%B8%D0%B7%D1%8B%D0%B2/hot"
+                }
             },
             {
                 "name": "Образование",
-                "url": "https://pikabu.ru/tag/%D0%9E%D0%B1%D1%80%D0%B0%D0%B7%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5/hot"
+                "url": {
+                    "href": "https://pikabu.ru/tag/%D0%9E%D0%B1%D1%80%D0%B0%D0%B7%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5/hot"
+                }
             },
             {
                 "name": "Грамматические ошибки",
-                "url": "https://pikabu.ru/tag/%D0%93%D1%80%D0%B0%D0%BC%D0%BC%D0%B0%D1%82%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B8%D0%B5%20%D0%BE%D1%88%D0%B8%D0%B1%D0%BA%D0%B8/hot"
+                "url": {
+                    "href": "https://pikabu.ru/tag/%D0%93%D1%80%D0%B0%D0%BC%D0%BC%D0%B0%D1%82%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B8%D0%B5%20%D0%BE%D1%88%D0%B8%D0%B1%D0%BA%D0%B8/hot"
+                }
             },
             {
                 "name": "Текст",
-                "url": "https://pikabu.ru/tag/%D0%A2%D0%B5%D0%BA%D1%81%D1%82/hot"
+                "url": {
+                    "href": "https://pikabu.ru/tag/%D0%A2%D0%B5%D0%BA%D1%81%D1%82/hot"
+                }
             }
         ],
         "generator": [
@@ -1069,7 +1099,9 @@
         ],
         "attachment": [
             {
-                "url": "https://gramota.ru/biblioteka/spravochniki/pravila-russkoj-orfografii-i-punktuacii/pravopisanie-ne-i-ni"
+                "url": {
+                    "href": "https://gramota.ru/biblioteka/spravochniki/pravila-russkoj-orfografii-i-punktuacii/pravopisanie-ne-i-ni"
+                }
             }
         ],
         "stats": [

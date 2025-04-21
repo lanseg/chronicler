@@ -102,8 +102,10 @@ func (fca *fourchanAdapter) Get(link *opb.Link) ([]*opb.Object, error) {
 		if p.MD5 != "" {
 			obj.Attachment = append(obj.Attachment, &opb.Attachment{
 				Checksum: fmt.Sprintf("md5:%s", p.MD5),
-				Url:      fmt.Sprintf("https://i.4cdn.org/%s/%d%s", post.Board, p.Tim, p.Ext),
-				Mime:     mime.TypeByExtension(p.Ext),
+				Url: &opb.Link{
+					Href: fmt.Sprintf("https://i.4cdn.org/%s/%d%s", post.Board, p.Tim, p.Ext),
+				},
+				Mime: mime.TypeByExtension(p.Ext),
 			})
 		}
 

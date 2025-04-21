@@ -54,11 +54,11 @@ func list(s *Settings, _ []string) {
 }
 
 func view(s *Settings, args []string) {
-	cmd.NewViewer(s.Storage.Root).View(common.UUID4For(&opb.Link{Href: args[0]}))
+	cmd.NewViewer(s.Storage.Root).View(common.UUID4For(common.OrExit(opb.ParseLink(args[0]))))
 }
 
 func export(s *Settings, args []string) {
-	cmd.NewExporter(s.Storage.Root, args[0]).Export(common.UUID4For(&opb.Link{Href: args[1]}))
+	cmd.NewExporter(s.Storage.Root, args[0]).Export(common.UUID4For(common.OrExit(opb.ParseLink(args[0]))))
 }
 
 func save(s *Settings, args []string) {

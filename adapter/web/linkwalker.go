@@ -94,8 +94,8 @@ func (lw *LinkWalker) AddToVisit(link string) {
 	}
 }
 
-func (lw *LinkWalker) FindLinks(baseUrl *url.URL, data []byte) map[string]bool {
-	allLinks := map[string]bool{}
+func (lw *LinkWalker) FindLinks(baseUrl *url.URL, data []byte) map[string][]string {
+	allLinks := map[string][]string{}
 	reader := parser.NewHtmlReader(bytes.NewReader(data))
 	for reader.NextToken() {
 		for attr := range linkAttr {
@@ -109,11 +109,18 @@ func (lw *LinkWalker) FindLinks(baseUrl *url.URL, data []byte) map[string]bool {
 						attr, reader.Raw(), err)
 					continue
 				}
-				allLinks[h.String()] = true
+				actualLink := common.NormalizeURL(h).String()
+				allLinks[actualLink] = append(allLinks[actualLink], href)
 			}
 		}
-		for _, u := range linkRe.FindAllString(reader.Raw(), -1) {
-			allLinks[u] = true
+		for _, href := range linkRe.FindAllString(reader.Raw(), -1) {
+			h, err := common.ParseUrlDefaults(href, baseUrl)
+			if err != nil {
+				lw.logger.Errorf("cannot parse %q from token %q as url: %s", href, reader.Raw(), err)
+				continue
+			}
+			actualLink := common.NormalizeURL(h).String()
+			allLinks[actualLink] = append(allLinks[actualLink], href)
 		}
 	}
 	for k := range allLinks {
