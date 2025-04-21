@@ -76,6 +76,9 @@ func (v *Exporter) Export(id string) error {
 	v.logger.Infof("Loaded objects: %d", total)
 	os.MkdirAll(v.Target, 0766)
 	for i, obj := range result.Objects {
+		if !strings.Contains(obj.Id, "scp-series") {
+			continue
+		}
 		atmapping := map[string][]string{}
 		for _, att := range obj.Attachment {
 			safeUrl := common.SanitizeUrl(att.Url, 255)
@@ -84,6 +87,7 @@ func (v *Exporter) Export(id string) error {
 				safeUrl += exts[0]
 			}
 			atmapping[safeUrl] = denormalize(root, att.Url)
+			fmt.Printf("HERE %q -> %q\n", safeUrl, atmapping[safeUrl])
 		}
 
 		fileTarget := filepath.Join(v.Target, common.SanitizeUrl(obj.Id, 255)+".html")
@@ -143,6 +147,7 @@ func (v *Exporter) Export(id string) error {
 			f.Close()
 			reader.Close()
 		}
+		break
 	}
 	return nil
 }
