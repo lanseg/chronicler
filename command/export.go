@@ -47,18 +47,22 @@ func (v *Exporter) Export(id string) error {
 	v.logger.Infof("Loaded objects: %d", total)
 	os.MkdirAll(v.target, 0766)
 
-	atmapping := map[string]string{}
+	atmapping := map[string]map[string]string{}
 	for _, obj := range result.Objects {
-		atmapping[obj.Id] = common.SanitizeUrl(obj.Id, 255)
+		if atmapping[obj.Id] == nil {
+			atmapping[obj.Id] = map[string]string{}
+		}
+		currentMapping := atmapping[obj.Id]
+		currentMapping[obj.Id] = common.SanitizeUrl(obj.Id, 255)
 		for _, att := range obj.Attachment {
 			safeUrl := common.SanitizeUrl(att.Url.Href, 255)
 			exts, err := mime.ExtensionsByType(att.Mime)
 			if err == nil && len(exts) > 0 {
 				safeUrl += exts[0]
 			}
-			atmapping[att.Url.Href] = safeUrl
+			currentMapping[att.Url.Href] = safeUrl
 			for _, v := range att.Url.Variants {
-				atmapping[v] = safeUrl
+				currentMapping[v] = safeUrl
 			}
 		}
 	}
@@ -73,7 +77,7 @@ func (v *Exporter) Export(id string) error {
 			continue
 		}
 		for _, content := range obj.Content {
-			text := convertLinks(content.Text, atmapping)
+			text := convertLinks(content.Text, atmapping[obj.Id])
 			if _, err := f.Write([]byte(text)); err != nil {
 				v.logger.Warningf("cannot write to file %q: %q", fileTarget, err)
 				break
@@ -84,6 +88,7 @@ func (v *Exporter) Export(id string) error {
 	v.logger.Debugf("Exported all %d objects", len(result.Objects))
 
 	for i, obj := range result.Objects {
+		mapping := atmapping[obj.Id]
 		for _, att := range obj.Attachment {
 			safeUrl := common.SanitizeUrl(att.Url.Href, 255)
 			exts, err := mime.ExtensionsByType(att.Mime)
@@ -106,14 +111,14 @@ func (v *Exporter) Export(id string) error {
 					v.logger.Warningf("cannot open file %q for reading: %q", att.Url.Href, err)
 					continue
 				}
-				reader = io.NopCloser(bytes.NewReader([]byte(convertLinks(string(fileBytes), atmapping))))
+				reader = io.NopCloser(bytes.NewReader([]byte(convertLinks(string(fileBytes), mapping))))
 			} else {
 				fileBytes, err := store.GetBytes(request)
 				if err != nil {
 					v.logger.Warningf("cannot open file %q for reading: %q", att.Url.Href, err)
 					continue
 				}
-				reader = io.NopCloser(bytes.NewReader([]byte(convertLinks(string(fileBytes), atmapping))))
+				reader = io.NopCloser(bytes.NewReader([]byte(convertLinks(string(fileBytes), mapping))))
 			}
 
 			f, err := os.Create(fileTarget)
