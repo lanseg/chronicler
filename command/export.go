@@ -76,8 +76,10 @@ func (v *Exporter) Export(id string) error {
 			v.logger.Warningf("cannot open file %q for writing: %q", fileTarget, err)
 			continue
 		}
+		mapping := atmapping[obj.Id]
+		v.logger.Debugf("Replacing links in %q, to replace: %d", obj.Id, len(mapping))
 		for _, content := range obj.Content {
-			text := convertLinks(content.Text, atmapping[obj.Id])
+			text := convertLinks(content.Text, mapping)
 			if _, err := f.Write([]byte(text)); err != nil {
 				v.logger.Warningf("cannot write to file %q: %q", fileTarget, err)
 				break
