@@ -5,7 +5,6 @@ import (
 	"chronicler/common"
 	opb "chronicler/proto"
 	"chronicler/storage"
-	"fmt"
 	"io"
 	"mime"
 	"os"
@@ -15,8 +14,7 @@ import (
 
 func convertLinks(text string, realToLocal map[string]string) string {
 	for link, localPath := range realToLocal {
-		text = strings.ReplaceAll(text, fmt.Sprintf("\"%s\"", link), fmt.Sprintf("\"%s\"", localPath))
-		text = strings.ReplaceAll(text, fmt.Sprintf("'%s'", link), fmt.Sprintf("'%s'", localPath))
+		text = strings.ReplaceAll(text, link, localPath)
 	}
 	return text
 }
@@ -64,6 +62,8 @@ func (v *Exporter) Export(id string) error {
 			}
 		}
 	}
+	v.logger.Debugf("Link mapping done, records: %d", len(atmapping))
+
 	for i, obj := range result.Objects {
 		fileTarget := filepath.Join(v.target, common.SanitizeUrl(obj.Id, 255))
 		v.logger.Infof("[%06d of %06d] exporting %q to %q", i, total, obj.Id, fileTarget)
@@ -81,6 +81,8 @@ func (v *Exporter) Export(id string) error {
 		}
 		f.Close()
 	}
+	v.logger.Debugf("Exported all %d objects", len(result.Objects))
+
 	for i, obj := range result.Objects {
 		for _, att := range obj.Attachment {
 			safeUrl := common.SanitizeUrl(att.Url.Href, 255)
