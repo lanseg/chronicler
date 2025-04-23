@@ -94,8 +94,8 @@ func (lw *LinkWalker) AddToVisit(link string) {
 	}
 }
 
-func (lw *LinkWalker) FindLinks(baseUrl *url.URL, data []byte) map[string][]string {
-	allLinks := map[string][]string{}
+func (lw *LinkWalker) FindLinks(baseUrl *url.URL, data []byte) map[string](map[string]bool) {
+	allLinks := map[string](map[string]bool){}
 	reader := parser.NewHtmlReader(bytes.NewReader(data))
 	for reader.NextToken() {
 		for attr := range linkAttr {
@@ -105,12 +105,17 @@ func (lw *LinkWalker) FindLinks(baseUrl *url.URL, data []byte) map[string][]stri
 				}
 				h, err := common.ParseUrlDefaults(href, baseUrl)
 				if err != nil {
-					lw.logger.Errorf("cannot parse attribute %q from token %q as url: %s",
-						attr, reader.Raw(), err)
+					lw.logger.Errorf("cannot parse attribute %q (%q) from token %q as url: %s",
+						attr, href, reader.Raw(), err)
 					continue
 				}
 				actualLink := common.NormalizeURL(h).String()
-				allLinks[actualLink] = append(allLinks[actualLink], href)
+				if allLinks[actualLink] == nil {
+					allLinks[actualLink] = map[string]bool{}
+				}
+				if href != actualLink {
+					allLinks[actualLink][href] = true
+				}
 			}
 		}
 		for _, href := range linkRe.FindAllString(reader.Raw(), -1) {
@@ -120,7 +125,12 @@ func (lw *LinkWalker) FindLinks(baseUrl *url.URL, data []byte) map[string][]stri
 				continue
 			}
 			actualLink := common.NormalizeURL(h).String()
-			allLinks[actualLink] = append(allLinks[actualLink], href)
+			if allLinks[actualLink] == nil {
+				allLinks[actualLink] = map[string]bool{}
+			}
+			if href != actualLink {
+				allLinks[actualLink][href] = true
+			}
 		}
 	}
 	for k := range allLinks {

@@ -2,7 +2,6 @@ package pikabu
 
 import (
 	"bytes"
-	"chronicler/adapter"
 	"chronicler/common"
 	"encoding/json"
 	"fmt"
@@ -31,11 +30,11 @@ type CommentResponse struct {
 }
 
 type Client struct {
-	httpClient adapter.HttpClient
+	httpClient common.HttpClient
 	logger     *common.Logger
 }
 
-func NewClient(httpClient adapter.HttpClient) *Client {
+func NewClient(httpClient common.HttpClient) *Client {
 	return &Client{
 		httpClient: httpClient,
 		logger:     common.NewLogger("PikabuClient"),

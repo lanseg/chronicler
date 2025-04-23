@@ -1,7 +1,7 @@
 package fourchan
 
 import (
-	"chronicler/adapter"
+	"chronicler/common"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -55,7 +55,7 @@ type FourChanPost struct {
 	ArchivedOn    int64  `json:"archived_on"`
 }
 
-func GetThread(httpClient adapter.HttpClient, board string, thread string) ([]*FourChanPost, error) {
+func GetThread(httpClient common.HttpClient, board string, thread string) ([]*FourChanPost, error) {
 	requestUrl, err := url.Parse(fmt.Sprintf("https://a.4cdn.org/%s/thread/%s.json", board, thread))
 	if err != nil {
 		return nil, err

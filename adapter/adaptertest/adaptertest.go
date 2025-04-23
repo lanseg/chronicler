@@ -3,6 +3,7 @@ package adaptertest
 import (
 	"bytes"
 	"chronicler/adapter"
+	"chronicler/common"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -18,7 +19,7 @@ import (
 )
 
 type FakeHttpClient struct {
-	adapter.HttpClient
+	common.HttpClient
 
 	currnetFile int
 	files       []string

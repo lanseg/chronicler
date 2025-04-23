@@ -32,10 +32,6 @@ var (
 	})
 )
 
-type HttpClient interface {
-	Do(request *http.Request) (*http.Response, error)
-}
-
 func isFileUrl(link string) bool {
 	return webpageFileTypes.Contains(link)
 }

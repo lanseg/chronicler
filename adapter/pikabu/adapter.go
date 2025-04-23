@@ -26,7 +26,7 @@ type pikabuAdapter struct {
 	client *Client
 }
 
-func NewAdapter(client adapter.HttpClient) adapter.Adapter {
+func NewAdapter(client common.HttpClient) adapter.Adapter {
 	return &pikabuAdapter{
 		client: NewClient(client),
 		logger: common.NewLogger("PikabuAdapter"),

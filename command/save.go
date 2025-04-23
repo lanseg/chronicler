@@ -11,23 +11,10 @@ import (
 	opb "chronicler/proto"
 	"chronicler/resolver"
 	"chronicler/storage"
-	"log"
-	"net/http"
-	"net/http/cookiejar"
-	"time"
 )
 
-func Save(tw *twitter.Settings, rs *reddit.Settings, st *storage.Settings, args []string) {
-	jar, err := cookiejar.New(&cookiejar.Options{})
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	httpClient := &http.Client{
-		Jar:     jar,
-		Timeout: 10 * time.Minute,
-	}
-
+func Save(tw *twitter.Settings, rs *reddit.Settings, st *storage.Settings, http *common.HttpSettings, args []string) {
+	httpClient := common.NewHttpClient(http)
 	r := resolver.NewResolver(
 		st.Root,
 		common.NewHttpDownloader(httpClient),

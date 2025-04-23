@@ -16,14 +16,14 @@ type redditAdapter struct {
 	client Client
 }
 
-func NewAnonymousAdapter(client adapter.HttpClient) adapter.Adapter {
+func NewAnonymousAdapter(client common.HttpClient) adapter.Adapter {
 	return &redditAdapter{
 		logger: common.NewLogger("RedditAdapter"),
 		client: NewAnonymousClient(client),
 	}
 }
 
-func NewAdapter(client adapter.HttpClient, auth *RedditAuth) adapter.Adapter {
+func NewAdapter(client common.HttpClient, auth *RedditAuth) adapter.Adapter {
 	return &redditAdapter{
 		logger: common.NewLogger("RedditAdapter"),
 		client: NewClient(client, auth),

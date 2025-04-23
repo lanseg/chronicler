@@ -1,7 +1,6 @@
 package reddit
 
 import (
-	"chronicler/adapter"
 	"chronicler/common"
 	"encoding/json"
 	"fmt"
@@ -89,7 +88,7 @@ type RedditAuth struct {
 
 type redditClient struct {
 	auth       *RedditAuth
-	httpClient adapter.HttpClient
+	httpClient common.HttpClient
 	logger     *common.Logger
 }
 
@@ -160,11 +159,11 @@ func (rc *redditClient) GetChildren(rp *RedditPostDef, childIds []string) (*GetP
 	}, nil
 }
 
-func NewAnonymousClient(client adapter.HttpClient) Client {
+func NewAnonymousClient(client common.HttpClient) Client {
 	return NewClient(client, nil)
 }
 
-func NewClient(client adapter.HttpClient, auth *RedditAuth) Client {
+func NewClient(client common.HttpClient, auth *RedditAuth) Client {
 	return &redditClient{
 		auth:       auth,
 		logger:     common.NewLogger("RedditClient"),

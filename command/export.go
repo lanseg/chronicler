@@ -13,58 +13,59 @@ import (
 	"strings"
 )
 
-func convertLinks(text string, realToLocal map[string][]string) string {
-	for localPath, links := range realToLocal {
-		for _, link := range links {
-			text = strings.ReplaceAll(text, fmt.Sprintf("\"%s\"", link), fmt.Sprintf("\"%s\"", localPath))
-			text = strings.ReplaceAll(text, fmt.Sprintf("'%s'", link), fmt.Sprintf("'%s'", localPath))
-		}
+func convertLinks(text string, realToLocal map[string]string) string {
+	for link, localPath := range realToLocal {
+		text = strings.ReplaceAll(text, fmt.Sprintf("\"%s\"", link), fmt.Sprintf("\"%s\"", localPath))
+		text = strings.ReplaceAll(text, fmt.Sprintf("'%s'", link), fmt.Sprintf("'%s'", localPath))
 	}
 	return text
 }
 
 type Exporter struct {
-	Root   string
-	Target string
+	root   string
+	target string
 	logger *common.Logger
 }
 
 func NewExporter(root string, target string) *Exporter {
 	return &Exporter{
-		Root:   root,
-		Target: target,
+		root:   root,
+		target: target,
 		logger: common.NewLogger("export"),
 	}
 }
 
 func (v *Exporter) Export(id string) error {
+	v.logger.Infof("Exporting %q/%q to %q", v.root, id, v.target)
 	store := storage.BlockStorage{
-		Storage: common.OrExit(storage.NewLocalStorage(filepath.Join(v.Root, id))),
+		Storage: common.OrExit(storage.NewLocalStorage(filepath.Join(v.root, id))),
 	}
-	v.logger.Infof("Loading objects from %q", filepath.Join(v.Root, id, objectFileName))
+	v.logger.Infof("Loading objects from %q", filepath.Join(v.root, id, objectFileName))
 	result := &opb.Snapshot{}
 	if err := store.GetObject(&storage.GetRequest{Url: objectFileName}, &result); err != nil {
 		return err
 	}
 	total := len(result.Objects)
 	v.logger.Infof("Loaded objects: %d", total)
-	os.MkdirAll(v.Target, 0766)
-	for i, obj := range result.Objects {
-		if !strings.Contains(obj.Id, "scp-series") {
-			continue
-		}
-		atmapping := map[string][]string{}
+	os.MkdirAll(v.target, 0766)
+
+	atmapping := map[string]string{}
+	for _, obj := range result.Objects {
+		atmapping[obj.Id] = common.SanitizeUrl(obj.Id, 255)
 		for _, att := range obj.Attachment {
 			safeUrl := common.SanitizeUrl(att.Url.Href, 255)
 			exts, err := mime.ExtensionsByType(att.Mime)
 			if err == nil && len(exts) > 0 {
 				safeUrl += exts[0]
 			}
-			atmapping[safeUrl] = att.Url.Variants
-			fmt.Printf("HERE %q -> %q\n", safeUrl, atmapping[safeUrl])
+			atmapping[att.Url.Href] = safeUrl
+			for _, v := range att.Url.Variants {
+				atmapping[v] = safeUrl
+			}
 		}
-
-		fileTarget := filepath.Join(v.Target, common.SanitizeUrl(obj.Id, 255)+".html")
+	}
+	for i, obj := range result.Objects {
+		fileTarget := filepath.Join(v.target, common.SanitizeUrl(obj.Id, 255))
 		v.logger.Infof("[%06d of %06d] exporting %q to %q", i, total, obj.Id, fileTarget)
 		f, err := os.OpenFile(fileTarget, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
 		if err != nil {
@@ -79,32 +80,35 @@ func (v *Exporter) Export(id string) error {
 			}
 		}
 		f.Close()
-
+	}
+	for i, obj := range result.Objects {
 		for _, att := range obj.Attachment {
 			safeUrl := common.SanitizeUrl(att.Url.Href, 255)
 			exts, err := mime.ExtensionsByType(att.Mime)
 			if err == nil && len(exts) > 0 {
 				safeUrl += exts[0]
+			} else {
+				safeUrl += ".html"
 			}
-			fileTarget := filepath.Join(v.Target, safeUrl)
+			fileTarget := filepath.Join(v.target, safeUrl)
 			if _, err := os.Stat(fileTarget); err == nil {
-				v.logger.Infof("[%06d of %06d] exporting %q to %q (skipped, already exists)", i, total, att.Url, fileTarget)
+				v.logger.Infof("[%06d of %06d] exporting %q to %q (skipped, already exists)", i, total, att.Url.Href, fileTarget)
 				continue
 			}
-			v.logger.Infof("[%06d of %06d] exporting %q to %q", i, total, att.Url, fileTarget)
+			v.logger.Infof("[%06d of %06d] exporting %q to %q", i, total, att.Url.Href, fileTarget)
 			request := &storage.GetRequest{Url: att.Url.Href}
 			var reader io.ReadCloser
 			if strings.HasPrefix(att.Mime, "text") {
 				fileBytes, err := store.GetBytes(request)
 				if err != nil {
-					v.logger.Warningf("cannot open file %q for reading: %q", att.Url, err)
+					v.logger.Warningf("cannot open file %q for reading: %q", att.Url.Href, err)
 					continue
 				}
 				reader = io.NopCloser(bytes.NewReader([]byte(convertLinks(string(fileBytes), atmapping))))
 			} else {
 				fileBytes, err := store.GetBytes(request)
 				if err != nil {
-					v.logger.Warningf("cannot open file %q for reading: %q", att.Url, err)
+					v.logger.Warningf("cannot open file %q for reading: %q", att.Url.Href, err)
 					continue
 				}
 				reader = io.NopCloser(bytes.NewReader([]byte(convertLinks(string(fileBytes), atmapping))))
@@ -116,7 +120,7 @@ func (v *Exporter) Export(id string) error {
 				continue
 			}
 			if _, err := io.Copy(f, reader); err != nil {
-				v.logger.Warningf("cannot write %q to %q: %q", att.Url, fileTarget, err)
+				v.logger.Warningf("cannot write %q to %q: %q", att.Url.Href, fileTarget, err)
 			}
 			f.Close()
 			reader.Close()

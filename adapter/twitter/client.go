@@ -1,7 +1,6 @@
 package twitter
 
 import (
-	"chronicler/adapter"
 	"chronicler/common"
 	"encoding/json"
 	"fmt"
@@ -44,13 +43,13 @@ type Client interface {
 type ClientImpl struct {
 	Client
 
-	httpClient adapter.HttpClient
+	httpClient common.HttpClient
 	token      string
 
 	logger *common.Logger
 }
 
-func NewClient(httpClient adapter.HttpClient, token string) Client {
+func NewClient(httpClient common.HttpClient, token string) Client {
 	return &ClientImpl{
 		token:      token,
 		httpClient: httpClient,

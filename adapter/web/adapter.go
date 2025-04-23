@@ -3,9 +3,11 @@ package web
 import (
 	"fmt"
 	"io"
+	"maps"
 	"net/http"
 	"net/url"
 	"regexp"
+	"slices"
 	"time"
 
 	"chronicler/adapter"
@@ -35,12 +37,12 @@ var (
 type webAdapter struct {
 	adapter.Adapter
 
-	client adapter.HttpClient
+	client common.HttpClient
 	delay  time.Duration
 	logger *common.Logger
 }
 
-func NewAdapter(client adapter.HttpClient) adapter.Adapter {
+func NewAdapter(client common.HttpClient) adapter.Adapter {
 	return &webAdapter{
 		delay:  defaultDelay,
 		client: client,
@@ -105,7 +107,7 @@ func (wa *webAdapter) Get(link *opb.Link) ([]*opb.Object, error) {
 			attachments = append(attachments, &opb.Attachment{
 				Url: &opb.Link{
 					Href:     actualUrl,
-					Variants: pageLinks,
+					Variants: slices.Sorted(maps.Keys(pageLinks)),
 				},
 				Mime: common.GuessMimeType(actualUrl),
 			})
