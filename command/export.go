@@ -14,7 +14,7 @@ import (
 
 func convertLinks(text string, realToLocal map[string]string) string {
 	for link, localPath := range realToLocal {
-		text = strings.ReplaceAll(text, link, localPath)
+		text = strings.ReplaceAll(strings.ReplaceAll(text, "\""+link+"\"", "\""+localPath+"\""), "'"+link+"'", "'"+localPath+"'")
 	}
 	return text
 }
@@ -56,9 +56,11 @@ func (v *Exporter) Export(id string) error {
 		currentMapping[obj.Id] = common.SanitizeUrl(obj.Id, 255)
 		for _, att := range obj.Attachment {
 			safeUrl := common.SanitizeUrl(att.Url.Href, 255)
-			exts, err := mime.ExtensionsByType(att.Mime)
-			if err == nil && len(exts) > 0 {
-				safeUrl += exts[0]
+			if filepath.Ext(safeUrl) == "" {
+				exts, err := mime.ExtensionsByType(att.Mime)
+				if err == nil && len(exts) > 0 {
+					safeUrl += exts[0]
+				}
 			}
 			currentMapping[att.Url.Href] = safeUrl
 			for _, v := range att.Url.Variants {
@@ -93,11 +95,13 @@ func (v *Exporter) Export(id string) error {
 		mapping := atmapping[obj.Id]
 		for _, att := range obj.Attachment {
 			safeUrl := common.SanitizeUrl(att.Url.Href, 255)
-			exts, err := mime.ExtensionsByType(att.Mime)
-			if err == nil && len(exts) > 0 {
-				safeUrl += exts[0]
-			} else {
-				safeUrl += ".html"
+			if filepath.Ext(safeUrl) == "" {
+				exts, err := mime.ExtensionsByType(att.Mime)
+				if err == nil && len(exts) > 0 {
+					safeUrl += exts[0]
+				} else {
+					safeUrl += ".html"
+				}
 			}
 			fileTarget := filepath.Join(v.target, safeUrl)
 			if _, err := os.Stat(fileTarget); err == nil {
