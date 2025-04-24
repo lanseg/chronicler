@@ -10,7 +10,8 @@ import (
 	"time"
 )
 
-func List(root string) {
+func List(s *Settings, args []string) {
+	root := s.Storage.Root
 	dir, err := os.ReadDir(root)
 	if err != nil {
 		return

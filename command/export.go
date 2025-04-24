@@ -19,6 +19,10 @@ func convertLinks(text string, realToLocal map[string]string) string {
 	return text
 }
 
+func Export(s *Settings, args []string) {
+	NewExporter(s.Storage.Root, args[0]).Export(common.UUID4For(common.OrExit(opb.ParseLink(args[1]))))
+}
+
 type Exporter struct {
 	root   string
 	target string

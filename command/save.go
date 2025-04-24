@@ -10,19 +10,18 @@ import (
 	"chronicler/common"
 	opb "chronicler/proto"
 	"chronicler/resolver"
-	"chronicler/storage"
 )
 
-func Save(tw *twitter.Settings, rs *reddit.Settings, st *storage.Settings, http *common.HttpSettings, args []string) {
-	httpClient := common.NewHttpClient(http)
+func Save(s *Settings, args []string) {
+	httpClient := common.NewHttpClient(s.HttpSettings.CachePath, s.HttpSettings.CookieJar)
 	r := resolver.NewResolver(
-		st.Root,
+		s.Storage.Root,
 		common.NewHttpDownloader(httpClient),
 		[]adapter.Adapter{
-			twitter.NewAdapter(twitter.NewClient(httpClient, tw.Token)),
+			twitter.NewAdapter(twitter.NewClient(httpClient, s.Twitter.Token)),
 			fourchan.NewAdapter(httpClient),
 			pikabu.NewAdapter(httpClient),
-			reddit.NewAdapter(httpClient, &reddit.RedditAuth{AccessToken: rs.Token}),
+			reddit.NewAdapter(httpClient, &reddit.RedditAuth{AccessToken: s.Reddit.Token}),
 			web.NewAdapter(httpClient),
 		},
 	)

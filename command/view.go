@@ -16,6 +16,10 @@ const (
 	objectFileName = "snapshot.json"
 )
 
+func View(s *Settings, args []string) {
+	NewViewer(s.Storage.Root).View(common.UUID4For(common.OrExit(opb.ParseLink(args[0]))))
+}
+
 type Viewer struct {
 	Root string
 

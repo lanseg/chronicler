@@ -20,9 +20,9 @@ type HttpClient interface {
 	Do(request *http.Request) (*http.Response, error)
 }
 
-func NewHttpClient(settings *HttpSettings) HttpClient {
+func NewHttpClient(cacheDir string, cookieDir string) HttpClient {
 	baseClient := &http.Client{}
-	if settings != nil && settings.CookieJar != "" {
+	if cookieDir != "" {
 		jar, err := cookiejar.New(&cookiejar.Options{})
 		if err != nil {
 			log.Fatal(err)
@@ -31,13 +31,13 @@ func NewHttpClient(settings *HttpSettings) HttpClient {
 	}
 
 	client := HttpClient(baseClient)
-	if settings != nil && settings.CachePath != "" {
+	if cacheDir != "" {
 		logger := NewLogger("CachingHttp")
-		logger.Infof("Using http client cache at %q", settings.CachePath)
+		logger.Infof("Using http client cache at %q", cacheDir)
 		client = &cachingHttpClient{
 			parent:    client,
 			logger:    logger,
-			cachePath: settings.CachePath,
+			cachePath: cacheDir,
 		}
 	}
 
