@@ -3,6 +3,9 @@ package common
 import (
 	"fmt"
 	"hash/fnv"
+	"mime"
+	"net/url"
+	"path/filepath"
 	"strings"
 	"unicode"
 )
@@ -63,4 +66,34 @@ func SanitizeUrl(remotePath string, maxLength int) string {
 		builder.WriteString(fmt.Sprintf("_%x", hash.Sum([]byte{})))
 	}
 	return builder.String()
+}
+
+func SanitizeWithExt(remotePath string, mimeType string, maxLength int) string {
+	ext := ""
+	maybeUrl, err := url.Parse(remotePath)
+	if err == nil {
+		path := maybeUrl.Path
+		pathEnd := strings.Index(path, "?")
+		if pathEnd != -1 {
+			path = path[:pathEnd]
+		}
+		ext = filepath.Ext(path)
+	} else {
+		ext = filepath.Ext(remotePath)
+	}
+	if ext == "" && mimeType != "" {
+		exts, err := mime.ExtensionsByType(mimeType)
+		if err == nil && len(exts) > 0 {
+			ext = exts[0]
+		}
+	}
+	safeUrl := SanitizeUrl(remotePath, maxLength)
+	if ext == "" || len(safeUrl) == len(remotePath) {
+		return safeUrl
+	}
+	safeUrl = safeUrl[:len(safeUrl)-len(ext)-1]
+	if safeUrl[len(safeUrl)-1] != '.' {
+		safeUrl += "."
+	}
+	return safeUrl + ext
 }
