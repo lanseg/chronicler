@@ -1,35 +1,28 @@
-package command
+package exporter
 
 import (
 	"chronicler/common"
-	opb "chronicler/proto"
 	"chronicler/storage"
 	"fmt"
-	"path/filepath"
 	"regexp"
 	"sort"
 	"strings"
 	"time"
+
+	opb "chronicler/proto"
 )
 
-const (
-	objectFileName = "snapshot.json"
-)
-
-func View(s *Settings, args []string) {
-	NewViewer(s.Storage.Root).View(common.UUID4For(common.OrExit(opb.ParseLink(args[0]))))
-}
-
-type Viewer struct {
-	Root string
+type textExporter struct {
+	Exporter
 
 	logger *common.Logger
+	store  storage.Storage
 }
 
-func NewViewer(root string) *Viewer {
-	return &Viewer{
-		Root:   root,
-		logger: common.NewLogger("viewer"),
+func NewTextExporter(store storage.Storage) Exporter {
+	return &textExporter{
+		store:  store,
+		logger: common.NewLogger("LocalExporter"),
 	}
 }
 
@@ -65,10 +58,8 @@ func formatObject(obj *opb.Object, prefix int) string {
 	return strings.Join(lines[from:total-to-1], "\n")
 }
 
-func (v *Viewer) View(id string) error {
-	store := storage.BlockStorage{
-		Storage: common.OrExit(storage.NewLocalStorage(filepath.Join(v.Root, id))),
-	}
+func (v *textExporter) Export(destination string) error {
+	store := storage.BlockStorage{Storage: v.store}
 
 	result := &opb.Snapshot{}
 	if err := store.GetObject(&storage.GetRequest{Url: objectFileName}, &result); err != nil {

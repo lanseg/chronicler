@@ -15,7 +15,7 @@ var (
 	logger = common.NewLogger("main")
 )
 
-func getCommand() func(*cmd.Settings, []string) {
+func getCommand() cmd.Commmand {
 	switch os.Args[1] {
 	case "list":
 		return cmd.List
@@ -49,7 +49,9 @@ func main() {
 		return
 	}
 	logger.Debugf("Running command %q with args %q", os.Args[1], os.Args[2:])
-	command(cmd.GetSettings(), os.Args[2:])
+	if err := command(cmd.GetSettings(), os.Args[2:]); err != nil {
+		logger.Errorf("Error: %s", err)
+	}
 
 	ff, err := os.Create("memprofile")
 	if err != nil {
