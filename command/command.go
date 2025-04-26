@@ -42,7 +42,7 @@ func Export(s *Settings, args []string) error {
 }
 
 func View(s *Settings, args []string) error {
-	storage, err := getStorage(s, args[1])
+	storage, err := getStorage(s, args[0])
 	if err != nil {
 		return err
 	}
@@ -83,12 +83,16 @@ func List(s *Settings, args []string) error {
 		if snapshot.FetchTime != nil {
 			fetchTime = time.Unix(snapshot.FetchTime.Seconds, 0).Format(time.DateTime)
 		}
-		fmt.Printf("%03d [%s] %s\n", i, fetchTime, snapshot.Link)
+		fmt.Printf("%03d [%s] %s\n", i, fetchTime, snapshot.Link.Href)
 	}
 	return nil
 }
 
 func Save(s *Settings, args []string) error {
+	link, err := opb.ParseLink(args[0])
+	if err != nil {
+		return err
+	}
 	httpClient := common.NewHttpClient(s.HttpSettings.CachePath, s.HttpSettings.CookieJar)
 	r := resolver.NewResolver(
 		s.Storage.Root,
@@ -102,7 +106,7 @@ func Save(s *Settings, args []string) error {
 		},
 	)
 	r.Start()
-	r.Resolve(&opb.Link{Href: args[0]})
+	r.Resolve(link)
 	r.Wait()
 	r.Stop()
 	return nil
