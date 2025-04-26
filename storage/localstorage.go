@@ -30,8 +30,9 @@ type localStorage struct {
 }
 
 func NewLocalStorage(root string) (Storage, error) {
-	if err := os.MkdirAll(filepath.Join(root, defaultMetadata), defaultPerms); err != nil {
-		return nil, err
+	dir := filepath.Join(root, defaultMetadata)
+	if err := os.MkdirAll(dir, defaultPerms); err != nil {
+		return nil, errors.Join(fmt.Errorf("cannot create storage directory %q", dir), err)
 	}
 	storage := &localStorage{
 		root:       root,
@@ -53,12 +54,13 @@ func (ls *localStorage) saveMapping() error {
 }
 
 func (ls *localStorage) readMapping() error {
-	bytes, err := os.ReadFile(filepath.Join(ls.root, defaultMapping))
+	mapFile := filepath.Join(ls.root, defaultMapping)
+	bytes, err := os.ReadFile(mapFile)
 	if err != nil {
 		if os.IsNotExist((err)) {
 			return nil
 		}
-		return err
+		return errors.Join(fmt.Errorf("cannot read storage mapping %q", mapFile), err)
 	}
 	mapping := map[string]string{}
 	err = json.Unmarshal(bytes, &mapping)

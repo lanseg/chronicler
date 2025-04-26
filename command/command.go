@@ -12,6 +12,7 @@ import (
 	opb "chronicler/proto"
 	"chronicler/resolver"
 	"chronicler/storage"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -50,14 +51,13 @@ func View(s *Settings, args []string) error {
 }
 
 func List(s *Settings, args []string) error {
-	root := s.Storage.Root
-	dir, err := os.ReadDir(root)
+	dir, err := os.ReadDir(s.Storage.Root)
 	if err != nil {
-		return err
+		return errors.Join(fmt.Errorf("cannot read storage dir %q", s.Storage.Root), err)
 	}
 	snapshots := []*opb.Snapshot{}
 	for _, d := range dir {
-		ls, err := storage.NewLocalStorage(filepath.Join(root, d.Name()))
+		ls, err := storage.NewLocalStorage(filepath.Join(s.Storage.Root, d.Name()))
 		if err != nil {
 			continue
 		}
