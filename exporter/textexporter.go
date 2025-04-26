@@ -58,7 +58,7 @@ func formatObject(obj *opb.Object, prefix int) string {
 	return strings.Join(lines[from:total-to-1], "\n")
 }
 
-func (v *textExporter) Export(destination string) error {
+func (v *textExporter) Export(_ string) error {
 	store := storage.BlockStorage{Storage: v.store}
 
 	result := &opb.Snapshot{}

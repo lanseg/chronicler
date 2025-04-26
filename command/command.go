@@ -19,14 +19,22 @@ import (
 	"time"
 )
 
-type Commmand = func(*Settings, []string) error
+type Command = func(*Settings, []string) error
 
-func Export(s *Settings, args []string) error {
-	itemLink, err := opb.ParseLink(args[1])
+func getStorage(s *Settings, link string) (storage.Storage, error) {
+	itemLink, err := opb.ParseLink(link)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	storage, err := storage.NewLocalStorage(filepath.Join(s.Storage.Root, common.UUID4For(itemLink)))
+	if err != nil {
+		return nil, err
+	}
+	return storage, nil
+}
+
+func Export(s *Settings, args []string) error {
+	storage, err := getStorage(s, args[1])
 	if err != nil {
 		return err
 	}
@@ -34,15 +42,11 @@ func Export(s *Settings, args []string) error {
 }
 
 func View(s *Settings, args []string) error {
-	storage, err := storage.NewLocalStorage(filepath.Join(s.Storage.Root, args[0]))
+	storage, err := getStorage(s, args[1])
 	if err != nil {
 		return err
 	}
-	itemLink, err := opb.ParseLink(args[1])
-	if err != nil {
-		return err
-	}
-	return exporter.NewTextExporter(storage).Export(common.UUID4For(itemLink))
+	return exporter.NewTextExporter(storage).Export("")
 }
 
 func List(s *Settings, args []string) error {

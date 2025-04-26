@@ -15,7 +15,7 @@ var (
 	logger = common.NewLogger("main")
 )
 
-func getCommand() cmd.Commmand {
+func getCommand() cmd.Command {
 	switch os.Args[1] {
 	case "list":
 		return cmd.List
