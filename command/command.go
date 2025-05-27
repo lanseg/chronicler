@@ -35,6 +35,9 @@ func getStorage(s *Settings, link string) (storage.Storage, error) {
 }
 
 func Export(s *Settings, args []string) error {
+	if len(args) < 2 {
+		return fmt.Errorf("Export requires two arguments: <link> and <target>, but got %q", args)
+	}
 	storage, err := getStorage(s, args[1])
 	if err != nil {
 		return err
@@ -43,6 +46,9 @@ func Export(s *Settings, args []string) error {
 }
 
 func View(s *Settings, args []string) error {
+	if len(args) == 0 {
+		return fmt.Errorf("View requires one argument: <link>, but got none")
+	}
 	storage, err := getStorage(s, args[0])
 	if err != nil {
 		return err
@@ -89,6 +95,9 @@ func List(s *Settings, args []string) error {
 }
 
 func Save(s *Settings, args []string) error {
+	if len(args) == 0 {
+		return fmt.Errorf("Save requires one argument: <link>, but got none")
+	}
 	link, err := opb.ParseLink(args[0])
 	if err != nil {
 		return err
