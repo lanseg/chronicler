@@ -103,16 +103,23 @@ func Save(s *Settings, args []string) error {
 		return err
 	}
 	httpClient := common.NewHttpClient(s.HttpSettings.CachePath, s.HttpSettings.CookieJar)
+	adapters := []adapter.Adapter{
+		fourchan.NewAdapter(httpClient),
+		pikabu.NewAdapter(httpClient),
+		web.NewAdapter(httpClient),
+	}
+	if s.Twitter != nil {
+		adapters = append(adapters,
+			twitter.NewAdapter(twitter.NewClient(httpClient, s.Twitter.Token)))
+	}
+	if s.Reddit != nil {
+		adapters = append(adapters,
+			reddit.NewAdapter(httpClient, &reddit.RedditAuth{AccessToken: s.Reddit.Token}))
+	}
 	r := resolver.NewResolver(
 		s.Storage.Root,
 		common.NewHttpDownloader(httpClient),
-		[]adapter.Adapter{
-			twitter.NewAdapter(twitter.NewClient(httpClient, s.Twitter.Token)),
-			fourchan.NewAdapter(httpClient),
-			pikabu.NewAdapter(httpClient),
-			reddit.NewAdapter(httpClient, &reddit.RedditAuth{AccessToken: s.Reddit.Token}),
-			web.NewAdapter(httpClient),
-		},
+		adapters,
 	)
 	r.Start()
 	r.Resolve(link)

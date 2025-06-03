@@ -153,7 +153,7 @@ func (psm *PikabuParser) getAttachments() {
 }
 
 func (psm *PikabuParser) InDocument() {
-	if psm.doc.Matches("article") {
+	if psm.doc.Matches("article", "story") {
 		if psm.article == nil {
 			psm.newArticle()
 			psm.SetState(InArticle)
