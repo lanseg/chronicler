@@ -2,7 +2,6 @@ package pikabu
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"net/url"
 	"regexp"
@@ -96,8 +95,6 @@ func (pa *pikabuAdapter) Get(link *opb.Link) ([]*opb.Object, error) {
 		result[i] = c
 		i++
 	}
-	b, _ := json.Marshal(result)
-	fmt.Println(string(b))
 	sort.Slice(result, func(i, j int) bool {
 		if result[i].CreatedAt.Seconds > result[j].CreatedAt.Seconds {
 			return true

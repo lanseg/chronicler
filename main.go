@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"os"
 
 	cmd "chronicler/command"
@@ -27,9 +28,26 @@ func getCommand(cmdName string) cmd.Command {
 	return nil
 }
 
+func getDefaultSettings(src string) (*cmd.Settings, error) {
+	data, err := os.ReadFile(src)
+	if err != nil {
+		return nil, err
+	}
+	result := &cmd.Settings{}
+	if err := json.Unmarshal(data, result); err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
 func main() {
+	settings, err := getDefaultSettings("settings.json")
+	if err != nil {
+		logger.Errorf("Cannot load default settings from file: %s. Zero values will be used", err)
+		settings = &cmd.Settings{}
+	}
 	forFlag := &goconfig.FlagSource{}
-	cfg, err := goconfig.GetConfig[cmd.Settings](goconfig.FromEnv, forFlag.Collect)
+	cfg, err := goconfig.GetConfigTo(settings, goconfig.FromEnv, forFlag.Collect)
 	if err != nil {
 		logger.Errorf("Cannot load settings: %s", err)
 		return
