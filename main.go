@@ -7,26 +7,18 @@ import (
 	cmd "chronicler/command"
 	"chronicler/common"
 
-	"github.com/lanseg/goconfig"
+	cfg "github.com/lanseg/goconfig"
 )
 
 var (
-	logger = common.NewLogger("main")
-)
-
-func getCommand(cmdName string) cmd.Command {
-	switch cmdName {
-	case "list":
-		return cmd.List
-	case "save":
-		return cmd.Save
-	case "view":
-		return cmd.View
-	case "export":
-		return cmd.Export
+	logger   = common.NewLogger("main")
+	commands = map[string]cmd.Command{
+		"list":   cmd.List,
+		"save":   cmd.Save,
+		"view":   cmd.View,
+		"export": cmd.Export,
 	}
-	return nil
-}
+)
 
 func getDefaultSettings(src string) (*cmd.Settings, error) {
 	data, err := os.ReadFile(src)
@@ -46,8 +38,8 @@ func main() {
 		logger.Errorf("Cannot load default settings from file: %s. Zero values will be used", err)
 		settings = &cmd.Settings{}
 	}
-	forFlag := &goconfig.FlagSource{}
-	cfg, err := goconfig.GetConfigTo(settings, goconfig.FromEnv, forFlag.Collect)
+	forFlag := &cfg.FlagSource{}
+	cfg, err := cfg.GetConfigTo(settings, cfg.FromEnv, forFlag.Collect)
 	if err != nil {
 		logger.Errorf("Cannot load settings: %s", err)
 		return
@@ -57,8 +49,8 @@ func main() {
 		logger.Errorf("No command specified, available commands: %s", "COMMANDS")
 		os.Exit(-1)
 	}
-	command := getCommand(args[0])
-	if command == nil {
+	command, ok := commands[args[0]]
+	if !ok {
 		logger.Debugf("Unknown command (args %q)", os.Args)
 		return
 	}

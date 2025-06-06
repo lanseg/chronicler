@@ -1,8 +1,9 @@
 package command
 
 type HttpSettings struct {
-	CachePath string `json:"cache_path" env:"CACHE_PATH" arg:"cache_path"`
-	CookieJar string `json:"cookie_jar" env:"COOKIE_JAR" arg:"cookie_jar"`
+	CachePath      string `json:"cache_path" env:"CACHE_PATH" arg:"cache_path"`
+	CookieJar      string `json:"cookie_jar" env:"COOKIE_JAR" arg:"cookie_jar"`
+	RequestDelayMs int    `json:"request_delay_ms" env:"REQUEST_DELAY_MS" arg:"request_delay_ms"`
 }
 
 type RedditSettings struct {

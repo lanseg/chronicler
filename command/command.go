@@ -57,6 +57,7 @@ func View(s *Settings, args []string) error {
 }
 
 func List(s *Settings, args []string) error {
+	logger := common.NewLogger("Command-List")
 	dir, err := os.ReadDir(s.Storage.Root)
 	if err != nil {
 		return errors.Join(fmt.Errorf("cannot read storage dir %q", s.Storage.Root), err)
@@ -65,11 +66,14 @@ func List(s *Settings, args []string) error {
 	for _, d := range dir {
 		ls, err := storage.NewLocalStorage(filepath.Join(s.Storage.Root, d.Name()))
 		if err != nil {
+			logger.Warningf("cannot read storage in the folder %q: %q", d, err)
 			continue
 		}
 		bs := storage.BlockStorage{Storage: ls}
 		snapshot := &opb.Snapshot{}
 		if err = bs.GetObject(&storage.GetRequest{Url: "snapshot.json"}, snapshot); err != nil {
+			logger.Warningf("cannot read snapshot file %q in the folder %q: %q",
+				"snapshot.json", d, err)
 			continue
 		}
 		snapshots = append(snapshots, snapshot)

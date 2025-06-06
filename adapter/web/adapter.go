@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"regexp"
 	"slices"
+	"strings"
 	"time"
 
 	"chronicler/adapter"
@@ -116,7 +117,10 @@ func (wa *webAdapter) Get(link *opb.Link) ([]*opb.Object, error) {
 		result = append(result, &opb.Object{
 			Id:         resp.Request.URL.String(),
 			Attachment: attachments,
-			Content:    []*opb.Content{{Text: string(data), Mime: "text/html"}},
+			Content: []*opb.Content{{
+				Text: strings.ToValidUTF8(string(data), ""),
+				Mime: "text/html",
+			}},
 		})
 		time.Sleep(wa.delay)
 	}
