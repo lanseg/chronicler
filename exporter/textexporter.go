@@ -62,7 +62,7 @@ func (v *textExporter) Export(_ string) error {
 	store := storage.BlockStorage{Storage: v.store}
 
 	result := &opb.Snapshot{}
-	if err := store.GetObject(&storage.GetRequest{Url: objectFileName}, &result); err != nil {
+	if err := store.GetJSON(&storage.GetRequest{Url: objectFileName}, &result); err != nil {
 		return err
 	}
 

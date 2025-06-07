@@ -22,11 +22,11 @@ func TestBlockStorage(t *testing.T) {
 			String: "Root",
 			Array:  []*someType{{String: "Child"}},
 		}
-		if _, err := bs.PutObject(&PutRequest{Url: "obj-file"}, want); err != nil {
+		if _, err := bs.PutJSON(&PutRequest{Url: "obj-file"}, want); err != nil {
 			t.Errorf("Error writing object to storage: %s", err)
 		}
 		got := &someType{}
-		if err = bs.GetObject(&GetRequest{Url: "obj-file"}, got); err != nil {
+		if err = bs.GetJSON(&GetRequest{Url: "obj-file"}, got); err != nil {
 			t.Errorf("Error reading object from storage: %s", err)
 		}
 		if !reflect.DeepEqual(want, got) {

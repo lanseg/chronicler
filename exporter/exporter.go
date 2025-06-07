@@ -78,11 +78,19 @@ func (le *localExporter) exportFile(target string, href string, typeName string,
 
 func (le *localExporter) Export(destination string) error {
 	le.logger.Infof("Exporting to %q", destination)
-	store := storage.BlockStorage{Storage: le.store}
+	bs := storage.BlockStorage{Storage: le.store}
 
 	le.logger.Infof("Loading snapshot from storage: %q", objectFileName)
 	result := &opb.Snapshot{}
-	if err := store.GetObject(&storage.GetRequest{Url: objectFileName}, &result); err != nil {
+	err := bs.GetJSON(&storage.GetRequest{Url: "snapshot.json"}, result)
+	if err != nil {
+		le.logger.Warningf("cannot read snapshot json file %q: %q",
+			"snapshot.json", err)
+		err = bs.GetProto(&storage.GetRequest{Url: "snapshot.binpb"}, result)
+	}
+	if err != nil {
+		le.logger.Warningf("cannot read snapshot binary proto file %q: %q",
+			"snapshot.binpb", err)
 		return err
 	}
 
@@ -128,7 +136,7 @@ func (le *localExporter) Export(destination string) error {
 			le.logger.Infof(
 				"[%06d of %06d] attachment exporting %q to %q", i, total, attUrl, fileTarget)
 			request := &storage.GetRequest{Url: attUrl}
-			fileBytes, err := store.GetBytes(request)
+			fileBytes, err := bs.GetBytes(request)
 			if err != nil {
 				le.logger.Warningf("cannot open file %q for reading: %q", attUrl, err)
 				continue

@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
+
+	"google.golang.org/protobuf/proto"
 )
 
 type BlockStorage struct {
@@ -28,7 +30,7 @@ func (bs *BlockStorage) GetBytes(get *GetRequest) ([]byte, error) {
 	return io.ReadAll(reader)
 }
 
-func (bs *BlockStorage) PutObject(put *PutRequest, data interface{}) (int64, error) {
+func (bs *BlockStorage) PutJSON(put *PutRequest, data interface{}) (int64, error) {
 	jsonBytes, err := json.Marshal(data)
 	if err != nil {
 		return -1, err
@@ -36,10 +38,26 @@ func (bs *BlockStorage) PutObject(put *PutRequest, data interface{}) (int64, err
 	return bs.PutBytes(put, jsonBytes)
 }
 
-func (bs *BlockStorage) GetObject(get *GetRequest, data interface{}) error {
+func (bs *BlockStorage) GetJSON(get *GetRequest, data interface{}) error {
 	jsonBytes, err := bs.GetBytes(get)
 	if err != nil {
 		return err
 	}
 	return json.Unmarshal(jsonBytes, data)
+}
+
+func (bs *BlockStorage) PutProto(put *PutRequest, data proto.Message) (int64, error) {
+	protoBytes, err := proto.Marshal(data)
+	if err != nil {
+		return -1, err
+	}
+	return bs.PutBytes(put, protoBytes)
+}
+
+func (bs *BlockStorage) GetProto(get *GetRequest, data proto.Message) error {
+	protoBytes, err := bs.GetBytes(get)
+	if err != nil {
+		return err
+	}
+	return proto.Unmarshal(protoBytes, data)
 }

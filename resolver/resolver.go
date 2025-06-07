@@ -5,6 +5,7 @@ import (
 	"chronicler/common"
 	opb "chronicler/proto"
 	"chronicler/storage"
+	"fmt"
 	"net/url"
 	"path/filepath"
 	"sync"
@@ -12,7 +13,7 @@ import (
 )
 
 const (
-	objectFileName = "snapshot.json"
+	objectFileName = "snapshot"
 )
 
 type resolverTask struct {
@@ -126,8 +127,8 @@ func (r *resolver) resolveTask(task resolverTask) error {
 		Link:    link,
 		Objects: objs,
 	}
-	bytesWritten, err := s.PutObject(&storage.PutRequest{
-		Url:             objectFileName,
+	bytesWritten, err := s.PutJSON(&storage.PutRequest{
+		Url:             fmt.Sprintf("%s.json", objectFileName),
 		SaveOnOverwrite: true,
 	}, snapshot)
 	if err != nil {

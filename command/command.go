@@ -38,11 +38,11 @@ func Export(s *Settings, args []string) error {
 	if len(args) < 2 {
 		return fmt.Errorf("Export requires two arguments: <link> and <target>, but got %q", args)
 	}
-	storage, err := getStorage(s, args[1])
+	storage, err := getStorage(s, args[0])
 	if err != nil {
 		return err
 	}
-	return exporter.NewLocalExporter(storage).Export(args[0])
+	return exporter.NewLocalExporter(storage).Export(args[1])
 }
 
 func View(s *Settings, args []string) error {
@@ -71,9 +71,14 @@ func List(s *Settings, args []string) error {
 		}
 		bs := storage.BlockStorage{Storage: ls}
 		snapshot := &opb.Snapshot{}
-		if err = bs.GetObject(&storage.GetRequest{Url: "snapshot.json"}, snapshot); err != nil {
-			logger.Warningf("cannot read snapshot file %q in the folder %q: %q",
+		if err = bs.GetJSON(&storage.GetRequest{Url: "snapshot.json"}, snapshot); err != nil {
+			logger.Warningf("cannot read snapshot json file %q in the folder %q: %q",
 				"snapshot.json", d, err)
+			err = bs.GetProto(&storage.GetRequest{Url: "snapshot.binpb"}, snapshot)
+		}
+		if err != nil {
+			logger.Warningf("cannot read snapshot binary proto file %q in the folder %q: %q",
+				"snapshot.binpb", d, err)
 			continue
 		}
 		snapshots = append(snapshots, snapshot)
@@ -106,20 +111,23 @@ func Save(s *Settings, args []string) error {
 	if err != nil {
 		return err
 	}
+	logger := common.NewLogger("Save")
 	httpClient := common.NewHttpClient(s.HttpSettings.CachePath, s.HttpSettings.CookieJar)
-	adapters := []adapter.Adapter{
-		fourchan.NewAdapter(httpClient),
-		pikabu.NewAdapter(httpClient),
-		web.NewAdapter(httpClient),
-	}
+	adapters := []adapter.Adapter{}
 	if s.Twitter != nil {
 		adapters = append(adapters,
 			twitter.NewAdapter(twitter.NewClient(httpClient, s.Twitter.Token)))
+		logger.Infof("Twitter adapter loaded")
 	}
 	if s.Reddit != nil {
 		adapters = append(adapters,
 			reddit.NewAdapter(httpClient, &reddit.RedditAuth{AccessToken: s.Reddit.Token}))
+		logger.Infof("Reddit adapter loaded")
 	}
+	adapters = append(adapters,
+		fourchan.NewAdapter(httpClient),
+		pikabu.NewAdapter(httpClient),
+		web.NewAdapter(httpClient))
 	r := resolver.NewResolver(
 		s.Storage.Root,
 		common.NewHttpDownloader(httpClient),
