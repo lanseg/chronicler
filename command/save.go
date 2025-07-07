@@ -23,7 +23,10 @@ func Save(s *Settings, args []string) error {
 		return err
 	}
 	logger := common.NewLogger("Save")
-	httpClient := common.NewHttpClient(s.HttpSettings.CachePath, s.HttpSettings.CookieJar)
+	httpClient := common.HttpClientBuilder{
+		CookieJarPath: s.HttpSettings.CookieJar,
+		CacheDirPath:  s.HttpSettings.CachePath,
+	}.Build()
 	adapters := []adapter.Adapter{}
 	if s.Twitter != nil {
 		adapters = append(adapters,

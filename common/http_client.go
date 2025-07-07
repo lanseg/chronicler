@@ -11,18 +11,18 @@ import (
 	"path/filepath"
 )
 
-type HttpSettings struct {
-	CachePath string `json:"cachePath"`
-	CookieJar string `json:"cookieJar"`
-}
-
 type HttpClient interface {
 	Do(request *http.Request) (*http.Response, error)
 }
 
-func NewHttpClient(cacheDir string, cookieDir string) HttpClient {
+type HttpClientBuilder struct {
+	CookieJarPath string
+	CacheDirPath  string
+}
+
+func (hbc HttpClientBuilder) Build() HttpClient {
 	baseClient := &http.Client{}
-	if cookieDir != "" {
+	if hbc.CookieJarPath != "" {
 		jar, err := cookiejar.New(&cookiejar.Options{})
 		if err != nil {
 			log.Fatal(err)
@@ -31,13 +31,13 @@ func NewHttpClient(cacheDir string, cookieDir string) HttpClient {
 	}
 
 	client := HttpClient(baseClient)
-	if cacheDir != "" {
+	if hbc.CacheDirPath != "" {
 		logger := NewLogger("CachingHttp")
-		logger.Infof("Using http client cache at %q", cacheDir)
+		logger.Infof("Using http client cache at %q", hbc.CacheDirPath)
 		client = &cachingHttpClient{
 			parent:    client,
 			logger:    logger,
-			cachePath: cacheDir,
+			cachePath: hbc.CacheDirPath,
 		}
 	}
 

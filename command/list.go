@@ -20,6 +20,7 @@ func List(s *Settings, args []string) error {
 		return errors.Join(fmt.Errorf("cannot read storage dir %q", s.Storage.Root), err)
 	}
 	snapshots := []*opb.Snapshot{}
+	dirs := []string{}
 	for _, d := range dir {
 		ls, err := storage.NewLocalStorage(filepath.Join(s.Storage.Root, d.Name()))
 		if err != nil {
@@ -39,6 +40,7 @@ func List(s *Settings, args []string) error {
 			continue
 		}
 		snapshots = append(snapshots, snapshot)
+		dirs = append(dirs, d.Name())
 	}
 	sort.Slice(snapshots, func(i, j int) bool {
 		sa := snapshots[i]
@@ -55,7 +57,7 @@ func List(s *Settings, args []string) error {
 		if snapshot.FetchTime != nil {
 			fetchTime = time.Unix(snapshot.FetchTime.Seconds, 0).Format(time.DateTime)
 		}
-		fmt.Printf("%03d [%s] %s\n", i, fetchTime, snapshot.Link.Href)
+		fmt.Printf("%03d [%s] %s %s\n", i, fetchTime, dirs[i], snapshot.Link.Href)
 	}
 	return nil
 }
