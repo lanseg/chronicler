@@ -31,7 +31,7 @@ func Export(s *Settings, args []string) error {
 	if err != nil {
 		return err
 	}
-	return exporter.NewLocalExporter(storage).Export(args[1])
+	return exporter.HtmlExporter(storage).Export(args[1])
 }
 
 func View(s *Settings, args []string) error {

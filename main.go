@@ -35,27 +35,27 @@ func getDefaultSettings(src string) (*cmd.Settings, error) {
 func main() {
 	settings, err := getDefaultSettings("settings.json")
 	if err != nil {
-		logger.Errorf("Cannot load default settings from file: %s. Zero values will be used", err)
+		logger.Infof("Cannot load default settings from file: %s. Will use only user input", err)
 		settings = &cmd.Settings{}
 	}
 	forFlag := &cfg.FlagSource{}
-	cfg, err := cfg.GetConfigTo(settings, cfg.FromEnv, forFlag.Collect)
-	if err != nil {
-		logger.Errorf("Cannot load settings: %s", err)
-		return
-	}
+	cfg := common.OrExit(cfg.GetConfigTo(settings, cfg.FromEnv, forFlag.Collect))
+
 	args := forFlag.Args()
 	if len(args) == 0 {
 		logger.Errorf("No command specified, available commands: %s", "COMMANDS")
 		os.Exit(-1)
 	}
+
 	command, ok := commands[args[0]]
 	if !ok {
-		logger.Debugf("Unknown command (args %q)", os.Args)
-		return
+		logger.Errorf("Unknown command (args %q)", os.Args)
+		os.Exit(-1)
 	}
+
 	logger.Debugf("Running command %q with args %q", os.Args[1], os.Args[2:])
 	if err := command(cfg, args[1:]); err != nil {
 		logger.Errorf("Error: %s", err)
+		os.Exit(-1)
 	}
 }
