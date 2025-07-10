@@ -40,7 +40,7 @@ func NewLocalStorage(root string) (Storage, error) {
 		logger:     common.NewLogger("LocalStorage"),
 	}
 	if err := storage.readMapping(); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("cannot open storage mapping: %s", err)
 	}
 	return storage, nil
 }
@@ -91,7 +91,7 @@ func (ls *localStorage) Put(put *PutRequest) (io.WriteCloser, error) {
 	ls.mux.Lock()
 	defer ls.mux.Unlock()
 
-	localName := common.SanitizeUrl(put.Url, maxNameLen)
+	localName := common.Sanitize(put.Url, maxNameLen)
 	localPath := filepath.Join(ls.root, localName)
 	if _, err := os.Stat(localPath); err == nil {
 		if put.SaveOnOverwrite {

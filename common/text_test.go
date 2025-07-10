@@ -75,7 +75,7 @@ func TestWrapText(t *testing.T) {
 	})
 }
 
-func TestSanitizeUrl(t *testing.T) {
+func TestSanitize(t *testing.T) {
 
 	for _, tc := range []struct {
 		name   string
@@ -107,9 +107,9 @@ func TestSanitizeUrl(t *testing.T) {
 		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			result := SanitizeUrl(tc.url, tc.maxLen)
+			result := Sanitize(tc.url, tc.maxLen)
 			if tc.want != result || (tc.maxLen > 0 && tc.maxLen < len(result)) {
-				t.Errorf("Expected SanitizeUrl(%q, %d)=%q (%d), but got %q (%d)",
+				t.Errorf("Expected Sanitize(%q, %d)=%q (%d), but got %q (%d)",
 					tc.url, tc.maxLen, tc.want, tc.maxLen, result, len(result))
 			}
 		})
@@ -148,9 +148,9 @@ func TestSanitizeWithExt(t *testing.T) {
 		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			result := SanitizeUrl(tc.url, tc.maxLen)
+			result := Sanitize(tc.url, tc.maxLen)
 			if tc.want != result || (tc.maxLen > 0 && tc.maxLen < len(result)) {
-				t.Errorf("Expected SanitizeUrl(%q, %d)=%q (%d), but got %q (%d)",
+				t.Errorf("Expected Sanitize(%q, %d)=%q (%d), but got %q (%d)",
 					tc.url, tc.maxLen, tc.want, tc.maxLen, result, len(result))
 			}
 		})

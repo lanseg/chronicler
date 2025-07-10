@@ -43,12 +43,18 @@ func WrapText(text string, maxWidth int) string {
 	return result.String()
 }
 
-func SanitizeUrl(remotePath string, maxLength int) string {
+func hash(input string) string {
+	hash := fnv.New32()
+	hash.Write([]byte(input))
+	return fmt.Sprintf("_%x", hash.Sum([]byte{}))
+}
+
+func Sanitize(input string, maxLength int) string {
 	builder := strings.Builder{}
-	addHash := false
-	for i, r := range remotePath {
-		if maxLength > 0 && i >= maxLength-9 {
-			addHash = true
+	hashLength := 9
+	for i, r := range input {
+		if i >= maxLength-hashLength && maxLength > 0 {
+			builder.WriteString(hash(input))
 			break
 		}
 		if (r >= 'a' && r <= 'z') ||
@@ -59,11 +65,6 @@ func SanitizeUrl(remotePath string, maxLength int) string {
 		} else {
 			builder.WriteRune('_')
 		}
-	}
-	if addHash {
-		hash := fnv.New32()
-		hash.Write([]byte(remotePath))
-		builder.WriteString(fmt.Sprintf("_%x", hash.Sum([]byte{})))
 	}
 	return builder.String()
 }
@@ -87,7 +88,7 @@ func SanitizeWithExt(remotePath string, mimeType string, maxLength int) string {
 			ext = exts[0]
 		}
 	}
-	safeUrl := SanitizeUrl(remotePath, maxLength)
+	safeUrl := Sanitize(remotePath, maxLength)
 	if ext == "" || len(safeUrl) == len(remotePath) {
 		return safeUrl
 	}

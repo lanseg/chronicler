@@ -74,7 +74,7 @@ func (cc *cachingHttpClient) Do(request *http.Request) (*http.Response, error) {
 		return nil, err
 	}
 
-	cachedPath := filepath.Join(cacheRoot, SanitizeUrl(request.URL.String(), 255))
+	cachedPath := filepath.Join(cacheRoot, Sanitize(request.URL.String(), 255))
 	if _, err := os.Stat(cachedPath); err == nil {
 		cc.logger.Debugf("loaded %q from cache at %q", request.URL.String(), cachedPath)
 		return makeCachedResponse(cachedPath, request)
