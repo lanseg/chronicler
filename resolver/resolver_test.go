@@ -42,19 +42,20 @@ func newFakeAdapter(o ...*opb.Object) adapter.Adapter {
 }
 
 func TestResolver(t *testing.T) {
-	t.Run("resolver start stop", func(t *testing.T) {
-		root := t.TempDir()
-		loader := &fakeDownloader{
-			urls: []string{},
-		}
-		adapters := []adapter.Adapter{
-			newFakeAdapter(&opb.Object{
-				Id: "123",
-				Attachment: []*opb.Attachment{
-					{Url: &opb.Link{Href: "http://some/other/url"}, Mime: "text/html"},
-				},
-			}),
-		}
+	root := t.TempDir()
+	loader := &fakeDownloader{
+		urls: []string{},
+	}
+	adapters := []adapter.Adapter{
+		newFakeAdapter(&opb.Object{
+			Id: "123",
+			Attachment: []*opb.Attachment{
+				{Url: &opb.Link{Href: "http://some/other/url"}, Mime: "text/html"},
+			},
+		}),
+	}
+
+	t.Run("start wait stop", func(t *testing.T) {
 		r := NewResolver(root, loader, adapters)
 		r.Start()
 		if err := r.Resolve(&opb.Link{Href: "http://some/url"}); err != nil {
@@ -66,5 +67,18 @@ func TestResolver(t *testing.T) {
 		if !reflect.DeepEqual(loader.urls, []string{"http://some/other/url"}) {
 			t.Error("Expected url not resolved")
 		}
+	})
+
+	t.Run("stop before start", func(t *testing.T) {
+		r := NewResolver(root, loader, adapters)
+		r.Stop()
+		r.Stop()
+	})
+
+	t.Run("start multiple times", func(t *testing.T) {
+		r := NewResolver(root, loader, adapters)
+		r.Start()
+		r.Start()
+		r.Start()
 	})
 }

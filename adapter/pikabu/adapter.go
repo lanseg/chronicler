@@ -78,8 +78,11 @@ func (pa *pikabuAdapter) Get(link *opb.Link) ([]*opb.Object, error) {
 	pa.logger.Debugf("Loading %d comments for post %s", len(ids), id)
 
 	commText, _ := pa.client.GetComments(ids)
-	for _, c := range commText {
-		objs, _ := NewPikabuParser(link.Href, bytes.NewReader([]byte(c.Html))).Parse()
+	for i, c := range commText {
+		objs, err := NewPikabuParser(link.Href, bytes.NewReader([]byte(c.Html))).Parse()
+		if err != nil {
+			pa.logger.Warningf("Failed to parse comment %s/%s", link.Href, ids[i])
+		}
 		for _, obj := range objs {
 			if obj.Parent == "0" || obj.Parent == "" {
 				obj.Parent = id

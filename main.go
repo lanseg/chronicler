@@ -2,7 +2,9 @@ package main
 
 import (
 	"encoding/json"
+	"maps"
 	"os"
+	"slices"
 
 	cmd "chronicler/command"
 	"chronicler/common"
@@ -32,30 +34,42 @@ func getDefaultSettings(src string) (*cmd.Settings, error) {
 	return result, nil
 }
 
-func main() {
+func mainf() int {
 	settings, err := getDefaultSettings("settings.json")
 	if err != nil {
 		logger.Infof("Cannot load default settings from file: %s. Will use only user input", err)
 		settings = &cmd.Settings{}
 	}
 	forFlag := &cfg.FlagSource{}
-	cfg := common.OrExit(cfg.GetConfigTo(settings, cfg.FromEnv, forFlag.Collect))
+	cfg, err := cfg.GetConfigTo(settings, cfg.FromEnv, forFlag.Collect)
+	if err != nil {
+		logger.Errorf("Cannot read configs: %s", err)
+		return -1
+	}
 
 	args := forFlag.Args()
 	if len(args) == 0 {
-		logger.Errorf("No command specified, available commands: %s", "COMMANDS")
-		os.Exit(-1)
+		logger.Infof("No command specified, supported commands are:")
+		for _, cmd := range slices.Sorted(maps.Keys(commands)) {
+			logger.Infof("\t%s", cmd)
+		}
+		return -2
 	}
 
 	command, ok := commands[args[0]]
 	if !ok {
 		logger.Errorf("Unknown command (args %q)", os.Args)
-		os.Exit(-1)
+		return -3
 	}
 
-	logger.Debugf("Running command %q with args %q", os.Args[1], os.Args[2:])
+	logger.Debugf("Running command %q with args %q", args[0], args)
 	if err := command(cfg, args[1:]); err != nil {
 		logger.Errorf("Error: %s", err)
-		os.Exit(-1)
+		return -4
 	}
+	return 0
+}
+
+func main() {
+	os.Exit(mainf())
 }

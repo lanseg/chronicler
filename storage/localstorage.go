@@ -23,7 +23,7 @@ const (
 type localStorage struct {
 	Storage
 
-	writeMux   sync.Mutex
+	mux        sync.Mutex
 	root       string
 	localNames map[string]string
 	logger     *common.Logger
@@ -88,8 +88,8 @@ func (ls *localStorage) snapshotFile(localName string) error {
 }
 
 func (ls *localStorage) Put(put *PutRequest) (io.WriteCloser, error) {
-	ls.writeMux.Lock()
-	defer ls.writeMux.Unlock()
+	ls.mux.Lock()
+	defer ls.mux.Unlock()
 
 	localName := common.SanitizeUrl(put.Url, maxNameLen)
 	localPath := filepath.Join(ls.root, localName)
@@ -111,6 +111,9 @@ func (ls *localStorage) Put(put *PutRequest) (io.WriteCloser, error) {
 }
 
 func (ls *localStorage) Get(get *GetRequest) (io.ReadCloser, error) {
+	ls.mux.Lock()
+	defer ls.mux.Unlock()
+
 	localName, ok := ls.localNames[get.Url]
 	if !ok {
 		return nil, fmt.Errorf("cannot open %s/%s: %s", ls.root, get.Url, os.ErrNotExist)
@@ -123,6 +126,9 @@ func (ls *localStorage) Get(get *GetRequest) (io.ReadCloser, error) {
 }
 
 func (ls *localStorage) List(list *ListRequest) (*ListResponse, error) {
+	ls.mux.Lock()
+	defer ls.mux.Unlock()
+
 	result := &ListResponse{}
 	snapshotRoot := filepath.Join(ls.root, defaultSnapshot)
 	for actual, local := range ls.localNames {

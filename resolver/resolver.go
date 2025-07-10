@@ -5,6 +5,7 @@ import (
 	"chronicler/common"
 	opb "chronicler/proto"
 	"chronicler/storage"
+	"context"
 	"fmt"
 	"net/url"
 	"path/filepath"
@@ -31,12 +32,13 @@ type Resolver interface {
 type resolver struct {
 	Resolver
 
+	done       func()
+	statusMux  sync.Mutex
 	taskWaiter sync.WaitGroup
+	tasks      chan resolverTask
 
-	done     chan bool
-	tasks    chan resolverTask
-	loader   common.Downloader
 	root     string
+	loader   common.Downloader
 	adapters []adapter.Adapter
 	logger   *common.Logger
 }
@@ -44,25 +46,32 @@ type resolver struct {
 func NewResolver(root string, loader common.Downloader, adapters []adapter.Adapter) Resolver {
 	r := &resolver{
 		taskWaiter: sync.WaitGroup{},
-
-		done:     make(chan bool, 1),
-		tasks:    make(chan resolverTask, 10),
-		adapters: adapters,
-		loader:   loader,
-		root:     root,
-		logger:   common.NewLogger("Resolver"),
+		tasks:      make(chan resolverTask, 10),
+		adapters:   adapters,
+		loader:     loader,
+		root:       root,
+		logger:     common.NewLogger("Resolver"),
 	}
 	r.logger.Infof("Initialized resolver with %d adapters", len(adapters))
 	return r
 }
 
 func (r *resolver) Start() {
+	r.statusMux.Lock()
+	defer r.statusMux.Unlock()
+	if r.done != nil {
+		r.logger.Infof("Already started")
+		return
+	}
 	r.logger.Infof("Starting resolver thread")
+	ctx, done := context.WithCancel(context.Background())
+	r.done = done
+
 	go func() {
 	loop:
 		for {
 			select {
-			case <-r.done:
+			case <-ctx.Done():
 				break loop
 			case task := <-r.tasks:
 				if err := r.resolveTask(task); err != nil {
@@ -72,7 +81,6 @@ func (r *resolver) Start() {
 			}
 		}
 		close(r.tasks)
-		close(r.done)
 	}()
 }
 
@@ -82,8 +90,14 @@ func (r *resolver) Wait() {
 }
 
 func (r *resolver) Stop() {
+	r.statusMux.Lock()
+	defer r.statusMux.Unlock()
+	if r.done == nil {
+		r.logger.Infof("Not running")
+		return
+	}
 	r.logger.Infof("Stopping resolver")
-	r.done <- true
+	r.done()
 }
 
 func (r *resolver) Resolve(link *opb.Link) error {
