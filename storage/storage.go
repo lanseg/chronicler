@@ -32,3 +32,7 @@ type Storage interface {
 	Get(get *GetRequest) (io.ReadCloser, error)
 	List(list *ListRequest) (*ListResponse, error)
 }
+
+type StorageBuilder interface {
+	Build() (Storage, error)
+}

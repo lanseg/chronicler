@@ -82,6 +82,7 @@ func (pa *pikabuAdapter) Get(link *opb.Link) ([]*opb.Object, error) {
 		objs, err := NewPikabuParser(link.Href, bytes.NewReader([]byte(c.Html))).Parse()
 		if err != nil {
 			pa.logger.Warningf("Failed to parse comment %s/%s", link.Href, ids[i])
+			continue
 		}
 		for _, obj := range objs {
 			if obj.Parent == "0" || obj.Parent == "" {

@@ -6,11 +6,20 @@ import (
 	"sort"
 	"strings"
 	"testing"
+	"time"
 )
 
 const (
 	defaultFile = "test_file"
 )
+
+func FakeTimeSource(start int64, tick int64) TimeSource {
+	i := start
+	return func() time.Time {
+		i += tick
+		return time.Unix(i, 0)
+	}
+}
 
 func listResponseUrls(urls ...string) *ListResponse {
 	result := &ListResponse{}
@@ -79,10 +88,12 @@ type get struct {
 
 func TestLocalStoragePutFile(t *testing.T) {
 	for _, tc := range []struct {
-		name       string
-		puts       []*put
-		gets       []*get
-		list       []*ListRequest
+		name string
+		puts []*put
+		gets []*get
+		list []*ListRequest
+
+		times      TimeSource
 		wantList   []*ListResponse
 		wantBackup map[string]([]byte)
 	}{
@@ -141,7 +152,37 @@ func TestLocalStoragePutFile(t *testing.T) {
 			wantList: []*ListResponse{listResponseUrls("Message", "Message 2")},
 		},
 		{
-			name: "save on overwrite",
+			name: "save on overwrite, same time",
+			puts: []*put{
+				{request: &PutRequest{Url: "Message", SaveOnOverwrite: true}, writes: [][]byte{{1, 2, 3}}},
+				{request: &PutRequest{Url: "Message", SaveOnOverwrite: true}, writes: [][]byte{{4, 5, 6}}},
+				{request: &PutRequest{Url: "Message", SaveOnOverwrite: true}, writes: [][]byte{{7, 8, 9}}},
+				{request: &PutRequest{Url: "Message", SaveOnOverwrite: true}, writes: [][]byte{{1, 2, 3}}},
+				{request: &PutRequest{Url: "Message", SaveOnOverwrite: true}, writes: [][]byte{{4, 5, 6}}},
+				{request: &PutRequest{Url: "Message", SaveOnOverwrite: true}, writes: [][]byte{{7, 8, 9}}},
+			},
+			gets: []*get{
+				{request: &GetRequest{Url: "Message"}, wantBytes: []byte{7, 8, 9}},
+			},
+			times: FakeTimeSource(0, 0),
+			list:  []*ListRequest{{WithSnapshots: true}},
+			wantList: []*ListResponse{{
+				Items: []StorageItem{
+					{
+						Url: "Message",
+						Versions: []string{
+							"1970-01-01_01-00-00.000_0_Message",
+							"1970-01-01_01-00-00.000_1_Message",
+							"1970-01-01_01-00-00.000_2_Message",
+							"1970-01-01_01-00-00.000_3_Message",
+							"1970-01-01_01-00-00.000_4_Message",
+						},
+					},
+				},
+			}},
+		},
+		{
+			name: "save on overwrite, time changes",
 			puts: []*put{
 				{request: &PutRequest{Url: "Message"}, writes: [][]byte{{1, 2, 3}}},
 				{request: &PutRequest{Url: "Message", SaveOnOverwrite: true}, writes: [][]byte{{4, 5, 6}}},
@@ -150,10 +191,17 @@ func TestLocalStoragePutFile(t *testing.T) {
 			gets: []*get{
 				{request: &GetRequest{Url: "Message"}, wantBytes: []byte{7, 8, 9}},
 			},
-			list: []*ListRequest{{WithSnapshots: true}},
+			times: FakeTimeSource(1750000000, 1000000),
+			list:  []*ListRequest{{WithSnapshots: true}},
 			wantList: []*ListResponse{{
 				Items: []StorageItem{
-					{Url: "Message", Versions: []string{"0000", "0001"}},
+					{
+						Url: "Message",
+						Versions: []string{
+							"2025-06-27_06-53-20.000_0_Message",
+							"2025-07-08_20-40-00.000_0_Message",
+						},
+					},
 				},
 			}},
 		},
@@ -186,6 +234,9 @@ func TestLocalStoragePutFile(t *testing.T) {
 			if err != nil {
 				t.Errorf("Cannot create temporary storage: %s", err)
 			}
+			if tc.times != nil {
+				s.(*localStorage).timeSource = tc.times
+			}
 			if tc.puts == nil {
 				tc.puts = []*put{}
 			}
@@ -197,6 +248,7 @@ func TestLocalStoragePutFile(t *testing.T) {
 				wc, err := s.Put(put.request)
 				if err != nil {
 					t.Errorf("Cannot open writer for the new file %s %s", put.request.Url, err)
+					break
 				}
 				for _, p := range put.writes {
 					wc.Write([]byte(p))
