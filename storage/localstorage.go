@@ -55,7 +55,6 @@ func (ls *LocalStorageBuilder) Build() (Storage, error) {
 		maxBackups: defaultMaxBackups,
 		maxNameLen: defaultMaxNameLen,
 		timeSource: time.Now,
-		localNames: map[string]string{},
 		logger:     common.NewLogger("LocalStorage"),
 	}
 	if ls.MaxBackups != 0 {
@@ -68,19 +67,7 @@ func (ls *LocalStorageBuilder) Build() (Storage, error) {
 }
 
 func NewLocalStorage(root string) (Storage, error) {
-	result, err := (&LocalStorageBuilder{Root: root}).Build()
-	if err != nil {
-		return nil, fmt.Errorf("cannot create local storage at root %q: %w", root, err)
-	}
-	dir := filepath.Join(root, defaultMetadata)
-	if err := os.MkdirAll(dir, defaultPerms); err != nil {
-		return nil, fmt.Errorf("cannot create storage directory %q: %w", dir, err)
-	}
-
-	if err := result.(*localStorage).readMapping(); err != nil {
-		return nil, fmt.Errorf("cannot open storage mapping: %s", err)
-	}
-	return result, nil
+	return (&LocalStorageBuilder{Root: root}).Build()
 }
 
 func (ls *localStorage) saveMapping() error {
@@ -154,9 +141,27 @@ func (ls *localStorage) snapshotFile(localName string) error {
 	return fmt.Errorf("still cannot create snapshot")
 }
 
+func (ls *localStorage) maybeInit() error {
+	if ls.localNames != nil {
+		return nil
+	}
+	dir := filepath.Join(ls.root, defaultMetadata)
+	if err := os.MkdirAll(dir, defaultPerms); err != nil {
+		return fmt.Errorf("cannot create storage directory %q: %w", dir, err)
+	}
+	ls.localNames = map[string]string{}
+	if err := ls.readMapping(); err != nil {
+		return fmt.Errorf("cannot open storage mapping: %s", err)
+	}
+	return nil
+}
+
 func (ls *localStorage) Put(put *PutRequest) (io.WriteCloser, error) {
 	ls.mux.Lock()
 	defer ls.mux.Unlock()
+	if err := ls.maybeInit(); err != nil {
+		return nil, err
+	}
 
 	localName := common.Sanitize(put.Url, ls.maxNameLen)
 	localPath := filepath.Join(ls.root, localName)
@@ -180,6 +185,9 @@ func (ls *localStorage) Put(put *PutRequest) (io.WriteCloser, error) {
 func (ls *localStorage) Get(get *GetRequest) (io.ReadCloser, error) {
 	ls.mux.Lock()
 	defer ls.mux.Unlock()
+	if err := ls.maybeInit(); err != nil {
+		return nil, err
+	}
 
 	localName, ok := ls.localNames[get.Url]
 	if !ok {
@@ -195,6 +203,9 @@ func (ls *localStorage) Get(get *GetRequest) (io.ReadCloser, error) {
 func (ls *localStorage) List(list *ListRequest) (*ListResponse, error) {
 	ls.mux.Lock()
 	defer ls.mux.Unlock()
+	if err := ls.maybeInit(); err != nil {
+		return nil, err
+	}
 
 	result := &ListResponse{}
 	for actual, local := range ls.localNames {
@@ -213,7 +224,6 @@ func (ls *localStorage) List(list *ListRequest) (*ListResponse, error) {
 		item := StorageItem{Url: actual}
 		if list.WithSnapshots {
 			versions, err := ls.getSnapshots(local)
-			fmt.Println("HERE: ", versions)
 			if err != nil {
 				ls.logger.Warningf("cannot get snapshots for %q: %s", local, err)
 				continue

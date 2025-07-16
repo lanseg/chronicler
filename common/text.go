@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 	"unicode"
+	"unicode/utf8"
 )
 
 func WrapText(text string, maxWidth int) string {
@@ -50,11 +51,13 @@ func hash(input string) string {
 }
 
 func Sanitize(input string, maxLength int) string {
+	if input == "" {
+		return ""
+	}
 	builder := strings.Builder{}
-	hashLength := 9
+	hashLength := 8
 	for i, r := range input {
-		if i >= maxLength-hashLength && maxLength > 0 {
-			builder.WriteString(hash(input))
+		if maxLength > 0 && i >= maxLength-hashLength-1 {
 			break
 		}
 		if (r >= 'a' && r <= 'z') ||
@@ -66,12 +69,16 @@ func Sanitize(input string, maxLength int) string {
 			builder.WriteRune('_')
 		}
 	}
+	builder.WriteString(hash(input))
 	return builder.String()
 }
 
-func SanitizeWithExt(remotePath string, mimeType string, maxLength int) string {
+func SanitizeWithExt(input string, mimeType string, maxLength int) string {
+	if input == "" {
+		return ""
+	}
 	ext := ""
-	maybeUrl, err := url.Parse(remotePath)
+	maybeUrl, err := url.Parse(input)
 	if err == nil {
 		path := maybeUrl.Path
 		pathEnd := strings.Index(path, "?")
@@ -80,7 +87,7 @@ func SanitizeWithExt(remotePath string, mimeType string, maxLength int) string {
 		}
 		ext = filepath.Ext(path)
 	} else {
-		ext = filepath.Ext(remotePath)
+		ext = filepath.Ext(input)
 	}
 	if ext == "" && mimeType != "" {
 		exts, err := mime.ExtensionsByType(mimeType)
@@ -88,13 +95,8 @@ func SanitizeWithExt(remotePath string, mimeType string, maxLength int) string {
 			ext = exts[0]
 		}
 	}
-	safeUrl := Sanitize(remotePath, maxLength)
-	if ext == "" || len(safeUrl) == len(remotePath) {
-		return safeUrl
+	if ext == "" || maxLength == 0 {
+		return Sanitize(input, maxLength) + ext
 	}
-	safeUrl = safeUrl[:len(safeUrl)-len(ext)-1]
-	if safeUrl[len(safeUrl)-1] != '.' {
-		safeUrl += "."
-	}
-	return safeUrl + ext
+	return Sanitize(input, min(utf8.RuneCountInString(input), maxLength)-len(ext)) + ext
 }

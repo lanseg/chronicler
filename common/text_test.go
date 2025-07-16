@@ -86,12 +86,12 @@ func TestSanitize(t *testing.T) {
 		{
 			name: "basic url",
 			url:  "http://somehost.domain.com/query?a=b&c=d",
-			want: "http___somehost.domain.com_query_a_b_c_d",
+			want: "http___somehost.domain.com_query_a_b_c_d_d3a8884e",
 		},
 		{
 			name:   "basic url limited not truncated",
 			url:    "http://somehost.domain.com/query?a=b&c=d",
-			want:   "http___somehost.domain.com_query_a_b_c_d",
+			want:   "http___somehost.domain.com_query_a_b_c_d_d3a8884e",
 			maxLen: 320,
 		},
 		{
@@ -103,7 +103,12 @@ func TestSanitize(t *testing.T) {
 		{
 			name: "basic url unicode",
 			url:  "http://somehost.domain.com/query?a=b&wwwwtpowkfwüokзщулкпзщ3",
-			want: "http___somehost.domain.com_query_a_b_wwwwtpowkfw_ok________3",
+			want: "http___somehost.domain.com_query_a_b_wwwwtpowkfw_ok________3_0a80a2de",
+		},
+		{
+			name: "empty string",
+			url:  "",
+			want: "",
 		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
@@ -114,6 +119,51 @@ func TestSanitize(t *testing.T) {
 			}
 		})
 	}
+
+	for _, tc := range []struct {
+		name          string
+		urlA          string
+		urlB          string
+		maxLen        int
+		wantCollision bool
+	}{
+		{
+			name:          "different urls different sanitized",
+			urlA:          "http://somehost.domain.com/query?a=b&c=d",
+			urlB:          "http://somehost.domain.com/query?a=d&b=c",
+			wantCollision: false,
+		},
+		{
+			name:          "different urls same sanitized",
+			urlA:          "http://somehost.domain.com/query?А=Б&Ц=Д",
+			urlB:          "http://somehost.domain.com/query?Б=А&Д=Ц",
+			wantCollision: false,
+		},
+		{
+			name:          "different urls same after truncation",
+			urlA:          "http://somehost.domain.com/query/some/long/path?А=Б&Ц=Д",
+			urlB:          "http://somehost.domain.com/query/some/long/path?Б=А&Д=Ц",
+			maxLen:        20,
+			wantCollision: false,
+		},
+		{
+			name:          "same urls same sanitized after truncation",
+			urlA:          "http://somehost.domain.com/query?А=Б&Ц=Д",
+			urlB:          "http://somehost.domain.com/query?Б=А&Д=Ц",
+			maxLen:        20,
+			wantCollision: false,
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			resultA := Sanitize(tc.urlA, tc.maxLen)
+			resultB := Sanitize(tc.urlB, tc.maxLen)
+			if resultA == resultB && !tc.wantCollision {
+				t.Errorf("Expected Sanitize(%q, %d)=%q, Sanitize(%q, %d)=%q to be different, but "+
+					"they are the same",
+					tc.urlA, tc.maxLen, resultA, tc.urlB, tc.maxLen, resultB)
+			}
+		})
+	}
 }
 
 func TestSanitizeWithExt(t *testing.T) {
@@ -121,18 +171,24 @@ func TestSanitizeWithExt(t *testing.T) {
 	for _, tc := range []struct {
 		name   string
 		url    string
+		mime   string
 		want   string
 		maxLen int
 	}{
 		{
-			name: "basic url",
+			name: "basic url without extension",
 			url:  "http://somehost.domain.com/query?a=b&c=d",
-			want: "http___somehost.domain.com_query_a_b_c_d",
+			want: "http___somehost.domain.com_query_a_b_c_d_d3a8884e",
+		},
+		{
+			name: "basic url with extension",
+			url:  "http://somehost.domain.com/path/to/file.png?a=b&c=d",
+			want: "http___somehost.domain.com_path_to_file.png_a_b_c_d_676dc64b.png",
 		},
 		{
 			name:   "basic url limited not truncated",
 			url:    "http://somehost.domain.com/query?a=b&c=d",
-			want:   "http___somehost.domain.com_query_a_b_c_d",
+			want:   "http___somehost.domain.com_query_a_b_c_d_d3a8884e",
 			maxLen: 320,
 		},
 		{
@@ -142,13 +198,19 @@ func TestSanitizeWithExt(t *testing.T) {
 			maxLen: 32,
 		},
 		{
+			name:   "basic url with extension limited truncated",
+			url:    "http://somehost.domain.com/path/to/file.png?query&a=b&c=d",
+			want:   "http___somehost.dom_41afbf31.png",
+			maxLen: 32,
+		},
+		{
 			name: "basic url unicode",
 			url:  "http://somehost.domain.com/query?a=b&wwwwtpowkfwüokзщулкпзщ3",
-			want: "http___somehost.domain.com_query_a_b_wwwwtpowkfw_ok________3",
+			want: "http___somehost.domain.com_query_a_b_wwwwtpowkfw_ok________3_0a80a2de",
 		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			result := Sanitize(tc.url, tc.maxLen)
+			result := SanitizeWithExt(tc.url, tc.mime, tc.maxLen)
 			if tc.want != result || (tc.maxLen > 0 && tc.maxLen < len(result)) {
 				t.Errorf("Expected Sanitize(%q, %d)=%q (%d), but got %q (%d)",
 					tc.url, tc.maxLen, tc.want, tc.maxLen, result, len(result))

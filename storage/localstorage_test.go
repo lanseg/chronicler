@@ -171,11 +171,11 @@ func TestLocalStoragePutFile(t *testing.T) {
 					{
 						Url: "Message",
 						Versions: []string{
-							"1970-01-01_01-00-00.000_0_Message",
-							"1970-01-01_01-00-00.000_1_Message",
-							"1970-01-01_01-00-00.000_2_Message",
-							"1970-01-01_01-00-00.000_3_Message",
-							"1970-01-01_01-00-00.000_4_Message",
+							"1970-01-01_01-00-00.000_0_Message_dc4d930a",
+							"1970-01-01_01-00-00.000_1_Message_dc4d930a",
+							"1970-01-01_01-00-00.000_2_Message_dc4d930a",
+							"1970-01-01_01-00-00.000_3_Message_dc4d930a",
+							"1970-01-01_01-00-00.000_4_Message_dc4d930a",
 						},
 					},
 				},
@@ -198,8 +198,8 @@ func TestLocalStoragePutFile(t *testing.T) {
 					{
 						Url: "Message",
 						Versions: []string{
-							"2025-06-27_06-53-20.000_0_Message",
-							"2025-07-08_20-40-00.000_0_Message",
+							"2025-06-27_06-53-20.000_0_Message_dc4d930a",
+							"2025-07-08_20-40-00.000_0_Message_dc4d930a",
 						},
 					},
 				},
