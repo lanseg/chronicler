@@ -12,16 +12,6 @@ import (
 	cfg "github.com/lanseg/goconfig"
 )
 
-var (
-	logger   = common.NewLogger("main")
-	commands = map[string]cmd.Command{
-		"list":   cmd.List,
-		"save":   cmd.Save,
-		"view":   cmd.View,
-		"export": cmd.Export,
-	}
-)
-
 func getDefaultSettings(src string) (*cmd.Settings, error) {
 	data, err := os.ReadFile(src)
 	if err != nil {
@@ -35,6 +25,14 @@ func getDefaultSettings(src string) (*cmd.Settings, error) {
 }
 
 func mainf() int {
+	logger := common.NewLogger("main")
+	commands := map[string]cmd.Command{
+		"list":   cmd.List,
+		"save":   cmd.Save,
+		"view":   cmd.View,
+		"export": cmd.Export,
+	}
+
 	settings, err := getDefaultSettings("settings.json")
 	if err != nil {
 		logger.Infof("Cannot load default settings from file: %s. Will use only user input", err)

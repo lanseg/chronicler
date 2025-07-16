@@ -37,7 +37,7 @@ type LinkWalker struct {
 	Links    map[string]bool `json:"links"`
 }
 
-func NewWalker(root *url.URL) *LinkWalker {
+func NewWalker(root *url.URL, maxLinks int) *LinkWalker {
 	return &LinkWalker{
 		logger: common.NewLogger("LinkWalker"),
 		Root:   root,
@@ -46,7 +46,7 @@ func NewWalker(root *url.URL) *LinkWalker {
 			IsSameHost,
 			IsHTML,
 		},
-		MaxLinks: defaultMaxLinks,
+		MaxLinks: maxLinks,
 		Links:    map[string]bool{root.String(): false},
 	}
 }

@@ -70,7 +70,7 @@ func (wa *webAdapter) Get(link *opb.Link) ([]*opb.Object, error) {
 		return nil, err
 	}
 
-	walker := NewWalker(rootLink)
+	walker := NewWalker(rootLink, defaultMaxLinks)
 	i := 0
 	errorCount := 0
 	result := []*opb.Object{}

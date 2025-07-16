@@ -63,21 +63,29 @@ func (pa *pikabuAdapter) Get(link *opb.Link) ([]*opb.Object, error) {
 	pa.logger.Debugf("Loading post %s", id)
 	postText, err := pa.client.GetPost(id)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("cannot get post %q: %w", id, err)
 	}
 	objs, err := NewPikabuParser(link.Href, bytes.NewReader([]byte(postText))).Parse()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("cannot parse post %q: %w", id, err)
 	}
 	objects := map[string]*opb.Object{}
 	for _, post := range objs {
 		objects[post.Id] = post
 	}
 
-	ids, _ := getCommentIds(postText)
+	ids, err := getCommentIds(postText)
+	if err != nil {
+		pa.logger.Warningf("Failed to fetch comment ids for post %s", id)
+		ids = []string{}
+	}
 	pa.logger.Debugf("Loading %d comments for post %s", len(ids), id)
 
-	commText, _ := pa.client.GetComments(ids)
+	commText, err := pa.client.GetComments(ids)
+	if err != nil {
+		pa.logger.Warningf("Failed to fetch comments by ids for post %s", id)
+		commText = []*CommentData{}
+	}
 	for i, c := range commText {
 		objs, err := NewPikabuParser(link.Href, bytes.NewReader([]byte(c.Html))).Parse()
 		if err != nil {
@@ -113,18 +121,14 @@ func (pa *pikabuAdapter) Get(link *opb.Link) ([]*opb.Object, error) {
 func getCommentIds(doc string) ([]string, error) {
 	hr := html.NewTokenizer(bytes.NewReader([]byte(doc)))
 	inTree := false
-	for {
-		if tokenType := hr.Next(); tokenType == html.ErrorToken {
-			break
-		}
+	for tokenType := hr.Next(); !inTree && tokenType != html.ErrorToken; tokenType = hr.Next() {
 		tok := hr.Token()
 		if tok.Data == "script" && strings.Contains(string(hr.Raw()), "comments-tree") {
 			inTree = true
-			continue
 		}
-		if inTree {
-			return ResolveCommentTree(string(hr.Raw()))
-		}
+	}
+	if inTree {
+		return ResolveCommentTree(string(hr.Raw()))
 	}
 	return []string{}, nil
 }
