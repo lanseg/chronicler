@@ -2,6 +2,9 @@ SHELL = /bin/sh
 GO_OUT = "."
 COVFILE = "coverage.out"
 
+install-hooks:
+	@echo "make clean test" >> .git/hooks/pre-commit
+
 deps:
 	$(MAKE) -C proto all
 
