@@ -4,6 +4,7 @@ COVFILE = "coverage.out"
 
 install-hooks:
 	@echo "make clean test" >> .git/hooks/pre-commit
+	@chmod a+x .git/hooks/pre-commit
 
 deps:
 	$(MAKE) -C proto all

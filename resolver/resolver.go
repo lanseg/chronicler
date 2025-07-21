@@ -80,6 +80,7 @@ func (r *resolver) Start() {
 				r.taskWaiter.Done()
 			}
 		}
+		r.taskWaiter.Wait()
 		close(r.tasks)
 	}()
 }
@@ -127,11 +128,11 @@ func (r *resolver) resolveTask(task resolverTask) error {
 
 	objs, err := ad.Get(link)
 	if err != nil {
-		return err
+		return fmt.Errorf("adapter %q cannot get data from %q: %w", ad, link, err)
 	}
 	s, err := r.getStorage(link)
 	if err != nil {
-		return err
+		return fmt.Errorf("cannot open storage for link %q: %w", link, err)
 	}
 
 	snapshot := &opb.Snapshot{
@@ -141,12 +142,14 @@ func (r *resolver) resolveTask(task resolverTask) error {
 		Link:    link,
 		Objects: objs,
 	}
+
+	// Filename could be arbitrary, as the storage sanitizes it if necessary.
 	bytesWritten, err := s.PutJSON(&storage.PutRequest{
 		Url:             fmt.Sprintf("%s.json", objectFileName),
 		SaveOnOverwrite: true,
 	}, snapshot)
 	if err != nil {
-		return err
+		return fmt.Errorf("cannot save link data for link %q: %w", link, err)
 	}
 	r.logger.Infof("Saved %q, written bytes: %d", objectFileName, bytesWritten)
 
@@ -180,7 +183,9 @@ func (r *resolver) resolveTask(task resolverTask) error {
 		if err != nil {
 			r.logger.Warningf("Failed to download %s: %s", k, err)
 		}
-		writer.Close()
+		if err := writer.Close(); err != nil {
+			r.logger.Warningf("Failed to close writer for %s: %s", k, err)
+		}
 	}
 	r.logger.Infof("Saved objects: %d, files: %d", len(objs), len(filesToLoad))
 	return nil
