@@ -2,7 +2,9 @@ package proto
 
 import (
 	"chronicler/common"
+	"iter"
 	"net/url"
+	"slices"
 )
 
 func ParsePageLink(page string, link string) (*Link, error) {
@@ -35,4 +37,8 @@ func ParsePageLink(page string, link string) (*Link, error) {
 
 func ParseLink(link string) (*Link, error) {
 	return ParsePageLink("", link)
+}
+
+func Attachments(obj *Object) iter.Seq[*Attachment] {
+	return slices.Values(obj.Attachment)
 }

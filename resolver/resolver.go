@@ -1,16 +1,18 @@
 package resolver
 
 import (
-	"chronicler/adapter"
-	"chronicler/common"
-	opb "chronicler/proto"
-	"chronicler/storage"
 	"context"
 	"fmt"
 	"net/url"
 	"path/filepath"
+	"slices"
 	"sync"
 	"time"
+
+	"chronicler/adapter"
+	cm "chronicler/common"
+	opb "chronicler/proto"
+	"chronicler/storage"
 )
 
 const (
@@ -38,19 +40,19 @@ type resolver struct {
 	tasks      chan resolverTask
 
 	root     string
-	loader   common.Downloader
+	loader   cm.Downloader
 	adapters []adapter.Adapter
-	logger   *common.Logger
+	logger   *cm.Logger
 }
 
-func NewResolver(root string, loader common.Downloader, adapters []adapter.Adapter) Resolver {
+func NewResolver(root string, loader cm.Downloader, adapters []adapter.Adapter) Resolver {
 	r := &resolver{
 		taskWaiter: sync.WaitGroup{},
 		tasks:      make(chan resolverTask, 10),
 		adapters:   adapters,
 		loader:     loader,
 		root:       root,
-		logger:     common.NewLogger("Resolver"),
+		logger:     cm.NewLogger("Resolver"),
 	}
 	r.logger.Infof("Initialized resolver with %d adapters", len(adapters))
 	return r
@@ -113,7 +115,7 @@ func (r *resolver) Resolve(link *opb.Link) error {
 }
 
 func (r *resolver) getStorage(link *opb.Link) (*storage.BlockStorage, error) {
-	ls, err := storage.NewLocalStorage(filepath.Join(r.root, common.UUID4For(link)))
+	ls, err := storage.NewLocalStorage(filepath.Join(r.root, cm.UUID4For(link)))
 	if err != nil {
 		return nil, err
 	}
@@ -154,18 +156,17 @@ func (r *resolver) resolveTask(task resolverTask) error {
 	r.logger.Infof("Saved %q, written bytes: %d", objectFileName, bytesWritten)
 
 	filesToLoad := map[*url.URL]bool{}
-	for _, obj := range objs {
-		for _, attachment := range obj.Attachment {
-			if attachment.Mime == "" {
-				continue
-			}
-			fileUrl, err := url.Parse(attachment.Url.Href)
-			if err != nil {
-				r.logger.Warningf("Cannot parse url \"%s\" from object %s: %s", obj.Id, fileUrl, err)
-				continue
-			}
-			filesToLoad[fileUrl] = true
+
+	for attachment := range cm.FlatMap(slices.Values(objs), opb.Attachments) {
+		if attachment.Mime == "" {
+			continue
 		}
+		fileUrl, err := url.Parse(attachment.Url.Href)
+		if err != nil {
+			r.logger.Warningf("Cannot parse url %q: %s", fileUrl, err)
+			continue
+		}
+		filesToLoad[fileUrl] = true
 	}
 
 	file := 0
