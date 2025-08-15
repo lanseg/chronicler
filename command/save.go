@@ -42,14 +42,9 @@ func Save(s *Settings, args []string) error {
 		fourchan.NewAdapter(httpClient),
 		pikabu.NewAdapter(httpClient),
 		web.NewAdapter(httpClient))
-	r := resolver.NewResolver(
+	return resolver.NewResolver(
 		s.Storage.Root,
 		common.NewHttpDownloader(httpClient),
 		adapters,
-	)
-	r.Start()
-	r.Resolve(link)
-	r.Wait()
-	r.Stop()
-	return nil
+	).Resolve(link)
 }
