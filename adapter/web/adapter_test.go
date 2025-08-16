@@ -9,7 +9,7 @@ import (
 )
 
 func TestWebAdapterMatcher(t *testing.T) {
-	webAdapter := NewAdapter(nil)
+	webAdapter := NewAdapter(nil, false)
 	for _, tc := range []struct {
 		name    string
 		url     string
@@ -30,16 +30,17 @@ func TestWebAdapterMatcher(t *testing.T) {
 
 func TestWebAdapter(t *testing.T) {
 	for _, tc := range []struct {
-		name string
-		file string
+		name      string
+		file      string
+		recursive bool
 	}{
-		{name: "simple html", file: "simple.html"},
-		{name: "self link html", file: "self_link.html"},
-		{name: "broken links", file: "broken_links.html"},
+		{name: "simple html", file: "simple.html", recursive: true},
+		{name: "self link html", file: "self_link.html", recursive: true},
+		{name: "broken links", file: "broken_links.html", recursive: true},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			if err := adaptertest.TestRequestResponse(
-				NewAdapter(adaptertest.NewFakeHttp(filepath.Join("test_data", tc.file))),
+				NewAdapter(adaptertest.NewFakeHttp(filepath.Join("test_data", tc.file)), tc.recursive),
 				"http://demo",
 				filepath.Join("test_data", tc.file+".json")); err != nil {
 				t.Error(err)

@@ -38,10 +38,12 @@ func Save(s *Settings, args []string) error {
 			reddit.NewAdapter(httpClient, &reddit.RedditAuth{AccessToken: s.Reddit.Token}))
 		logger.Infof("Reddit adapter loaded")
 	}
+	fmt.Println("HERE", s.WebSettings, link)
 	adapters = append(adapters,
 		fourchan.NewAdapter(httpClient),
 		pikabu.NewAdapter(httpClient),
-		web.NewAdapter(httpClient))
+		web.NewAdapter(httpClient, s.WebSettings.Recursive),
+	)
 	return resolver.NewResolver(
 		s.Storage.Root,
 		common.NewHttpDownloader(httpClient),

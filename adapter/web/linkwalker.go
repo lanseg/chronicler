@@ -31,13 +31,14 @@ func IsHTML(lw *LinkWalker, parent *url.URL, link *url.URL) bool {
 type LinkWalker struct {
 	logger *common.Logger
 
-	Rules    []VisitRule
-	Root     *url.URL        `json:"root"`
-	MaxLinks int             `json:"max_links"`
-	Links    map[string]bool `json:"links"`
+	Rules     []VisitRule
+	Root      *url.URL        `json:"root"`
+	Recursive bool            `json:"recursive"`
+	MaxLinks  int             `json:"max_links"`
+	Links     map[string]bool `json:"links"`
 }
 
-func NewWalker(root *url.URL, maxLinks int) *LinkWalker {
+func NewWalker(root *url.URL, maxLinks int, recursive bool) *LinkWalker {
 	return &LinkWalker{
 		logger: common.NewLogger("LinkWalker"),
 		Root:   root,
@@ -46,8 +47,9 @@ func NewWalker(root *url.URL, maxLinks int) *LinkWalker {
 			IsSameHost,
 			IsHTML,
 		},
-		MaxLinks: maxLinks,
-		Links:    map[string]bool{root.String(): false},
+		Recursive: recursive,
+		MaxLinks:  maxLinks,
+		Links:     map[string]bool{root.String(): false},
 	}
 }
 
@@ -132,6 +134,9 @@ func (lw *LinkWalker) FindLinks(baseUrl *url.URL, data []byte) map[string](map[s
 				allLinks[actualLink][href] = true
 			}
 		}
+	}
+	if !lw.Recursive {
+		return allLinks
 	}
 	for k := range allLinks {
 		linkAsUrl, err := url.Parse(k)

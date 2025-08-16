@@ -18,10 +18,15 @@ type StorageSettings struct {
 	Root string `json:"root" env:"ROOT" arg:"root"`
 }
 
+type WebSettings struct {
+	Recursive bool `json:"recursive" env:"RECURSIVE" arg:"recursive"`
+}
+
 type Settings struct {
 	Twitter *TwitterSettings `json:"twitter" env:"TWITTER" arg:"twitter"`
 	Reddit  *RedditSettings  `json:"reddit" env:"REDDIT" arg:"reddit"`
 	Storage *StorageSettings `json:"storage" env:"STORAGE" arg:"storage"`
 
+	WebSettings  *WebSettings  `json:"web" env:"WEB" arg:"web"`
 	HttpSettings *HttpSettings `json:"http" env:"HTTP" arg:"http"`
 }

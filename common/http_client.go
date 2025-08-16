@@ -30,9 +30,11 @@ func (hbc HttpClientBuilder) Build() HttpClient {
 		baseClient.Jar = jar
 	}
 
+	logger := NewLogger("HttpClient")
 	client := HttpClient(baseClient)
-	if hbc.CacheDirPath != "" {
-		logger := NewLogger("CachingHttp")
+	if hbc.CacheDirPath == "" {
+		logger.Infof("Using http client without cache")
+	} else {
 		logger.Infof("Using http client cache at %q", hbc.CacheDirPath)
 		client = &cachingHttpClient{
 			parent:    client,

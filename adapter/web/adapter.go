@@ -38,16 +38,19 @@ var (
 type webAdapter struct {
 	adapter.Adapter
 
+	recursive bool
+
 	client common.HttpClient
 	delay  time.Duration
 	logger *common.Logger
 }
 
-func NewAdapter(client common.HttpClient) adapter.Adapter {
+func NewAdapter(client common.HttpClient, recursive bool) adapter.Adapter {
 	return &webAdapter{
-		delay:  defaultDelay,
-		client: client,
-		logger: common.NewLogger("WebAdapter"),
+		recursive: recursive,
+		delay:     defaultDelay,
+		client:    client,
+		logger:    common.NewLogger("WebAdapter"),
 	}
 }
 
@@ -69,8 +72,7 @@ func (wa *webAdapter) Get(link *opb.Link) ([]*opb.Object, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	walker := NewWalker(rootLink, defaultMaxLinks)
+	walker := NewWalker(rootLink, defaultMaxLinks, wa.recursive)
 	i := 0
 	errorCount := 0
 	result := []*opb.Object{}
@@ -89,13 +91,13 @@ func (wa *webAdapter) Get(link *opb.Link) ([]*opb.Object, error) {
 			wa.logger.Warningf("Ignoring invalid link %q: %s", current, err)
 			continue
 		}
+		wa.logger.Debugf("Fetching %q", url)
 		resp, err := wa.client.Do(&http.Request{Method: "GET", URL: url})
 		if err != nil {
 			errorCount++
 			wa.logger.Warningf("Failed to fetch data from %q: %s", current, err)
 			continue
 		}
-
 		data, err := io.ReadAll(resp.Body)
 		if err != nil {
 			errorCount++
@@ -103,6 +105,7 @@ func (wa *webAdapter) Get(link *opb.Link) ([]*opb.Object, error) {
 			continue
 		}
 
+		wa.logger.Debugf("Parsing attachments %q", url)
 		attachments := []*opb.Attachment{}
 		for actualUrl, pageLinks := range walker.FindLinks(resp.Request.URL, data) {
 			attachments = append(attachments, &opb.Attachment{
@@ -122,6 +125,7 @@ func (wa *webAdapter) Get(link *opb.Link) ([]*opb.Object, error) {
 				Mime: "text/html",
 			}},
 		})
+		wa.logger.Debugf("Sleep for %d", wa.delay)
 		time.Sleep(wa.delay)
 	}
 	if errorCount == i {
