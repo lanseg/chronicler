@@ -37,6 +37,8 @@ func TestWebAdapter(t *testing.T) {
 		{name: "simple html", file: "simple.html", recursive: true},
 		{name: "self link html", file: "self_link.html", recursive: true},
 		{name: "broken links", file: "broken_links.html", recursive: true},
+		{name: "simple html non-recursive", file: "recursion/index.html", recursive: false},
+		{name: "simple html recursive", file: "recursion/index_recursive.html", recursive: true},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			response := filepath.Join("test_data", tc.file+".json")

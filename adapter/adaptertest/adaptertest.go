@@ -64,6 +64,8 @@ func TestRequestResponse(a adapter.Adapter, link string, wantFile string) error 
 		cmpopts.SortSlices(func(a, b interface{}) bool { return fmt.Sprintf("%s", a) < fmt.Sprintf("%s", b) }),
 	}
 	if diff := cmp.Diff(want, got, options...); diff != "" {
+		g, _ := json.Marshal(got)
+		fmt.Println(string(g))
 		return fmt.Errorf("expected parsed and reference results to be equal, but got %s", diff)
 	}
 	return nil
