@@ -1,7 +1,6 @@
 package reddit
 
 import (
-	"chronicler/common"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -9,6 +8,8 @@ import (
 	"net/url"
 	"regexp"
 	"strings"
+
+	"chronicler/common"
 )
 
 var (

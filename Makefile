@@ -20,6 +20,8 @@ test: build
 	@rm -rf $(COVFILE)
 	staticcheck ./...
 	go vet
+	goimports -local "chronicler" -w .
+	gofmt -s -w .
 	go test -v -cover -coverprofile=$(COVFILE) ./...
 
 run: build

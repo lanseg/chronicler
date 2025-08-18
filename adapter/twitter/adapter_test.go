@@ -1,13 +1,15 @@
 package twitter
 
 import (
-	"chronicler/adapter/adaptertest"
 	"path/filepath"
 	"testing"
+
+	atest "chronicler/adapter/adaptertest"
 )
 
 const (
-	fakeToken = "fakeToken"
+	fakeToken   = "fakeToken"
+	twitterPost = "http://x.com/username/status/123123123123"
 )
 
 func TestTwitterAdapter(t *testing.T) {
@@ -24,12 +26,10 @@ func TestTwitterAdapter(t *testing.T) {
 		{name: "tweet with media", response: "tweet_media"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			if err := adaptertest.TestRequestResponse(
-				NewAdapter(NewClient(
-					adaptertest.NewFakeHttp(filepath.Join("test_data", tc.response+".json")),
-					fakeToken)),
-				"http://x.com/username/status/123123123123",
-				filepath.Join("test_data", tc.response+"_expect.json")); err != nil {
+			fakeHttpClient := atest.NewFakeHttp(filepath.Join("test_data", tc.response+".json"))
+			adapter := NewAdapter(fakeHttpClient, &TwitterSettings{Token: fakeToken})
+			responseFile := filepath.Join("test_data", tc.response+"_expect.json")
+			if err := atest.TestRequestResponse(adapter, twitterPost, responseFile); err != nil {
 				t.Error(err)
 			}
 		})

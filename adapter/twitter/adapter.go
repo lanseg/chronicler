@@ -72,10 +72,10 @@ type twitterAdapter struct {
 	client Client
 }
 
-func NewAdapter(client Client) adapter.Adapter {
+func NewAdapter(client common.HttpClient, settings *TwitterSettings) adapter.Adapter {
 	return &twitterAdapter{
 		logger: common.NewLogger("TwitterAdapter"),
-		client: client,
+		client: NewClient(client, settings.Token),
 	}
 }
 

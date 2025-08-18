@@ -1,9 +1,10 @@
 package exporter
 
 import (
+	"strings"
+
 	"chronicler/common"
 	opb "chronicler/proto"
-	"strings"
 )
 
 type Exporter interface {

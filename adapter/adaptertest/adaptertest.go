@@ -2,13 +2,14 @@ package adaptertest
 
 import (
 	"bytes"
-	"chronicler/adapter"
-	"chronicler/common"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
+
+	"chronicler/adapter"
+	"chronicler/common"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"

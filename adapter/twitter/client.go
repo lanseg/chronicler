@@ -1,13 +1,14 @@
 package twitter
 
 import (
-	"chronicler/common"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 	"strings"
+
+	"chronicler/common"
 )
 
 var (

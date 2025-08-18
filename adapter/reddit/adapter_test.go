@@ -1,10 +1,11 @@
 package reddit
 
 import (
-	"chronicler/adapter/adaptertest"
-	opb "chronicler/proto"
 	"path/filepath"
 	"testing"
+
+	"chronicler/adapter/adaptertest"
+	opb "chronicler/proto"
 )
 
 func TestRedditAdapterMatcher(t *testing.T) {

@@ -23,10 +23,12 @@ func NewAnonymousAdapter(client common.HttpClient) adapter.Adapter {
 	}
 }
 
-func NewAdapter(client common.HttpClient, auth *RedditAuth) adapter.Adapter {
+func NewAdapter(client common.HttpClient, settings *RedditSettings) adapter.Adapter {
 	return &redditAdapter{
 		logger: common.NewLogger("RedditAdapter"),
-		client: NewClient(client, auth),
+		client: NewClient(client, &RedditAuth{
+			AccessToken: settings.Token,
+		}),
 	}
 }
 

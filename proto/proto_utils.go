@@ -1,10 +1,11 @@
 package proto
 
 import (
-	"chronicler/common"
 	"iter"
 	"net/url"
 	"slices"
+
+	"chronicler/common"
 )
 
 func ParsePageLink(page string, link string) (*Link, error) {

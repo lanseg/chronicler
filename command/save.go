@@ -22,31 +22,20 @@ func Save(s *Settings, args []string) error {
 	if err != nil {
 		return err
 	}
-	logger := common.NewLogger("Save")
 	httpClient := common.HttpClientBuilder{
 		CookieJarPath: s.HttpSettings.CookieJar,
 		CacheDirPath:  s.HttpSettings.CachePath,
 	}.Build()
-	adapters := []adapter.Adapter{}
-	if s.Twitter != nil {
-		adapters = append(adapters,
-			twitter.NewAdapter(twitter.NewClient(httpClient, s.Twitter.Token)))
-		logger.Infof("Twitter adapter loaded")
-	}
-	if s.Reddit != nil {
-		adapters = append(adapters,
-			reddit.NewAdapter(httpClient, &reddit.RedditAuth{AccessToken: s.Reddit.Token}))
-		logger.Infof("Reddit adapter loaded")
-	}
-	fmt.Println("HERE", s.WebSettings, link)
-	adapters = append(adapters,
-		fourchan.NewAdapter(httpClient),
-		pikabu.NewAdapter(httpClient),
-		web.NewAdapter(httpClient, s.WebSettings.Recursive),
-	)
+
 	return resolver.NewResolver(
 		s.Storage.Root,
 		common.NewHttpDownloader(httpClient),
-		adapters,
+		[]adapter.Adapter{
+			twitter.NewAdapter(httpClient, s.Twitter),
+			reddit.NewAdapter(httpClient, s.Reddit),
+			fourchan.NewAdapter(httpClient),
+			pikabu.NewAdapter(httpClient),
+			web.NewAdapter(httpClient, s.WebSettings),
+		},
 	).Resolve(link)
 }

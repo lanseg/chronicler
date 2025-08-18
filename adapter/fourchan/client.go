@@ -1,12 +1,13 @@
 package fourchan
 
 import (
-	"chronicler/common"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
+
+	"chronicler/common"
 )
 
 type FourChanResponse struct {

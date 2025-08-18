@@ -2,13 +2,14 @@ package pikabu
 
 import (
 	"bytes"
-	"chronicler/common"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 	"strings"
+
+	"chronicler/common"
 
 	"golang.org/x/text/encoding/charmap"
 )

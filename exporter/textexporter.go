@@ -1,13 +1,14 @@
 package exporter
 
 import (
-	"chronicler/common"
-	"chronicler/storage"
 	"fmt"
 	"regexp"
 	"sort"
 	"strings"
 	"time"
+
+	"chronicler/common"
+	"chronicler/storage"
 
 	opb "chronicler/proto"
 )

@@ -38,19 +38,19 @@ var (
 type webAdapter struct {
 	adapter.Adapter
 
-	recursive bool
+	settings *WebSettings
 
 	client common.HttpClient
 	delay  time.Duration
 	logger *common.Logger
 }
 
-func NewAdapter(client common.HttpClient, recursive bool) adapter.Adapter {
+func NewAdapter(client common.HttpClient, settings *WebSettings) adapter.Adapter {
 	return &webAdapter{
-		recursive: recursive,
-		delay:     defaultDelay,
-		client:    client,
-		logger:    common.NewLogger("WebAdapter"),
+		settings: settings,
+		delay:    defaultDelay,
+		client:   client,
+		logger:   common.NewLogger("WebAdapter"),
 	}
 }
 
@@ -72,7 +72,7 @@ func (wa *webAdapter) Get(link *opb.Link) ([]*opb.Object, error) {
 	if err != nil {
 		return nil, err
 	}
-	walker := NewWalker(rootLink, defaultMaxLinks, wa.recursive)
+	walker := NewWalker(rootLink, defaultMaxLinks, wa.settings.Recursive)
 	i := 0
 	errorCount := 0
 	result := []*opb.Object{}
