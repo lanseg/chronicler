@@ -1,0 +1,86 @@
+[
+    {
+        "id": "http://demo",
+        "content": [
+            {
+                "text": "\u003chtml\u003e\n    \u003cbody\u003e\n        \u003cimg src=\"an_image_link\" /\u003e\n        \u003ca href=\"/link/to/page.html\"\u003eLink to another page, ignored\u003c/a\u003e\n    \u003c/body\u003e\n\u003c/html\u003e",
+                "mime": "text/html"
+            }
+        ],
+        "attachment": [
+            {
+                "url": {
+                    "href": "http://demo/an_image_link",
+                    "variants": [
+                        "an_image_link"
+                    ]
+                }
+            },
+            {
+                "url": {
+                    "href": "http://demo/link/to/page.html",
+                    "variants": [
+                        "/link/to/page.html"
+                    ]
+                },
+                "mime": "text/html; charset=utf-8"
+            }
+        ]
+    },
+    {
+        "id": "http://demo/an_image_link",
+        "content": [
+            {
+                "text": "\u003chtml\u003e\n    \u003cbody\u003e\n        \u003cimg src=\"an_image_link\" /\u003e\n        \u003ca href=\"/link/to/page.html\"\u003eLink to another page, ignored\u003c/a\u003e\n    \u003c/body\u003e\n\u003c/html\u003e",
+                "mime": "text/html"
+            }
+        ],
+        "attachment": [
+            {
+                "url": {
+                    "href": "http://demo/an_image_link",
+                    "variants": [
+                        "an_image_link"
+                    ]
+                }
+            },
+            {
+                "url": {
+                    "href": "http://demo/link/to/page.html",
+                    "variants": [
+                        "/link/to/page.html"
+                    ]
+                },
+                "mime": "text/html; charset=utf-8"
+            }
+        ]
+    },
+    {
+        "id": "http://demo/link/to/page.html",
+        "content": [
+            {
+                "text": "\u003chtml\u003e\n    \u003cbody\u003e\n        \u003cimg src=\"an_image_link\" /\u003e\n        \u003ca href=\"/link/to/page.html\"\u003eLink to another page, ignored\u003c/a\u003e\n    \u003c/body\u003e\n\u003c/html\u003e",
+                "mime": "text/html"
+            }
+        ],
+        "attachment": [
+            {
+                "url": {
+                    "href": "http://demo/an_image_link",
+                    "variants": [
+                        "an_image_link"
+                    ]
+                }
+            },
+            {
+                "url": {
+                    "href": "http://demo/link/to/page.html",
+                    "variants": [
+                        "/link/to/page.html"
+                    ]
+                },
+                "mime": "text/html; charset=utf-8"
+            }
+        ]
+    }
+]
