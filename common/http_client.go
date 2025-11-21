@@ -9,6 +9,7 @@ import (
 	"net/http/cookiejar"
 	"os"
 	"path/filepath"
+	"time"
 )
 
 type HttpClient interface {
@@ -18,10 +19,14 @@ type HttpClient interface {
 type HttpClientBuilder struct {
 	CookieJarPath string
 	CacheDirPath  string
+	Timeout       time.Duration
 }
 
 func (hbc HttpClientBuilder) Build() HttpClient {
 	baseClient := &http.Client{}
+	if hbc.Timeout > 0 {
+		baseClient.Timeout = hbc.Timeout
+	}
 	if hbc.CookieJarPath != "" {
 		jar, err := cookiejar.New(&cookiejar.Options{})
 		if err != nil {
